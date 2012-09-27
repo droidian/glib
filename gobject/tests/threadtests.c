@@ -482,6 +482,14 @@ test_threaded_toggle_notify (void)
   gsize i;
   const int n_iterations = g_test_thorough () ? 1000000 : 100000;
 
+#if defined(__arm__)
+  if (g_getenv ("DEB_ALLOW_FLAKY_TESTS") == NULL)
+    {
+      g_test_skip ("Not reliable on 32-bit ARM");
+      return;
+    }
+#endif
+
   g_test_bug ("https://gitlab.gnome.org/GNOME/glib/issues/2394");
   g_test_summary ("Test that toggle reference notifications can be changed "
                   "safely from another (the main) thread without causing the "
