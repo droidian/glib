@@ -35,6 +35,12 @@ test_timer_basic (void)
   volatile gdouble elapsed;
   gulong micros;
 
+  if (g_getenv ("DEB_ALLOW_FLAKY_TESTS") == NULL)
+    {
+      g_test_skip ("Not reliable due to floating-point rounding (glib#820)");
+      return;
+    }
+
   timer = g_timer_new ();
 
   g_timer_start (timer);
