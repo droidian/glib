@@ -680,6 +680,12 @@ main (int   argc,
 
   g_test_init (&argc, &argv, G_TEST_OPTION_ISOLATE_DIRS, NULL);
 
+  if (g_getenv ("DEB_ALLOW_FLAKY_TESTS") == NULL)
+    {
+      g_print("1..0 # SKIP all gdbus-threading tests skipped because they are too unreliable (glib#1515)\n");
+      return 0;
+    }
+
   session_bus_up ();
 
   /* this is safe; testserver will exit once the bus goes away */
