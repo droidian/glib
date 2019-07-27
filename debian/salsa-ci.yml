@@ -1,0 +1,9 @@
+---
+include:
+  - https://salsa.debian.org/salsa-ci-team/pipeline/raw/master/recipes/debian.yml
+
+variables:
+  # The test for GDir quite reasonably assumes that rewinddir() followed
+  # by readdir() will start again with the same first item, but that isn't
+  # the case in disorderfs
+  SALSA_CI_REPROTEST_ARGS: --vary=-fileordering
