@@ -32,6 +32,12 @@ setup (Fixture       *fixture,
   gchar *path = NULL;
   GError *local_error = NULL;
 
+  if (g_getenv ("DEB_ALLOW_FLAKY_TESTS") == NULL)
+    {
+      g_test_skip ("https://gitlab.gnome.org/GNOME/glib/issues/1634");
+      return;
+    }
+
   path = g_dir_make_tmp ("gio-test-testfilemonitor_XXXXXX", &local_error);
   g_assert_no_error (local_error);
 
@@ -48,7 +54,9 @@ teardown (Fixture       *fixture,
 {
   GError *local_error = NULL;
 
-  g_file_delete (fixture->tmp_dir, NULL, &local_error);
+  if (fixture->tmp_dir != NULL)
+    g_file_delete (fixture->tmp_dir, NULL, &local_error);
+
   g_assert_no_error (local_error);
   g_clear_object (&fixture->tmp_dir);
 }
@@ -375,6 +383,10 @@ test_atomic_replace (Fixture       *fixture,
   if (skip_win32 ())
     return;
 
+  /* respect g_test_skip() during setup() */
+  if (g_test_failed ())
+    return;
+
   data.step = 0;
   data.events = NULL;
 
@@ -481,6 +493,10 @@ test_file_changes (Fixture       *fixture,
   TestData data;
 
   if (skip_win32 ())
+    return;
+
+  /* respect g_test_skip() during setup() */
+  if (g_test_failed ())
     return;
 
   data.step = 0;
@@ -603,6 +619,10 @@ test_dir_monitor (Fixture       *fixture,
   if (skip_win32 ())
     return;
 
+  /* respect g_test_skip() during setup() */
+  if (g_test_failed ())
+    return;
+
   data.step = 0;
   data.events = NULL;
 
@@ -701,6 +721,10 @@ test_dir_non_existent (Fixture       *fixture,
   GError *error = NULL;
 
   if (skip_win32 ())
+    return;
+
+  /* respect g_test_skip() during setup() */
+  if (g_test_failed ())
     return;
 
   data.step = 0;
@@ -813,6 +837,10 @@ test_cross_dir_moves (Fixture       *fixture,
   TestData data[2];
 
   if (skip_win32 ())
+    return;
+
+  /* respect g_test_skip() during setup() */
+  if (g_test_failed ())
     return;
 
   data[0].step = 0;
@@ -984,6 +1012,10 @@ test_file_hard_links (Fixture       *fixture,
   GError *error = NULL;
   TestData data;
 
+  /* respect g_test_skip() during setup() */
+  if (g_test_failed ())
+    return;
+
   g_test_bug ("https://bugzilla.gnome.org/show_bug.cgi?id=755721");
 
   if (skip_win32 ())
@@ -1042,6 +1074,10 @@ test_finalize_in_callback (Fixture       *fixture,
 {
   GFile *file = NULL;
   guint i;
+
+  /* respect g_test_skip() during setup() */
+  if (g_test_failed ())
+     return;
 
   g_test_summary ("Test that finalization of a GFileMonitor in one of its "
                   "callbacks doesn’t cause a deadlock.");
