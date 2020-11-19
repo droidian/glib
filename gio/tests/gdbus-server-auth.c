@@ -327,6 +327,13 @@ do_test_server_auth (InteropFlags flags)
     }
 #endif
 
+  if ((flags & (INTEROP_FLAGS_TCP | INTEROP_FLAGS_SHA1)) &&
+      g_getenv ("DEB_ALLOW_FLAKY_TESTS") == NULL)
+    {
+      g_test_skip ("https://gitlab.gnome.org/GNOME/glib/-/issues/2206");
+      goto out;
+    }
+
   if (flags & INTEROP_FLAGS_ANONYMOUS)
     server_flags |= G_DBUS_SERVER_FLAGS_AUTHENTICATION_ALLOW_ANONYMOUS;
   if (flags & INTEROP_FLAGS_REQUIRE_SAME_USER)
