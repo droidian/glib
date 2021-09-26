@@ -54,6 +54,7 @@ Recommends: libglib2.0-data,
             xdg-user-dirs
 Breaks: gimp (<< 2.10.14-3~),
         glib-networking-tests (<< 2.70.0~),
+        gnome-keyring (<< 40.0-3~),
         libgio-fam (<< 2.64.1-2~) [kfreebsd-any hurd-any],
         libgirepository-1.0-1 (<< 1.62.0-4~),
         libgladeui-2-6 (<< 3.22.2),
