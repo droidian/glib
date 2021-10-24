@@ -1,4 +1,4 @@
-glib2.0 (2.70.0-2) UNRELEASED; urgency=medium
+glib2.0 (2.70.0-2) unstable; urgency=medium
 
   * d/patches: Update to upstream glib-2-70 branch commit
     2.70.0-41-g359a837ee.
@@ -20,8 +20,11 @@ glib2.0 (2.70.0-2) UNRELEASED; urgency=medium
     cache there.
   * d/libglib2.0-0.postinst.in: Add comments indicating when other
     workarounds can be removed
+  * Add Lintian override for a unit test depending on a private library
+  * Skip memory-monitor-dbus test by default, and add extra debug info.
+    Helps: #995178
 
- -- Simon McVittie <smcv@debian.org>  Sun, 24 Oct 2021 15:05:53 +0100
+ -- Simon McVittie <smcv@debian.org>  Sun, 24 Oct 2021 22:41:35 +0100
 
 glib2.0 (2.70.0-1) unstable; urgency=medium
 
