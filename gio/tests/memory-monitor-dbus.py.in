@@ -38,6 +38,8 @@ try:
             klass.start_system_bus()
             klass.dbus_con = klass.get_dbus(True)
 
+        @unittest.skipIf('DEB_ALLOW_FLAKY_TESTS' not in os.environ,
+                         'https://bugs.debian.org/995178')
         def setUp(self):
             try:
                 Gio.MemoryMonitor
