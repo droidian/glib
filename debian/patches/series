@@ -39,3 +39,5 @@ debian/gmenumodel-test-Mark-as-flaky.patch
 debian/gvariant-test-Don-t-run-at-build-time-on-mips.patch
 debian/testfilemonitor-Skip-if-we-are-avoiding-flaky-tests.patch
 debian/gdbus-server-auth-Normally-skip-flaky-DBUS_COOKIE_SHA1-te.patch
+debian/Skip-memory-monitor-dbus-test-if-not-specifically-request.patch
+debian/Add-extra-debug-to-memory-monitor-dbus-test.patch

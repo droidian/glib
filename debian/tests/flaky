@@ -63,6 +63,7 @@ gnome-desktop-testing-runner \
 	glib/gdbus-threading.test \
 	glib/gmenumodel.test \
 	glib/mainloop.test \
+	glib/memory-monitor-dbus.test \
 	glib/socket.test \
 	glib/testfilemonitor.test \
 	glib/timeout.test \
