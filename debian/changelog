@@ -1,3 +1,28 @@
+glib2.0 (2.70.0-2) UNRELEASED; urgency=medium
+
+  * d/patches: Update to upstream glib-2-70 branch commit
+    2.70.0-41-g359a837ee.
+    Among other fixes, this makes sure we receive change-notification from
+    NetworkManager (>= 1.31.5), which dropped its legacy PropertiesChanged
+    signal in favour of using standard D-Bus Properties. (LP: #1946196)
+  * Add Breaks on older versions of glib-networking-tests.
+    With this GLib, the old way glib-networking's tests used to mock up
+    a particular negotiated protocol no longer works.
+  * Add Breaks on versions of gnome-keyring that had elevated capabilities.
+    Security hardening in GLib 2.70.0 interferes with their ability to
+    connect to D-Bus in some system configurations. (See #994961)
+  * Remove vestigial triggers for /usr/lib/gio/modules.
+    We no longer load files from that directory (since Debian 11 and Ubuntu
+    20.04), but we still had a trigger for it, and the postinst still created
+    a module cache if it existed.
+  * d/libglib2.0-0.postinst.in: Clean up /usr/lib/gio/modules on upgrade.
+    This directory would still exist if older versions of GLib created a
+    cache there.
+  * d/libglib2.0-0.postinst.in: Add comments indicating when other
+    workarounds can be removed
+
+ -- Simon McVittie <smcv@debian.org>  Sun, 24 Oct 2021 15:05:53 +0100
+
 glib2.0 (2.70.0-1) unstable; urgency=medium
 
   * New upstream release
