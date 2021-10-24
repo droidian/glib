@@ -17,19 +17,11 @@ handle_triggers () {
             "/usr/lib/#MULTIARCH#/glib-2.0/glib-compile-schemas" /usr/share/glib-2.0/schemas || true
             ;;
 
-          "/usr/lib/#MULTIARCH#/gio/modules"|/usr/lib/gio/modules)
+          "/usr/lib/#MULTIARCH#/gio/modules")
             # This is triggered everytime an application installs a GIO
-            # module into /usr/lib/#MULTIARCH#/gio/modules or the
-            # backwards-compatible /usr/lib/gio/modules directory
+            # module into /usr/lib/#MULTIARCH#/gio/modules
 
-            # The /usr/lib/gio/modules directory is no longer shipped by
-            # libglib2.0 itself so we need to check to avoid a warning from
-            # gio-querymodules
-            dirs="/usr/lib/#MULTIARCH#/gio/modules"
-            if [ -d /usr/lib/gio/modules ] && [ $(dpkg --print-architecture) = "#ARCH#" ]; then
-                dirs="$dirs /usr/lib/gio/modules"
-            fi
-            "/usr/lib/#MULTIARCH#/glib-2.0/gio-querymodules" $dirs || true
+            "/usr/lib/#MULTIARCH#/glib-2.0/gio-querymodules" "/usr/lib/#MULTIARCH#/gio/modules" || true
             ;;
         esac
     done
@@ -63,9 +55,5 @@ install -d "/usr/lib/#MULTIARCH#/gio/modules"
 
 "/usr/lib/#MULTIARCH#/glib-2.0/glib-compile-schemas" /usr/share/glib-2.0/schemas || true
 "/usr/lib/#MULTIARCH#/glib-2.0/gio-querymodules" "/usr/lib/#MULTIARCH#/gio/modules" || true
-
-if [ -d /usr/lib/gio/modules ] && [ $(dpkg --print-architecture) = "#ARCH#" ]; then
-    "/usr/lib/#MULTIARCH#/glib-2.0/gio-querymodules" /usr/lib/gio/modules || true
-fi
 
 # vim:set sw=4 sts=4 et:
