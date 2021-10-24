@@ -1,0 +1,25 @@
+From: Egor Bychin <e.bychin@drweb.com>
+Date: Mon, 11 Oct 2021 14:10:39 +0300
+Subject: gmessages: Add check for a localtime function return value
+
+Origin: upstream, 2.70.1, commit:644c9b964d26f15a90221fe6f090b84f78133841
+---
+ glib/gmessages.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/glib/gmessages.c b/glib/gmessages.c
+index 8907512..7affcd4 100644
+--- a/glib/gmessages.c
++++ b/glib/gmessages.c
+@@ -2321,7 +2321,10 @@ g_log_writer_format_fields (GLogLevelFlags   log_level,
+   now = g_get_real_time ();
+   now_secs = (time_t) (now / 1000000);
+   now_tm = localtime (&now_secs);
+-  strftime (time_buf, sizeof (time_buf), "%H:%M:%S", now_tm);
++  if (G_LIKELY (now_tm != NULL))
++    strftime (time_buf, sizeof (time_buf), "%H:%M:%S", now_tm);
++  else
++    strcpy (time_buf, "(error)");
+ 
+   g_string_append_printf (gstring, "%s%s.%03d%s: ",
+                           use_color ? "\033[34m" : "",

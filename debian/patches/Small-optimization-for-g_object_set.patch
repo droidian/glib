@@ -1,0 +1,36 @@
+From: Matthias Clasen <mclasen@redhat.com>
+Date: Mon, 20 Sep 2021 08:18:32 -0400
+Subject: Small optimization for g_object_set
+
+We've already followed the redirection, no need
+to check for that again - just avoid notifying
+non-readable properties.
+
+Origin: upstream, 2.70.1, commit:ff095d252d2fd3ae2c2da316cac40fd5dcad6cbe
+---
+ gobject/gobject.c | 12 +++---------
+ 1 file changed, 3 insertions(+), 9 deletions(-)
+
+diff --git a/gobject/gobject.c b/gobject/gobject.c
+index 9776d7c..3767058 100644
+--- a/gobject/gobject.c
++++ b/gobject/gobject.c
+@@ -1570,15 +1570,9 @@ object_set_property (GObject             *object,
+     {
+       class->set_property (object, param_id, &tmp_value, pspec);
+ 
+-      if (~pspec->flags & G_PARAM_EXPLICIT_NOTIFY)
+-        {
+-          GParamSpec *notify_pspec;
+-
+-          notify_pspec = get_notify_pspec (pspec);
+-
+-          if (notify_pspec != NULL)
+-            g_object_notify_queue_add (object, nqueue, notify_pspec);
+-        }
++      if (~pspec->flags & G_PARAM_EXPLICIT_NOTIFY &&
++          pspec->flags & G_PARAM_READABLE)
++        g_object_notify_queue_add (object, nqueue, pspec);
+     }
+   g_value_unset (&tmp_value);
+ }

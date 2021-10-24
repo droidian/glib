@@ -1,0 +1,30 @@
+From: Egor Bychin <e.bychin@drweb.com>
+Date: Mon, 11 Oct 2021 13:59:05 +0300
+Subject: gmarshal-internal: Fix string leakage due to misplaced check
+
+Origin: upstream, 2.70.1, commit:5eb4e095c7fea5d85c2411e0ef903116c7e9ac7f
+---
+ gio/gmarshal-internal.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/gio/gmarshal-internal.c b/gio/gmarshal-internal.c
+index 6858907..f3f7800 100644
+--- a/gio/gmarshal-internal.c
++++ b/gio/gmarshal-internal.c
+@@ -490,14 +490,14 @@ _g_cclosure_marshal_BOOLEAN__STRINGv (GClosure *closure,
+   gpointer arg0;
+   va_list args_copy;
+ 
++  g_return_if_fail (return_value != NULL);
++
+   G_VA_COPY (args_copy, args);
+   arg0 = (gpointer) va_arg (args_copy, gpointer);
+   if ((param_types[0] & G_SIGNAL_TYPE_STATIC_SCOPE) == 0 && arg0 != NULL)
+     arg0 = g_strdup (arg0);
+   va_end (args_copy);
+ 
+-  g_return_if_fail (return_value != NULL);
+-
+   if (G_CCLOSURE_SWAP_DATA (closure))
+     {
+       data1 = closure->data;

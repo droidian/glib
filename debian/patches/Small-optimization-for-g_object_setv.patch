@@ -1,0 +1,40 @@
+From: Matthias Clasen <mclasen@redhat.com>
+Date: Mon, 20 Sep 2021 08:20:04 -0400
+Subject: Small optimization for g_object_setv
+
+No need to call memset in the loop, we can just
+initialize all the values in one go.
+
+GtkBuilder is now using g_object_setv, so this
+may improve application start times a bit.
+
+Origin: upstream, 2.70.1, commit:1197b1362c4299655df0c03097c7c8d0abc686bd
+---
+ gobject/gobject.c | 9 +++------
+ 1 file changed, 3 insertions(+), 6 deletions(-)
+
+diff --git a/gobject/gobject.c b/gobject/gobject.c
+index 3767058..879ed84 100644
+--- a/gobject/gobject.c
++++ b/gobject/gobject.c
+@@ -2523,17 +2523,14 @@ g_object_getv (GObject      *object,
+ 
+   g_object_ref (object);
+ 
++  memset (values, 0, n_properties * sizeof (GValue));
++
+   obj_type = G_OBJECT_TYPE (object);
+   for (i = 0; i < n_properties; i++)
+     {
+-      pspec = g_param_spec_pool_lookup (pspec_pool,
+-				        names[i],
+-				        obj_type,
+-				        TRUE);
++      pspec = g_param_spec_pool_lookup (pspec_pool, names[i], obj_type, TRUE);
+       if (!g_object_get_is_valid_property (object, pspec, names[i]))
+         break;
+-
+-      memset (&values[i], 0, sizeof (GValue));
+       g_value_init (&values[i], pspec->value_type);
+       object_get_property (object, pspec, &values[i]);
+     }

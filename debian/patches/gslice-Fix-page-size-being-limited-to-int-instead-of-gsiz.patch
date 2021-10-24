@@ -1,0 +1,22 @@
+From: Egor Bychin <e.bychin@drweb.com>
+Date: Mon, 11 Oct 2021 14:11:39 +0300
+Subject: gslice: Fix page size being limited to int instead of gsize
+
+Origin: upstream, 2.70.1, commit:88604931bbbc2e0a981ded3e874a482e308c4be9
+---
+ glib/gslice.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/glib/gslice.c b/glib/gslice.c
+index 690d21e..630b6bc 100644
+--- a/glib/gslice.c
++++ b/glib/gslice.c
+@@ -1307,7 +1307,7 @@ static gsize
+ allocator_aligned_page_size (Allocator *allocator,
+                              gsize      n_bytes)
+ {
+-  gsize val = 1 << g_bit_storage (n_bytes - 1);
++  gsize val = (gsize) 1 << g_bit_storage (n_bytes - 1);
+   val = MAX (val, allocator->min_page_size);
+   return val;
+ }

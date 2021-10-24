@@ -16,7 +16,7 @@ Applied-upstream: no, rejected because "this will be solved soon" (in 2013)
  1 file changed, 83 insertions(+)
 
 diff --git a/glib/gkeyfile.c b/glib/gkeyfile.c
-index 56500cc..5e6c3fc 100644
+index 17cf856..3fcf8cc 100644
 --- a/glib/gkeyfile.c
 +++ b/glib/gkeyfile.c
 @@ -489,6 +489,17 @@
@@ -125,8 +125,8 @@ index 56500cc..5e6c3fc 100644
    for (i = 0; languages[i]; i++)
      {
        candidate_key = g_strdup_printf ("%s[%s]", key, languages[i]);
-@@ -2264,6 +2314,39 @@ g_key_file_get_locale_string (GKeyFile     *key_file,
-       translated_value = NULL;
+@@ -2261,6 +2311,39 @@ g_key_file_get_locale_string (GKeyFile     *key_file,
+ 	break;
     }
  
 +  /* Fallback to gettext */

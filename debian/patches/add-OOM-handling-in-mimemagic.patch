@@ -1,0 +1,46 @@
+From: Egor Bychin <e.bychin@drweb.com>
+Date: Mon, 11 Oct 2021 15:31:01 +0300
+Subject: add OOM handling in mimemagic
+
+Origin: upstream, 2.70.1, commit:2f8e17ad84ef17f2c48d539b20721b2dc05688c1
+---
+ gio/xdgmime/xdgmimemagic.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/gio/xdgmime/xdgmimemagic.c b/gio/xdgmime/xdgmimemagic.c
+index 51be972..ea98665 100644
+--- a/gio/xdgmime/xdgmimemagic.c
++++ b/gio/xdgmime/xdgmimemagic.c
+@@ -99,6 +99,8 @@ _xdg_mime_magic_matchlet_new (void)
+   XdgMimeMagicMatchlet *matchlet;
+ 
+   matchlet = malloc (sizeof (XdgMimeMagicMatchlet));
++  if (matchlet == NULL)
++    return NULL;
+ 
+   matchlet->indent = 0;
+   matchlet->offset = 0;
+@@ -351,6 +353,11 @@ _xdg_mime_magic_parse_magic_line (FILE              *magic_file,
+     return XDG_MIME_MAGIC_ERROR;
+ 
+   matchlet = _xdg_mime_magic_matchlet_new ();
++
++  /* OOM */
++  if (matchlet == NULL)
++    return XDG_MIME_MAGIC_ERROR;
++
+   matchlet->indent = indent;
+   matchlet->offset = _xdg_mime_magic_read_a_number (magic_file, &end_of_file);
+   if (end_of_file)
+@@ -765,6 +772,11 @@ _xdg_mime_magic_read_magic_file (XdgMimeMagic *mime_magic,
+ 	{
+ 	case XDG_MIME_MAGIC_SECTION:
+ 	  match = _xdg_mime_magic_match_new ();
++
++	  /* OOM */
++	  if (match == NULL)
++	    return;
++
+ 	  state = _xdg_mime_magic_parse_header (magic_file, match);
+ 	  if (state == XDG_MIME_MAGIC_EOF || state == XDG_MIME_MAGIC_ERROR)
+ 	    _xdg_mime_magic_match_free (match);

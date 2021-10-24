@@ -1,0 +1,22 @@
+From: Egor Bychin <e.bychin@drweb.com>
+Date: Mon, 11 Oct 2021 14:04:57 +0300
+Subject: gsocket: Add ignorant of an fcntl return value
+
+Origin: upstream, 2.70.1, commit:567fae6e0b29594842cf7eab16b1a782d374fd04
+---
+ gio/gsocket.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/gio/gsocket.c b/gio/gsocket.c
+index d5603c5..d13e2ca 100644
+--- a/gio/gsocket.c
++++ b/gio/gsocket.c
+@@ -621,7 +621,7 @@ g_socket (gint     domain,
+ 	(flags & FD_CLOEXEC) == 0)
+       {
+ 	flags |= FD_CLOEXEC;
+-	fcntl (fd, F_SETFD, flags);
++	(void) fcntl (fd, F_SETFD, flags);
+       }
+   }
+ #else

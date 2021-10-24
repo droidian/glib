@@ -1,0 +1,51 @@
+From: Jamie Bainbridge <jamie.bainbridge@gmail.com>
+Date: Wed, 8 Sep 2021 12:08:17 +1000
+Subject: gutils: Avoid segfault in g_get_user_database_entry
+
+g_get_user_database_entry() capitalises the first letter of pw_name
+with g_ascii_toupper (pw->pw_name[0]).
+
+However, the manpage for getpwnam() and getpwuid() says the result of
+those calls "may point to a static area". GLib is then trying to edit
+static memory which belongs to a shared library, so segfaults.
+
+The reentrant variants of the above calls are supposed to fill the user
+buffer supplied to them, however Michael Catanzaro also found a bug in
+systemd where the data is not copied to the user buffer and still points
+to static memory, resulting in the same sort of segfault. See:
+https://github.com/systemd/systemd/issues/20679
+
+Solve both these cases in GLib by copying pw_name off to a temporary
+variable, set uppercase on that variable, and use the variable to join
+into the desired string. Free the variable after it is no longer needed.
+
+Signed-off-by: Jamie Bainbridge <jamie.bainbridge@gmail.com>
+Origin: upstream, 2.70.1, commit:47114f52ddefe7b04b5c2c4e232bad287ad6af8d
+---
+ glib/gutils.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/glib/gutils.c b/glib/gutils.c
+index b7a2113..4bccd72 100644
+--- a/glib/gutils.c
++++ b/glib/gutils.c
+@@ -692,14 +692,17 @@ g_get_user_database_entry (void)
+               {
+                 gchar **gecos_fields;
+                 gchar **name_parts;
++                gchar *uppercase_pw_name;
+ 
+                 /* split the gecos field and substitute '&' */
+                 gecos_fields = g_strsplit (pw->pw_gecos, ",", 0);
+                 name_parts = g_strsplit (gecos_fields[0], "&", 0);
+-                pw->pw_name[0] = g_ascii_toupper (pw->pw_name[0]);
+-                e.real_name = g_strjoinv (pw->pw_name, name_parts);
++                uppercase_pw_name = g_strdup (pw->pw_name);
++                uppercase_pw_name[0] = g_ascii_toupper (uppercase_pw_name[0]);
++                e.real_name = g_strjoinv (uppercase_pw_name, name_parts);
+                 g_strfreev (gecos_fields);
+                 g_strfreev (name_parts);
++                g_free (uppercase_pw_name);
+               }
+ #endif
+ 

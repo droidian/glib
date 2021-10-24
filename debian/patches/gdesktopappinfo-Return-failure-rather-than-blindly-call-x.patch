@@ -1,0 +1,33 @@
+From: shironeko <shironeko@tesaguri.club>
+Date: Thu, 9 Sep 2021 10:32:44 -0400
+Subject: gdesktopappinfo: Return failure rather than blindly call xterm
+
+Instead of calling xterm when it clearly does not exist and causes a silent error,
+inform the user that the launch failed so they can take the right action.
+
+Bug: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/2245
+Origin: upstream, 2.70.1, commit:b60cd327fe307300ddbbe13971d99edc09a96079
+---
+ gio/gdesktopappinfo.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/gio/gdesktopappinfo.c b/gio/gdesktopappinfo.c
+index 63ef0c0..229e621 100644
+--- a/gio/gdesktopappinfo.c
++++ b/gio/gdesktopappinfo.c
+@@ -2612,10 +2612,13 @@ prepend_terminal_to_vector (int    *argc,
+             check = g_find_program_in_path ("rxvt");
+           if (check == NULL)
+             check = g_find_program_in_path ("dtterm");
++          if (check == NULL)
++            check = g_find_program_in_path ("xterm");
+           if (check == NULL)
+             {
+-              check = g_strdup ("xterm");
+-              g_debug ("Couldn’t find a terminal: falling back to xterm");
++              g_debug ("Couldn’t find a known terminal");
++              g_free (term_argv);
++              return FALSE;
+             }
+           term_argv[0] = check;
+           term_argv[1] = g_strdup ("-e");

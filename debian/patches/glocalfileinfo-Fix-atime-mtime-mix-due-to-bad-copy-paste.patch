@@ -1,0 +1,22 @@
+From: Egor Bychin <e.bychin@drweb.com>
+Date: Mon, 11 Oct 2021 13:56:43 +0300
+Subject: glocalfileinfo: Fix atime/mtime mix due to bad copy/paste
+
+Origin: upstream, 2.70.1, commit:55dea0fd8d091f0934808da52b5071426fbbc44f
+---
+ gio/glocalfileinfo.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/gio/glocalfileinfo.c b/gio/glocalfileinfo.c
+index 3867ca6..d3b327a 100644
+--- a/gio/glocalfileinfo.c
++++ b/gio/glocalfileinfo.c
+@@ -2650,7 +2650,7 @@ set_mtime_atime (char                       *filename,
+     {
+       if (lazy_stat (filename, &statbuf, &got_stat) == 0)
+ 	{
+-	  times[0].tv_sec = statbuf.st_mtime;
++	  times[0].tv_sec = statbuf.st_atime;
+ #if defined (HAVE_STRUCT_STAT_ST_ATIMENSEC)
+ 	  times[0].tv_usec = statbuf.st_atimensec / 1000;
+ #elif defined (HAVE_STRUCT_STAT_ST_ATIM_TV_NSEC)
