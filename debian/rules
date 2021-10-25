@@ -216,11 +216,6 @@ else
 use_fam := false
 endif
 
-# configure flags
-DEB_CONFIGURE_EXTRA_FLAGS := \
-	-Dinternal_pcre=false \
-	$(NULL)
-
 DEB_CONFIGURE_FLAGS_deb := \
 	--default-library both \
 	-Dfam=$(use_fam) \

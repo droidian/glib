@@ -1,3 +1,10 @@
+glib2.0 (2.70.0-3) unstable; urgency=medium
+
+  * d/rules: Remove internal_pcre build option, which no longer exists.
+    Meson 0.60.0 no longer tolerates this.
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 25 Oct 2021 11:25:31 +0100
+
 glib2.0 (2.70.0-2) unstable; urgency=medium
 
   * d/patches: Update to upstream glib-2-70 branch commit
