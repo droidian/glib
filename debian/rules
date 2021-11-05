@@ -304,7 +304,7 @@ ifneq ($(filter %-tests,$(binaries)),)
 endif
 
 override_dh_missing:
-	dh_missing --sourcedir=debian/install/deb --fail-missing
+	dh_missing --sourcedir=debian/install/deb
 ifneq ($(filter %-udeb,$(binaries)),)
-	dh_missing --sourcedir=debian/install/udeb --fail-missing
+	dh_missing --sourcedir=debian/install/udeb
 endif

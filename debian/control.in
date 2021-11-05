@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
 Uploaders: @GNOME_TEAM@, Simon McVittie <smcv@debian.org>
 Build-Depends: dbus <!nocheck> <!noinsttest>,
-               debhelper-compat (= 12),
+               debhelper-compat (= 13),
                dh-exec,
                dh-python,
                docbook-xml,
