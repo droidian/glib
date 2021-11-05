@@ -1,6 +1,9 @@
 glib2.0 (2.70.1-1) UNRELEASED; urgency=medium
 
   * New upstream release
+    - Functionally equivalent to previous releases to Debian, except for
+      Windows-specific changes
+  * Drop patches that came from upstream
 
  -- Simon McVittie <smcv@debian.org>  Fri, 05 Nov 2021 14:13:37 +0000
 
