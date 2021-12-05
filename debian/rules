@@ -19,10 +19,7 @@ DEB_LDFLAGS_MAINT_APPEND += -Wl,-O1
 include /usr/share/dpkg/default.mk
 
 %:
-	dh $@ --buildsystem=meson
-
-override_dh_autoreconf:
-	@:
+	dh $@
 
 ifneq ($(filter hppa,$(DEB_HOST_ARCH_CPU)),)
 stack_grows_up = true
