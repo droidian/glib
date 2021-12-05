@@ -1,5 +1,5 @@
 project('glib', 'c', 'cpp',
-  version : '2.70.1',
+  version : '2.70.2',
   # NOTE: We keep this pinned at 0.49 because that's what Debian 10 ships
   meson_version : '>= 0.49.2',
   default_options : [
@@ -1999,7 +1999,7 @@ endif
 
 # Try again with the fallback
 if not pcre.found()
-  pcre = dependency('libpcre', required : true, fallback : ['libpcre', 'pcre_dep'])
+  pcre = dependency('libpcre', required : true, fallback : ['pcre', 'pcre_dep'])
   use_pcre_static_flag = true
 elif host_system == 'windows'
   pcre_static = cc.links('''#define PCRE_STATIC
