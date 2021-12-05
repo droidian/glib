@@ -19,7 +19,7 @@ DEB_LDFLAGS_MAINT_APPEND += -Wl,-O1
 include /usr/share/dpkg/default.mk
 
 %:
-	dh $@ --with gnome,python3 --buildsystem=meson
+	dh $@ --buildsystem=meson
 
 override_dh_autoreconf:
 	@:
