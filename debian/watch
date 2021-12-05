@@ -1,6 +1,7 @@
 version=4
-https://download.gnome.org/sources/glib/([\d\.]+[02468])/ \
-	glib@ANY_VERSION@\.tar\.xz
+opts="searchmode=plain, uversionmangle=s/\.(alpha|beta|rc)/~$1/" \
+https://download.gnome.org/sources/glib/cache.json \
+	[\d.]+[02468]/glib-([\d.]+)@ARCHIVE_EXT@
 #opts="mode=git,compression=xz" \
 #https://gitlab.gnome.org/GNOME/glib.git \
 #refs/tags/@ANY_VERSION@
