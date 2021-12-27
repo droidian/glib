@@ -1,8 +1,10 @@
-glib2.0 (2.71.0-1) UNRELEASED; urgency=medium
+glib2.0 (2.71.0-1) experimental; urgency=medium
 
   * New upstream development release
+  * Unfuzz patch series
+  * Update symbols file
 
- -- Simon McVittie <smcv@debian.org>  Mon, 27 Dec 2021 12:57:22 +0000
+ -- Simon McVittie <smcv@debian.org>  Mon, 27 Dec 2021 15:04:01 +0000
 
 glib2.0 (2.70.1-1) unstable; urgency=medium
 
