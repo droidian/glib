@@ -1,5 +1,5 @@
 version=4
-https://download.gnome.org/sources/glib/([\d\.]+[02468])/ \
+https://download.gnome.org/sources/glib/([\d\.]+)/ \
 	glib@ANY_VERSION@\.tar\.xz
 #opts="mode=git,compression=xz" \
 #https://gitlab.gnome.org/GNOME/glib.git \
