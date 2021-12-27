@@ -514,7 +514,7 @@ g_system_thread_new (GThreadFunc proxy,
       goto error;
     }
 
-  if (ResumeThread (thread->handle) == -1)
+  if (ResumeThread (thread->handle) == (DWORD) -1)
     {
       message = "Error resuming new thread";
       goto error;
@@ -617,7 +617,7 @@ g_thread_win32_load_library (void)
 {
   /* FIXME: Add support for UWP app */
 #if !defined(G_WINAPI_ONLY_APP)
-  static volatile gsize _init_once = 0;
+  static gsize _init_once = 0;
   if (g_once_init_enter (&_init_once))
     {
       kernel32_module = LoadLibraryW (L"kernel32.dll");
