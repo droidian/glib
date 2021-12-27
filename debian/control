@@ -6,16 +6,16 @@ Source: glib2.0
 Section: libs
 Priority: optional
 Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
-Uploaders: Iain Lane <laney@debian.org>, Simon McVittie <smcv@debian.org>
+Uploaders: Iain Lane <laney@debian.org>, Jeremy Bicha <jbicha@debian.org>, Simon McVittie <smcv@debian.org>
 Build-Depends: dbus <!nocheck> <!noinsttest>,
                debhelper-compat (= 13),
                dh-exec,
-               dh-python,
+               dh-sequence-python3,
+               dh-sequence-gnome,
                docbook-xml,
                docbook-xsl,
                dpkg-dev (>= 1.17.14),
                gettext,
-               gnome-pkg-tools (>= 0.11),
                libdbus-1-dev (>= 1.2.14) <!nocheck> <!noinsttest>,
                libelf-dev (>= 0.142),
                libffi-dev (>= 3.3),

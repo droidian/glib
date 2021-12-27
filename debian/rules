@@ -19,10 +19,7 @@ DEB_LDFLAGS_MAINT_APPEND += -Wl,-O1
 include /usr/share/dpkg/default.mk
 
 %:
-	dh $@ --with gnome,python3 --buildsystem=meson
-
-override_dh_autoreconf:
-	@:
+	dh $@
 
 ifneq ($(filter hppa,$(DEB_HOST_ARCH_CPU)),)
 stack_grows_up = true
@@ -69,8 +66,7 @@ endif
 
 override_dh_clean:
 	rm -rf $(CURDIR)/debian/build \
-	       $(CURDIR)/debian/install \
-	       $(CURDIR)/debian/tmp-xdg-runtime-dir
+	       $(CURDIR)/debian/install
 	dh_clean -Xorg.gtk.test.gschema.xml.orig -Xorg.gtk.test.gschema.override.orig
 
 
@@ -86,17 +82,6 @@ override_dh_translations:
 # Do not clutter $HOME with ~/.dbus-keyrings and avoid failure on the buildds
 # where creating /home/buildd/.dbus-keyrings fails
 export HOME=$(CURDIR)/debian/build
-
-# Put these back to their defaults if we are not running with a clean
-# environment, so that they are based on the temporary $HOME above.
-# Otherwise, some tests would try to write to the user's real XDG_DATA_HOME,
-# causing unwanted side-effects or FTBFS depending whether the user's
-# real HOME is available in the build chroot (if used)
-unexport XDG_CACHE_HOME
-unexport XDG_CONFIG_DIRS
-unexport XDG_CONFIG_HOME
-unexport XDG_DATA_HOME
-unexport XDG_DATA_DIRS
 
 # Make sure that everything that uses D-Bus is creating its own temporary
 # session rather than polluting the developer's (or failing, on buildds)
@@ -196,8 +181,6 @@ override_dh_auto_test-indep:
 		gio-doc-check glib-doc-check gobject-doc-check \
 	|| $(handle_test_failure)
 
-# The tests assume this directory exists and is writable
-export XDG_RUNTIME_DIR=$(CURDIR)/debian/tmp-xdg-runtime-dir
 # Let's get failing tests' stdout and stderr so we have some information when
 # a build fails
 export VERBOSE=1
