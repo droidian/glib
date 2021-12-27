@@ -1386,6 +1386,7 @@ libgio-2.0.so.0 libglib2.0-0 #MINVER#
  g_resolver_lookup_service_finish@Base 2.22.0
  g_resolver_name_lookup_flags_get_type@Base 2.59.0
  g_resolver_record_type_get_type@Base 2.33.14
+ g_resolver_records_from_res_query@Base 2.71.0
  g_resolver_set_default@Base 2.22.0
  g_resource_enumerate_children@Base 2.31.18
  g_resource_error_get_type@Base 2.31.18
@@ -2760,6 +2761,7 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_main_context_is_owner@Base 2.12.0
  g_main_context_iteration@Base 2.12.0
  g_main_context_new@Base 2.12.0
+ g_main_context_new_with_flags@Base 2.71.0
  g_main_context_pending@Base 2.12.0
  g_main_context_pop_thread_default@Base 2.22.0
  g_main_context_prepare@Base 2.12.0
