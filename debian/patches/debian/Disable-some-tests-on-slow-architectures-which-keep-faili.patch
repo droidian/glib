@@ -15,10 +15,10 @@ Forwarded: no
  2 files changed, 25 insertions(+)
 
 diff --git a/glib/tests/mainloop.c b/glib/tests/mainloop.c
-index ab13176..d3eed9c 100644
+index 25ef4f4..d3113be 100644
 --- a/glib/tests/mainloop.c
 +++ b/glib/tests/mainloop.c
-@@ -470,6 +470,14 @@ test_child_sources (void)
+@@ -520,6 +520,14 @@ test_child_sources (void)
    GMainLoop *loop;
    GSource *parent, *child_b, *child_c, *end;
  
@@ -33,7 +33,7 @@ index ab13176..d3eed9c 100644
    ctx = g_main_context_new ();
    loop = g_main_loop_new (ctx, FALSE);
  
-@@ -548,6 +556,14 @@ test_recursive_child_sources (void)
+@@ -598,6 +606,14 @@ test_recursive_child_sources (void)
    GMainLoop *loop;
    GSource *parent, *child_b, *child_c, *end;
  
