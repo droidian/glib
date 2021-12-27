@@ -17,7 +17,7 @@ if build_machine.system() == 'linux'
   libutil_name = 'libutil'
   libutil = run_command('sh', '-c',
     '''ldconfig -p | grep -o "[[:space:]]@0@\.so\(\.[0-9]\+\)\?\b"'''
-    .format(libutil_name)).stdout().strip().split('\n')
+    .format(libutil_name), check: false).stdout().strip().split('\n')
 
   if libutil.length() > 0
       message('Found libutil as @0@'.format(libutil[0]))
@@ -52,6 +52,9 @@ gio_tests = {
   'contenttype' : {},
   'converter-stream' : {},
   'credentials' : {},
+  'cxx' : {
+    'source' : ['cxx.cpp'],
+  },
   'data-input-stream' : {},
   'data-output-stream' : {},
   'defaultvalue' : {'extra_sources' : [giotypefuncs_inc]},
@@ -683,7 +686,14 @@ if not meson.is_cross_build() or meson.has_exe_wrapper()
   objcopy_supports_add_symbol = false
   objcopy = find_program('objcopy', required : false)
   if objcopy.found()
-    objcopy_supports_add_symbol = run_command(objcopy, '--help').stdout().contains('--add-symbol')
+    # FIXME: This should be `check: true` because we never really expect
+    # `objcopy --help` to fail, given that `objcopy` exists. However, it does
+    # fail on FreeBSD because ELF Tool Chain has
+    # [a bug](https://sourceforge.net/p/elftoolchain/code/3950/).
+    # This can be changed back to `check: true` once our CI uses a FreeBSD
+    # version which includes the fix.
+    # See https://gitlab.gnome.org/GNOME/glib/-/merge_requests/2360#note_1318608
+    objcopy_supports_add_symbol = run_command(objcopy, '--help', check: false).stdout().contains('--add-symbol')
   endif
 
   ld = find_program('ld', required : false)

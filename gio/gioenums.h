@@ -1021,6 +1021,9 @@ typedef enum
  * do not ask the bus to launch an owner during proxy initialization, but allow it to be
  * autostarted by a method call. This flag is only meaningful in proxies for well-known names,
  * and only if %G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START is not also specified.
+ * @G_DBUS_PROXY_FLAGS_NO_MATCH_RULE: Don't actually send the AddMatch D-Bus
+ *    call for this signal subscription. This gives you more control
+ *    over which match rules you add (but you must add them manually). (Since: 2.72)
  *
  * Flags used when constructing an instance of a #GDBusProxy derived class.
  *
@@ -1033,7 +1036,8 @@ typedef enum
   G_DBUS_PROXY_FLAGS_DO_NOT_CONNECT_SIGNALS = (1<<1),
   G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START = (1<<2),
   G_DBUS_PROXY_FLAGS_GET_INVALIDATED_PROPERTIES = (1<<3),
-  G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START_AT_CONSTRUCTION = (1<<4)
+  G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START_AT_CONSTRUCTION = (1<<4),
+  G_DBUS_PROXY_FLAGS_NO_MATCH_RULE GLIB_AVAILABLE_ENUMERATOR_IN_2_72 = (1<<5)
 } GDBusProxyFlags;
 
 /**
@@ -1584,10 +1588,16 @@ typedef enum {
  *   flags
  *
  * A set of flags describing TLS certification validation. This can be
- * used to set which validation steps to perform (eg, with
- * g_tls_client_connection_set_validation_flags()), or to describe why
- * a particular certificate was rejected (eg, in
- * #GTlsConnection::accept-certificate).
+ * used to describe why a particular certificate was rejected (for
+ * example, in #GTlsConnection::accept-certificate).
+ *
+ * GLib guarantees that if certificate verification fails, at least one
+ * flag will be set, but it does not guarantee that all possible flags
+ * will be set. Accordingly, you may not safely decide to ignore any
+ * particular type of error. For example, it would be incorrect to mask
+ * %G_TLS_CERTIFICATE_EXPIRED if you want to allow expired certificates,
+ * because this could potentially be the only error flag set even if
+ * other problems exist with the certificate.
  *
  * Since: 2.28
  */
@@ -1973,6 +1983,9 @@ typedef enum /*< flags >*/ {
  *   file descriptors of their parent, unless those descriptors have
  *   been explicitly marked as close-on-exec.  This flag has no effect
  *   over the "standard" file descriptors (stdin, stdout, stderr).
+ * @G_SUBPROCESS_FLAGS_SEARCH_PATH_FROM_ENVP: if path searching is
+ *   needed when spawning the subprocess, use the `PATH` in the launcher
+ *   environment. (Since: 2.72)
  *
  * Flags to define the behaviour of a #GSubprocess.
  *
@@ -1995,7 +2008,8 @@ typedef enum {
   G_SUBPROCESS_FLAGS_STDERR_PIPE           = (1u << 4),
   G_SUBPROCESS_FLAGS_STDERR_SILENCE        = (1u << 5),
   G_SUBPROCESS_FLAGS_STDERR_MERGE          = (1u << 6),
-  G_SUBPROCESS_FLAGS_INHERIT_FDS           = (1u << 7)
+  G_SUBPROCESS_FLAGS_INHERIT_FDS           = (1u << 7),
+  G_SUBPROCESS_FLAGS_SEARCH_PATH_FROM_ENVP = (1u << 8)
 } GSubprocessFlags;
 
 /**
