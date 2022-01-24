@@ -269,6 +269,9 @@ endif
 ifneq ($(filter %-tests,$(binaries)),)
 	sed -i -e '/^#!.*/,1 d' debian/install/deb/usr/libexec/installed-tests/glib/taptestrunner.py
 endif
+ifneq ($(filter hurd,$(DEB_HOST_ARCH_OS)),)
+	dh_install -plibglib2.0-0 --sourcedir=debian/install/deb usr/lib/${DEB_HOST_MULTIARCH}/gio/modules/libgiofam.so usr/lib/${DEB_HOST_MULTIARCH}/gio/modules
+endif
 	dh_install --remaining-packages --sourcedir=debian/install/deb
 	install -D -t debian/libglib2.0-0/usr/share/glib-2.0/ debian/clean-up-unmanaged-libraries
 	install -D -t debian/libglib2.0-0/usr/lib/${DEB_HOST_MULTIARCH}/glib-2.0/ debian/gio-launch-desktop
