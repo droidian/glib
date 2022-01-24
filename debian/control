@@ -9,7 +9,6 @@ Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.
 Uploaders: Iain Lane <laney@debian.org>, Jeremy Bicha <jbicha@debian.org>, Simon McVittie <smcv@debian.org>
 Build-Depends: dbus <!nocheck> <!noinsttest>,
                debhelper-compat (= 13),
-               dh-exec,
                dh-sequence-python3,
                dh-sequence-gnome,
                docbook-xml,
