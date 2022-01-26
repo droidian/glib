@@ -1,4 +1,4 @@
-glib2.0 (2.70.3-1) UNRELEASED; urgency=medium
+glib2.0 (2.70.3-1) unstable; urgency=medium
 
   * New upstream release
     - Do not allow empty structs (tuples) in D-Bus messages, resolving a
@@ -18,8 +18,10 @@ glib2.0 (2.70.3-1) UNRELEASED; urgency=medium
     After that, the one remaining dh-exec feature in use was a conditional
     installation for the FAM GIO module for Hurd. Open-code this in d/rules
     instead.
+  * d/gbp.conf: Use upstream/2.70.x branch for packaging.
+    We have already had a 2.71.x release.
 
- -- Simon McVittie <smcv@debian.org>  Wed, 26 Jan 2022 20:06:05 +0000
+ -- Simon McVittie <smcv@debian.org>  Wed, 26 Jan 2022 20:18:19 +0000
 
 glib2.0 (2.70.2-1) unstable; urgency=medium
 
