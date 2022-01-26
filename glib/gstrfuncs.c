@@ -317,8 +317,11 @@ static const guint16 ascii_table_data[256] = {
 
 const guint16 * const g_ascii_table = ascii_table_data;
 
-#if defined(HAVE_NEWLOCALE) && \
-    defined(HAVE_USELOCALE)
+#if defined (HAVE_NEWLOCALE) && \
+    defined (HAVE_USELOCALE) && \
+    defined (HAVE_STRTOD_L) && \
+    defined (HAVE_STRTOULL_L) && \
+    defined (HAVE_STRTOLL_L)
 #define USE_XLOCALE 1
 #endif
 
@@ -728,7 +731,7 @@ gdouble
 g_ascii_strtod (const gchar *nptr,
                 gchar      **endptr)
 {
-#if defined(USE_XLOCALE) && defined(HAVE_STRTOD_L)
+#ifdef USE_XLOCALE
 
   g_return_val_if_fail (nptr != NULL, 0);
 
@@ -1041,7 +1044,7 @@ g_ascii_formatd (gchar       *buffer,
 #define TOUPPER(c)              (ISLOWER (c) ? (c) - 'a' + 'A' : (c))
 #define TOLOWER(c)              (ISUPPER (c) ? (c) - 'A' + 'a' : (c))
 
-#if !defined(USE_XLOCALE) || !defined(HAVE_STRTOULL_L) || !defined(HAVE_STRTOLL_L)
+#ifndef USE_XLOCALE
 
 static guint64
 g_parse_long_long (const gchar  *nptr,
@@ -1166,7 +1169,7 @@ g_parse_long_long (const gchar  *nptr,
     }
   return 0;
 }
-#endif /* !defined(USE_XLOCALE) || !defined(HAVE_STRTOULL_L) || !defined(HAVE_STRTOLL_L) */
+#endif /* !USE_XLOCALE */
 
 /**
  * g_ascii_strtoull:
@@ -1207,7 +1210,7 @@ g_ascii_strtoull (const gchar *nptr,
                   gchar      **endptr,
                   guint        base)
 {
-#if defined(USE_XLOCALE) && defined(HAVE_STRTOULL_L)
+#ifdef USE_XLOCALE
   return strtoull_l (nptr, endptr, base, get_C_locale ());
 #else
   gboolean negative;
@@ -1254,7 +1257,7 @@ g_ascii_strtoll (const gchar *nptr,
                  gchar      **endptr,
                  guint        base)
 {
-#if defined(USE_XLOCALE) && defined(HAVE_STRTOLL_L)
+#ifdef USE_XLOCALE
   return strtoll_l (nptr, endptr, base, get_C_locale ());
 #else
   gboolean negative;
@@ -1871,9 +1874,7 @@ g_ascii_strcasecmp (const gchar *s1,
  * @n: number of characters to compare
  *
  * Compare @s1 and @s2, ignoring the case of ASCII characters and any
- * characters after the first @n in each string. If either string is
- * less than @n bytes long, comparison will stop at the first nul byte
- * encountered.
+ * characters after the first @n in each string.
  *
  * Unlike the BSD strcasecmp() function, this only recognizes standard
  * ASCII letters and ignores the locale, treating all non-ASCII

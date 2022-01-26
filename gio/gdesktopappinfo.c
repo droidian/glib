@@ -89,7 +89,6 @@ enum {
 static void     g_desktop_app_info_iface_init         (GAppInfoIface    *iface);
 static gboolean g_desktop_app_info_ensure_saved       (GDesktopAppInfo  *info,
                                                        GError          **error);
-static gboolean g_desktop_app_info_load_file (GDesktopAppInfo *self);
 
 /**
  * GDesktopAppInfo:
@@ -1004,19 +1003,6 @@ desktop_file_dir_unindexed_init (DesktopFileDir *dir)
 }
 
 static GDesktopAppInfo *
-g_desktop_app_info_new_from_filename_unlocked (const char *filename)
-{
-  GDesktopAppInfo *info = NULL;
-
-  info = g_object_new (G_TYPE_DESKTOP_APP_INFO, "filename", filename, NULL);
-
-  if (!g_desktop_app_info_load_file (info))
-    g_clear_object (&info);
-
-  return info;
-}
-
-static GDesktopAppInfo *
 desktop_file_dir_unindexed_get_app (DesktopFileDir *dir,
                                     const gchar    *desktop_id)
 {
@@ -1027,7 +1013,7 @@ desktop_file_dir_unindexed_get_app (DesktopFileDir *dir,
   if (!filename)
     return NULL;
 
-  return g_desktop_app_info_new_from_filename_unlocked (filename);
+  return g_desktop_app_info_new_from_filename (filename);
 }
 
 static void
@@ -1047,7 +1033,7 @@ desktop_file_dir_unindexed_get_all (DesktopFileDir *dir,
       if (desktop_file_dir_app_name_is_masked (dir, app_name))
         continue;
 
-      add_to_table_if_appropriate (apps, app_name, g_desktop_app_info_new_from_filename_unlocked (filename));
+      add_to_table_if_appropriate (apps, app_name, g_desktop_app_info_new_from_filename (filename));
     }
 }
 
@@ -1768,56 +1754,6 @@ binary_from_exec (const char *exec)
   return g_strndup (start, p - start);
 }
 
-/*< internal >
- * g_desktop_app_info_get_desktop_id_for_filename
- * @self: #GDesktopAppInfo to get desktop id of
- *
- * Tries to find the desktop ID for a particular `.desktop` filename, as per the
- * [Desktop Entry Specification](https://specifications.freedesktop.org/desktop-
- * entry-spec/desktop-entry-spec-latest.html#desktop-file-id).
- *
- * Returns: desktop id or basename if filename is unknown.
- */
-static char *
-g_desktop_app_info_get_desktop_id_for_filename (GDesktopAppInfo *self)
-{
-  guint i;
-  gchar *desktop_id = NULL;
-
-  g_return_val_if_fail (self->filename != NULL, NULL);
-
-  for (i = 0; i < desktop_file_dirs->len; i++)
-    {
-      DesktopFileDir *dir = g_ptr_array_index (desktop_file_dirs, i);
-      GHashTable *app_names;
-      GHashTableIter iter;
-      gpointer key, value;
-
-      app_names = dir->app_names;
-
-      if (!app_names)
-        continue;
-
-      g_hash_table_iter_init (&iter, app_names);
-      while (g_hash_table_iter_next (&iter, &key, &value))
-        {
-          if (!strcmp (value, self->filename))
-            {
-              desktop_id = g_strdup (key);
-              break;
-            }
-        }
-
-      if (desktop_id)
-        break;
-    }
-
-  if (!desktop_id)
-    desktop_id = g_path_get_basename (self->filename);
-
-  return g_steal_pointer (&desktop_id);
-}
-
 static gboolean
 g_desktop_app_info_load_from_keyfile (GDesktopAppInfo *info,
                                       GKeyFile        *key_file)
@@ -1976,9 +1912,6 @@ g_desktop_app_info_load_from_keyfile (GDesktopAppInfo *info,
       g_free (basename);
     }
 
-  if (info->filename)
-    info->desktop_id = g_desktop_app_info_get_desktop_id_for_filename (info);
-
   info->keyfile = g_key_file_ref (key_file);
 
   return TRUE;
@@ -1991,6 +1924,8 @@ g_desktop_app_info_load_file (GDesktopAppInfo *self)
   gboolean retval = FALSE;
 
   g_return_val_if_fail (self->filename != NULL, FALSE);
+
+  self->desktop_id = g_path_get_basename (self->filename);
 
   key_file = g_key_file_new ();
 
@@ -2018,14 +1953,11 @@ g_desktop_app_info_new_from_keyfile (GKeyFile *key_file)
 
   info = g_object_new (G_TYPE_DESKTOP_APP_INFO, NULL);
   info->filename = NULL;
-
-  desktop_file_dirs_lock ();
-
   if (!g_desktop_app_info_load_from_keyfile (info, key_file))
-    g_clear_object (&info);
-
-  desktop_file_dirs_unlock ();
-
+    {
+      g_object_unref (info);
+      return NULL;
+    }
   return info;
 }
 
@@ -2043,12 +1975,12 @@ g_desktop_app_info_new_from_filename (const char *filename)
 {
   GDesktopAppInfo *info = NULL;
 
-  desktop_file_dirs_lock ();
-
-  info = g_desktop_app_info_new_from_filename_unlocked (filename);
-
-  desktop_file_dirs_unlock ();
-
+  info = g_object_new (G_TYPE_DESKTOP_APP_INFO, "filename", filename, NULL);
+  if (!g_desktop_app_info_load_file (info))
+    {
+      g_object_unref (info);
+      return NULL;
+    }
   return info;
 }
 
@@ -2799,26 +2731,6 @@ notify_desktop_launch (GDBusConnection  *session_bus,
   g_object_unref (msg);
 }
 
-static void
-emit_launch_started (GAppLaunchContext *context,
-                     GDesktopAppInfo   *info,
-                     const gchar       *startup_id)
-{
-  GVariantBuilder builder;
-  GVariant *platform_data = NULL;
-
-  if (startup_id)
-    {
-      g_variant_builder_init (&builder, G_VARIANT_TYPE_ARRAY);
-      g_variant_builder_add (&builder, "{sv}",
-                             "startup-notification-id",
-                             g_variant_new_string (startup_id));
-      platform_data = g_variant_ref_sink (g_variant_builder_end (&builder));
-    }
-  g_signal_emit_by_name (context, "launch-started", info, platform_data);
-  g_clear_pointer (&platform_data, g_variant_unref);
-}
-
 #define _SPAWN_FLAGS_DEFAULT (G_SPAWN_SEARCH_PATH)
 
 static gboolean
@@ -2914,8 +2826,6 @@ g_desktop_app_info_launch_uris_with_spawn (GDesktopAppInfo            *info,
             }
 
           g_list_free_full (launched_files, g_object_unref);
-
-          emit_launch_started (launch_context, info, sn_id);
         }
 
       /* Wrap the @argv in a command which will set the
@@ -3049,64 +2959,6 @@ g_desktop_app_info_make_platform_data (GDesktopAppInfo   *info,
   return g_variant_builder_end (&builder);
 }
 
-typedef struct
-{
-  GDesktopAppInfo     *info; /* (owned) */
-  GAppLaunchContext   *launch_context; /* (owned) (nullable) */
-  GAsyncReadyCallback  callback;
-  gchar               *startup_id; /* (owned) */
-  gpointer             user_data;
-} LaunchUrisWithDBusData;
-
-static void
-launch_uris_with_dbus_data_free (LaunchUrisWithDBusData *data)
-{
-  g_clear_object (&data->info);
-  g_clear_object (&data->launch_context);
-  g_free (data->startup_id);
-
-  g_free (data);
-}
-
-static void
-launch_uris_with_dbus_signal_cb (GObject      *object,
-                                 GAsyncResult *result,
-                                 gpointer      user_data)
-{
-  LaunchUrisWithDBusData *data = user_data;
-  GVariantBuilder builder;
-
-  if (data->launch_context)
-    {
-      if (g_task_had_error (G_TASK (result)))
-        g_app_launch_context_launch_failed (data->launch_context, data->startup_id);
-      else
-        {
-          GVariant *platform_data;
-
-          g_variant_builder_init (&builder, G_VARIANT_TYPE_ARRAY);
-          /* the docs guarantee `pid` will be set, but we can’t
-           * easily know it for a D-Bus process, so set it to zero */
-          g_variant_builder_add (&builder, "{sv}", "pid", g_variant_new_int32 (0));
-          if (data->startup_id)
-            g_variant_builder_add (&builder, "{sv}",
-                                   "startup-notification-id",
-                                   g_variant_new_string (data->startup_id));
-          platform_data = g_variant_ref_sink (g_variant_builder_end (&builder));
-          g_signal_emit_by_name (data->launch_context,
-                                 "launched",
-                                 data->info,
-                                 platform_data);
-          g_variant_unref (platform_data);
-        }
-    }
-
-  if (data->callback)
-    data->callback (object, result, data->user_data);
-
-  launch_uris_with_dbus_data_free (data);
-}
-
 static void
 launch_uris_with_dbus (GDesktopAppInfo    *info,
                        GDBusConnection    *session_bus,
@@ -3116,11 +2968,8 @@ launch_uris_with_dbus (GDesktopAppInfo    *info,
                        GAsyncReadyCallback callback,
                        gpointer            user_data)
 {
-  GVariant *platform_data;
   GVariantBuilder builder;
-  GVariantDict dict;
   gchar *object_path;
-  LaunchUrisWithDBusData *data;
 
   g_variant_builder_init (&builder, G_VARIANT_TYPE_TUPLE);
 
@@ -3134,26 +2983,13 @@ launch_uris_with_dbus (GDesktopAppInfo    *info,
       g_variant_builder_close (&builder);
     }
 
-  platform_data = g_desktop_app_info_make_platform_data (info, uris, launch_context);
+  g_variant_builder_add_value (&builder, g_desktop_app_info_make_platform_data (info, uris, launch_context));
 
-  g_variant_builder_add_value (&builder, platform_data);
   object_path = object_path_from_appid (info->app_id);
-
-  data = g_new0 (LaunchUrisWithDBusData, 1);
-  data->info = g_object_ref (info);
-  data->callback = callback;
-  data->user_data = user_data;
-  data->launch_context = launch_context ? g_object_ref (launch_context) : NULL;
-  g_variant_dict_init (&dict, platform_data);
-  g_variant_dict_lookup (&dict, "desktop-startup-id", "s", &data->startup_id);
-
-  if (launch_context)
-    emit_launch_started (launch_context, info, data->startup_id);
-
   g_dbus_connection_call (session_bus, info->app_id, object_path, "org.freedesktop.Application",
                           uris ? "Open" : "Activate", g_variant_builder_end (&builder),
                           NULL, G_DBUS_CALL_FLAGS_NONE, -1,
-                          cancellable, launch_uris_with_dbus_signal_cb, g_steal_pointer (&data));
+                          cancellable, callback, user_data);
   g_free (object_path);
 }
 

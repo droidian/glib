@@ -893,9 +893,8 @@ static GDateTime *
 g_date_time_new_from_timeval (GTimeZone      *tz,
                               const GTimeVal *tv)
 {
-  gint64 tv_sec = tv->tv_sec;
-
-  if (tv_sec > G_MAXINT64 - 1 || !UNIX_TO_INSTANT_IS_VALID (tv_sec + 1))
+  if ((gint64) tv->tv_sec > G_MAXINT64 - 1 ||
+      !UNIX_TO_INSTANT_IS_VALID ((gint64) tv->tv_sec + 1))
     return NULL;
 
   return g_date_time_from_instant (tz, tv->tv_usec +

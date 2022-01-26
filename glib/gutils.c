@@ -69,7 +69,6 @@
 #include "garray.h"
 #include "glibintl.h"
 #include "gstdio.h"
-#include "gquark.h"
 
 #ifdef G_PLATFORM_WIN32
 #include "gconvert.h"
@@ -1051,7 +1050,7 @@ g_get_host_name (void)
 }
 
 G_LOCK_DEFINE_STATIC (g_prgname);
-static const gchar *g_prgname = NULL; /* always a quark */
+static gchar *g_prgname = NULL;
 
 /**
  * g_get_prgname:
@@ -1072,7 +1071,7 @@ static const gchar *g_prgname = NULL; /* always a quark */
 const gchar*
 g_get_prgname (void)
 {
-  const gchar* retval;
+  gchar* retval;
 
   G_LOCK (g_prgname);
   retval = g_prgname;
@@ -1094,16 +1093,14 @@ g_get_prgname (void)
  * #GtkApplication::startup handler. The program name is found by
  * taking the last component of @argv[0].
  *
- * Since GLib 2.72, this function can be called multiple times
- * and is fully thread safe. Prior to GLib 2.72, this function
- * could only be called once per process.
+ * Note that for thread-safety reasons this function can only be called once.
  */
 void
 g_set_prgname (const gchar *prgname)
 {
-  GQuark qprgname = g_quark_from_string (prgname);
   G_LOCK (g_prgname);
-  g_prgname = g_quark_to_string (qprgname);
+  g_free (g_prgname);
+  g_prgname = g_strdup (prgname);
   G_UNLOCK (g_prgname);
 }
 
@@ -1297,53 +1294,34 @@ static gchar *
 get_windows_version (gboolean with_windows)
 {
   GString *version = g_string_new (NULL);
-  gboolean is_win_server = FALSE;
 
   if (g_win32_check_windows_version (10, 0, 0, G_WIN32_OS_ANY))
     {
       gchar *win10_release;
       gboolean is_win11 = FALSE;
-      OSVERSIONINFOEXW osinfo;
 
-      /* Are we on Windows 2016/2019/2022 Server? */
-      is_win_server = g_win32_check_windows_version (10, 0, 0, G_WIN32_OS_SERVER);
-
-      /*
-       * This always succeeds if we get here, since the
-       * g_win32_check_windows_version() already did this!
-       * We want the OSVERSIONINFOEXW here for more even
-       * fine-grained versioning items
-       */
-      _g_win32_call_rtl_version (&osinfo);
-
-      if (!is_win_server)
+      if (!g_win32_check_windows_version (10, 0, 0, G_WIN32_OS_SERVER))
         {
+          OSVERSIONINFOEXW osinfo;
+
+          /*
+           * This always succeeds if we get here, since the
+           * g_win32_check_windows_version() already did this!
+           * We want the OSVERSIONINFOEXW here for more even
+           * fine-grained versioning items
+           */
+          _g_win32_call_rtl_version (&osinfo);
+
           /*
            * Windows 11 is actually Windows 10.0.22000+,
            * so look at the build number
            */
           is_win11 = (osinfo.dwBuildNumber >= 22000);
         }
-      else
-        {
-          /*
-           * Windows 2022 Server is actually Windows 10.0.20348+,
-           * Windows 2019 Server is actually Windows 10.0.17763+,
-           * Windows 2016 Server is actually Windows 10.0.14393+,
-           * so look at the build number
-           */
-          g_string_append (version, "Server");
-          if (osinfo.dwBuildNumber >= 20348)
-            g_string_append (version, " 2022");
-          else if (osinfo.dwBuildNumber >= 17763)
-            g_string_append (version, " 2019");
-          else
-            g_string_append (version, " 2016");
-        }
 
       if (is_win11)
         g_string_append (version, "11");
-      else if (!is_win_server)
+      else
         g_string_append (version, "10");
 
       /* Windows 10/Server 2016+ is identified by its ReleaseId or
@@ -1386,10 +1364,10 @@ get_windows_version (gboolean with_windows)
     {
       gchar *win81_update;
 
-      if (g_win32_check_windows_version (6, 3, 0, G_WIN32_OS_WORKSTATION))
-        g_string_append (version, "8.1");
-      else
-        g_string_append (version, "Server 2012 R2");
+      g_string_append (version, "8.1");
+
+      if (!g_win32_check_windows_version (6, 3, 0, G_WIN32_OS_WORKSTATION))
+        g_string_append (version, " Server");
 
       win81_update = get_windows_8_1_update ();
 
@@ -1409,23 +1387,8 @@ get_windows_version (gboolean with_windows)
 
           g_string_append (version, versions[i].version);
 
-          if (g_win32_check_windows_version (versions[i].major, versions[i].minor, versions[i].sp, G_WIN32_OS_SERVER))
-            {
-              /*
-               * This condition should now always hold, since Windows
-               * 7+/Server 2008 R2+ is now required
-               */
-              if (versions[i].major == 6)
-                {
-                  g_string_append (version, "Server");
-                  if (versions[i].minor == 2)
-                    g_string_append (version, " 2012");
-                  else if (versions[i].minor == 1)
-                    g_string_append (version, " 2008 R2");
-                  else
-                    g_string_append (version, " 2008");
-                }
-            }
+          if (!g_win32_check_windows_version (versions[i].major, versions[i].minor, versions[i].sp, G_WIN32_OS_WORKSTATION))
+            g_string_append (version, " Server");
 
           g_string_append (version, versions[i].spversion);
         }
@@ -1445,7 +1408,7 @@ get_windows_version (gboolean with_windows)
 }
 #endif
 
-#if defined (G_OS_UNIX) && !defined (__APPLE__)
+#ifdef G_OS_UNIX
 static gchar *
 get_os_info_from_os_release (const gchar *key_name,
                              const gchar *buffer)
@@ -1574,7 +1537,7 @@ get_os_info_from_uname (const gchar *key_name)
   else
     return NULL;
 }
-#endif  /* defined (G_OS_UNIX) && !defined (__APPLE__) */
+#endif
 
 /**
  * g_get_os_info:
@@ -1977,21 +1940,12 @@ g_build_user_runtime_dir (void)
   const gchar *runtime_dir_env = g_getenv ("XDG_RUNTIME_DIR");
 
   if (runtime_dir_env && runtime_dir_env[0])
-    {
-      runtime_dir = g_strdup (runtime_dir_env);
-
-      /* If the XDG_RUNTIME_DIR environment variable is set, we are being told by
-       * the OS that this directory exists and is appropriately configured
-       * already.
-       */
-    }
+    runtime_dir = g_strdup (runtime_dir_env);
   else
     {
       runtime_dir = g_build_user_cache_dir ();
 
-      /* Fallback case: the directory may not yet exist.
-       *
-       * The user should be able to rely on the directory existing
+      /* The user should be able to rely on the directory existing
        * when the function returns.  Probably it already does, but
        * let's make sure.  Just do mkdir() directly since it will be
        * no more expensive than a stat() in the case that the
@@ -2312,9 +2266,9 @@ g_reload_user_special_dirs_cache (void)
  * of the special directory without requiring the session to restart; GLib
  * will not reflect any change once the special directories are loaded.
  *
- * Returns: (type filename) (nullable): the path to the specified special
- *   directory, or %NULL if the logical id was not found. The returned string is
- *   owned by GLib and should not be modified or freed.
+ * Returns: (type filename): the path to the specified special directory, or
+ *   %NULL if the logical id was not found. The returned string is owned by
+ *   GLib and should not be modified or freed.
  *
  * Since: 2.14
  */

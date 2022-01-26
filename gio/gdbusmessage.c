@@ -51,7 +51,6 @@
 #include "gseekable.h"
 #include "gioerror.h"
 #include "gdbusprivate.h"
-#include "gutilsprivate.h"
 
 #ifdef G_OS_UNIX
 #include "gunixfdlist.h"
@@ -257,6 +256,17 @@ g_memory_buffer_read_uint64 (GMemoryBuffer  *mbuf,
 }
 
 #define MIN_ARRAY_SIZE  128
+
+static gsize
+g_nearest_pow (gsize num)
+{
+  gsize n = 1;
+
+  while (n < num && n > 0)
+    n <<= 1;
+
+  return n;
+}
 
 static void
 array_resize (GMemoryBuffer  *mbuf,
@@ -1839,6 +1849,16 @@ parse_value_from_blob (GMemoryBuffer       *buf,
                         }
                       g_variant_builder_add_value (&builder, item);
                       g_variant_unref (item);
+
+                      /* Array elements must not be zero-length. There are no
+                       * valid zero-length serialisations of any types which
+                       * can be array elements in the D-Bus wire format, so this
+                       * assertion should always hold.
+                       *
+                       * See https://gitlab.gnome.org/GNOME/glib/-/issues/2557
+                       */
+                      g_assert (buf->pos > (gsize) offset);
+
                       offset = buf->pos;
                     }
                 }
@@ -1907,6 +1927,16 @@ parse_value_from_blob (GMemoryBuffer       *buf,
 
               g_variant_builder_init (&builder, type);
               element_type = g_variant_type_first (type);
+              if (!element_type)
+                {
+                  g_variant_builder_clear (&builder);
+                  g_set_error_literal (&local_error,
+                                       G_IO_ERROR,
+                                       G_IO_ERROR_INVALID_ARGUMENT,
+                                       _("Empty structures (tuples) are not allowed in D-Bus"));
+                  goto fail;
+                }
+
               while (element_type != NULL)
                 {
                   GVariant *item;
@@ -2617,6 +2647,15 @@ append_value_to_blob (GVariant            *value,
     default:
       if (g_variant_type_is_dict_entry (type) || g_variant_type_is_tuple (type))
         {
+          if (!g_variant_type_first (type))
+            {
+              g_set_error_literal (error,
+                                   G_IO_ERROR,
+                                   G_IO_ERROR_INVALID_ARGUMENT,
+                                   _("Empty structures (tuples) are not allowed in D-Bus"));
+              goto fail;
+            }
+
           padding_added = ensure_output_padding (mbuf, 8);
           if (value != NULL)
             {

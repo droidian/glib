@@ -288,14 +288,11 @@ g_date_new (void)
  * @month: month of the year
  * @year: year
  *
- * Create a new #GDate representing the given day-month-year triplet.
+ * Like g_date_new(), but also sets the value of the date. Assuming the
+ * day-month-year triplet you pass in represents an existing day, the
+ * returned date will be valid.
  *
- * The triplet you pass in must represent a valid date. Use g_date_valid_dmy()
- * if needed to validate it. The returned #GDate is guaranteed to be non-%NULL
- * and valid.
- *
- * Returns: (transfer full) (not nullable): a newly-allocated #GDate
- *   initialized with @day, @month, and @year
+ * Returns: a newly-allocated #GDate initialized with @day, @month, and @year
  */
 GDate*
 g_date_new_dmy (GDateDay   day, 
@@ -323,14 +320,11 @@ g_date_new_dmy (GDateDay   day,
  * g_date_new_julian:
  * @julian_day: days since January 1, Year 1
  *
- * Create a new #GDate representing the given Julian date.
+ * Like g_date_new(), but also sets the value of the date. Assuming the
+ * Julian day number you pass in is valid (greater than 0, less than an
+ * unreasonably large number), the returned date will be valid.
  *
- * The @julian_day you pass in must be valid. Use g_date_valid_julian() if
- * needed to validate it. The returned #GDate is guaranteed to be non-%NULL and
- * valid.
- *
- * Returns: (transfer full) (not nullable): a newly-allocated #GDate initialized
- *   with @julian_day
+ * Returns: a newly-allocated #GDate initialized with @julian_day
  */
 GDate*
 g_date_new_julian (guint32 julian_day)
@@ -2594,8 +2588,7 @@ win32_strftime_helper (const GDate     *d,
       return 0;
     }
   
-  g_assert (convlen >= 0);
-  if ((gsize) convlen >= slen)
+  if (slen <= convlen)
     {
       /* Ensure only whole characters are copied into the buffer. */
       gchar *end = g_utf8_find_prev_char (convbuf, convbuf + slen);

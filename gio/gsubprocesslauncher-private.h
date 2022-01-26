@@ -28,6 +28,7 @@ struct _GSubprocessLauncher
   GObject parent;
 
   GSubprocessFlags flags;
+  gboolean path_from_envp;
   char **envp;
   char *cwd;
 

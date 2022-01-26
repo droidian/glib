@@ -20,14 +20,10 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "config.h"
 
 #include "xdgmime.h"
 #include "xdgmimeint.h"
@@ -138,8 +134,7 @@ xdg_dir_time_list_free (XdgDirTimeList *list)
 }
 
 static int
-xdg_mime_init_from_directory (const char *directory,
-                              void       *user_data)
+xdg_mime_init_from_directory (const char *directory)
 {
   char *file_name;
   struct stat st;
@@ -405,11 +400,10 @@ xdg_check_file (const char *file_path,
 
 static int
 xdg_check_dir (const char *directory,
-	       void       *user_data)
+	       int        *invalid_dir_list)
 {
   int invalid, exists;
   char *file_name;
-  int* invalid_dir_list = user_data;
 
   assert (directory != NULL);
 
@@ -464,7 +458,8 @@ xdg_check_dirs (void)
   for (list = dir_time_list; list; list = list->next)
     list->checked = XDG_CHECKED_UNCHECKED;
 
-  xdg_run_command_on_dirs (xdg_check_dir, &invalid_dir_list);
+  xdg_run_command_on_dirs ((XdgDirectoryFunc) xdg_check_dir,
+			   &invalid_dir_list);
 
   if (invalid_dir_list)
     return TRUE;
@@ -520,7 +515,8 @@ xdg_mime_init (void)
       icon_list = _xdg_mime_icon_list_new ();
       generic_icon_list = _xdg_mime_icon_list_new ();
 
-      xdg_run_command_on_dirs (xdg_mime_init_from_directory, NULL);
+      xdg_run_command_on_dirs ((XdgDirectoryFunc) xdg_mime_init_from_directory,
+			       NULL);
 
       need_reread = FALSE;
     }
@@ -552,6 +548,8 @@ xdg_mime_get_mime_type_for_data (const void *data,
 
   return _xdg_binary_or_text_fallback(data, len);
 }
+
+#ifdef NOT_USED_IN_GIO
 
 const char *
 xdg_mime_get_mime_type_for_file (const char  *file_name,
@@ -623,13 +621,13 @@ xdg_mime_get_mime_type_for_file (const char  *file_name,
   mime_type = _xdg_mime_magic_lookup_data (global_magic, data, bytes_read, NULL,
 					   mime_types, n);
 
-  if (!mime_type)
-    mime_type = _xdg_binary_or_text_fallback (data, bytes_read);
-
   free (data);
   fclose (file);
 
-  return mime_type;
+  if (mime_type)
+    return mime_type;
+
+  return _xdg_binary_or_text_fallback(data, bytes_read);
 }
 
 const char *
@@ -648,6 +646,8 @@ xdg_mime_get_mime_type_from_file_name (const char *file_name)
     return XDG_MIME_TYPE_UNKNOWN;
 }
 
+#endif
+
 int
 xdg_mime_get_mime_types_from_file_name (const char *file_name,
 					const char  *mime_types[],
@@ -661,6 +661,8 @@ xdg_mime_get_mime_types_from_file_name (const char *file_name,
   return _xdg_glob_hash_lookup_file_name (global_hash, file_name, mime_types, n_mime_types);
 }
 
+#ifdef NOT_USED_IN_GIO
+
 int
 xdg_mime_is_valid_mime_type (const char *mime_type)
 {
@@ -668,6 +670,8 @@ xdg_mime_is_valid_mime_type (const char *mime_type)
    */
   return _xdg_utf8_validate (mime_type);
 }
+
+#endif
 
 void
 xdg_mime_shutdown (void)
@@ -884,14 +888,19 @@ xdg_mime_mime_type_subclass (const char *mime,
 char **
 xdg_mime_list_mime_parents (const char *mime)
 {
+  const char *umime;
   const char **parents;
   char **result;
   int i, n;
 
+  xdg_mime_init ();
+
   if (_caches)
     return _xdg_mime_cache_list_mime_parents (mime);
 
-  parents = xdg_mime_get_mime_parents (mime);
+  umime = _xdg_mime_unalias_mime_type (mime);
+
+  parents = _xdg_mime_parent_list_lookup (parent_list, umime);
 
   if (!parents)
     return NULL;
@@ -904,6 +913,8 @@ xdg_mime_list_mime_parents (const char *mime)
 
   return result;
 }
+
+#ifdef NOT_USED_IN_GIO
 
 const char **
 xdg_mime_get_mime_parents (const char *mime)
@@ -934,6 +945,7 @@ xdg_mime_dump (void)
   _xdg_mime_cache_glob_dump ();
 }
 
+#endif
 
 /* Registers a function to be called every time the mime database reloads its files
  */
@@ -961,6 +973,8 @@ xdg_mime_register_reload_callback (XdgMimeCallback  callback,
   return callback_id - 1;
 }
 
+#ifdef NOT_USED_IN_GIO
+
 void
 xdg_mime_remove_callback (int callback_id)
 {
@@ -985,6 +999,8 @@ xdg_mime_remove_callback (int callback_id)
 	}
     }
 }
+
+#endif
 
 const char *
 xdg_mime_get_icon (const char *mime)

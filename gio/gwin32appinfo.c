@@ -3359,7 +3359,7 @@ uwp_package_cb (gpointer         user_data,
                 GPtrArray       *supported_extgroups,
                 GPtrArray       *supported_protocols)
 {
-  guint i, i_verb, i_ext;
+  gint i, i_verb, i_ext;
   gint extensions_considered;
   GWin32AppInfoApplication *app;
   gchar *app_user_model_id_u8;
@@ -3459,7 +3459,7 @@ uwp_package_cb (gpointer         user_data,
    */
   while (g_hash_table_iter_next (&iter, NULL, (gpointer *) &ext))
     {
-      guint i_hverb;
+      gint i_hverb;
 
       if (!ext)
         continue;
@@ -3537,7 +3537,7 @@ uwp_package_cb (gpointer         user_data,
 
   while (g_hash_table_iter_next (&iter, NULL, (gpointer *) &url))
     {
-      guint i_hverb;
+      gint i_hverb;
 
       if (!url)
         continue;
@@ -4788,7 +4788,7 @@ g_win32_app_info_launch_internal (GWin32AppInfo      *info,
   if (apppath)
     {
       gchar **p;
-      gsize p_index;
+      gint p_index;
 
       for (p = envp, p_index = 0; p[0]; p++, p_index++)
         if ((p[0][0] == 'p' || p[0][0] == 'P') &&
@@ -4856,13 +4856,7 @@ g_win32_app_info_launch_internal (GWin32AppInfo      *info,
           GVariant *platform_data;
 
           g_variant_builder_init (&builder, G_VARIANT_TYPE_ARRAY);
-          /* pid handles are never bigger than 2^24 as per
-           * https://docs.microsoft.com/en-us/windows/win32/sysinfo/kernel-objects,
-           * so truncating to `int32` is valid.
-           * The gsize cast is to silence a compiler warning
-           * about conversion from pointer to integer of
-           * different size. */
-          g_variant_builder_add (&builder, "{sv}", "pid", g_variant_new_int32 ((gsize) pid));
+          g_variant_builder_add (&builder, "{sv}", "pid", g_variant_new_int32 ((gint32) pid));
 
           platform_data = g_variant_ref_sink (g_variant_builder_end (&builder));
           g_signal_emit_by_name (launch_context, "launched", info, platform_data);
@@ -5094,15 +5088,6 @@ g_win32_app_info_launch_uris (GAppInfo           *appinfo,
 }
 
 static gboolean
-g_win32_app_info_should_show (GAppInfo *appinfo)
-{
-  /* FIXME: This is a placeholder implementation to avoid crashes
-   * for now. It can be made more specific to @appinfo in future. */
-
-  return TRUE;
-}
-
-static gboolean
 g_win32_app_info_launch (GAppInfo           *appinfo,
                          GList              *files,
                          GAppLaunchContext  *launch_context,
@@ -5238,7 +5223,7 @@ g_win32_app_info_iface_init (GAppInfoIface *iface)
   iface->supports_uris = g_win32_app_info_supports_uris;
   iface->supports_files = g_win32_app_info_supports_files;
   iface->launch_uris = g_win32_app_info_launch_uris;
-  iface->should_show = g_win32_app_info_should_show;
+/*  iface->should_show = g_win32_app_info_should_show;*/
 /*  iface->set_as_default_for_type = g_win32_app_info_set_as_default_for_type;*/
 /*  iface->set_as_default_for_extension = g_win32_app_info_set_as_default_for_extension;*/
 /*  iface->add_supports_type = g_win32_app_info_add_supports_type;*/

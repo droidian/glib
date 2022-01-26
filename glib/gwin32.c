@@ -569,7 +569,7 @@ g_win32_check_windows_version (const gint major,
   gboolean is_type_checked = FALSE;
 
   /* We Only Support Checking for XP or later */
-  g_return_val_if_fail (major >= 5 && (major <= 6 || major == 10), FALSE);
+  g_return_val_if_fail (major >= 5 && (major <=6 || major == 10), FALSE);
   g_return_val_if_fail ((major >= 5 && minor >= 1) || major >= 6, FALSE);
 
   /* Check for Service Pack Version >= 0 */
@@ -577,14 +577,14 @@ g_win32_check_windows_version (const gint major,
   g_return_val_if_fail (_g_win32_call_rtl_version (&osverinfo), FALSE);
 
   /* check the OS and Service Pack Versions */
-  if (osverinfo.dwMajorVersion > (DWORD) major)
+  if (osverinfo.dwMajorVersion > major)
     is_ver_checked = TRUE;
-  else if (osverinfo.dwMajorVersion == (DWORD) major)
+  else if (osverinfo.dwMajorVersion == major)
     {
-      if (osverinfo.dwMinorVersion > (DWORD) minor)
+      if (osverinfo.dwMinorVersion > minor)
         is_ver_checked = TRUE;
-      else if (osverinfo.dwMinorVersion == (DWORD) minor)
-        if (osverinfo.wServicePackMajor >= (DWORD) spver)
+      else if (osverinfo.dwMinorVersion == minor)
+        if (osverinfo.wServicePackMajor >= spver)
           is_ver_checked = TRUE;
     }
 
