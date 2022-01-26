@@ -118,6 +118,19 @@ g_dtls_connection_default_init (GDtlsConnectionInterface *iface)
    * If no certificate database is set, then the default database will be
    * used. See g_tls_backend_get_default_database().
    *
+   * When using a non-default database, #GDtlsConnection must fall back to using
+   * the #GTlsDatabase to perform certificate verification using
+   * g_tls_database_verify_chain(), which means certificate verification will
+   * not be able to make use of TLS session context. This may be less secure.
+   * For example, if you create your own #GTlsDatabase that just wraps the
+   * default #GTlsDatabase, you might expect that you have not changed anything,
+   * but this is not true because you may have altered the behavior of
+   * #GDtlsConnection by causing it to use g_tls_database_verify_chain(). See the
+   * documentation of g_tls_database_verify_chain() for more details on specific
+   * security checks that may not be performed. Accordingly, setting a
+   * non-default database is discouraged except for specialty applications with
+   * unusual security requirements.
+   *
    * Since: 2.48
    */
   g_object_interface_install_property (iface,
@@ -223,6 +236,14 @@ g_dtls_connection_default_init (GDtlsConnectionInterface *iface)
    * #GDtlsConnection::accept-certificate overrode the default
    * behavior.
    *
+   * GLib guarantees that if certificate verification fails, at least
+   * one error will be set, but it does not guarantee that all possible
+   * errors will be set. Accordingly, you may not safely decide to
+   * ignore any particular type of error. For example, it would be
+   * incorrect to mask %G_TLS_CERTIFICATE_EXPIRED if you want to allow
+   * expired certificates, because this could potentially be the only
+   * error flag set even if other problems exist with the certificate.
+   *
    * Since: 2.48
    */
   g_object_interface_install_property (iface,
@@ -314,6 +335,15 @@ g_dtls_connection_default_init (GDtlsConnectionInterface *iface)
    * signal handler. Otherwise, if no handler accepts the certificate,
    * the handshake will fail with %G_TLS_ERROR_BAD_CERTIFICATE.
    *
+   * GLib guarantees that if certificate verification fails, this signal
+   * will be emitted with at least one error will be set in @errors, but
+   * it does not guarantee that all possible errors will be set.
+   * Accordingly, you may not safely decide to ignore any particular
+   * type of error. For example, it would be incorrect to ignore
+   * %G_TLS_CERTIFICATE_EXPIRED if you want to allow expired
+   * certificates, because this could potentially be the only error flag
+   * set even if other problems exist with the certificate.
+   *
    * For a server-side connection, @peer_cert is the certificate
    * presented by the client, if this was requested via the server's
    * #GDtlsServerConnection:authentication_mode. On the server side,
@@ -371,6 +401,9 @@ g_dtls_connection_default_init (GDtlsConnectionInterface *iface)
  * #GDtlsConnection::accept-certificate will always be emitted on
  * client-side connections, unless that bit is not set in
  * #GDtlsClientConnection:validation-flags).
+ *
+ * There are nonintuitive security implications when using a non-default
+ * database. See #GDtlsConnection:database for details.
  *
  * Since: 2.48
  */

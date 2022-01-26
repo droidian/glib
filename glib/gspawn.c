@@ -1520,7 +1520,7 @@ safe_fdwalk (int (*cb)(void *data, int fd), void *data)
 
 /* This function is called between fork() and exec() and hence must be
  * async-signal-safe (see signal-safety(7)). */
-static int
+static void
 safe_fdwalk_set_cloexec (int lowfd)
 {
 #if defined(HAVE_CLOSE_RANGE) && defined(CLOSE_RANGE_CLOEXEC)
@@ -1534,18 +1534,15 @@ safe_fdwalk_set_cloexec (int lowfd)
    * Handle ENOSYS in case it’s supported in libc but not the kernel; if so,
    * fall back to safe_fdwalk(). Handle EINVAL in case `CLOSE_RANGE_CLOEXEC`
    * is not supported. */
-  int ret = close_range (lowfd, G_MAXUINT, CLOSE_RANGE_CLOEXEC);
-  if (ret == 0 || !(errno == ENOSYS || errno == EINVAL))
-    return ret;
+  if (close_range (lowfd, G_MAXUINT, CLOSE_RANGE_CLOEXEC) != 0 &&
+      (errno == ENOSYS || errno == EINVAL))
 #endif  /* HAVE_CLOSE_RANGE */
-  return safe_fdwalk (set_cloexec, GINT_TO_POINTER (lowfd));
+  (void) safe_fdwalk (set_cloexec, GINT_TO_POINTER (lowfd));
 }
 
 /* This function is called between fork() and exec() and hence must be
- * async-signal-safe (see signal-safety(7)).
- *
- * On failure, `-1` will be returned and errno will be set. */
-static int
+ * async-signal-safe (see signal-safety(7)). */
+static void
 safe_closefrom (int lowfd)
 {
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || \
@@ -1563,7 +1560,6 @@ safe_closefrom (int lowfd)
    * On such systems, F_CLOSEFROM is defined.
    */
   (void) closefrom (lowfd);
-  return 0;
 #elif defined(__DragonFly__)
   /* It is unclear whether closefrom function included in DragonFlyBSD libc_r
    * is safe to use because it calls a lot of library functions. It is also
@@ -1571,13 +1567,12 @@ safe_closefrom (int lowfd)
    * direct system call here ourselves to avoid possible issues.
    */
   (void) syscall (SYS_closefrom, lowfd);
-  return 0;
 #elif defined(F_CLOSEM)
   /* NetBSD and AIX have a special fcntl command which does the same thing as
    * closefrom. NetBSD also includes closefrom function, which seems to be a
    * simple wrapper of the fcntl command.
    */
-  return fcntl (lowfd, F_CLOSEM);
+  (void) fcntl (lowfd, F_CLOSEM);
 #else
 
 #if defined(HAVE_CLOSE_RANGE)
@@ -1587,11 +1582,9 @@ safe_closefrom (int lowfd)
    *
    * Handle ENOSYS in case it’s supported in libc but not the kernel; if so,
    * fall back to safe_fdwalk(). */
-  int ret = close_range (lowfd, G_MAXUINT, 0);
-  if (ret == 0 || errno != ENOSYS)
-    return ret;
+  if (close_range (lowfd, G_MAXUINT, 0) != 0 && errno == ENOSYS)
 #endif  /* HAVE_CLOSE_RANGE */
-  return safe_fdwalk (close_func, GINT_TO_POINTER (lowfd));
+  (void) safe_fdwalk (close_func, GINT_TO_POINTER (lowfd));
 #endif
 }
 
@@ -1627,9 +1620,9 @@ enum
 {
   CHILD_CHDIR_FAILED,
   CHILD_EXEC_FAILED,
+  CHILD_OPEN_FAILED,
   CHILD_DUP2_FAILED,
-  CHILD_FORK_FAILED,
-  CHILD_CLOSE_FAILED,
+  CHILD_FORK_FAILED
 };
 
 /* This function is called between fork() and exec() and hence must be
@@ -1668,7 +1661,6 @@ do_exec (gint                  child_err_report_fd,
   /* Redirect pipes as required */
   if (stdin_fd >= 0)
     {
-      /* dup2 can't actually fail here I don't think */
       if (safe_dup2 (stdin_fd, 0) < 0)
         write_err_and_exit (child_err_report_fd,
                             CHILD_DUP2_FAILED);
@@ -1683,14 +1675,15 @@ do_exec (gint                  child_err_report_fd,
       gint read_null = safe_open ("/dev/null", O_RDONLY);
       if (read_null < 0)
         write_err_and_exit (child_err_report_fd,
+                            CHILD_OPEN_FAILED);
+      if (safe_dup2 (read_null, 0) < 0)
+        write_err_and_exit (child_err_report_fd,
                             CHILD_DUP2_FAILED);
-      safe_dup2 (read_null, 0);
       close_and_invalidate (&read_null);
     }
 
   if (stdout_fd >= 0)
     {
-      /* dup2 can't actually fail here I don't think */
       if (safe_dup2 (stdout_fd, 1) < 0)
         write_err_and_exit (child_err_report_fd,
                             CHILD_DUP2_FAILED);
@@ -1704,14 +1697,15 @@ do_exec (gint                  child_err_report_fd,
       gint write_null = safe_open ("/dev/null", O_WRONLY);
       if (write_null < 0)
         write_err_and_exit (child_err_report_fd,
+                            CHILD_OPEN_FAILED);
+      if (safe_dup2 (write_null, 1) < 0)
+        write_err_and_exit (child_err_report_fd,
                             CHILD_DUP2_FAILED);
-      safe_dup2 (write_null, 1);
       close_and_invalidate (&write_null);
     }
 
   if (stderr_fd >= 0)
     {
-      /* dup2 can't actually fail here I don't think */
       if (safe_dup2 (stderr_fd, 2) < 0)
         write_err_and_exit (child_err_report_fd,
                             CHILD_DUP2_FAILED);
@@ -1725,8 +1719,10 @@ do_exec (gint                  child_err_report_fd,
       gint write_null = safe_open ("/dev/null", O_WRONLY);
       if (write_null < 0)
         write_err_and_exit (child_err_report_fd,
+                            CHILD_OPEN_FAILED);
+      if (safe_dup2 (write_null, 2) < 0)
+        write_err_and_exit (child_err_report_fd,
                             CHILD_DUP2_FAILED);
-      safe_dup2 (write_null, 2);
       close_and_invalidate (&write_null);
     }
 
@@ -1739,16 +1735,15 @@ do_exec (gint                  child_err_report_fd,
     {
       if (child_setup == NULL && n_fds == 0)
         {
-          safe_dup2 (child_err_report_fd, 3);
+          if (safe_dup2 (child_err_report_fd, 3) < 0)
+            write_err_and_exit (child_err_report_fd, CHILD_DUP2_FAILED);
           set_cloexec (GINT_TO_POINTER (0), 3);
-          if (safe_closefrom (4) < 0)
-            write_err_and_exit (child_err_report_fd, CHILD_CLOSE_FAILED);
+          safe_closefrom (4);
           child_err_report_fd = 3;
         }
       else
         {
-          if (safe_fdwalk_set_cloexec (3) < 0)
-            write_err_and_exit (child_err_report_fd, CHILD_CLOSE_FAILED);
+          safe_fdwalk_set_cloexec (3);
         }
     }
   else
@@ -1786,7 +1781,11 @@ do_exec (gint                  child_err_report_fd,
       for (i = 0; i < n_fds; i++)
         {
           if (source_fds[i] != target_fds[i])
-            source_fds[i] = dupfd_cloexec (source_fds[i], max_target_fd + 1);
+            {
+              source_fds[i] = dupfd_cloexec (source_fds[i], max_target_fd + 1);
+              if (source_fds[i] < 0)
+                write_err_and_exit (child_err_report_fd, CHILD_DUP2_FAILED);
+            }
         }
 
       for (i = 0; i < n_fds; i++)
@@ -1804,9 +1803,15 @@ do_exec (gint                  child_err_report_fd,
                * dup it so it doesn’t get conflated.
                */
               if (target_fds[i] == child_err_report_fd)
-                child_err_report_fd = dupfd_cloexec (child_err_report_fd, max_target_fd + 1);
+                {
+                  child_err_report_fd = dupfd_cloexec (child_err_report_fd, max_target_fd + 1);
+                  if (child_err_report_fd < 0)
+                    write_err_and_exit (child_err_report_fd, CHILD_DUP2_FAILED);
+                }
 
-              safe_dup2 (source_fds[i], target_fds[i]);
+              if (safe_dup2 (source_fds[i], target_fds[i]) < 0)
+                write_err_and_exit (child_err_report_fd, CHILD_DUP2_FAILED);
+
               close_and_invalidate (&source_fds[i]);
             }
         }
@@ -1890,18 +1895,24 @@ do_posix_spawn (const gchar * const *argv,
                 gint       *child_close_fds,
                 gint        stdin_fd,
                 gint        stdout_fd,
-                gint        stderr_fd)
+                gint        stderr_fd,
+                const gint *source_fds,
+                const gint *target_fds,
+                gsize       n_fds)
 {
   pid_t pid;
+  gint *duped_source_fds = NULL;
+  gint max_target_fd = 0;
   const gchar * const *argv_pass;
   posix_spawnattr_t attr;
   posix_spawn_file_actions_t file_actions;
   gint parent_close_fds[3];
-  gint num_parent_close_fds = 0;
+  gsize num_parent_close_fds = 0;
   GSList *child_close = NULL;
   GSList *elem;
   sigset_t mask;
-  int i, r;
+  gsize i;
+  int r;
 
   if (*argv[0] == '\0')
     {
@@ -2015,6 +2026,50 @@ do_posix_spawn (const gchar * const *argv,
         goto out_close_fds;
     }
 
+  /* If source_fds[i] != target_fds[i], we need to handle the case
+   * where the user has specified, e.g., 5 -> 4, 4 -> 6. We do this
+   * by duping the source fds, taking care to ensure the new fds are
+   * larger than any target fd to avoid introducing new conflicts.
+   *
+   * If source_fds[i] == target_fds[i], then we just need to leak
+   * the fd into the child process, which we *could* do by temporarily
+   * unsetting CLOEXEC and then setting it again after we spawn if
+   * it was originally set. POSIX requires that the addup2 action unset
+   * CLOEXEC if source and target are identical, so you'd think doing it
+   * manually wouldn't be needed, but unfortunately as of 2021 many
+   * libcs still don't do so. Example nonconforming libcs:
+   *  Bionic: https://android.googlesource.com/platform/bionic/+/f6e5b582604715729b09db3e36a7aeb8c24b36a4/libc/bionic/spawn.cpp#71
+   *  uclibc-ng: https://cgit.uclibc-ng.org/cgi/cgit/uclibc-ng.git/tree/librt/spawn.c?id=7c36bcae09d66bbaa35cbb02253ae0556f42677e#n88
+   *
+   * Anyway, unsetting CLOEXEC ourselves would open a small race window
+   * where the fd could be inherited into a child process if another
+   * thread spawns something at the same time, because we have not
+   * called fork() and are multithreaded here. This race is avoidable by
+   * using dupfd_cloexec, which we already have to do to handle the
+   * source_fds[i] != target_fds[i] case. So let's always do it!
+   */
+
+  for (i = 0; i < n_fds; i++)
+    max_target_fd = MAX (max_target_fd, target_fds[i]);
+
+  if (max_target_fd == G_MAXINT)
+    goto out_close_fds;
+
+  duped_source_fds = g_new (gint, n_fds);
+  for (i = 0; i < n_fds; i++)
+    {
+      duped_source_fds[i] = dupfd_cloexec (source_fds[i], max_target_fd + 1);
+      if (duped_source_fds[i] < 0)
+        goto out_close_fds;
+    }
+
+  for (i = 0; i < n_fds; i++)
+    {
+      r = posix_spawn_file_actions_adddup2 (&file_actions, duped_source_fds[i], target_fds[i]);
+      if (r != 0)
+        goto out_close_fds;
+    }
+
   /* Intentionally close the fds in the child as the last file action,
    * having been careful not to add the same fd to this list twice.
    *
@@ -2046,6 +2101,13 @@ do_posix_spawn (const gchar * const *argv,
 out_close_fds:
   for (i = 0; i < num_parent_close_fds; i++)
     close_and_invalidate (&parent_close_fds [i]);
+
+  if (duped_source_fds != NULL)
+    {
+      for (i = 0; i < n_fds; i++)
+        close_and_invalidate (&duped_source_fds[i]);
+      g_free (duped_source_fds);
+    }
 
   posix_spawn_file_actions_destroy (&file_actions);
 out_free_spawnattr:
@@ -2134,10 +2196,8 @@ fork_exec (gboolean              intermediate_child,
   child_close_fds[n_child_close_fds++] = -1;
 
 #ifdef POSIX_SPAWN_AVAILABLE
-  /* FIXME: Handle @source_fds and @target_fds in do_posix_spawn() using the
-   * file actions API. */
   if (!intermediate_child && working_directory == NULL && !close_descriptors &&
-      !search_path_from_envp && child_setup == NULL && n_fds == 0)
+      !search_path_from_envp && child_setup == NULL)
     {
       g_trace_mark (G_TRACE_CURRENT_TIME, 0,
                     "GLib", "posix_spawn",
@@ -2154,7 +2214,10 @@ fork_exec (gboolean              intermediate_child,
                                child_close_fds,
                                stdin_fd,
                                stdout_fd,
-                               stderr_fd);
+                               stderr_fd,
+                               source_fds,
+                               target_fds,
+                               n_fds);
       if (status == 0)
         goto success;
 
@@ -2455,12 +2518,20 @@ fork_exec (gboolean              intermediate_child,
                            g_strerror (buf[1]));
 
               break;
-              
+
+            case CHILD_OPEN_FAILED:
+              g_set_error (error,
+                           G_SPAWN_ERROR,
+                           G_SPAWN_ERROR_FAILED,
+                           _("Failed to open file to remap file descriptor (%s)"),
+                           g_strerror (buf[1]));
+              break;
+
             case CHILD_DUP2_FAILED:
               g_set_error (error,
                            G_SPAWN_ERROR,
                            G_SPAWN_ERROR_FAILED,
-                           _("Failed to redirect output or input of child process (%s)"),
+                           _("Failed to duplicate file descriptor for child process (%s)"),
                            g_strerror (buf[1]));
 
               break;
@@ -2472,15 +2543,7 @@ fork_exec (gboolean              intermediate_child,
                            _("Failed to fork child process (%s)"),
                            g_strerror (buf[1]));
               break;
-
-            case CHILD_CLOSE_FAILED:
-              g_set_error (error,
-                           G_SPAWN_ERROR,
-                           G_SPAWN_ERROR_FAILED,
-                           _("Failed to close file descriptor for child process (%s)"),
-                           g_strerror (buf[1]));
-              break;
-
+              
             default:
               g_set_error (error,
                            G_SPAWN_ERROR,
