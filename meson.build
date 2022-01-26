@@ -1,5 +1,5 @@
 project('glib', 'c', 'cpp',
-  version : '2.70.2',
+  version : '2.70.3',
   # NOTE: We keep this pinned at 0.49 because that's what Debian 10 ships
   meson_version : '>= 0.49.2',
   default_options : [
@@ -282,7 +282,6 @@ headers = [
   'grp.h',
   'inttypes.h',
   'limits.h',
-  'linux/magic.h',
   'locale.h',
   'mach/mach_time.h',
   'memory.h',

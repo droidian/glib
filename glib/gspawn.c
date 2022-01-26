@@ -1298,13 +1298,13 @@ unset_cloexec (int fd)
 /* This function is called between fork() and exec() and hence must be
  * async-signal-safe (see signal-safety(7)). */
 static int
-dupfd_cloexec (int parent_fd)
+dupfd_cloexec (int old_fd, int new_fd_min)
 {
   int fd, errsv;
 #ifdef F_DUPFD_CLOEXEC
   do
     {
-      fd = fcntl (parent_fd, F_DUPFD_CLOEXEC, 3);
+      fd = fcntl (old_fd, F_DUPFD_CLOEXEC, new_fd_min);
       errsv = errno;
     }
   while (fd == -1 && errsv == EINTR);
@@ -1315,7 +1315,7 @@ dupfd_cloexec (int parent_fd)
   int result, flags;
   do
     {
-      fd = fcntl (parent_fd, F_DUPFD, 3);
+      fd = fcntl (old_fd, F_DUPFD, new_fd_min);
       errsv = errno;
     }
   while (fd == -1 && errsv == EINTR);
@@ -1520,7 +1520,7 @@ safe_fdwalk (int (*cb)(void *data, int fd), void *data)
 
 /* This function is called between fork() and exec() and hence must be
  * async-signal-safe (see signal-safety(7)). */
-static void
+static int
 safe_fdwalk_set_cloexec (int lowfd)
 {
 #if defined(HAVE_CLOSE_RANGE) && defined(CLOSE_RANGE_CLOEXEC)
@@ -1534,15 +1534,18 @@ safe_fdwalk_set_cloexec (int lowfd)
    * Handle ENOSYS in case it’s supported in libc but not the kernel; if so,
    * fall back to safe_fdwalk(). Handle EINVAL in case `CLOSE_RANGE_CLOEXEC`
    * is not supported. */
-  if (close_range (lowfd, G_MAXUINT, CLOSE_RANGE_CLOEXEC) != 0 &&
-      (errno == ENOSYS || errno == EINVAL))
+  int ret = close_range (lowfd, G_MAXUINT, CLOSE_RANGE_CLOEXEC);
+  if (ret == 0 || !(errno == ENOSYS || errno == EINVAL))
+    return ret;
 #endif  /* HAVE_CLOSE_RANGE */
-  (void) safe_fdwalk (set_cloexec, GINT_TO_POINTER (lowfd));
+  return safe_fdwalk (set_cloexec, GINT_TO_POINTER (lowfd));
 }
 
 /* This function is called between fork() and exec() and hence must be
- * async-signal-safe (see signal-safety(7)). */
-static void
+ * async-signal-safe (see signal-safety(7)).
+ *
+ * On failure, `-1` will be returned and errno will be set. */
+static int
 safe_closefrom (int lowfd)
 {
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || \
@@ -1560,6 +1563,7 @@ safe_closefrom (int lowfd)
    * On such systems, F_CLOSEFROM is defined.
    */
   (void) closefrom (lowfd);
+  return 0;
 #elif defined(__DragonFly__)
   /* It is unclear whether closefrom function included in DragonFlyBSD libc_r
    * is safe to use because it calls a lot of library functions. It is also
@@ -1567,12 +1571,13 @@ safe_closefrom (int lowfd)
    * direct system call here ourselves to avoid possible issues.
    */
   (void) syscall (SYS_closefrom, lowfd);
+  return 0;
 #elif defined(F_CLOSEM)
   /* NetBSD and AIX have a special fcntl command which does the same thing as
    * closefrom. NetBSD also includes closefrom function, which seems to be a
    * simple wrapper of the fcntl command.
    */
-  (void) fcntl (lowfd, F_CLOSEM);
+  return fcntl (lowfd, F_CLOSEM);
 #else
 
 #if defined(HAVE_CLOSE_RANGE)
@@ -1582,24 +1587,12 @@ safe_closefrom (int lowfd)
    *
    * Handle ENOSYS in case it’s supported in libc but not the kernel; if so,
    * fall back to safe_fdwalk(). */
-  if (close_range (lowfd, G_MAXUINT, 0) != 0 && errno == ENOSYS)
+  int ret = close_range (lowfd, G_MAXUINT, 0);
+  if (ret == 0 || errno != ENOSYS)
+    return ret;
 #endif  /* HAVE_CLOSE_RANGE */
-  (void) safe_fdwalk (close_func, GINT_TO_POINTER (lowfd));
+  return safe_fdwalk (close_func, GINT_TO_POINTER (lowfd));
 #endif
-}
-
-/* This function is called between fork() and exec() and hence must be
- * async-signal-safe (see signal-safety(7)). */
-static gint
-safe_dup (gint fd)
-{
-  gint ret;
-
-  do
-    ret = dup (fd);
-  while (ret < 0 && (errno == EINTR || errno == EBUSY));
-
-  return ret;
 }
 
 /* This function is called between fork() and exec() and hence must be
@@ -1635,7 +1628,8 @@ enum
   CHILD_CHDIR_FAILED,
   CHILD_EXEC_FAILED,
   CHILD_DUP2_FAILED,
-  CHILD_FORK_FAILED
+  CHILD_FORK_FAILED,
+  CHILD_CLOSE_FAILED,
 };
 
 /* This function is called between fork() and exec() and hence must be
@@ -1665,6 +1659,7 @@ do_exec (gint                  child_err_report_fd,
          gpointer              user_data)
 {
   gsize i;
+  gint max_target_fd = 0;
 
   if (working_directory && chdir (working_directory) < 0)
     write_err_and_exit (child_err_report_fd,
@@ -1746,12 +1741,14 @@ do_exec (gint                  child_err_report_fd,
         {
           safe_dup2 (child_err_report_fd, 3);
           set_cloexec (GINT_TO_POINTER (0), 3);
-          safe_closefrom (4);
+          if (safe_closefrom (4) < 0)
+            write_err_and_exit (child_err_report_fd, CHILD_CLOSE_FAILED);
           child_err_report_fd = 3;
         }
       else
         {
-          safe_fdwalk_set_cloexec (3);
+          if (safe_fdwalk_set_cloexec (3) < 0)
+            write_err_and_exit (child_err_report_fd, CHILD_CLOSE_FAILED);
         }
     }
   else
@@ -1763,42 +1760,54 @@ do_exec (gint                  child_err_report_fd,
   /*
    * Work through the @source_fds and @target_fds mapping.
    *
-   * Based on code derived from
+   * Based on code originally derived from
    * gnome-terminal:src/terminal-screen.c:terminal_screen_child_setup(),
-   * used under the LGPLv2+ with permission from author.
+   * used under the LGPLv2+ with permission from author. (The code has
+   * since migrated to vte:src/spawn.cc:SpawnContext::exec and is no longer
+   * terribly similar to what we have here.)
    */
 
-  /* Basic fd assignments (where source == target) we can just unset FD_CLOEXEC
-   *
-   * If we're doing remapping fd assignments, we need to handle
-   * the case where the user has specified e.g.:
-   * 5 -> 4, 4 -> 6
-   *
-   * We do this by duping the source fds temporarily in a first pass.
-   *
-   * If any of the @target_fds conflict with @child_err_report_fd, dup the
-   * latter so it doesn’t get conflated.
-   */
   if (n_fds > 0)
     {
       for (i = 0; i < n_fds; i++)
+        max_target_fd = MAX (max_target_fd, target_fds[i]);
+
+      if (max_target_fd == G_MAXINT)
         {
-          if (source_fds[i] != target_fds[i])
-            source_fds[i] = dupfd_cloexec (source_fds[i]);
+          errno = EINVAL;
+          write_err_and_exit (child_err_report_fd, CHILD_DUP2_FAILED);
         }
+
+      /* If we're doing remapping fd assignments, we need to handle
+       * the case where the user has specified e.g. 5 -> 4, 4 -> 6.
+       * We do this by duping all source fds, taking care to ensure the new
+       * fds are larger than any target fd to avoid introducing new conflicts.
+       */
       for (i = 0; i < n_fds; i++)
         {
+          if (source_fds[i] != target_fds[i])
+            source_fds[i] = dupfd_cloexec (source_fds[i], max_target_fd + 1);
+        }
+
+      for (i = 0; i < n_fds; i++)
+        {
+          /* For basic fd assignments (where source == target), we can just
+           * unset FD_CLOEXEC.
+           */
           if (source_fds[i] == target_fds[i])
             {
               unset_cloexec (source_fds[i]);
             }
           else
             {
+              /* If any of the @target_fds conflict with @child_err_report_fd,
+               * dup it so it doesn’t get conflated.
+               */
               if (target_fds[i] == child_err_report_fd)
-                child_err_report_fd = safe_dup (child_err_report_fd);
+                child_err_report_fd = dupfd_cloexec (child_err_report_fd, max_target_fd + 1);
 
               safe_dup2 (source_fds[i], target_fds[i]);
-              (void) close (source_fds[i]);
+              close_and_invalidate (&source_fds[i]);
             }
         }
     }
@@ -2463,7 +2472,15 @@ fork_exec (gboolean              intermediate_child,
                            _("Failed to fork child process (%s)"),
                            g_strerror (buf[1]));
               break;
-              
+
+            case CHILD_CLOSE_FAILED:
+              g_set_error (error,
+                           G_SPAWN_ERROR,
+                           G_SPAWN_ERROR_FAILED,
+                           _("Failed to close file descriptor for child process (%s)"),
+                           g_strerror (buf[1]));
+              break;
+
             default:
               g_set_error (error,
                            G_SPAWN_ERROR,
