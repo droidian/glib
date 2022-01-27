@@ -19,7 +19,6 @@ tests = {
   'testglib' : {'tap' : true},
   'testgdate' : {},
   'file-test' : {},
-  'env-test' : {},
   'gio-test' : {},
   'mainloop-test' : {},
   'mapping-test' : {},
@@ -33,7 +32,6 @@ tests = {
   'thread-test' : {},
   'threadpool-test' : {'suite' : ['slow']},
   'type-test' : {},
-  'unicode-caseconv' : {},
   'unicode-encoding' : {},
   'module-test-library' : {
     'dependencies' : [libgmodule_dep],
@@ -57,7 +55,6 @@ test_extra_programs = {
     'extra_sources' : ['memchunks.c'],
   },
   'assert-msg-test' : {},
-  'unicode-collate' : {},
 }
 
 if host_machine.system() != 'windows'
@@ -74,8 +71,6 @@ endif
 if installed_tests_enabled
   install_data(
     'iochannel-test-infile',
-    'casemap.txt',
-    'casefold.txt',
     'utf8.txt',
     install_dir : installed_tests_execdir,
   )
