@@ -1,4 +1,4 @@
-glib2.0 (2.71.0-3) UNRELEASED; urgency=medium
+glib2.0 (2.71.1-1) UNRELEASED; urgency=medium
 
   * Use debhelper 13 features instead of dh-exec
     debhelper now has ${DEB_HOST_MULTIARCH} substitutions, so we don't need
@@ -6,8 +6,9 @@ glib2.0 (2.71.0-3) UNRELEASED; urgency=medium
     After that, the one remaining dh-exec feature in use was a conditional
     installation for the FAM GIO module for Hurd. Open-code this in d/rules
     instead.
+  * New upstream release
 
- -- Simon McVittie <smcv@debian.org>  Mon, 24 Jan 2022 11:02:54 +0000
+ -- Simon McVittie <smcv@debian.org>  Thu, 27 Jan 2022 16:07:14 +0000
 
 glib2.0 (2.71.0-2) experimental; urgency=medium
 
