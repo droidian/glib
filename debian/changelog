@@ -1,12 +1,8 @@
 glib2.0 (2.71.1-1) UNRELEASED; urgency=medium
 
-  * New upstream release
-  * Use debhelper 13 features instead of dh-exec
-    debhelper now has ${DEB_HOST_MULTIARCH} substitutions, so we don't need
-    to use dh-exec for those.
-    After that, the one remaining dh-exec feature in use was a conditional
-    installation for the FAM GIO module for Hurd. Open-code this in d/rules
-    instead.
+  * New upstream development release
+  * Merge packaging changes from unstable
+    - Use debhelper 13 features instead of dh-exec
 
  -- Simon McVittie <smcv@debian.org>  Thu, 27 Jan 2022 16:07:14 +0000
 
