@@ -35,6 +35,7 @@
 #include <sys/resource.h>
 #endif
 #ifdef G_OS_WIN32
+#include <crtdbg.h>
 #include <io.h>
 #include <windows.h>
 #endif
@@ -1433,7 +1434,7 @@ test_do_isolate_dirs (GError **error)
 {
   gchar *subdir = NULL;
   gchar *home_dir = NULL, *cache_dir = NULL, *config_dir = NULL;
-  gchar *data_dir = NULL, *runtime_dir = NULL;
+  gchar *state_dir = NULL, *data_dir = NULL, *runtime_dir = NULL;
   gchar *config_dirs[3];
   gchar *data_dirs[3];
 
@@ -1470,6 +1471,7 @@ test_do_isolate_dirs (GError **error)
   cache_dir = g_build_filename (subdir, "cache", NULL);
   config_dir = g_build_filename (subdir, "config", NULL);
   data_dir = g_build_filename (subdir, "data", NULL);
+  state_dir = g_build_filename (subdir, "state", NULL);
 
   config_dirs[0] = g_build_filename (subdir, "system-config1", NULL);
   config_dirs[1] = g_build_filename (subdir, "system-config2", NULL);
@@ -1487,10 +1489,12 @@ test_do_isolate_dirs (GError **error)
                    "XDG_CONFIG_HOME", config_dir,
                    "XDG_DATA_DIRS", data_dirs,
                    "XDG_DATA_HOME", data_dir,
+                   "XDG_STATE_HOME", state_dir,
                    "XDG_RUNTIME_DIR", runtime_dir,
                    NULL);
 
   g_free (runtime_dir);
+  g_free (state_dir);
   g_free (data_dir);
   g_free (config_dir);
   g_free (cache_dir);
@@ -1595,6 +1599,25 @@ void
 
 #ifdef _GLIB_ADDRESS_SANITIZER
   mutable_test_config_vars.test_undefined = FALSE;
+#endif
+
+#ifdef G_OS_WIN32
+  // don't open a window for errors (like the "abort() was called one")
+  _CrtSetReportMode (_CRT_ERROR, _CRTDBG_MODE_FILE);
+  _CrtSetReportFile (_CRT_ERROR, _CRTDBG_FILE_STDERR);
+  // while gtest tests tend to use g_assert and friends
+  // if they do use the C standard assert macro we want to
+  // output a message to stderr, not open a popup window
+  _CrtSetReportMode (_CRT_ASSERT, _CRTDBG_MODE_FILE);
+  _CrtSetReportFile (_CRT_ASSERT, _CRTDBG_FILE_STDERR);
+  // in release mode abort() will pop up a windows error
+  // reporting dialog, let's prevent that. Only msvcrxx and
+  // the UCRT have this function, but there's no great way to
+  // detect msvcrxx (that I know of) so only call this when using
+  // the UCRT
+#ifdef _UCRT
+  _set_abort_behavior (0, _CALL_REPORTFAULT);
+#endif
 #endif
 
   va_start (args, argv);
@@ -4371,9 +4394,9 @@ g_test_get_dir (GTestFileType file_type)
  * Gets the pathname to a data file that is required for a test.
  *
  * This is the same as g_test_build_filename() with two differences.
- * The first difference is that must only use this function from within
+ * The first difference is that you must only use this function from within
  * a testcase function.  The second difference is that you need not free
- * the return value -- it will be automatically freed when the testcase
+ * the return value — it will be automatically freed when the testcase
  * finishes running.
  *
  * It is safe to use this function from a thread inside of a testcase
