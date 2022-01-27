@@ -578,6 +578,12 @@ libgio-2.0.so.0 libglib2.0-0 #MINVER#
  g_dbus_signal_info_unref@Base 2.26.0
  g_dbus_subtree_flags_get_type@Base 2.26.0
  g_dbus_unescape_object_path@Base 2.67.3
+ g_debug_controller_dbus_get_type@Base 2.71.1
+ g_debug_controller_dbus_new@Base 2.71.1
+ g_debug_controller_dup_default@Base 2.71.1
+ g_debug_controller_get_debug_enabled@Base 2.71.1
+ g_debug_controller_get_type@Base 2.71.1
+ g_debug_controller_set_debug_enabled@Base 2.71.1
  g_desktop_app_info_get_action_name@Base 2.37.5
  g_desktop_app_info_get_boolean@Base 2.35.8
  g_desktop_app_info_get_categories@Base 2.30.0
@@ -1840,9 +1846,11 @@ libgio-2.0.so.0 libglib2.0-0 #MINVER#
  g_tls_certificate_is_same@Base 2.33.14
  g_tls_certificate_list_new_from_file@Base 2.28.0
  g_tls_certificate_new_from_file@Base 2.28.0
+ g_tls_certificate_new_from_file_with_password@Base 2.71.1
  g_tls_certificate_new_from_files@Base 2.28.0
  g_tls_certificate_new_from_pem@Base 2.28.0
  g_tls_certificate_new_from_pkcs11_uris@Base 2.67.1
+ g_tls_certificate_new_from_pkcs12@Base 2.71.1
  g_tls_certificate_request_flags_get_type@Base 2.39.4
  g_tls_certificate_verify@Base 2.28.0
  g_tls_channel_binding_error_get_type@Base 2.65.1
@@ -2517,6 +2525,7 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_get_user_name@Base 2.12.0
  g_get_user_runtime_dir@Base 2.28.0
  g_get_user_special_dir@Base 2.14.0
+ g_get_user_state_dir@Base 2.71.1
  g_getenv@Base 2.12.0
  g_hash_table_add@Base 2.31.8
  g_hash_table_contains@Base 2.31.8
@@ -2539,6 +2548,7 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_hash_table_lookup_extended@Base 2.12.0
  g_hash_table_new@Base 2.12.0
  g_hash_table_new_full@Base 2.12.0
+ g_hash_table_new_similar@Base 2.71.1
  g_hash_table_ref@Base 2.12.0
  g_hash_table_remove@Base 2.12.0
  g_hash_table_remove_all@Base 2.12.0
@@ -2725,8 +2735,10 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_locale_to_utf8@Base 2.12.0
  g_log@Base 2.12.0
  g_log_default_handler@Base 2.12.0
+ g_log_get_debug_enabled@Base 2.71.1
  g_log_remove_handler@Base 2.12.0
  g_log_set_always_fatal@Base 2.12.0
+ g_log_set_debug_enabled@Base 2.71.1
  g_log_set_default_handler@Base 2.12.0
  g_log_set_fatal_mask@Base 2.12.0
  g_log_set_handler@Base 2.12.0
