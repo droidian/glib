@@ -10,6 +10,31 @@ glib2.0 (2.71.1-1) UNRELEASED; urgency=medium
 
  -- Simon McVittie <smcv@debian.org>  Thu, 27 Jan 2022 16:07:14 +0000
 
+glib2.0 (2.70.3-1) unstable; urgency=medium
+
+  * New upstream release
+    - Do not allow empty structs (tuples) in D-Bus messages, resolving a
+      denial-of-service vulnerability for private GDBus servers that accept
+      messages from untrusted clients (glib#2557)
+    - Do not allow deep recursion in serialized GVariant binary data,
+      resolving a denial of service for anything that loads untrusted
+      GVariant binary data (glib#2572)
+    - Fix file descriptor handling when launching subprocesses
+    - Don't skip fsync when writing out files on btrfs.
+      This was based on a kernel behaviour that was guaranteed prior to
+      2014, but is no longer considered to be a guarantee.
+    - Translation updates
+  * Use debhelper 13 features instead of dh-exec
+    debhelper now has ${DEB_HOST_MULTIARCH} substitutions, so we don't need
+    to use dh-exec for those.
+    After that, the one remaining dh-exec feature in use was a conditional
+    installation for the FAM GIO module for Hurd. Open-code this in d/rules
+    instead.
+  * d/gbp.conf: Use upstream/2.70.x branch for packaging.
+    We have already had a 2.71.x release.
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 26 Jan 2022 20:18:19 +0000
+
 glib2.0 (2.71.0-2) experimental; urgency=medium
 
   * Merge packaging updates from unstable
