@@ -580,7 +580,7 @@ libgio-2.0.so.0 libglib2.0-0 #MINVER#
  g_dbus_unescape_object_path@Base 2.67.3
  g_debug_controller_dbus_get_type@Base 2.71.1
  g_debug_controller_dbus_new@Base 2.71.1
- g_debug_controller_dup_default@Base 2.71.1
+ g_debug_controller_dbus_stop@Base 2.71.2
  g_debug_controller_get_debug_enabled@Base 2.71.1
  g_debug_controller_get_type@Base 2.71.1
  g_debug_controller_set_debug_enabled@Base 2.71.1
@@ -887,6 +887,8 @@ libgio-2.0.so.0 libglib2.0-0 #MINVER#
  g_file_mount_mountable@Base 2.16.0
  g_file_mount_mountable_finish@Base 2.16.0
  g_file_move@Base 2.16.0
+ g_file_move_async@Base 2.71.2
+ g_file_move_finish@Base 2.71.2
  g_file_new_build_filename@Base 2.55.1
  g_file_new_for_commandline_arg@Base 2.16.0
  g_file_new_for_commandline_arg_and_cwd@Base 2.35.8
@@ -2079,6 +2081,9 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
 * Build-Depends-Package: libglib2.0-dev
  __glib_assert_msg@Base 2.37.6
  g_access@Base 2.12.0
+ g_aligned_alloc@Base 2.71.2
+ g_aligned_alloc0@Base 2.71.2
+ g_aligned_free@Base 2.71.2
  g_allocator_free@Base 2.12.0
  g_allocator_new@Base 2.12.0
  g_array_append_vals@Base 2.12.0
@@ -3910,6 +3915,13 @@ libgobject-2.0.so.0 libglib2.0-0 #MINVER#
  g_binding_get_target@Base 2.26.0
  g_binding_get_target_property@Base 2.26.0
  g_binding_get_type@Base 2.26.0
+ g_binding_group_bind@Base 2.71.2
+ g_binding_group_bind_full@Base 2.71.2
+ g_binding_group_bind_with_closures@Base 2.71.2
+ g_binding_group_dup_source@Base 2.71.2
+ g_binding_group_get_type@Base 2.71.2
+ g_binding_group_new@Base 2.71.2
+ g_binding_group_set_source@Base 2.71.2
  g_binding_unbind@Base 2.37.1
  g_boxed_copy@Base 2.12.0
  g_boxed_free@Base 2.12.0
@@ -4141,6 +4153,17 @@ libgobject-2.0.so.0 libglib2.0-0 #MINVER#
  g_signal_emit_valist@Base 2.12.0
  g_signal_emitv@Base 2.12.0
  g_signal_get_invocation_hint@Base 2.12.0
+ g_signal_group_block@Base 2.71.2
+ g_signal_group_connect@Base 2.71.2
+ g_signal_group_connect_after@Base 2.71.2
+ g_signal_group_connect_data@Base 2.71.2
+ g_signal_group_connect_object@Base 2.71.2
+ g_signal_group_connect_swapped@Base 2.71.2
+ g_signal_group_dup_target@Base 2.71.2
+ g_signal_group_get_type@Base 2.71.2
+ g_signal_group_new@Base 2.71.2
+ g_signal_group_set_target@Base 2.71.2
+ g_signal_group_unblock@Base 2.71.2
  g_signal_handler_block@Base 2.12.0
  g_signal_handler_disconnect@Base 2.12.0
  g_signal_handler_find@Base 2.12.0
