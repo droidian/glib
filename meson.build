@@ -1,5 +1,5 @@
 project('glib', 'c', 'cpp',
-  version : '2.71.1',
+  version : '2.71.2',
   # NOTE: We keep this pinned at 0.52 because that's what Debian Stable ships
   meson_version : '>= 0.52.0',
   default_options : [
@@ -653,8 +653,19 @@ if host_system == 'android'
 endif
 
 
-# Check that posix_memalign() is usable; must use header
-if host_system != 'windows' and cc.has_function('posix_memalign', prefix : '#include <stdlib.h>')
+if cc.has_function('memalign', prefix: '#include <stdlib.h>\n#include <malloc.h>')
+  glib_conf.set('HAVE_MEMALIGN', 1)
+endif
+
+if cc.has_function('_aligned_malloc', prefix: '#include <malloc.h>')
+  glib_conf.set('HAVE__ALIGNED_MALLOC', 1)
+endif
+
+if host_system != 'windows' and cc.has_function('aligned_alloc', prefix: '#include <stdlib.h>')
+  glib_conf.set('HAVE_ALIGNED_ALLOC', 1)
+endif
+
+if host_system != 'windows' and cc.has_function('posix_memalign', prefix: '#include <stdlib.h>')
   glib_conf.set('HAVE_POSIX_MEMALIGN', 1)
 endif
 
@@ -1857,6 +1868,10 @@ endif
 glibconfig_conf.set('G_ATOMIC_LOCK_FREE', have_atomic_lock_free)
 
 # === Threads ===
+
+if get_option('force_posix_threads')
+  warning('DEPRECATION: Option \'force_posix_threads\' is deprecated and will be removed after GLib 2.72; please file an issue with your use case if you still require it')
+endif
 
 # Determination of thread implementation
 if host_system == 'windows' and not get_option('force_posix_threads')
