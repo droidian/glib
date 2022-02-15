@@ -192,6 +192,12 @@ test_dbus_properties (void)
 
   g_test_summary ("Test getting and setting properties on a #GDebugControllerDBus.");
 
+  if (g_getenv ("DEB_ALLOW_FLAKY_TESTS") == NULL)
+    {
+      g_test_skip ("https://gitlab.gnome.org/GNOME/glib/-/merge_requests/2486#note_1384102");
+      return;
+    }
+
   /* Set up a test session bus and connection. Set up a separate second
    * connection to simulate a remote peer. */
   bus = g_test_dbus_new (G_TEST_DBUS_NONE);
