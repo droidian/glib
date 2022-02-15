@@ -1,8 +1,9 @@
-glib2.0 (2.70.4-1) UNRELEASED; urgency=medium
+glib2.0 (2.70.4-1) unstable; urgency=medium
 
   * New upstream release
+  * Adjust Lintian overrides for newer Lintian
 
- -- Simon McVittie <smcv@debian.org>  Mon, 14 Feb 2022 21:01:39 +0000
+ -- Simon McVittie <smcv@debian.org>  Tue, 15 Feb 2022 10:08:01 +0000
 
 glib2.0 (2.70.3-1) unstable; urgency=medium
 
