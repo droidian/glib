@@ -1820,7 +1820,7 @@ g_log_structured (const gchar    *log_domain,
  * contain the text shown to the user.
  *
  * The values in the @fields dictionary are likely to be of type String
- * (#G_VARIANT_TYPE_STRING). Array of bytes (#G_VARIANT_TYPE_BYTESTRING) is also
+ * (%G_VARIANT_TYPE_STRING). Array of bytes (%G_VARIANT_TYPE_BYTESTRING) is also
  * supported. In this case the message is handled as binary and will be forwarded
  * to the log writer as such. The size of the array should not be higher than
  * %G_MAXSSIZE. Otherwise it will be truncated to this size. For other types
@@ -2893,8 +2893,8 @@ _g_log_writer_fallback (GLogLevelFlags   log_level,
  * other logging functions; it should only be used from %GLogWriterFunc
  * implementations.
  *
- * Note also that the value of this does not depend on `G_MESSAGES_DEBUG`, as
- * it is domain-dependent.
+ * Note also that the value of this does not depend on `G_MESSAGES_DEBUG`; see
+ * the docs for g_log_set_debug_enabled().
  *
  * Returns: %TRUE if debug output is enabled, %FALSE otherwise
  *
@@ -2910,9 +2910,9 @@ g_log_get_debug_enabled (void)
  * g_log_set_debug_enabled:
  * @enabled: %TRUE to enable debug output, %FALSE otherwise
  *
- * Enable or disable debug output from the GLib logging system is enabled. This
- * value interacts disjunctively with `G_MESSAGES_DEBUG` — if either of them
- * would allow a debug message to be outputted, it will be.
+ * Enable or disable debug output from the GLib logging system for all domains.
+ * This value interacts disjunctively with `G_MESSAGES_DEBUG` — if either of
+ * them would allow a debug message to be outputted, it will be.
  *
  * Note that this should not be used from within library code to enable debug
  * output — it is intended for external use.
