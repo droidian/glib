@@ -16,7 +16,6 @@ subdir('gobject')
 subdir('refcount')
 
 tests = {
-  'testglib' : {'tap' : true},
   'gio-test' : {},
   'mainloop-test' : {},
   'mapping-test' : {},
@@ -29,7 +28,6 @@ tests = {
   'spawn-test' : {},
   'thread-test' : {},
   'threadpool-test' : {'suite' : ['slow']},
-  'type-test' : {},
   'unicode-encoding' : {},
   'module-test-library' : {
     'dependencies' : [libgmodule_dep],
@@ -58,7 +56,6 @@ test_extra_programs = {
 if host_machine.system() != 'windows'
   tests += {
     'timeloop' : {},
-    'iochannel-test' : {},
   }
 else
   test_extra_programs += {
@@ -68,7 +65,6 @@ endif
 
 if installed_tests_enabled
   install_data(
-    'iochannel-test-infile',
     'utf8.txt',
     install_dir : installed_tests_execdir,
   )

@@ -31,6 +31,7 @@
 #include <sys/types.h>
 
 static char *echo_prog_path;
+static char *sleep_prog_path;
 
 #ifdef G_OS_UNIX
 #include <unistd.h>
@@ -40,12 +41,8 @@ static char *echo_prog_path;
 #include <windows.h>
 #endif
 
-GMainLoop *main_loop;
-guint alive;
-
-#ifdef G_OS_WIN32
-char *argv0;
-#endif
+static GMainLoop *global_main_loop;
+static guint alive;
 
 static GPid
 get_a_child (gint ttl)
@@ -61,9 +58,9 @@ get_a_child (gint ttl)
   si.cb = sizeof (&si);
   memset (&pi, 0, sizeof (pi));
 
-  cmdline = g_strdup_printf ("child-test -c%d", ttl);
+  cmdline = g_strdup_printf ("%s %d", sleep_prog_path, ttl);
 
-  if (!CreateProcess (argv0, cmdline, NULL, NULL,
+  if (!CreateProcess (NULL, cmdline, NULL, NULL,
                       FALSE, 0, NULL, NULL, &si, &pi))
     g_error ("CreateProcess failed: %s",
              g_win32_error_message (GetLastError ()));
@@ -98,7 +95,7 @@ child_watch_callback (GPid pid, gint status, gpointer data)
   g_spawn_close_pid (pid);
 
   if (--alive == 0)
-    g_main_loop_quit (main_loop);
+    g_main_loop_quit (global_main_loop);
 
   return TRUE;
 }
@@ -142,16 +139,16 @@ test_spawn_childs (void)
 {
   GPid pid;
 
-  main_loop = g_main_loop_new (NULL, FALSE);
+  global_main_loop = g_main_loop_new (NULL, FALSE);
 
 #ifdef G_OS_WIN32
-  system ("ipconfig /all");
+  system ("cd .");
 #else
   system ("true");
 #endif
 
   alive = 2;
-  g_timeout_add_seconds (30, quit_loop, main_loop);
+  g_timeout_add_seconds (30, quit_loop, global_main_loop);
 
   pid = get_a_child (10);
   g_child_watch_add (pid, (GChildWatchFunc) child_watch_callback,
@@ -160,8 +157,8 @@ test_spawn_childs (void)
   g_child_watch_add (pid, (GChildWatchFunc) child_watch_callback,
                      GINT_TO_POINTER (7));
 
-  g_main_loop_run (main_loop);
-  g_main_loop_unref (main_loop);
+  g_main_loop_run (global_main_loop);
+  g_main_loop_unref (global_main_loop);
 
   g_assert_cmpint (alive, ==, 0);
 }
@@ -169,22 +166,22 @@ test_spawn_childs (void)
 static void
 test_spawn_childs_threads (void)
 {
-  main_loop = g_main_loop_new (NULL, FALSE);
+  global_main_loop = g_main_loop_new (NULL, FALSE);
 
 #ifdef G_OS_WIN32
-  system ("ipconfig /all");
+  system ("cd .");
 #else
   system ("true");
 #endif
 
   alive = 2;
-  g_timeout_add_seconds (30, quit_loop, main_loop);
+  g_timeout_add_seconds (30, quit_loop, global_main_loop);
 
   g_thread_new (NULL, start_thread, GINT_TO_POINTER (3));
   g_thread_new (NULL, start_thread, GINT_TO_POINTER (7));
 
-  g_main_loop_run (main_loop);
-  g_main_loop_unref (main_loop);
+  g_main_loop_run (global_main_loop);
+  g_main_loop_unref (global_main_loop);
 
   g_assert_cmpint (alive, ==, 0);
 }
@@ -384,14 +381,13 @@ main (int   argc,
 
   dirname = g_path_get_dirname (argv[0]);
   echo_prog_path = g_build_filename (dirname, "test-spawn-echo" EXEEXT, NULL);
-  if (!g_file_test (echo_prog_path, G_FILE_TEST_EXISTS))
-    {
-      g_free (echo_prog_path);
-      echo_prog_path = g_build_filename (dirname, "lt-test-spawn-echo" EXEEXT, NULL);
-    }
+  sleep_prog_path = g_build_filename (dirname, "test-spawn-sleep" EXEEXT, NULL);
   g_free (dirname);
 
   g_assert (g_file_test (echo_prog_path, G_FILE_TEST_EXISTS));
+#ifdef G_OS_WIN32
+  g_assert (g_file_test (sleep_prog_path, G_FILE_TEST_EXISTS));
+#endif
 
   g_test_add_func ("/gthread/spawn-childs", test_spawn_childs);
   g_test_add_func ("/gthread/spawn-childs-threads", test_spawn_childs_threads);
@@ -401,6 +397,7 @@ main (int   argc,
   ret = g_test_run();
 
   g_free (echo_prog_path);
+  g_free (sleep_prog_path);
 
   return ret;
 }

@@ -1000,7 +1000,7 @@ get_contents_win32 (const gchar  *filename,
  * contents and @length to the length of the file contents in bytes. The string
  * stored in @contents will be nul-terminated, so for text files you can pass
  * %NULL for the @length argument. If the call was not successful, it returns
- * %FALSE and sets @error. The error domain is #G_FILE_ERROR. Possible error
+ * %FALSE and sets @error. The error domain is %G_FILE_ERROR. Possible error
  * codes are those in the #GFileError enumeration. In the error case,
  * @contents is set to %NULL and @length is set to zero.
  *
@@ -1271,7 +1271,7 @@ g_file_set_contents (const gchar  *filename,
  *   @filename already exists and is open.
  *
  * If the call was successful, it returns %TRUE. If the call was not successful,
- * it returns %FALSE and sets @error. The error domain is #G_FILE_ERROR.
+ * it returns %FALSE and sets @error. The error domain is %G_FILE_ERROR.
  * Possible error codes are those in the #GFileError enumeration.
  *
  * Note that the name for the temporary file is constructed by appending up
@@ -2754,8 +2754,12 @@ g_canonicalize_filename (const gchar *filename,
     *output = G_DIR_SEPARATOR;
 
   /* 1 to re-increment after the final decrement above (so that output >= canon),
-   * and 1 to skip the first `/` */
-  output += 2;
+   * and 1 to skip the first `/`. There might not be a first `/` if
+   * the @canon is a Windows `//server/share` style path with no
+   * trailing directories. @after_root will be '\0' in that case. */
+  output++;
+  if (*output == G_DIR_SEPARATOR)
+    output++;
 
   /* POSIX allows double slashes at the start to mean something special
    * (as does windows too). So, "//" != "/", but more than two slashes
