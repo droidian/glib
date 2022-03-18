@@ -1062,7 +1062,6 @@ _g_get_unix_mount_points (void)
           if ((mount_fstype != NULL && g_strcmp0 ("supermount", mount_fstype) == 0) ||
               ((userspace_flags & MNT_MS_USER) &&
                (g_strstr_len (mount_options, -1, "user_xattr") == NULL)) ||
-              (g_strstr_len (mount_options, -1, "pamconsole") == NULL) ||
               (userspace_flags & MNT_MS_USERS) ||
               (userspace_flags & MNT_MS_OWNER))
             {
@@ -1158,7 +1157,6 @@ _g_get_unix_mount_points (void)
 #ifdef HAVE_HASMNTOPT
 	  || (hasmntopt (mntent, "user") != NULL
 	      && hasmntopt (mntent, "user") != hasmntopt (mntent, "user_xattr"))
-	  || hasmntopt (mntent, "pamconsole") != NULL
 	  || hasmntopt (mntent, "users") != NULL
 	  || hasmntopt (mntent, "owner") != NULL
 #endif
@@ -1231,7 +1229,6 @@ _g_get_unix_mount_points (void)
 #ifdef HAVE_HASMNTOPT
 	  || (hasmntopt (&mntent, "user") != NULL
 	      && hasmntopt (&mntent, "user") != hasmntopt (&mntent, "user_xattr"))
-	  || hasmntopt (&mntent, "pamconsole") != NULL
 	  || hasmntopt (&mntent, "users") != NULL
 	  || hasmntopt (&mntent, "owner") != NULL
 #endif
@@ -1669,6 +1666,14 @@ g_unix_mount_for (const char *file_path,
   return entry;
 }
 
+static gpointer
+copy_mount_point_cb (gconstpointer src,
+                     gpointer      data)
+{
+  GUnixMountPoint *src_mount_point = (GUnixMountPoint *) src;
+  return g_unix_mount_point_copy (src_mount_point);
+}
+
 /**
  * g_unix_mount_points_get:
  * @time_read: (out) (optional): guint64 to contain a timestamp.
@@ -1684,10 +1689,29 @@ g_unix_mount_for (const char *file_path,
 GList *
 g_unix_mount_points_get (guint64 *time_read)
 {
-  if (time_read)
-    *time_read = get_mount_points_timestamp ();
+  static GList *mnt_pts_last = NULL;
+  static guint64 time_read_last = 0;
+  GList *mnt_pts = NULL;
+  guint64 time_read_now;
+  G_LOCK_DEFINE_STATIC (unix_mount_points);
 
-  return _g_get_unix_mount_points ();
+  G_LOCK (unix_mount_points);
+
+  time_read_now = get_mount_points_timestamp ();
+  if (time_read_now != time_read_last || mnt_pts_last == NULL)
+    {
+      time_read_last = time_read_now;
+      g_list_free_full (mnt_pts_last, (GDestroyNotify) g_unix_mount_point_free);
+      mnt_pts_last = _g_get_unix_mount_points ();
+    }
+  mnt_pts = g_list_copy_deep (mnt_pts_last, copy_mount_point_cb, NULL);
+
+  G_UNLOCK (unix_mount_points);
+
+  if (time_read)
+    *time_read = time_read_now;
+
+  return mnt_pts;
 }
 
 /**

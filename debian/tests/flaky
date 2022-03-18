@@ -59,6 +59,7 @@ debian/tests/run-with-locales \
 	-- \
 gnome-desktop-testing-runner \
 	glib/closure-refcount.test \
+	glib/debugcontroller.test \
 	glib/gdbus-server-auth.test \
 	glib/gdbus-threading.test \
 	glib/gmenumodel.test \

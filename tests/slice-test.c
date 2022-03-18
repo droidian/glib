@@ -28,7 +28,7 @@ static gboolean want_corruption = FALSE;
 
 /* --- old memchunk prototypes (memchunks.c) --- */
 GMemChunk*      old_mem_chunk_new       (const gchar  *name,
-                                         gint          atom_size,
+                                         gulong        atom_size,
                                          gulong        area_size,
                                          gint          type);
 void            old_mem_chunk_destroy   (GMemChunk *mem_chunk);
@@ -95,8 +95,7 @@ test_memchunk_thread (gpointer data)
     }
 
   /* prepare for memchunk creation */
-  memchunks = g_alloca (sizeof (memchunks[0]) * prime_size);
-  memset (memchunks, 0, sizeof (memchunks[0]) * prime_size);
+  memchunks = g_newa0 (GMemChunk*, prime_size);
 
   ps = g_new (guint8*, number_of_blocks);
   ss = g_new (guint, number_of_blocks);

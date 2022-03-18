@@ -48,7 +48,7 @@ dispatch (GSource *source, GSourceFunc cb, gpointer date)
   return FALSE;
 }
 
-static GSourceFuncs funcs = {
+static GSourceFuncs global_funcs = {
   prepare,
   check,
   dispatch,
@@ -63,14 +63,14 @@ test_maincontext_basic (void)
   GMainContext *ctx;
   GSource *source;
   guint id;
-  gpointer data = &funcs;
+  gpointer data = &global_funcs;
 
   ctx = g_main_context_new ();
 
   g_assert_false (g_main_context_pending (ctx));
   g_assert_false (g_main_context_iteration (ctx, FALSE));
 
-  source = g_source_new (&funcs, sizeof (GSource));
+  source = g_source_new (&global_funcs, sizeof (GSource));
   g_assert_cmpint (g_source_get_priority (source), ==, G_PRIORITY_DEFAULT);
   g_assert_false (g_source_is_destroyed (source));
 
@@ -87,7 +87,7 @@ test_maincontext_basic (void)
   g_assert_cmpstr (g_source_get_name (source), ==, "still d");
 
   g_assert_null (g_main_context_find_source_by_user_data (ctx, NULL));
-  g_assert_null (g_main_context_find_source_by_funcs_user_data (ctx, &funcs, NULL));
+  g_assert_null (g_main_context_find_source_by_funcs_user_data (ctx, &global_funcs, NULL));
 
   id = g_source_attach (source, ctx);
   g_assert_cmpint (g_source_get_id (source), ==, id);
@@ -113,18 +113,18 @@ test_maincontext_basic (void)
   g_source_unref (source);
 
   ctx = g_main_context_default ();
-  source = g_source_new (&funcs, sizeof (GSource));
-  g_source_set_funcs (source, &funcs);
+  source = g_source_new (&global_funcs, sizeof (GSource));
+  g_source_set_funcs (source, &global_funcs);
   g_source_set_callback (source, cb, data, NULL);
   id = g_source_attach (source, ctx);
   g_source_unref (source);
   g_source_set_name_by_id (id, "e");
   g_assert_cmpstr (g_source_get_name (source), ==, "e");
   g_assert_true (g_source_get_context (source) == ctx);
-  g_assert_true (g_source_remove_by_funcs_user_data (&funcs, data));
+  g_assert_true (g_source_remove_by_funcs_user_data (&global_funcs, data));
 
-  source = g_source_new (&funcs, sizeof (GSource));
-  g_source_set_funcs (source, &funcs);
+  source = g_source_new (&global_funcs, sizeof (GSource));
+  g_source_set_funcs (source, &global_funcs);
   g_source_set_callback (source, cb, data, NULL);
   id = g_source_attach (source, ctx);
   g_assert_cmpint (id, >, 0);
@@ -158,9 +158,59 @@ test_mainloop_basic (void)
   g_main_loop_unref (loop);
 }
 
-static gint a;
-static gint b;
-static gint c;
+static void
+test_ownerless_polling (gconstpointer test_data)
+{
+  gboolean attach_first = GPOINTER_TO_INT (test_data);
+  GMainContext *ctx = g_main_context_new_with_flags (
+    G_MAIN_CONTEXT_FLAGS_OWNERLESS_POLLING);
+
+  GPollFD fds[20];
+  gint fds_size;
+  gint max_priority;
+  GSource *source = NULL;
+
+  g_assert_true (ctx != g_main_context_default ());
+
+  g_main_context_push_thread_default (ctx);
+
+  /* Drain events */
+  for (;;)
+    {
+      gboolean ready_to_dispatch = g_main_context_prepare (ctx, &max_priority);
+      gint timeout, nready;
+      fds_size = g_main_context_query (ctx, max_priority, &timeout, fds, G_N_ELEMENTS (fds));
+      nready = g_poll (fds, fds_size, /*timeout=*/0);
+      if (!ready_to_dispatch && nready == 0)
+        {
+          if (timeout == -1)
+            break;
+          else
+            g_usleep (timeout * 1000);
+        }
+      ready_to_dispatch = g_main_context_check (ctx, max_priority, fds, fds_size);
+      if (ready_to_dispatch)
+        g_main_context_dispatch (ctx);
+    }
+
+  if (!attach_first)
+    g_main_context_pop_thread_default (ctx);
+
+  source = g_idle_source_new ();
+  g_source_attach (source, ctx);
+  g_source_unref (source);
+
+  if (attach_first)
+    g_main_context_pop_thread_default (ctx);
+
+  g_assert_cmpint (g_poll (fds, fds_size, 0), >, 0);
+
+  g_main_context_unref (ctx);
+}
+
+static gint global_a;
+static gint global_b;
+static gint global_c;
 
 static gboolean
 count_calls (gpointer data)
@@ -185,23 +235,23 @@ test_timeouts (void)
       return;
     }
 
-  a = b = c = 0;
+  global_a = global_b = global_c = 0;
 
   ctx = g_main_context_new ();
   loop = g_main_loop_new (ctx, FALSE);
 
   source = g_timeout_source_new (100);
-  g_source_set_callback (source, count_calls, &a, NULL);
+  g_source_set_callback (source, count_calls, &global_a, NULL);
   g_source_attach (source, ctx);
   g_source_unref (source);
 
   source = g_timeout_source_new (250);
-  g_source_set_callback (source, count_calls, &b, NULL);
+  g_source_set_callback (source, count_calls, &global_b, NULL);
   g_source_attach (source, ctx);
   g_source_unref (source);
 
   source = g_timeout_source_new (330);
-  g_source_set_callback (source, count_calls, &c, NULL);
+  g_source_set_callback (source, count_calls, &global_c, NULL);
   g_source_attach (source, ctx);
   g_source_unref (source);
 
@@ -215,13 +265,13 @@ test_timeouts (void)
   /* We may be delayed for an arbitrary amount of time - for example,
    * it's possible for all timeouts to fire exactly once.
    */
-  g_assert_cmpint (a, >, 0);
-  g_assert_cmpint (a, >=, b);
-  g_assert_cmpint (b, >=, c);
+  g_assert_cmpint (global_a, >, 0);
+  g_assert_cmpint (global_a, >=, global_b);
+  g_assert_cmpint (global_b, >=, global_c);
 
-  g_assert_cmpint (a, <=, 10);
-  g_assert_cmpint (b, <=, 4);
-  g_assert_cmpint (c, <=, 3);
+  g_assert_cmpint (global_a, <=, 10);
+  g_assert_cmpint (global_b, <=, 4);
+  g_assert_cmpint (global_c, <=, 3);
 
   g_main_loop_unref (loop);
   g_main_context_unref (ctx);
@@ -234,36 +284,36 @@ test_priorities (void)
   GSource *sourcea;
   GSource *sourceb;
 
-  a = b = c = 0;
+  global_a = global_b = global_c = 0;
 
   ctx = g_main_context_new ();
 
   sourcea = g_idle_source_new ();
-  g_source_set_callback (sourcea, count_calls, &a, NULL);
+  g_source_set_callback (sourcea, count_calls, &global_a, NULL);
   g_source_set_priority (sourcea, 1);
   g_source_attach (sourcea, ctx);
   g_source_unref (sourcea);
 
   sourceb = g_idle_source_new ();
-  g_source_set_callback (sourceb, count_calls, &b, NULL);
+  g_source_set_callback (sourceb, count_calls, &global_b, NULL);
   g_source_set_priority (sourceb, 0);
   g_source_attach (sourceb, ctx);
   g_source_unref (sourceb);
 
   g_assert_true (g_main_context_pending (ctx));
   g_assert_true (g_main_context_iteration (ctx, FALSE));
-  g_assert_cmpint (a, ==, 0);
-  g_assert_cmpint (b, ==, 1);
+  g_assert_cmpint (global_a, ==, 0);
+  g_assert_cmpint (global_b, ==, 1);
 
   g_assert_true (g_main_context_iteration (ctx, FALSE));
-  g_assert_cmpint (a, ==, 0);
-  g_assert_cmpint (b, ==, 2);
+  g_assert_cmpint (global_a, ==, 0);
+  g_assert_cmpint (global_b, ==, 2);
 
   g_source_destroy (sourceb);
 
   g_assert_true (g_main_context_iteration (ctx, FALSE));
-  g_assert_cmpint (a, ==, 1);
-  g_assert_cmpint (b, ==, 2);
+  g_assert_cmpint (global_a, ==, 1);
+  g_assert_cmpint (global_b, ==, 2);
 
   g_assert_true (g_main_context_pending (ctx));
   g_source_destroy (sourcea);
@@ -449,7 +499,7 @@ run_inner_loop (gpointer user_data)
   GMainLoop *inner;
   GSource *timeout;
 
-  a++;
+  global_a++;
 
   inner = g_main_loop_new (ctx, FALSE);
   timeout = counter_source_new (100);
@@ -473,7 +523,7 @@ test_child_sources (void)
   ctx = g_main_context_new ();
   loop = g_main_loop_new (ctx, FALSE);
 
-  a = b = c = 0;
+  global_a = global_b = global_c = 0;
 
   parent = counter_source_new (2000);
   g_source_set_callback (parent, run_inner_loop, ctx, NULL);
@@ -481,11 +531,11 @@ test_child_sources (void)
   g_source_attach (parent, ctx);
 
   child_b = counter_source_new (250);
-  g_source_set_callback (child_b, count_calls, &b, NULL);
+  g_source_set_callback (child_b, count_calls, &global_b, NULL);
   g_source_add_child_source (parent, child_b);
 
   child_c = counter_source_new (330);
-  g_source_set_callback (child_c, count_calls, &c, NULL);
+  g_source_set_callback (child_c, count_calls, &global_c, NULL);
   g_source_set_priority (child_c, G_PRIORITY_HIGH);
   g_source_add_child_source (parent, child_c);
 
@@ -528,9 +578,9 @@ test_child_sources (void)
    * 1110 - inner loop ends, a returns, outer loop exits
    */
 
-  g_assert_cmpint (a, ==, 6);
-  g_assert_cmpint (b, ==, 3);
-  g_assert_cmpint (c, ==, 3);
+  g_assert_cmpint (global_a, ==, 6);
+  g_assert_cmpint (global_b, ==, 3);
+  g_assert_cmpint (global_c, ==, 3);
 
   g_source_destroy (parent);
   g_source_unref (parent);
@@ -551,17 +601,17 @@ test_recursive_child_sources (void)
   ctx = g_main_context_new ();
   loop = g_main_loop_new (ctx, FALSE);
 
-  a = b = c = 0;
+  global_a = global_b = global_c = 0;
 
   parent = counter_source_new (500);
-  g_source_set_callback (parent, count_calls, &a, NULL);
+  g_source_set_callback (parent, count_calls, &global_a, NULL);
 
   child_b = counter_source_new (220);
-  g_source_set_callback (child_b, count_calls, &b, NULL);
+  g_source_set_callback (child_b, count_calls, &global_b, NULL);
   g_source_add_child_source (parent, child_b);
 
   child_c = counter_source_new (430);
-  g_source_set_callback (child_c, count_calls, &c, NULL);
+  g_source_set_callback (child_c, count_calls, &global_c, NULL);
   g_source_add_child_source (child_b, child_c);
 
   g_source_attach (parent, ctx);
@@ -585,9 +635,9 @@ test_recursive_child_sources (void)
    * 1940 b (b -> 2160, a -> 2440)
    */
 
-  g_assert_cmpint (a, ==, 9);
-  g_assert_cmpint (b, ==, 9);
-  g_assert_cmpint (c, ==, 4);
+  g_assert_cmpint (global_a, ==, 9);
+  g_assert_cmpint (global_b, ==, 9);
+  g_assert_cmpint (global_c, ==, 4);
 
   g_source_destroy (parent);
   g_source_unref (parent);
@@ -1637,10 +1687,11 @@ threadf (gpointer data)
   source = g_timeout_source_new (250);
   g_source_set_callback (source, timeout_cb, loop, NULL);
   g_source_attach (source, context);
-  g_source_unref (source);
  
   g_main_loop_run (loop);
 
+  g_source_destroy (source);
+  g_source_unref (source);
   g_main_loop_unref (loop);
 
   return NULL;
@@ -1826,6 +1877,191 @@ test_nfds (void)
   g_free (tmpfile);
 
   g_main_context_unref (ctx);
+}
+
+static gboolean
+nsources_cb (gpointer user_data)
+{
+  g_assert_not_reached ();
+  return FALSE;
+}
+
+static void
+shuffle_nsources (GSource **sources, int num)
+{
+  int i, a, b;
+  GSource *tmp;
+
+  for (i = 0; i < num * 10; i++)
+    {
+      a = g_random_int_range (0, num);
+      b = g_random_int_range (0, num);
+      tmp = sources[a];
+      sources[a] = sources[b];
+      sources[b] = tmp;
+    }
+}
+
+static void
+test_nsources_same_priority (void)
+{
+  GMainContext *context;
+  GSource **sources;
+  gint64 start, end;
+  gsize n_sources = 50000, i;
+
+  context = g_main_context_default ();
+  sources = g_new0 (GSource *, n_sources);
+
+  start = g_get_monotonic_time ();
+  for (i = 0; i < n_sources; i++)
+    {
+      sources[i] = g_idle_source_new ();
+      g_source_set_callback (sources[i], nsources_cb, NULL, NULL);
+      g_source_attach (sources[i], context);
+    }
+  end = g_get_monotonic_time ();
+  g_test_message ("Add same-priority sources: %" G_GINT64_FORMAT,
+                  (end - start) / 1000);
+
+  start = g_get_monotonic_time ();
+  for (i = 0; i < n_sources; i++)
+    g_assert_true (sources[i] == g_main_context_find_source_by_id (context, g_source_get_id (sources[i])));
+  end = g_get_monotonic_time ();
+  g_test_message ("Find each source: %" G_GINT64_FORMAT,
+                  (end - start) / 1000);
+
+  shuffle_nsources (sources, n_sources);
+
+  start = g_get_monotonic_time ();
+  for (i = 0; i < n_sources; i++)
+    {
+      g_source_destroy (sources[i]);
+      g_source_unref (sources[i]);
+    }
+  end = g_get_monotonic_time ();
+  g_test_message ("Remove in random order: %" G_GINT64_FORMAT,
+                  (end - start) / 1000);
+
+  /* Make sure they really did get removed */
+  g_main_context_iteration (context, FALSE);
+
+  g_free (sources);
+}
+
+static void
+test_nsources_different_priority (void)
+{
+  GMainContext *context;
+  GSource **sources;
+  gint64 start, end;
+  gsize n_sources = 50000, i;
+
+  context = g_main_context_default ();
+  sources = g_new0 (GSource *, n_sources);
+
+  start = g_get_monotonic_time ();
+  for (i = 0; i < n_sources; i++)
+    {
+      sources[i] = g_idle_source_new ();
+      g_source_set_callback (sources[i], nsources_cb, NULL, NULL);
+      g_source_set_priority (sources[i], i % 100);
+      g_source_attach (sources[i], context);
+    }
+  end = g_get_monotonic_time ();
+  g_test_message ("Add different-priority sources: %" G_GINT64_FORMAT,
+                  (end - start) / 1000);
+
+  start = g_get_monotonic_time ();
+  for (i = 0; i < n_sources; i++)
+    g_assert_true (sources[i] == g_main_context_find_source_by_id (context, g_source_get_id (sources[i])));
+  end = g_get_monotonic_time ();
+  g_test_message ("Find each source: %" G_GINT64_FORMAT,
+                  (end - start) / 1000);
+
+  shuffle_nsources (sources, n_sources);
+
+  start = g_get_monotonic_time ();
+  for (i = 0; i < n_sources; i++)
+    {
+      g_source_destroy (sources[i]);
+      g_source_unref (sources[i]);
+    }
+  end = g_get_monotonic_time ();
+  g_test_message ("Remove in random order: %" G_GINT64_FORMAT,
+                  (end - start) / 1000);
+
+  /* Make sure they really did get removed */
+  g_main_context_iteration (context, FALSE);
+
+  g_free (sources);
+}
+
+static void
+thread_pool_attach_func (gpointer data,
+                         gpointer user_data)
+{
+  GMainContext *context = user_data;
+  GSource *source = data;
+
+  g_source_attach (source, context);
+  g_source_unref (source);
+}
+
+static void
+thread_pool_destroy_func (gpointer data,
+                          gpointer user_data)
+{
+  GSource *source = data;
+
+  g_source_destroy (source);
+}
+
+static void
+test_nsources_threadpool (void)
+{
+  GMainContext *context;
+  GSource **sources;
+  GThreadPool *pool;
+  GError *error = NULL;
+  gint64 start, end;
+  gsize n_sources = 50000, i;
+
+  context = g_main_context_default ();
+  sources = g_new0 (GSource *, n_sources);
+
+  pool = g_thread_pool_new (thread_pool_attach_func, context,
+                            20, TRUE, NULL);
+  start = g_get_monotonic_time ();
+  for (i = 0; i < n_sources; i++)
+    {
+      sources[i] = g_idle_source_new ();
+      g_source_set_callback (sources[i], nsources_cb, NULL, NULL);
+      g_thread_pool_push (pool, sources[i], &error);
+      g_assert_no_error (error);
+    }
+  g_thread_pool_free (pool, FALSE, TRUE);
+  end = g_get_monotonic_time ();
+  g_test_message ("Add sources from threads: %" G_GINT64_FORMAT,
+                  (end - start) / 1000);
+
+  pool = g_thread_pool_new (thread_pool_destroy_func, context,
+                            20, TRUE, NULL);
+  start = g_get_monotonic_time ();
+  for (i = 0; i < n_sources; i++)
+    {
+      g_thread_pool_push (pool, sources[i], &error);
+      g_assert_no_error (error);
+    }
+  g_thread_pool_free (pool, FALSE, TRUE);
+  end = g_get_monotonic_time ();
+  g_test_message ("Remove sources from threads: %" G_GINT64_FORMAT,
+                  (end - start) / 1000);
+
+  /* Make sure they really did get removed */
+  g_main_context_iteration (context, FALSE);
+
+  g_free (sources);
 }
 
 static gboolean source_finalize_called = FALSE;
@@ -2108,6 +2344,9 @@ main (int argc, char *argv[])
   g_test_init (&argc, &argv, NULL);
 
   g_test_add_func ("/maincontext/basic", test_maincontext_basic);
+  g_test_add_func ("/maincontext/nsources_same_priority", test_nsources_same_priority);
+  g_test_add_func ("/maincontext/nsources_different_priority", test_nsources_different_priority);
+  g_test_add_func ("/maincontext/nsources_threadpool", test_nsources_threadpool);
   g_test_add_func ("/maincontext/source_finalization", test_maincontext_source_finalization);
   for (i = 0; i < 10; i++)
     {
@@ -2145,6 +2384,8 @@ main (int argc, char *argv[])
 #endif
   g_test_add_func ("/mainloop/nfds", test_nfds);
   g_test_add_func ("/mainloop/steal-fd", test_steal_fd);
+  g_test_add_data_func ("/mainloop/ownerless-polling/attach-first", GINT_TO_POINTER (TRUE), test_ownerless_polling);
+  g_test_add_data_func ("/mainloop/ownerless-polling/pop-first", GINT_TO_POINTER (FALSE), test_ownerless_polling);
 
   return g_test_run ();
 }

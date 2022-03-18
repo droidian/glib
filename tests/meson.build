@@ -16,32 +16,18 @@ subdir('gobject')
 subdir('refcount')
 
 tests = {
-  'testglib' : {'tap' : true},
-  'testgdate' : {},
-  'datetime' : {},
-  'bit-test' : {},
-  'child-test' : {},
-  'completion-test' : {},
-  'dirname-test' : {},
-  'file-test' : {},
-  'env-test' : {},
   'gio-test' : {},
   'mainloop-test' : {},
   'mapping-test' : {},
   'onceinit' : {},
-  'asyncqueue-test' : {},
-  'qsort-test' : {},
   'relation-test' : {},
   'slice-concurrent' : {},
   'slice-threadinit' : {
     'dependencies' : [libgthread_dep],
   },
-  'sources' : {},
   'spawn-test' : {},
   'thread-test' : {},
   'threadpool-test' : {'suite' : ['slow']},
-  'type-test' : {},
-  'unicode-caseconv' : {},
   'unicode-encoding' : {},
   'module-test-library' : {
     'dependencies' : [libgmodule_dep],
@@ -55,11 +41,6 @@ tests = {
     'source': 'module-test.c',
     'c_args': ['-DMODULE_TYPE="plugin"'],
   },
-  'cxx-test' : {
-    'source' : 'cxx-test.cpp',
-    'include_directories' : gmoduleinc,
-    'dependencies' : [libgio_dep],
-  },
 }
 
 test_extra_programs = {
@@ -70,13 +51,11 @@ test_extra_programs = {
     'extra_sources' : ['memchunks.c'],
   },
   'assert-msg-test' : {},
-  'unicode-collate' : {},
 }
 
 if host_machine.system() != 'windows'
   tests += {
     'timeloop' : {},
-    'iochannel-test' : {},
   }
 else
   test_extra_programs += {
@@ -86,9 +65,6 @@ endif
 
 if installed_tests_enabled
   install_data(
-    'iochannel-test-infile',
-    'casemap.txt',
-    'casefold.txt',
     'utf8.txt',
     install_dir : installed_tests_execdir,
   )

@@ -622,7 +622,7 @@ g_date_time_get_week_number (GDateTime *datetime,
                              gint      *day_of_week,
                              gint      *day_of_year)
 {
-  gint a, b, c, d, e, f, g, n, s, month, day, year;
+  gint a, b, c, d, e, f, g, n, s, month = -1, day = -1, year = -1;
 
   g_date_time_get_ymd (datetime, &year, &month, &day);
 
@@ -893,8 +893,9 @@ static GDateTime *
 g_date_time_new_from_timeval (GTimeZone      *tz,
                               const GTimeVal *tv)
 {
-  if ((gint64) tv->tv_sec > G_MAXINT64 - 1 ||
-      !UNIX_TO_INSTANT_IS_VALID ((gint64) tv->tv_sec + 1))
+  gint64 tv_sec = tv->tv_sec;
+
+  if (tv_sec > G_MAXINT64 - 1 || !UNIX_TO_INSTANT_IS_VALID (tv_sec + 1))
     return NULL;
 
   return g_date_time_from_instant (tz, tv->tv_usec +
@@ -2341,7 +2342,7 @@ g_date_time_get_day_of_month (GDateTime *datetime)
 gint
 g_date_time_get_week_numbering_year (GDateTime *datetime)
 {
-  gint year, month, day, weekday;
+  gint year = -1, month = -1, day = -1, weekday;
 
   g_date_time_get_ymd (datetime, &year, &month, &day);
   weekday = g_date_time_get_day_of_week (datetime);

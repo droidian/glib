@@ -74,17 +74,6 @@ if host_system != 'windows'
     endif
   endif
 
-  # res_init()
-  if cc.links('''#include <sys/types.h>
-                 #include <netinet/in.h>
-                 #include <arpa/nameser.h>
-                 #include <resolv.h>
-                 int main (int argc, char ** argv) {
-                   return res_init();
-                 }''', args : network_args, name : 'res_init()')
-    glib_conf.set('HAVE_RES_INIT', 1)
-  endif
-
   # res_nclose()
   if cc.links('''#include <sys/types.h>
                  #include <netinet/in.h>
@@ -341,12 +330,6 @@ local_sources = files(
 
 platform_deps = []
 internal_deps = []
-# TODO: internal_objects is a workaround for
-# <https://github.com/mesonbuild/meson/issues/3934> and
-# <https://github.com/mesonbuild/meson/issues/3937>. When we can depend
-# on a meson version where those are fixed, revert the commit that
-# introduced this workaround.
-internal_objects = []
 appinfo_sources = []
 contenttype_sources = []
 portal_sources = []
@@ -363,13 +346,10 @@ if host_system != 'windows'
   unix_sources = files(
     'gfiledescriptorbased.c',
     'giounix-private.c',
-    'gunixconnection.c',
-    'gunixcredentialsmessage.c',
     'gunixfdlist.c',
     'gunixfdmessage.c',
     'gunixmount.c',
     'gunixmounts.c',
-    'gunixsocketaddress.c',
     'gunixvolume.c',
     'gunixvolumemonitor.c',
     'gunixinputstream.c',
@@ -393,20 +373,19 @@ if host_system != 'windows'
 
   gio_unix_include_headers = files(
     'gfiledescriptorbased.h',
-    'gunixconnection.h',
-    'gunixcredentialsmessage.h',
     'gunixmounts.h',
     'gunixfdlist.h',
     'gunixfdmessage.h',
     'gunixinputstream.h',
     'gunixoutputstream.h',
-    'gunixsocketaddress.h',
   )
 
   if glib_have_cocoa
     settings_sources += files('gnextstepsettingsbackend.m')
     contenttype_sources += files('gosxcontenttype.m')
     appinfo_sources += files('gosxappinfo.m')
+    framework_dep = dependency('appleframeworks', modules : ['Foundation', 'CoreFoundation', 'AppKit'])
+    platform_deps += [framework_dep]
     if glib_have_os_x_9_or_later
       unix_sources += files('gcocoanotificationbackend.m')
     endif
@@ -419,7 +398,6 @@ if host_system != 'windows'
 
   subdir('xdgmime')
   internal_deps += [xdgmime_lib]
-  internal_objects += [xdgmime_lib.extract_all_objects(recursive: false)]
 
   install_headers(gio_unix_include_headers, subdir : 'gio-unix-2.0/gio')
 
@@ -439,6 +417,7 @@ else
   platform_deps += uwp_gio_deps
 
   win32_sources += files(
+    'gmemorymonitorwin32.c',
     'gwin32registrykey.c',
     'gwin32mount.c',
     'gwin32volumemonitor.c',
@@ -449,6 +428,8 @@ else
     'gwin32networkmonitor.c',
     'gwin32networkmonitor.h',
     'gwin32notificationbackend.c',
+    'gwin32sid.c',
+    'gwin32sid.h',
   )
 
   gio_win_rc = configure_file(
@@ -484,6 +465,8 @@ gio_sources = files(
   'gdatagrambased.c',
   'gdatainputstream.c',
   'gdataoutputstream.c',
+  'gdebugcontroller.c',
+  'gdebugcontrollerdbus.c',
   'gdrive.c',
   'gdummyfile.c',
   'gdummyproxyresolver.c',
@@ -582,6 +565,9 @@ gio_sources = files(
   'gdtlsclientconnection.c',
   'gdtlsserverconnection.c',
   'gunionvolumemonitor.c',
+  'gunixconnection.c',
+  'gunixcredentialsmessage.c',
+  'gunixsocketaddress.c',
   'gvfs.c',
   'gvolume.c',
   'gvolumemonitor.c',
@@ -631,6 +617,8 @@ gio_headers = files(
   'gdatagrambased.h',
   'gdatainputstream.h',
   'gdataoutputstream.h',
+  'gdebugcontroller.h',
+  'gdebugcontrollerdbus.h',
   'gdrive.h',
   'gemblem.h',
   'gemblemedicon.h',
@@ -717,6 +705,9 @@ gio_headers = files(
   'gdtlsconnection.h',
   'gdtlsclientconnection.h',
   'gdtlsserverconnection.h',
+  'gunixconnection.h',
+  'gunixcredentialsmessage.h',
+  'gunixsocketaddress.h',
   'gvfs.h',
   'gvolume.h',
   'gvolumemonitor.h',
@@ -758,20 +749,17 @@ gioenumtypes_dep = declare_dependency(sources : [gioenumtypes_h, glib_enumtypes_
 if glib_conf.has('HAVE_SYS_INOTIFY_H') and have_func_inotify_init1
   subdir('inotify')
   internal_deps += [ inotify_lib ]
-  internal_objects += [inotify_lib.extract_all_objects(recursive: false)]
 endif
 
 # kevent
 if have_func_kqueue and have_func_kevent
   subdir('kqueue')
   internal_deps += [ kqueue_lib ]
-  internal_objects += [kqueue_lib.extract_all_objects(recursive: false)]
 endif
 
 if host_system == 'windows'
   subdir('win32')
   internal_deps += [ giowin32_lib ]
-  internal_objects += [giowin32_lib.extract_all_objects(recursive: false)]
 endif
 
 if have_bash
@@ -807,13 +795,13 @@ endif
 libgio = library('gio-2.0',
   gioenumtypes_h, gioenumtypes_c, gnetworking_h, gio_sources,
   gio_dtrace_hdr, gio_dtrace_obj,
-  objects : internal_objects,
   version : library_version,
   soversion : soversion,
   darwin_versions : darwin_versions,
   install : true,
   include_directories : [configinc, gioinc],
   #  '$(gio_win32_res_ldflag)',
+  link_with: internal_deps,
   dependencies : [libz_dep, libdl_dep, libmount_dep, libglib_dep,
                   libgobject_dep, libgmodule_dep, selinux_dep, xattr_dep,
                   platform_deps, network_libs, libsysprof_capture_dep],
@@ -835,8 +823,17 @@ libgio_dep = declare_dependency(link_with : libgio,
   dependencies : [libgmodule_dep, libgobject_dep, gioenumtypes_dep],
   include_directories : [gioinc])
 
+# Work around variables kwarg requiring Meson 0.56
+if meson.version().version_compare('>=0.56.0')
+  libgio_dep = declare_dependency(dependencies: libgio_dep,
+    variables: [
+      'schemasdir=' + join_paths(glib_datadir, schemas_subdir),
+      'giomoduledir=' + glib_giomodulesdir,
+    ]
+  )
+endif
+
 pkg.generate(libgio,
-  libraries_private : [osx_ldflags],
   requires : ['glib-2.0', 'gobject-2.0'],
   variables : ['datadir=' + join_paths('${prefix}', get_option('datadir')),
                'schemasdir=' + join_paths('${datadir}', schemas_subdir),

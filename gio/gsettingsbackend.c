@@ -60,7 +60,7 @@ static gboolean g_settings_has_backend;
  * non-strictly-typed data that is stored in a hierarchy. To implement
  * an alternative storage backend for #GSettings, you need to implement
  * the #GSettingsBackend interface and then make it implement the
- * extension point #G_SETTINGS_BACKEND_EXTENSION_POINT_NAME.
+ * extension point %G_SETTINGS_BACKEND_EXTENSION_POINT_NAME.
  *
  * The interface defines methods for reading and writing values, a
  * method for determining if writing of certain values will fail
@@ -703,7 +703,7 @@ g_settings_backend_changed_tree (GSettingsBackend *backend,
  * backend (ie: the one that the backend would contain if
  * g_settings_reset() were called).
  *
- * Returns: the value that was read, or %NULL
+ * Returns: (nullable) (transfer full): the value that was read, or %NULL
  */
 GVariant *
 g_settings_backend_read (GSettingsBackend   *backend,
@@ -741,7 +741,7 @@ g_settings_backend_read (GSettingsBackend   *backend,
  * value for themselves, then this will return %NULL (even if the
  * sysadmin has provided a default value).
  *
- * Returns: the value that was read, or %NULL
+ * Returns: (nullable) (transfer full): the value that was read, or %NULL
  */
 GVariant *
 g_settings_backend_read_user_value (GSettingsBackend   *backend,
@@ -1041,7 +1041,8 @@ g_settings_backend_get_default (void)
  * If this is not implemented in the backend, then a %TRUE
  * #GSimplePermission is returned.
  *
- * Returns: a non-%NULL #GPermission. Free with g_object_unref()
+ * Returns: (not nullable) (transfer full): a non-%NULL #GPermission.
+ *     Free with g_object_unref()
  */
 GPermission *
 g_settings_backend_get_permission (GSettingsBackend *backend,

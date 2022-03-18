@@ -593,11 +593,15 @@ g_dbus_proxy_class_init (GDBusProxyClass *klass)
    *
    * Emitted when a signal from the remote object and interface that @proxy is for, has been received.
    *
+   * Since 2.72 this signal supports detailed connections. You can connect to
+   * the detailed signal `g-signal::x` in order to receive callbacks only when
+   * signal `x` is received from the remote object.
+   *
    * Since: 2.26
    */
   signals[SIGNAL_SIGNAL] = g_signal_new (I_("g-signal"),
                                          G_TYPE_DBUS_PROXY,
-                                         G_SIGNAL_RUN_LAST | G_SIGNAL_MUST_COLLECT,
+                                         G_SIGNAL_RUN_LAST | G_SIGNAL_DETAILED | G_SIGNAL_MUST_COLLECT,
                                          G_STRUCT_OFFSET (GDBusProxyClass, g_signal),
                                          NULL,
                                          NULL,
@@ -890,7 +894,7 @@ on_signal_received (GDBusConnection *connection,
 
   g_signal_emit (proxy,
                  signals[SIGNAL_SIGNAL],
-                 0,
+                 g_quark_try_string (signal_name),
                  sender_name,
                  signal_name,
                  parameters);
@@ -1694,6 +1698,10 @@ static void
 async_initable_init_first (GAsyncInitable *initable)
 {
   GDBusProxy *proxy = G_DBUS_PROXY (initable);
+  GDBusSignalFlags signal_flags = G_DBUS_SIGNAL_FLAGS_NONE;
+
+  if (proxy->priv->flags & G_DBUS_PROXY_FLAGS_NO_MATCH_RULE)
+    signal_flags |= G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE;
 
   if (!(proxy->priv->flags & G_DBUS_PROXY_FLAGS_DO_NOT_LOAD_PROPERTIES))
     {
@@ -1705,7 +1713,7 @@ async_initable_init_first (GAsyncInitable *initable)
                                             "PropertiesChanged",
                                             proxy->priv->object_path,
                                             proxy->priv->interface_name,
-                                            G_DBUS_SIGNAL_FLAGS_NONE,
+                                            signal_flags,
                                             on_properties_changed,
                                             weak_ref_new (G_OBJECT (proxy)),
                                             (GDestroyNotify) weak_ref_free);
@@ -1721,7 +1729,7 @@ async_initable_init_first (GAsyncInitable *initable)
                                             NULL,                        /* member */
                                             proxy->priv->object_path,
                                             NULL,                        /* arg0 */
-                                            G_DBUS_SIGNAL_FLAGS_NONE,
+                                            signal_flags,
                                             on_signal_received,
                                             weak_ref_new (G_OBJECT (proxy)),
                                             (GDestroyNotify) weak_ref_free);
@@ -1737,7 +1745,7 @@ async_initable_init_first (GAsyncInitable *initable)
                                             "NameOwnerChanged",      /* signal name */
                                             "/org/freedesktop/DBus", /* path */
                                             proxy->priv->name,       /* arg0 */
-                                            G_DBUS_SIGNAL_FLAGS_NONE,
+                                            signal_flags,
                                             on_name_owner_changed,
                                             weak_ref_new (G_OBJECT (proxy)),
                                             (GDestroyNotify) weak_ref_free);

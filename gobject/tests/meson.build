@@ -29,11 +29,15 @@ marshalers_c = custom_target('marshalers_c',
 gobject_tests = {
   'qdata' : {},
   'boxed' : {},
+  'cxx' : {
+    'source' : ['cxx.cpp'],
+  },
   'enums' : {},
   'param' : {},
   'threadtests' : {},
   'dynamictests' : {},
   'binding' : {},
+  'bindinggroup' : {},
   'properties' : {},
   'reference' : {},
   'flags' : {},
@@ -50,6 +54,7 @@ gobject_tests = {
   'signals' : {
     'source' : ['signals.c', marshalers_h, marshalers_c],
   },
+  'signalgroup' : {},
   'testing' : {},
   'type-flags' : {},
 }

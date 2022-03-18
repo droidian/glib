@@ -27,9 +27,9 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import xml.etree.ElementTree as ET
 
 import taptestrunner
-
 
 # Disable line length warnings as wrapping the C code templates would be hard
 # flake8: noqa: E501
@@ -55,7 +55,7 @@ class TestCodegen(unittest.TestCase):
     cwd = ""
 
     def setUp(self):
-        self.timeout_seconds = 10  # seconds per test
+        self.timeout_seconds = 100  # seconds per test
         self.tmpdir = tempfile.TemporaryDirectory()
         self.cwd = os.getcwd()
         os.chdir(self.tmpdir.name)
@@ -382,6 +382,46 @@ G_END_DECLS
                 # The output should be the same.
                 self.assertEqual(result1.out, result2.out)
 
+    def test_generate_docbook(self):
+        """Test the basic functionality of the docbook generator."""
+        xml_contents = """
+        <node>
+          <interface name="org.project.Bar.Frobnicator">
+            <method name="RandomMethod"/>
+          </interface>
+        </node>
+        """
+        res = self.runCodegenWithInterface(
+            xml_contents,
+            "--generate-docbook",
+            "test",
+        )
+        self.assertEqual("", res.err)
+        self.assertEqual("", res.out)
+        with open("test-org.project.Bar.Frobnicator.xml", "r") as f:
+            xml_data = f.readlines()
+            self.assertTrue(len(xml_data) != 0)
+
+    def test_generate_rst(self):
+        """Test the basic functionality of the rst generator."""
+        xml_contents = """
+        <node>
+          <interface name="org.project.Bar.Frobnicator">
+            <method name="RandomMethod"/>
+          </interface>
+        </node>
+        """
+        res = self.runCodegenWithInterface(
+            xml_contents,
+            "--generate-rst",
+            "test",
+        )
+        self.assertEqual("", res.err)
+        self.assertEqual("", res.out)
+        with open("test-org.project.Bar.Frobnicator.rst", "r") as f:
+            rst = f.readlines()
+            self.assertTrue(len(rst) != 0)
+
     def test_glib_min_required_invalid(self):
         """Test running with an invalid --glib-min-required."""
         with self.assertRaises(subprocess.CalledProcessError):
@@ -584,6 +624,40 @@ G_END_DECLS
         self.assertEqual("", result.err)
         self.assertEqual(result.out.strip().count("GDBusCallFlags call_flags,"), 2)
         self.assertEqual(result.out.strip().count("gint timeout_msec,"), 2)
+
+    def test_generate_valid_docbook(self):
+        """Test the basic functionality of the docbook generator."""
+        xml_contents = """
+        <node>
+          <interface name="org.project.Bar.Frobnicator">
+            <!-- Resize:
+                 @size: New partition size in bytes, 0 for maximal size.
+                 @options: Options.
+                 @since 2.7.2
+
+                 Resizes the partition.
+
+                 The partition will not change its position but might be slightly bigger
+                 than requested due to sector counts and alignment (e.g. 1MiB).
+                 If the requested size can't be allocated it results in an error.
+                 The maximal size can automatically be set by using 0 as size.
+            -->
+            <method name="Resize">
+              <arg name="size" direction="in" type="t"/>
+              <arg name="options" direction="in" type="a{sv}"/>
+            </method>
+          </interface>
+        </node>
+        """
+        res = self.runCodegenWithInterface(
+            xml_contents,
+            "--generate-docbook",
+            "test",
+        )
+        self.assertEqual("", res.err)
+        self.assertEqual("", res.out)
+        with open("test-org.project.Bar.Frobnicator.xml", "r") as f:
+            self.assertTrue(ET.parse(f) is not None)
 
 
 if __name__ == "__main__":

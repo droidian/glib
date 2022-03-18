@@ -51,6 +51,41 @@ void test_async_queue_sort (void)
 
   g_async_queue_sort (q, compare_func, NULL);
 
+  if (g_test_undefined ())
+    {
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_push_sorted (NULL, GINT_TO_POINTER (1),
+                                 compare_func, NULL);
+      g_test_assert_expected_messages ();
+
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_push_sorted_unlocked (NULL, GINT_TO_POINTER (1),
+                                          compare_func, NULL);
+      g_test_assert_expected_messages ();
+
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_sort (NULL, compare_func, NULL);
+      g_test_assert_expected_messages ();
+
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_sort (q, NULL, NULL);
+      g_test_assert_expected_messages ();
+
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_sort_unlocked (NULL, compare_func, NULL);
+      g_test_assert_expected_messages ();
+
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_sort_unlocked (q, NULL, NULL);
+      g_test_assert_expected_messages ();
+    }
+
   g_async_queue_push_sorted (q, GINT_TO_POINTER (1), compare_func, NULL);
   g_async_queue_push_sorted (q, GINT_TO_POINTER (8), compare_func, NULL);
 
@@ -77,6 +112,8 @@ static void
 test_async_queue_destroy (void)
 {
   GAsyncQueue *q;
+
+  destroy_count = 0;
 
   q = g_async_queue_new_full (destroy_notify);
 
@@ -181,11 +218,24 @@ test_async_queue_timed (void)
   gint64 start, end, diff;
   gpointer val;
 
+  g_get_current_time (&tv);
+  if (g_test_undefined ())
+    {
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_timed_pop (NULL, &tv);
+      g_test_assert_expected_messages ();
+
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_timed_pop_unlocked (NULL, &tv);
+      g_test_assert_expected_messages ();
+    }
+
   q = g_async_queue_new ();
 
   start = g_get_monotonic_time ();
-  val = g_async_queue_timeout_pop (q, G_USEC_PER_SEC / 10);
-  g_assert_null (val);
+  g_assert_null (g_async_queue_timeout_pop (q, G_USEC_PER_SEC / 10));
 
   end = g_get_monotonic_time ();
   diff = end - start;
@@ -195,24 +245,32 @@ test_async_queue_timed (void)
    */
   g_assert_cmpint (diff, <, 2 * G_USEC_PER_SEC);
 
+  g_async_queue_push (q, GINT_TO_POINTER (10));
+  val = g_async_queue_timed_pop (q, NULL);
+  g_assert_cmpint (GPOINTER_TO_INT (val), ==, 10);
+  g_assert_null (g_async_queue_try_pop (q));
+
   start = end;
   g_get_current_time (&tv);
   g_time_val_add (&tv, G_USEC_PER_SEC / 10);
-  val = g_async_queue_timed_pop (q, &tv);
-  g_assert_null (val);
+  g_assert_null (g_async_queue_timed_pop (q, &tv));
 
   end = g_get_monotonic_time ();
   diff = end - start;
   g_assert_cmpint (diff, >=, G_USEC_PER_SEC / 10);
   g_assert_cmpint (diff, <, 2 * G_USEC_PER_SEC);
 
+  g_async_queue_push (q, GINT_TO_POINTER (10));
+  val = g_async_queue_timed_pop_unlocked (q, NULL);
+  g_assert_cmpint (GPOINTER_TO_INT (val), ==, 10);
+  g_assert_null (g_async_queue_try_pop (q));
+
   start = end;
   g_get_current_time (&tv);
   g_time_val_add (&tv, G_USEC_PER_SEC / 10);
   g_async_queue_lock (q);
-  val = g_async_queue_timed_pop_unlocked (q, &tv);
+  g_assert_null (g_async_queue_timed_pop_unlocked (q, &tv));
   g_async_queue_unlock (q);
-  g_assert_null (val);
 
   end = g_get_monotonic_time ();
   diff = end - start;
@@ -228,6 +286,29 @@ test_async_queue_remove (void)
   GAsyncQueue *q;
 
   q = g_async_queue_new ();
+
+  if (g_test_undefined ())
+    {
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_remove (NULL, GINT_TO_POINTER (1));
+      g_test_assert_expected_messages ();
+
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_remove (q, NULL);
+      g_test_assert_expected_messages ();
+
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_remove_unlocked (NULL, GINT_TO_POINTER (1));
+      g_test_assert_expected_messages ();
+
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_remove_unlocked (q, NULL);
+      g_test_assert_expected_messages ();
+    }
 
   g_async_queue_push (q, GINT_TO_POINTER (10));
   g_async_queue_push (q, GINT_TO_POINTER (2));
@@ -252,6 +333,29 @@ test_async_queue_push_front (void)
 
   q = g_async_queue_new ();
 
+  if (g_test_undefined ())
+    {
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_push_front (NULL, GINT_TO_POINTER (1));
+      g_test_assert_expected_messages ();
+
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_push_front (q, NULL);
+      g_test_assert_expected_messages ();
+
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_push_front_unlocked (NULL, GINT_TO_POINTER (1));
+      g_test_assert_expected_messages ();
+
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_push_front_unlocked (q, NULL);
+      g_test_assert_expected_messages ();
+    }
+
   g_async_queue_push (q, GINT_TO_POINTER (10));
   g_async_queue_push (q, GINT_TO_POINTER (2));
   g_async_queue_push (q, GINT_TO_POINTER (7));
@@ -268,11 +372,149 @@ test_async_queue_push_front (void)
   g_async_queue_unref (q);
 }
 
+static void
+test_basics (void)
+{
+  GAsyncQueue *q;
+  gpointer item;
+
+  destroy_count = 0;
+
+  if (g_test_undefined ())
+    {
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_length (NULL);
+      g_test_assert_expected_messages ();
+
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_length_unlocked (NULL);
+      g_test_assert_expected_messages ();
+
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_ref (NULL);
+      g_test_assert_expected_messages ();
+
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_ref_unlocked (NULL);
+      g_test_assert_expected_messages ();
+
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_unref (NULL);
+      g_test_assert_expected_messages ();
+
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_unref_and_unlock (NULL);
+      g_test_assert_expected_messages ();
+
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_lock (NULL);
+      g_test_assert_expected_messages ();
+
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_unlock (NULL);
+      g_test_assert_expected_messages ();
+
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_pop (NULL);
+      g_test_assert_expected_messages ();
+
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_pop_unlocked (NULL);
+      g_test_assert_expected_messages ();
+
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_try_pop (NULL);
+      g_test_assert_expected_messages ();
+
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_try_pop_unlocked (NULL);
+      g_test_assert_expected_messages ();
+
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_timeout_pop (NULL, 1);
+      g_test_assert_expected_messages ();
+
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_timeout_pop_unlocked (NULL, 1);
+      g_test_assert_expected_messages ();
+    }
+
+  q = g_async_queue_new_full (destroy_notify);
+
+  if (g_test_undefined ())
+    {
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_push (NULL, GINT_TO_POINTER (1));
+      g_test_assert_expected_messages ();
+
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_push (q, NULL);
+      g_test_assert_expected_messages ();
+
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_push_unlocked (NULL, GINT_TO_POINTER (1));
+      g_test_assert_expected_messages ();
+
+      g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                             "*assertion* failed*");
+      g_async_queue_push_unlocked (q, NULL);
+      g_test_assert_expected_messages ();
+    }
+
+  g_async_queue_lock (q);
+  g_async_queue_ref (q);
+  g_async_queue_unlock (q);
+  g_async_queue_lock (q);
+  g_async_queue_ref_unlocked (q);
+  g_async_queue_unref_and_unlock (q);
+
+  item = g_async_queue_try_pop (q);
+  g_assert_null (item);
+
+  g_async_queue_lock (q);
+  item = g_async_queue_try_pop_unlocked (q);
+  g_async_queue_unlock (q);
+  g_assert_null (item);
+
+  g_async_queue_push (q, GINT_TO_POINTER (1));
+  g_async_queue_push (q, GINT_TO_POINTER (2));
+  g_async_queue_push (q, GINT_TO_POINTER (3));
+  g_assert_cmpint (destroy_count, ==, 0);
+
+  g_async_queue_unref (q);
+  g_assert_cmpint (destroy_count, ==, 0);
+
+  item = g_async_queue_pop (q);
+  g_assert_cmpint (GPOINTER_TO_INT (item), ==, 1);
+  g_assert_cmpint (destroy_count, ==, 0);
+
+  g_async_queue_unref (q);
+  g_assert_cmpint (destroy_count, ==, 2);
+}
+
 int
 main (int argc, char *argv[])
 {
   g_test_init (&argc, &argv, NULL);
 
+  g_test_add_func ("/asyncqueue/basics", test_basics);
   g_test_add_func ("/asyncqueue/sort", test_async_queue_sort);
   g_test_add_func ("/asyncqueue/destroy", test_async_queue_destroy);
   g_test_add_func ("/asyncqueue/threads", test_async_queue_threads);

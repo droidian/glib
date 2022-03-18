@@ -1,10 +1,10 @@
 project('glib', 'c', 'cpp',
-  version : '2.70.5',
-  # NOTE: We keep this pinned at 0.49 because that's what Debian 10 ships
-  meson_version : '>= 0.49.2',
+  version : '2.72.0',
+  # NOTE: We keep this pinned at 0.52 because that's what Debian Stable ships
+  meson_version : '>= 0.52.0',
   default_options : [
     'buildtype=debugoptimized',
-    'warning_level=1',
+    'warning_level=3',
     'c_std=gnu99'
   ]
 )
@@ -24,8 +24,25 @@ if cc.get_id() == 'msvc'
   # If a warning is completely useless and spammy, use '/wdXXXX' to suppress it
   # If a warning is harmless but hard to fix, use '/woXXXX' so it's shown once
   # NOTE: Only add warnings here if you are sure they're spurious
-  add_project_arguments('/wd4035', '/wd4715', '/wd4116',
-    '/wd4046', '/wd4068', '/wo4090',language : 'c')
+  add_project_arguments(cc.get_supported_arguments([
+    '/wo4057',  # 'operator': 'identifier1' differs in indirection to slightly different base types from 'identifier2'
+    '/wd4068',  # unknown pragma
+    '/wo4090',  # 'operation': different 'modifier' qualifiers
+    '/wd4100',  # 'identifier': unreferenced formal parameter
+    '/wd4116',  # unnamed type definition in parentheses
+    '/wo4125',  # decimal digit terminates octal escape sequence
+    '/wd4127',  # conditional expression is constant
+    '/wd4146',  # unary minus operator applied to unsigned type, result still unsigned
+    '/wd4152',  # nonstandard extension, function/data pointer conversion in expression
+    '/wd4201',  # nonstandard extension used: nameless struct/union
+    '/wd4232',  # nonstandard extension used: 'identifier': address of dllimport 'dllimport' is not static, identity not guaranteed
+    '/wo4245',  # 'conversion_type': conversion from 'type1' to 'type2', signed/unsigned mismatch
+    '/wo4267',  # 'variable': conversion from 'size_t' to 'type', possible loss of data
+    '/wd4334',  # 'shift_operator': result of 32-bit shift implicitly converted to 64 bits (was 64-bit shift intended?)
+    '/wo4389',  # 'operator': signed/unsigned mismatch
+    '/wo4702',  # unreachable code
+    '/wd4706'   # assignment within conditional expression
+    ]), language : 'c')
   # Set the input and exec encoding to utf-8, like is the default with GCC
   add_project_arguments(cc.get_supported_arguments(['/utf-8']), language: 'c')
   # Disable SAFESEH with MSVC for plugins and libs that use external deps that
@@ -200,6 +217,9 @@ endif
 glib_hidden_visibility_args = []
 if get_option('default_library') != 'static'
   if host_system == 'windows' or host_system == 'cygwin'
+    if get_option('default_library') != 'shared'
+      error('On Windows default_library must be "shared" or "static" but not "both"')
+    endif
     glib_conf.set('DLL_EXPORT', true)
     if cc.get_id() == 'msvc' or cc.get_id() == 'clang-cl'
       glib_conf.set('_GLIB_EXTERN', '__declspec(dllexport) extern')
@@ -214,8 +234,10 @@ if get_option('default_library') != 'static'
 endif
 
 if get_option('default_library') == 'static'
-    glibconfig_conf.set('GLIB_STATIC_COMPILATION', '1')
-    glibconfig_conf.set('GOBJECT_STATIC_COMPILATION', '1')
+  glibconfig_conf.set('GLIB_STATIC_COMPILATION', '1')
+  glibconfig_conf.set('GOBJECT_STATIC_COMPILATION', '1')
+  glibconfig_conf.set('G_INTL_STATIC_COMPILATION', '1')
+  glibconfig_conf.set('FFI_STATIC_BUILD', '1')
 endif
 
 # Cygwin glib port maintainers made it clear
@@ -275,6 +297,7 @@ add_project_arguments(glib_debug_cflags, language: 'c')
 
 headers = [
   'alloca.h',
+  'afunix.h',
   'crt_externs.h',
   'dirent.h', # MSC does not come with this by default
   'float.h',
@@ -424,31 +447,40 @@ endforeach
 
 # Compiler flags
 if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
-  warning_c_args = [
+  warning_common_args = [
     '-Wduplicated-branches',
     '-Wimplicit-fallthrough',
     '-Wmisleading-indentation',
-    '-Wstrict-prototypes',
     '-Wunused',
     # Due to maintained deprecated code, we do not want to see unused parameters
     '-Wno-unused-parameter',
     # Due to pervasive use of things like GPOINTER_TO_UINT(), we do not support
     # building with -Wbad-function-cast.
-    '-Wno-bad-function-cast',
     '-Wno-cast-function-type',
     # Due to function casts through (void*) we cannot support -Wpedantic:
     # https://wiki.gnome.org/Projects/GLib/CompilerRequirements#Function_pointer_conversions.
     '-Wno-pedantic',
     # A zero-length format string shouldn't be considered an issue.
     '-Wno-format-zero-length',
-    '-Werror=declaration-after-statement',
+    # We explicitly require variadic macros
+    '-Wno-variadic-macros',
     '-Werror=format=2',
-    '-Werror=implicit-function-declaration',
     '-Werror=init-self',
     '-Werror=missing-include-dirs',
-    '-Werror=missing-prototypes',
     '-Werror=pointer-arith',
   ]
+
+  warning_c_args = warning_common_args + [
+    '-Wstrict-prototypes',
+    # Due to pervasive use of things like GPOINTER_TO_UINT(), we do not support
+    # building with -Wbad-function-cast.
+    '-Wno-bad-function-cast',
+    '-Werror=declaration-after-statement',
+    '-Werror=implicit-function-declaration',
+    '-Werror=missing-prototypes',
+  ]
+  warning_cxx_args = warning_common_args
+  warning_objc_args = warning_c_args
   warning_c_link_args = [
     '-Wl,-z,nodelete',
   ]
@@ -457,10 +489,13 @@ if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
   endif
 else
   warning_c_args = []
+  warning_cxx_args = []
+  warning_objc_args = []
   warning_c_link_args = []
 endif
 
 add_project_arguments(cc.get_supported_arguments(warning_c_args), language: 'c')
+add_project_arguments(cxx.get_supported_arguments(warning_cxx_args), language: 'cpp')
 
 # FIXME: We cannot build some of the GResource tests with -z nodelete, which
 # means we cannot use that flag in add_project_link_arguments(), and must add
@@ -635,8 +670,19 @@ if host_system == 'android'
 endif
 
 
-# Check that posix_memalign() is usable; must use header
-if host_system != 'windows' and cc.has_function('posix_memalign', prefix : '#include <stdlib.h>')
+if cc.has_function('memalign', prefix: '#include <stdlib.h>\n#include <malloc.h>')
+  glib_conf.set('HAVE_MEMALIGN', 1)
+endif
+
+if cc.has_function('_aligned_malloc', prefix: '#include <malloc.h>')
+  glib_conf.set('HAVE__ALIGNED_MALLOC', 1)
+endif
+
+if host_system != 'windows' and cc.has_function('aligned_alloc', prefix: '#include <stdlib.h>')
+  glib_conf.set('HAVE_ALIGNED_ALLOC', 1)
+endif
+
+if host_system != 'windows' and cc.has_function('posix_memalign', prefix: '#include <stdlib.h>')
   glib_conf.set('HAVE_POSIX_MEMALIGN', 1)
 endif
 
@@ -746,7 +792,6 @@ if host_system == 'linux'
   endif
 endif
 
-osx_ldflags = []
 glib_have_os_x_9_or_later = false
 glib_have_carbon = false
 glib_have_cocoa = false
@@ -754,7 +799,7 @@ if host_system == 'darwin'
   add_languages('objc')
   objcc = meson.get_compiler('objc')
 
-  osx_ldflags += ['-Wl,-framework,CoreFoundation']
+  add_project_arguments(objcc.get_supported_arguments(warning_objc_args), language: 'objc')
 
   # Mac OS X Carbon support
   glib_have_carbon = objcc.compiles('''#include <Carbon/Carbon.h>
@@ -763,7 +808,6 @@ if host_system == 'darwin'
 
   if glib_have_carbon
     glib_conf.set('HAVE_CARBON', true)
-    osx_ldflags += '-Wl,-framework,Carbon'
     glib_have_os_x_9_or_later = objcc.compiles('''#include <AvailabilityMacros.h>
                                                   #if MAC_OS_X_VERSION_MIN_REQUIRED < 1090
                                                   #error Compiling for minimum OS X version before 10.9
@@ -780,13 +824,7 @@ if host_system == 'darwin'
 
   if glib_have_cocoa
     glib_conf.set('HAVE_COCOA', true)
-    osx_ldflags += ['-Wl,-framework,Foundation', '-Wl,-framework,AppKit']
   endif
-
-  # FIXME: libgio mix C and objC source files and there is no way to reliably
-  # know which language flags it's going to use to link. Add to both languages
-  # for now. See https://github.com/mesonbuild/meson/issues/3585.
-  add_project_link_arguments(osx_ldflags, language : ['objc', 'c'])
 endif
 
 if host_system == 'qnx'
@@ -1848,6 +1886,10 @@ glibconfig_conf.set('G_ATOMIC_LOCK_FREE', have_atomic_lock_free)
 
 # === Threads ===
 
+if get_option('force_posix_threads')
+  warning('DEPRECATION: Option \'force_posix_threads\' is deprecated and will be removed after GLib 2.72; please file an issue with your use case if you still require it')
+endif
+
 # Determination of thread implementation
 if host_system == 'windows' and not get_option('force_posix_threads')
   thread_dep = []
@@ -2046,13 +2088,13 @@ endif
 # FIXME: glib-gettext.m4 has much more checks to detect broken/uncompatible
 # implementations. This could be extended if issues are found in some platforms.
 libintl_deps = []
-if cc.has_function('ngettext', args : osx_ldflags)
+if cc.has_function('ngettext')
   have_bind_textdomain_codeset = cc.has_function('bind_textdomain_codeset')
 else
   # First just find the bare library.
   libintl = cc.find_library('intl', required : false)
   # The bare library probably won't link without help if it's static.
-  if libintl.found() and not cc.has_function('ngettext', args : osx_ldflags, dependencies : libintl)
+  if libintl.found() and not cc.has_function('ngettext', dependencies : libintl)
      libintl_iconv = cc.find_library('iconv', required : false)
      # libintl supports different threading APIs, which may not
      # require additional flags, but it defaults to using pthreads if
@@ -2062,10 +2104,10 @@ else
      # also defining the macros with the -pthread flag.
      libintl_pthread = cc.find_library('pthread', required : false)
      # Try linking with just libiconv.
-     if libintl_iconv.found() and cc.has_function('ngettext', args : osx_ldflags, dependencies : [libintl, libintl_iconv])
+     if libintl_iconv.found() and cc.has_function('ngettext', dependencies : [libintl, libintl_iconv])
        libintl_deps += [libintl_iconv]
      # Then also try linking with pthreads.
-     elif libintl_iconv.found() and libintl_pthread.found() and cc.has_function('ngettext', args : osx_ldflags, dependencies : [libintl, libintl_iconv, libintl_pthread])
+     elif libintl_iconv.found() and libintl_pthread.found() and cc.has_function('ngettext', dependencies : [libintl, libintl_iconv, libintl_pthread])
        libintl_deps += [libintl_iconv, libintl_pthread]
      else
        libintl = disabler()
@@ -2077,7 +2119,7 @@ else
     have_bind_textdomain_codeset = true  # proxy-libintl supports it
   else
     libintl_deps = [libintl] + libintl_deps
-    have_bind_textdomain_codeset = cc.has_function('bind_textdomain_codeset', args : osx_ldflags,
+    have_bind_textdomain_codeset = cc.has_function('bind_textdomain_codeset', 
                                                    dependencies : libintl_deps)
   endif
 endif
@@ -2281,7 +2323,7 @@ if host_system == 'windows' and cc.get_id() != 'msvc' and cc.get_id() != 'clang-
   add_project_arguments(win32_cflags, language : 'c')
 
   # Win32 API libs, used only by libglib and exposed in glib-2.0.pc
-  win32_ldflags = ['-lws2_32', '-lole32', '-lwinmm', '-lshlwapi']
+  win32_ldflags = ['-lws2_32', '-lole32', '-lwinmm', '-lshlwapi', '-luuid']
 elif host_system == 'cygwin'
   win32_ldflags = ['-luser32', '-lkernel32']
 endif

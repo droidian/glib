@@ -76,6 +76,10 @@
 #include "glibintl.h"
 #include "gioprivate.h"
 
+#ifdef G_OS_WIN32
+#include "giowin32-afunix.h"
+#endif
+
 /**
  * SECTION:gsocket
  * @short_description: Low-level socket object
@@ -3138,7 +3142,7 @@ g_socket_get_available_bytes (GSocket *socket)
        * systems add internal header size to the reported size, making it
        * unusable for this function. */
       avail = recv (socket->priv->fd, buf, bufsize, MSG_PEEK);
-      if (avail == -1)
+      if ((gint) avail == -1)
         {
           int errsv = get_socket_errno ();
 #ifdef G_OS_WIN32
@@ -3997,7 +4001,10 @@ socket_source_dispatch (GSource     *source,
   gboolean ret;
 
 #ifdef G_OS_WIN32
-  events = update_condition (socket_source->socket);
+  if ((socket_source->pollfd.revents & G_IO_NVAL) != 0)
+    events = G_IO_NVAL;
+  else
+    events = update_condition (socket_source->socket);
 #else
   if (g_socket_is_closed (socket_source->socket))
     {
@@ -4570,8 +4577,7 @@ G_STMT_START { \
       _msg->msg_control = NULL; \
     else \
       { \
-        _msg->msg_control = g_alloca (_msg->msg_controllen); \
-        memset (_msg->msg_control, '\0', _msg->msg_controllen); \
+        _msg->msg_control = g_alloca0 (_msg->msg_controllen); \
       } \
  \
     cmsg = CMSG_FIRSTHDR (_msg); \
@@ -5275,7 +5281,7 @@ g_socket_send_messages_with_timeout (GSocket        *socket,
 #else
   {
     gssize result;
-    gint i;
+    guint i;
     gint64 wait_timeout;
 
     wait_timeout = timeout_us;
@@ -5305,7 +5311,11 @@ g_socket_send_messages_with_timeout (GSocket        *socket,
 #endif
           }
 
-        result = pollable_result == G_POLLABLE_RETURN_OK ? bytes_written : -1;
+        if (G_MAXSSIZE > bytes_written &&
+            pollable_result == G_POLLABLE_RETURN_OK)
+          result = (gssize) bytes_written;
+        else
+          result = -1;
 
         /* check if we've timed out or how much time to wait at most */
         if (timeout_us > 0)
@@ -6052,10 +6062,20 @@ g_socket_get_credentials (GSocket   *socket,
       {
         if (cred.cr_version == XUCRED_VERSION)
           {
+            pid_t pid;
+            socklen_t optlen = sizeof (pid);
+
             ret = g_credentials_new ();
             g_credentials_set_native (ret,
                                       G_CREDENTIALS_NATIVE_TYPE,
                                       &cred);
+
+            if (getsockopt (socket->priv->fd,
+                            SOL_LOCAL,
+                            LOCAL_PEERPID,
+                            &pid,
+                            &optlen) == 0)
+              _g_credentials_set_local_peerid (ret, pid);
           }
         else
           {
@@ -6111,6 +6131,23 @@ g_socket_get_credentials (GSocket   *socket,
                                   G_CREDENTIALS_TYPE_SOLARIS_UCRED,
                                   ucred);
         ucred_free (ucred);
+      }
+  }
+#elif G_CREDENTIALS_USE_WIN32_PID
+  {
+    DWORD peerid, drc;
+
+    if (WSAIoctl (socket->priv->fd, SIO_AF_UNIX_GETPEERPID,
+                  NULL, 0U,
+                  &peerid, sizeof(peerid),
+                  /* Windows bug: always 0 https://github.com/microsoft/WSL/issues/4676 */
+                  &drc,
+                  NULL, NULL) == 0)
+      {
+        ret = g_credentials_new ();
+        g_credentials_set_native (ret,
+                                  G_CREDENTIALS_TYPE_WIN32_PID,
+                                  &peerid);
       }
   }
 #else

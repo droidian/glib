@@ -59,9 +59,14 @@ gmoduleconf_h = configure_file(input : 'gmoduleconf.h.in',
                                output : 'gmoduleconf.h',
                                configuration : gmoduleconf_conf)
 
-install_headers(['gmodule.h'], subdir : 'glib-2.0')
+# Expose as variable to be used by gobject-introspection
+# when it includes GLib as a subproject
+gmodule_h = files('gmodule.h')
+gmodule_c = files('gmodule.c')
 
-gmodule_sources = ['gmodule.c']
+install_headers([gmodule_h], subdir : 'glib-2.0')
+
+gmodule_sources = [gmodule_c]
 if host_system == 'windows'
   gmodule_win_rc = configure_file(
     input: 'gmodule.rc.in',
@@ -125,4 +130,8 @@ if meson.version().version_compare('>=0.54.0')
   meson.override_dependency('gmodule-no-export-2.0', libgmodule_dep)
   meson.override_dependency('gmodule-export-2.0', libgmodule_dep)
   meson.override_dependency('gmodule-2.0', libgmodule_dep)
+endif
+
+if build_tests
+  subdir('tests')
 endif
