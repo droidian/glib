@@ -15,3 +15,4 @@ debian/gdbus-server-auth-Normally-skip-flaky-DBUS_COOKIE_SHA1-te.patch
 debian/Skip-memory-monitor-dbus-test-if-not-specifically-request.patch
 debian/Add-extra-debug-to-memory-monitor-dbus-test.patch
 debian/tests-Skip-debugcontroller-test.patch
+debian/gdesktopappinfo-Recognize-gnome-console-as-a-terminal-app.patch
