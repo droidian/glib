@@ -1,15 +1,18 @@
-glib2.0 (2.72.1-1) UNRELEASED; urgency=medium
+glib2.0 (2.72.1-1) unstable; urgency=medium
 
   [ Jeremy Bicha ]
   * New upstream release (LP: #1969115)
+    - Includes workaround for meson #1008382
   * Add patch to recognize GNOME Console as a terminal app
+  * Refresh patch
+  * debian/libglib2.0-0.symbols: Add new symbol
 
   [ Johannes Schauer Marin Rodrigues ]
   * debian/libglib2.0-0.postinst.in: only run clean-up-unmanaged-libraries
     on upgrades and not on new installations
     (Closes: #1008096)
 
- -- Jeremy Bicha <jbicha@ubuntu.com>  Thu, 14 Apr 2022 08:42:24 -0400
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Thu, 14 Apr 2022 09:35:23 -0400
 
 glib2.0 (2.72.0-1) unstable; urgency=medium
 
