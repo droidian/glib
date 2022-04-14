@@ -171,6 +171,14 @@ else
   }
 endif
 
+have_dbus_daemon = find_program('dbus-daemon', required : false).found()
+if have_dbus_daemon
+  gio_tests += {
+    'debugcontroller' : {},
+    'defaultvalue' : {'extra_sources' : [giotypefuncs_inc]},
+  }
+endif
+
 #  Test programs buildable on UNIX only
 if host_machine.system() != 'windows'
   gio_tests += {
@@ -183,6 +191,7 @@ if host_machine.system() != 'windows'
     },
     'gdbus-peer-object-manager' : {},
     'live-g-file' : {},
+    'resolver-parsing' : {'dependencies' : [network_libs]},
     'socket-address' : {},
     'stream-rw_all' : {},
     'unix-fd' : {},
@@ -244,8 +253,6 @@ if host_machine.system() != 'windows'
     }
   endif
 
-  #  Test programs that need to bring up a session bus (requires dbus-daemon)
-  have_dbus_daemon = find_program('dbus-daemon', required : false).found()
   if have_dbus_daemon
     annotate_args = [
       '--annotate', 'org.project.Bar', 'Key1', 'Value1',
@@ -318,8 +325,6 @@ if host_machine.system() != 'windows'
         'extra_sources' : extra_sources,
         'suite' : ['slow'],
       },
-      'debugcontroller' : {},
-      'defaultvalue' : {'extra_sources' : [giotypefuncs_inc]},
       'gdbus-auth' : {'extra_sources' : extra_sources},
       'gdbus-bz627724' : {'extra_sources' : extra_sources},
       'gdbus-close-pending' : {'extra_sources' : extra_sources},
@@ -333,6 +338,7 @@ if host_machine.system() != 'windows'
         'suite' : ['slow'],
       },
       'gdbus-introspection' : {'extra_sources' : extra_sources},
+      'gdbus-method-invocation' : {'extra_sources' : extra_sources},
       'gdbus-names' : {'extra_sources' : extra_sources},
       'gdbus-proxy' : {'extra_sources' : extra_sources},
       'gdbus-proxy-threads' : {
