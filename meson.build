@@ -1,5 +1,5 @@
 project('glib', 'c', 'cpp',
-  version : '2.72.0',
+  version : '2.72.1',
   # NOTE: We keep this pinned at 0.52 because that's what Debian Stable ships
   meson_version : '>= 0.52.0',
   default_options : [
@@ -165,8 +165,8 @@ glibconfig_conf.set('LT_CURRENT_MINUS_AGE', soversion)
 
 glib_conf.set('_GNU_SOURCE', 1)
 
-if host_system == 'windows'
-  # Poll doesn't work on devices on Windows
+if host_system in ['windows', 'darwin']
+  # Poll doesn't work on devices on Windows, and macOS's poll() implementation is known to be broken
   glib_conf.set('BROKEN_POLL', true)
 endif
 

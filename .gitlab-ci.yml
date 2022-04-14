@@ -10,11 +10,11 @@ cache:
     - _ccache/
 
 variables:
-  FEDORA_IMAGE: "registry.gitlab.gnome.org/gnome/glib/fedora:v12"
-  COVERITY_IMAGE: "registry.gitlab.gnome.org/gnome/glib/coverity:v2"
+  FEDORA_IMAGE: "registry.gitlab.gnome.org/gnome/glib/fedora:v13"
+  COVERITY_IMAGE: "registry.gitlab.gnome.org/gnome/glib/coverity:v3"
   DEBIAN_IMAGE: "registry.gitlab.gnome.org/gnome/glib/debian-stable:v9"
-  ANDROID_IMAGE: "registry.gitlab.gnome.org/gnome/glib/android-ndk:v5"
-  MINGW_IMAGE: "registry.gitlab.gnome.org/gnome/glib/mingw:v4"
+  ANDROID_IMAGE: "registry.gitlab.gnome.org/gnome/glib/android-ndk:v6"
+  MINGW_IMAGE: "registry.gitlab.gnome.org/gnome/glib/mingw:v5"
   MESON_TEST_TIMEOUT_MULTIPLIER: 2
   G_MESSAGES_DEBUG: all
   MESON_COMMON_OPTIONS_NO_WARNING: "--buildtype debug --wrap-mode=nodownload"
@@ -90,7 +90,6 @@ fedora-x86_64:
             --libdir=lib
             -Dsystemtap=true
             -Ddtrace=true
-            -Dfam=true
             -Dinstalled_tests=true
             -Dgtk_doc=true
             _build
@@ -164,7 +163,6 @@ installed-tests:
     - meson ${MESON_COMMON_OPTIONS}
             --werror
             --prefix=/usr --libdir=/usr/lib64
-            -Dfam=true
             -Dinstalled_tests=true
             -Ddefault_library=both
             -Ddtrace=false
@@ -202,7 +200,6 @@ G_DISABLE_ASSERT:
             --werror
             -Dsystemtap=true
             -Ddtrace=true
-            -Dfam=true
             -Dinstalled_tests=true
             -Dglib_assert=false
             _build
@@ -233,7 +230,6 @@ valgrind:
             --werror
             -Dsystemtap=true
             -Ddtrace=true
-            -Dfam=true
             -Dinstalled_tests=true
             _build
     - ninja -C _build
@@ -501,7 +497,6 @@ scan-build:
             --libdir=lib
             -Dsystemtap=true
             -Ddtrace=true
-            -Dfam=true
             -Dinstalled_tests=true
             _scan_build
     - ninja -C _scan_build scan-build
@@ -530,7 +525,6 @@ coverity:
             --libdir=lib
             -Dsystemtap=true
             -Ddtrace=true
-            -Dfam=true
             -Dinstalled_tests=true
             _coverity_build
     - $HOME/cov-analysis-linux64-*/bin/cov-build --dir cov-int ninja -C _coverity_build
