@@ -5,12 +5,19 @@
 
 set -eu
 
+namespace=glib/
+
 # Disable gvfs if it happens to be installed. We want to test the built-in
 # stuff
 export GIO_USE_VFS=local
 export GIO_USE_VOLUME_MONITOR=unix
 
 export XDG_RUNTIME_DIR="$AUTOPKGTEST_TMP"
+
+if [ -z "$(ginsttest-runner -l "$namespace")" ]; then
+    echo "Error: no installed-tests found matching $namespace" >&2
+    exit 1
+fi
 
 printf "Running as: "; id -a
 printf "passwd entry: "; getent passwd "$(id -u)" || echo "(exit status $?)"
@@ -52,4 +59,4 @@ debian/tests/run-with-locales \
 	--generate tt_RU.utf8 \
 	--generate tt_RU@iqtelif=UTF-8 \
 	-- \
-gnome-desktop-testing-runner glib
+ginsttest-runner --tap "$namespace"
