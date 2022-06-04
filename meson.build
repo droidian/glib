@@ -1,5 +1,5 @@
 project('glib', 'c', 'cpp',
-  version : '2.72.1',
+  version : '2.72.2',
   # NOTE: We keep this pinned at 0.52 because that's what Debian Stable ships
   meson_version : '>= 0.52.0',
   default_options : [
@@ -1709,7 +1709,7 @@ va_list_val_copy_prog = '''
 
 if cc_can_run
   rres = cc.run(va_list_val_copy_prog, name : 'va_lists can be copied as values')
-  glib_va_val_copy = rres.returncode() == 0
+  glib_va_val_copy = rres.compiled() and rres.returncode() == 0
 else
   glib_va_val_copy = meson.get_cross_property('va_val_copy', true)
 endif
@@ -1988,7 +1988,7 @@ stack_grows_check_prog = '''
 
 if cc_can_run
   rres = cc.run(stack_grows_check_prog, name : 'stack grows check')
-  growing_stack = rres.returncode() == 0
+  growing_stack = rres.compiled() and rres.returncode() == 0
 else
   growing_stack = meson.get_cross_property('growing_stack', false)
 endif
