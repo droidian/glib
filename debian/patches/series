@@ -10,7 +10,6 @@ debian/Skip-test-which-performs-some-unreliable-floating-point-c.patch
 debian/Skip-unreliable-gdbus-threading-tests--by-default.patch
 debian/gmenumodel-test-Mark-as-flaky.patch
 debian/gvariant-test-Don-t-run-at-build-time-on-mips.patch
-debian/testfilemonitor-Skip-if-we-are-avoiding-flaky-tests.patch
 debian/gdbus-server-auth-Normally-skip-flaky-DBUS_COOKIE_SHA1-te.patch
 debian/Skip-memory-monitor-dbus-test-if-not-specifically-request.patch
 debian/Add-extra-debug-to-memory-monitor-dbus-test.patch
@@ -19,3 +18,4 @@ debian/gdesktopappinfo-Recognize-gnome-console-as-a-terminal-app.patch
 glocalfilemonitor-Avoid-file-monitor-destruction-from-eve.patch
 glocalfilemonitor-Skip-event-handling-if-the-source-has-b.patch
 tests-Add-a-test-for-GFileMonitor-deadlocks.patch
+debian/testfilemonitor-Skip-if-we-are-avoiding-flaky-tests.patch

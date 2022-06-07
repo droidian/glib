@@ -7,11 +7,11 @@ See https://gitlab.gnome.org/GNOME/glib/issues/1634
 Signed-off-by: Simon McVittie <smcv@debian.org>
 Forwarded: no
 ---
- gio/tests/testfilemonitor.c | 34 +++++++++++++++++++++++++++++++++-
- 1 file changed, 33 insertions(+), 1 deletion(-)
+ gio/tests/testfilemonitor.c | 38 +++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 37 insertions(+), 1 deletion(-)
 
 diff --git a/gio/tests/testfilemonitor.c b/gio/tests/testfilemonitor.c
-index a47aeab..a220d46 100644
+index 082f0db..7e7db90 100644
 --- a/gio/tests/testfilemonitor.c
 +++ b/gio/tests/testfilemonitor.c
 @@ -32,6 +32,12 @@ setup (Fixture       *fixture,
@@ -104,3 +104,14 @@ index a47aeab..a220d46 100644
    g_test_bug ("https://bugzilla.gnome.org/show_bug.cgi?id=755721");
  
    if (skip_win32 ())
+@@ -1043,6 +1075,10 @@ test_finalize_in_callback (Fixture       *fixture,
+   GFile *file = NULL;
+   guint i;
+ 
++  /* respect g_test_skip() during setup() */
++  if (g_test_failed ())
++     return;
++
+   g_test_summary ("Test that finalization of a GFileMonitor in one of its "
+                   "callbacks doesn’t cause a deadlock.");
+   g_test_bug ("https://gitlab.gnome.org/GNOME/glib/-/issues/1941");
