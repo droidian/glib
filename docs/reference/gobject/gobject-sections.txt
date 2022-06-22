@@ -531,6 +531,7 @@ g_param_spec_get_default_value
 g_param_value_set_default
 g_param_value_defaults
 g_param_value_validate
+g_param_value_is_valid
 g_param_value_convert
 g_param_values_cmp
 g_param_spec_is_valid_name
@@ -813,6 +814,7 @@ g_param_spec_types
 <INCLUDE>glib-object.h,gobject/gvaluecollector.h</INCLUDE>
 GTypeCValue
 G_VALUE_COLLECT_INIT
+G_VALUE_COLLECT_INIT2
 G_VALUE_COLLECT
 G_VALUE_COLLECT_SKIP
 G_VALUE_LCOPY
@@ -1034,6 +1036,7 @@ g_signal_group_connect_after
 g_signal_group_connect_data
 g_signal_group_connect_object
 g_signal_group_connect_swapped
+g_signal_group_connect_closure
 g_signal_group_dup_target
 g_signal_group_get_type
 g_signal_group_new

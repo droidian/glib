@@ -45,6 +45,7 @@ glib_tests = {
   'hmac' : {},
   'hook' : {},
   'hostutils' : {},
+  'io-channel-basic' : {},
   'io-channel' : {},
   'keyfile' : {},
   'list' : {},
@@ -52,6 +53,7 @@ glib_tests = {
   'macros' : {},
   'mainloop' : {},
   'mappedfile' : {},
+  'mapping' : {},
   'markup' : {},
   'markup-parse' : {},
   'markup-collect' : {},
@@ -65,6 +67,7 @@ glib_tests = {
   'mutex' : {},
   'node' : {},
   'once' : {},
+  'onceinit' : {},
   'option-context' : {},
   'option-argv0' : {},
   'overflow' : {},
@@ -98,22 +101,33 @@ glib_tests = {
   },
   'shell' : {},
   'slice' : {},
-  'slice-color' : {
-    'extra_sources' : ['memchunks.c'],
-  },
+  'slice-color' : {},
   'slice-concurrent' : {},
+  'slice-known-pages' : {'suite' : ['no-valgrind']},
+  'slice-glib' : {},
+  'slice-slab' : {},
+  'slice-malloc' : {},
+  'slice-memchunk' : {
+    'source' : ['slice-memchunk.c', 'memchunks.c'],
+  },
+  'slice-eager-freeing' : {},
   'slist' : {},
   'sort' : {},
   'spawn-multithreaded' : {},
   'spawn-path-search' : {},
-  'spawn-singlethread' : {},
+  'spawn-singlethread' : {
+    'dependencies' : [winsock2],
+  },
+  'spawn-test' : {},
   'strfuncs' : {},
   'string' : {},
   'strvbuilder' : {},
   'testing' : {},
   'test-printf' : {},
   'thread' : {},
+  'thread-deprecated' : {},
   'thread-pool' : {},
+  'thread-pool-slow' : {'suite' : ['slow']},
   'timeout' : {},
   'timer' : {},
   'tree' : {},
@@ -124,6 +138,8 @@ glib_tests = {
   'utf8-misc' : {},
   'utils' : {},
   'unicode' : {},
+  'unicode-encoding' : {},
+  'unicode-normalize': {},
   'uri' : {},
   '1bit-mutex' : {},
   '1bit-emufutex' : {
@@ -206,6 +222,7 @@ if installed_tests_enabled
     'iochannel-test-infile',
     'keyfile.c',
     'keyfiletest.ini',
+    'NormalizationTest.txt',
     'pages.ini',
     install_dir : installed_tests_execdir,
   )
@@ -262,6 +279,13 @@ foreach test_name, extra_args : glib_tests
   )
 endforeach
 
+if installed_tests_enabled
+  install_data(
+    'utf8.txt',
+    install_dir : installed_tests_execdir,
+  )
+endif
+
 executable('spawn-path-search-helper', 'spawn-path-search-helper.c',
   c_args : test_cargs,
   dependencies : test_deps,
@@ -292,6 +316,13 @@ if host_machine.system() == 'windows'
     install_dir: installed_tests_execdir,
     install: installed_tests_enabled,
   )
+  executable('spawn-test-win32-gui', 'spawn-test-win32-gui.c',
+    c_args : test_cargs,
+    dependencies : test_deps,
+    install_dir: installed_tests_execdir,
+    install: installed_tests_enabled,
+    win_subsystem: 'windows',
+  )
 endif
 
 executable('testing-helper', 'testing-helper.c',
@@ -302,7 +333,7 @@ executable('testing-helper', 'testing-helper.c',
 )
 
 # some testing of gtester functionality
-if not meson.is_cross_build() and host_system != 'windows'
+if meson.can_run_host_binaries() and host_system != 'windows'
   xmllint = find_program('xmllint', required: false)
   if xmllint.found()
     tmpsample_xml = custom_target('tmpsample.xml',

@@ -12,20 +12,20 @@ test_c_args = [
   '-UG_DISABLE_ASSERT',
 ]
 
-# workaround for https://github.com/mesonbuild/meson/issues/6880
-if build_machine.system() == 'linux'
-  libutil_name = 'libutil'
-  libutil = run_command('sh', '-c',
-    '''ldconfig -p | grep -o "[[:space:]]@0@\.so\(\.[0-9]\+\)\?\b"'''
-    .format(libutil_name), check: false).stdout().strip().split('\n')
+libutil_dep = dependency('', required : false)
 
-  if libutil.length() > 0
-      message('Found libutil as @0@'.format(libutil[0]))
-      test_c_args += '-DLIBUTIL_SONAME="@0@"'.format(libutil[0])
-  else
-      warning('libutil not found')
-  endif # libutil.length() > 0
-endif # build_machine.system() == 'linux'
+if cc.has_header('pty.h')
+  have_openpty = cc.has_function('openpty', prefix : '#include <pty.h>')
+
+  if host_machine.system() == 'linux' and not have_openpty
+    libutil_dep = cc.find_library('util', required : false)
+    have_openpty = cc.has_function('openpty', dependencies : libutil_dep, prefix : '#include <pty.h>')
+  endif
+
+  if have_openpty
+    test_c_args += '-DHAVE_OPENPTY'
+  endif
+endif
 
 if host_machine.system() == 'windows'
   common_gio_tests_deps += [iphlpapi_dep, winsock2, cc.find_library ('secur32')]
@@ -81,6 +81,12 @@ gio_tests = {
   'g-icon' : {},
   'gdbus-addresses' : {},
   'gdbus-message' : {},
+  'gdbus-peer' : {
+    'dependencies' : [libgdbus_example_objectmanager_dep],
+    'install_rpath' : installed_tests_execdir,
+    # FIXME: https://gitlab.gnome.org/GNOME/glib/-/issues/1392
+    'should_fail' : host_system == 'darwin',
+  },
   'inet-address' : {},
   'io-stream' : {},
   'memory-input-stream' : {},
@@ -91,7 +97,7 @@ gio_tests = {
   'network-monitor' : {},
   'network-monitor-race' : {},
   'permission' : {},
-  'pollable' : {'dependencies' : [libdl_dep]},
+  'pollable' : {'dependencies' : [libutil_dep]},
   'power-profile-monitor' : {},
   'proxy-test' : {},
   'readwrite' : {},
@@ -115,6 +121,7 @@ gio_tests = {
   'tls-interaction' : {'extra_sources' : ['gtesttlsbackend.c']},
   'tls-database' : {'extra_sources' : ['gtesttlsbackend.c']},
   'tls-bindings' : {'extra_sources' : ['gtesttlsbackend.c']},
+  'unix-fd' : {},
   'gdbus-address-get-session' : {
     # FIXME: https://gitlab.gnome.org/GNOME/glib/-/issues/1392
     'should_fail' : host_system == 'darwin',
@@ -183,18 +190,11 @@ endif
 if host_machine.system() != 'windows'
   gio_tests += {
     'file' : {},
-    'gdbus-peer' : {
-      'dependencies' : [libgdbus_example_objectmanager_dep],
-      'install_rpath' : installed_tests_execdir,
-      # FIXME: https://gitlab.gnome.org/GNOME/glib/-/issues/1392
-      'should_fail' : host_system == 'darwin',
-    },
     'gdbus-peer-object-manager' : {},
     'live-g-file' : {},
     'resolver-parsing' : {'dependencies' : [network_libs]},
     'socket-address' : {},
     'stream-rw_all' : {},
-    'unix-fd' : {},
     'unix-mounts' : {},
     'unix-streams' : {},
     'g-file-info-filesystem-readonly' : {},
@@ -603,7 +603,7 @@ if installed_tests_enabled
   endforeach
 endif
 
-if not meson.is_cross_build() or meson.has_exe_wrapper()
+if meson.can_run_host_binaries()
 
   compiler_type = '--compiler=@0@'.format(cc.get_id())
 
@@ -830,7 +830,7 @@ foreach test_name, extra_args : gio_tests
       foreach var, value : installed_tests_env
          envs += '@0@=@1@'.format(var, value)
       endforeach
-      test_env_override = '@0@ @1@ '.format(env_program.path(), ' '.join(envs))
+      test_env_override = '@0@ @1@ '.format(env_program.full_path(), ' '.join(envs))
     endif
     test_conf.set('env', test_env_override)
     configure_file(

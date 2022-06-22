@@ -3,6 +3,8 @@
  *  Copyright 2000 Red Hat, Inc.
  *  Copyright 2003 Tor Lillqvist
  *
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -106,19 +108,6 @@ enum {
   ARG_PROGRAM,
   ARG_COUNT = ARG_PROGRAM
 };
-
-static int
-reopen_noninherited (int fd,
-		     int mode)
-{
-  HANDLE filehandle;
-
-  DuplicateHandle (GetCurrentProcess (), (LPHANDLE) _get_osfhandle (fd),
-		   GetCurrentProcess (), &filehandle,
-		   0, FALSE, DUPLICATE_SAME_ACCESS);
-  close (fd);
-  return _open_osfhandle ((gintptr) filehandle, mode | _O_NOINHERIT);
-}
 
 #ifndef GSPAWN_HELPER
 
@@ -684,7 +673,10 @@ fork_exec (gint                  *exit_status,
    * helper process, and the started actual user process. As such that
    * shouldn't harm, but it is unnecessary.
    */
-  child_err_report_pipe[0] = reopen_noninherited (child_err_report_pipe[0], _O_RDONLY);
+  child_err_report_pipe[0] = g_win32_reopen_noninherited (
+    child_err_report_pipe[0], _O_RDONLY, error);
+  if (child_err_report_pipe[0] == -1)
+      goto cleanup_and_fail;
 
   if (flags & G_SPAWN_FILE_AND_ARGV_ZERO)
     {
@@ -703,7 +695,10 @@ fork_exec (gint                  *exit_status,
    * process won't read but won't get any EOF either, as it has the
    * write end open itself.
    */
-  helper_sync_pipe[1] = reopen_noninherited (helper_sync_pipe[1], _O_WRONLY);
+  helper_sync_pipe[1] = g_win32_reopen_noninherited (
+    helper_sync_pipe[1], _O_WRONLY, error);
+  if (helper_sync_pipe[1] == -1)
+      goto cleanup_and_fail;
 
   if (stdin_fd != -1)
     {
@@ -903,7 +898,8 @@ fork_exec (gint                  *exit_status,
 				    0, TRUE, DUPLICATE_SAME_ACCESS))
 		{
 		  char *emsg = g_win32_error_message (GetLastError ());
-		  g_print("%s\n", emsg);
+		  g_print ("%s\n", emsg);
+		  g_free (emsg);
 		  *child_pid = 0;
 		}
 	    }

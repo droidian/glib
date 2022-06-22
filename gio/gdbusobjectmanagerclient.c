@@ -2,6 +2,8 @@
  *
  * Copyright (C) 2008-2010 Red Hat, Inc.
  *
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -1043,17 +1045,17 @@ signal_cb (GDBusConnection *connection,
     {
       if (g_strcmp0 (signal_name, "PropertiesChanged") == 0)
         {
-          const gchar *interface_name;
+          const gchar *properties_interface_name;
           GVariant *changed_properties;
           const gchar **invalidated_properties;
 
           g_variant_get (parameters,
                          "(&s@a{sv}^a&s)",
-                         &interface_name,
+                         &properties_interface_name,
                          &changed_properties,
                          &invalidated_properties);
 
-          interface = g_dbus_object_get_interface (G_DBUS_OBJECT (object_proxy), interface_name);
+          interface = g_dbus_object_get_interface (G_DBUS_OBJECT (object_proxy), properties_interface_name);
           if (interface != NULL)
             {
               GVariantIter property_iter;

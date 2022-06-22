@@ -2,6 +2,8 @@
  *
  * Copyright (C) 2008-2010 Red Hat, Inc.
  *
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -681,7 +683,7 @@ keyring_generate_entry (const gchar  *cookie_context,
   gchar *keyring_dir;
   gchar *path;
   gchar *contents;
-  GError *local_error;
+  GError *local_error = NULL;
   gchar **lines;
   gint max_line_id;
   GString *new_contents;
@@ -717,7 +719,6 @@ keyring_generate_entry (const gchar  *cookie_context,
   if (lock_fd == -1)
     goto out;
 
-  local_error = NULL;
   contents = NULL;
   if (!g_file_get_contents (path,
                             &contents,
@@ -727,12 +728,12 @@ keyring_generate_entry (const gchar  *cookie_context,
       if (local_error->domain == G_FILE_ERROR && local_error->code == G_FILE_ERROR_NOENT)
         {
           /* file doesn't have to exist */
-          g_error_free (local_error);
+          g_clear_error (&local_error);
         }
       else
         {
           g_propagate_prefixed_error (error,
-                                      local_error,
+                                      g_steal_pointer (&local_error),
                                       _("Error opening keyring “%s” for writing: "),
                                       path);
           goto out;
@@ -911,11 +912,11 @@ keyring_generate_entry (const gchar  *cookie_context,
     }
 
  out:
+  /* Any error should have been propagated to @error by now */
+  g_assert (local_error == NULL);
 
   if (lock_fd != -1)
     {
-      GError *local_error;
-      local_error = NULL;
       if (!keyring_release_lock (path, lock_fd, &local_error))
         {
           if (error != NULL)

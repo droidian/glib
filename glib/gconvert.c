@@ -4,6 +4,8 @@
  * Copyright Red Hat Inc., 2000
  * Authors: Havoc Pennington <hp@redhat.com>, Owen Taylor <otaylor@redhat.com>
  *
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -248,9 +250,9 @@ g_iconv_open (const gchar  *to_codeset,
  * g_iconv: (skip)
  * @converter: conversion descriptor from g_iconv_open()
  * @inbuf: bytes to convert
- * @inbytes_left: inout parameter, bytes remaining to convert in @inbuf
+ * @inbytes_left: (inout): inout parameter, bytes remaining to convert in @inbuf
  * @outbuf: converted output bytes
- * @outbytes_left: inout parameter, bytes available to fill in @outbuf
+ * @outbytes_left: (inout): inout parameter, bytes available to fill in @outbuf
  * 
  * Same as the standard UNIX routine iconv(), but
  * may be implemented via libiconv on UNIX flavors that lack
@@ -680,6 +682,8 @@ g_convert_with_fallback (const gchar *str,
 		    bytes_read, bytes_written, &local_error);
   if (!local_error)
     return dest;
+
+  g_assert (dest == NULL);
 
   if (!g_error_matches (local_error, G_CONVERT_ERROR, G_CONVERT_ERROR_ILLEGAL_SEQUENCE))
     {

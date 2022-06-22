@@ -2,6 +2,8 @@
  *
  * Copyright (C) 2010 Collabora, Ltd.
  *
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -325,6 +327,7 @@ return_result (GTask *task)
 {
   GProxyAddressEnumeratorPrivate *priv = g_task_get_task_data (task);
   GSocketAddress *result;
+  gboolean is_inet_socket_address;
 
   if (strcmp ("direct", priv->proxy_type) == 0)
     {
@@ -356,12 +359,13 @@ return_result (GTask *task)
 	}
       dest_protocol = g_uri_parse_scheme (priv->dest_uri);
 
-      if (!G_IS_INET_SOCKET_ADDRESS (priv->proxy_address))
+      is_inet_socket_address = G_IS_INET_SOCKET_ADDRESS (priv->proxy_address);
+      if (!is_inet_socket_address)
         {
 	  g_free (dest_hostname);
 	  g_free (dest_protocol);
         }
-      g_return_if_fail (G_IS_INET_SOCKET_ADDRESS (priv->proxy_address));
+      g_return_if_fail (is_inet_socket_address);
 
       inetsaddr = G_INET_SOCKET_ADDRESS (priv->proxy_address);
       inetaddr = g_inet_socket_address_get_address (inetsaddr);

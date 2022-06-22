@@ -2422,9 +2422,9 @@ g_signal_connect_closure_by_id (gpointer  instance,
 	  Handler *handler = handler_new (signal_id, instance, after);
 
           if (G_TYPE_IS_OBJECT (node->itype))
-            _g_object_set_has_signal_handler ((GObject *)instance);
+            _g_object_set_has_signal_handler ((GObject *) instance, signal_id);
 
-	  handler_seq_no = handler->sequential_number;
+          handler_seq_no = handler->sequential_number;
 	  handler->detail = detail;
 	  handler->closure = g_closure_ref (closure);
 	  g_closure_sink (closure);
@@ -2489,9 +2489,9 @@ g_signal_connect_closure (gpointer     instance,
 	  Handler *handler = handler_new (signal_id, instance, after);
 
           if (G_TYPE_IS_OBJECT (node->itype))
-            _g_object_set_has_signal_handler ((GObject *)instance);
+            _g_object_set_has_signal_handler ((GObject *) instance, signal_id);
 
-	  handler_seq_no = handler->sequential_number;
+          handler_seq_no = handler->sequential_number;
 	  handler->detail = detail;
 	  handler->closure = g_closure_ref (closure);
 	  g_closure_sink (closure);
@@ -2593,7 +2593,7 @@ g_signal_connect_data (gpointer       instance,
 	  Handler *handler = handler_new (signal_id, instance, after);
 
           if (G_TYPE_IS_OBJECT (node->itype))
-            _g_object_set_has_signal_handler ((GObject *)instance);
+            _g_object_set_has_signal_handler ((GObject *) instance, signal_id);
 
 	  handler_seq_no = handler->sequential_number;
 	  handler->detail = detail;
@@ -3402,7 +3402,16 @@ g_signal_emit_valist (gpointer instance,
 
 	  if (closure != NULL)
 	    {
+              /*
+               * Coverity doesn’t understand the paired ref/unref here and seems
+               * to ignore the ref, thus reports every call to g_signal_emit()
+               * as causing a double-free. That’s incorrect, but I can’t get a
+               * model file to work for avoiding the false positives, so instead
+               * comment out the ref/unref when doing static analysis.
+               */
+#ifndef __COVERITY__
 	      g_object_ref (instance);
+#endif
 	      _g_closure_invoke_va (closure,
 				    return_accu,
 				    instance,
@@ -3452,8 +3461,11 @@ g_signal_emit_valist (gpointer instance,
 	  
 	  TRACE(GOBJECT_SIGNAL_EMIT_END(signal_id, detail, instance, instance_type));
 
+          /* See comment above paired ref above */
+#ifndef __COVERITY__
           if (closure != NULL)
             g_object_unref (instance);
+#endif
 
 	  return;
 	}

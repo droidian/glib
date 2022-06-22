@@ -172,6 +172,12 @@ typedef enum
  * 
  * #GParamFlags value alias for %G_PARAM_STATIC_NAME | %G_PARAM_STATIC_NICK | %G_PARAM_STATIC_BLURB.
  * 
+ * It is recommended to use this for all properties by default, as it allows for
+ * internal performance improvements in GObject.
+ *
+ * It is very rare that a property would have a dynamically constructed name,
+ * nickname or blurb.
+ *
  * Since 2.13.0
  */
 #define	G_PARAM_STATIC_STRINGS (G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB)
@@ -236,7 +242,10 @@ struct _GParamSpec
  *  g_param_value_validate().
  * @values_cmp: Compares @value1 with @value2 according to this type
  *  (recommended, the default is memcmp()), see g_param_values_cmp().
- * 
+ * @value_is_valid: Checks if contents of @value comply with the specifications
+ *   set out by this type, without modifying the value. This vfunc is optional.
+ *   If it isn't set, GObject will use @value_validate. Since 2.74
+ *
  * The class structure for the GParamSpec type.
  * Normally, GParamSpec classes are filled by
  * g_param_type_register_static().
@@ -257,8 +266,12 @@ struct _GParamSpecClass
   gint          (*values_cmp)           (GParamSpec   *pspec,
 					 const GValue *value1,
 					 const GValue *value2);
+
+  gboolean      (*value_is_valid)       (GParamSpec   *pspec,
+                                         const GValue *value);
+
   /*< private >*/
-  gpointer	  dummy[4];
+  gpointer	  dummy[3];
 };
 /**
  * GParameter:
@@ -313,6 +326,9 @@ gboolean	g_param_value_defaults		(GParamSpec    *pspec,
 GLIB_AVAILABLE_IN_ALL
 gboolean	g_param_value_validate		(GParamSpec    *pspec,
 						 GValue	       *value);
+GLIB_AVAILABLE_IN_2_74
+gboolean        g_param_value_is_valid          (GParamSpec    *pspec,
+                                                 const GValue  *value);
 GLIB_AVAILABLE_IN_ALL
 gboolean	g_param_value_convert		(GParamSpec    *pspec,
 						 const GValue  *src_value,

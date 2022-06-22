@@ -10,6 +10,8 @@
  * Copyright © 2005, 2006, 2008, 2012, 2013 Matthias Clasen
  * Copyright © 2020 Endless Mobile, Inc.
  *
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -59,6 +61,7 @@ test_small_writes (void)
   g_assert_cmpint (status, ==, G_IO_STATUS_NORMAL);
 
   g_io_channel_unref (io);
+  g_remove ("iochannel-test-outfile");
 }
 
 static void
@@ -93,8 +96,12 @@ test_read_write (void)
   status = g_io_channel_set_flags (gio_r, G_IO_FLAG_NONBLOCK, &local_error);
   if (status == G_IO_STATUS_ERROR)
     {
+#ifdef G_OS_WIN32
+      g_test_message ("FIXME: not implemented on win32");
+#else
       /* Errors should not happen */
       g_assert_no_error (local_error);
+#endif
       g_clear_error (&local_error);
     }
   buffer = g_string_sized_new (buffer_size_bytes);

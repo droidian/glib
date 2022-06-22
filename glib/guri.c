@@ -1,6 +1,8 @@
 /* GLIB - Library of useful routines for C programming
  * Copyright © 2020 Red Hat, Inc.
  *
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -1633,9 +1635,17 @@ g_uri_join_internal (GUriFlags    flags,
   g_return_val_if_fail (host == NULL || (path[0] == '\0' || path[0] == '/'), NULL);
   g_return_val_if_fail (host != NULL || (path[0] != '/' || path[1] != '/'), NULL);
 
-  str = g_string_new (scheme);
+  /* Arbitrarily chosen default size which should handle most average length
+   * URIs. This should avoid a few reallocations of the buffer in most cases.
+   * It’s 1B shorter than a power of two, since GString will add a
+   * nul-terminator byte. */
+  str = g_string_sized_new (127);
+
   if (scheme)
-    g_string_append_c (str, ':');
+    {
+      g_string_append (str, scheme);
+      g_string_append_c (str, ':');
+    }
 
   if (flags & G_URI_FLAGS_SCHEME_NORMALIZE && scheme && ((host && port != -1) || path[0] == '\0'))
     normalized_scheme = g_ascii_strdown (scheme, -1);
