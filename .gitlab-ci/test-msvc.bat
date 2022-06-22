@@ -12,7 +12,7 @@ for %%x in (%*) do (
 set args=%args:~1%
 
 :: FIXME: make warnings fatal
-pip3 install --upgrade --user meson==0.52.0  || goto :error
+pip3 install --upgrade --user meson==0.60.3  || goto :error
 meson %args% _build || goto :error
 ninja -C _build || goto :error
 
@@ -20,11 +20,6 @@ ninja -C _build || goto :error
 meson test -C _build --timeout-multiplier %MESON_TEST_TIMEOUT_MULTIPLIER% --no-suite flaky
 
 :: FIXME: can we get code coverage support?
-
-
-python "%CD%\.gitlab-ci\meson-junit-report.py" --project-name glib ^
---job-id "%CI_JOB_NAME%" --output "%CD%/_build/%CI_JOB_NAME%-report.xml" ^
-"%CD%/_build/meson-logs/testlog.json"
 
 goto :EOF
 :error

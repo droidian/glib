@@ -1,6 +1,8 @@
 /* GLIB - Library of useful routines for C programming
  * Copyright (C) 1995-1997  Peter Mattis, Spencer Kimball and Josh MacDonald
  *
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -2059,9 +2061,18 @@ g_log_set_writer_func (GLogWriterFunc func,
   g_return_if_fail (func != NULL);
 
   g_mutex_lock (&g_messages_lock);
+
+  if (log_writer_func != g_log_writer_default)
+    {
+      g_mutex_unlock (&g_messages_lock);
+      g_error ("g_log_set_writer_func() called multiple times");
+      return;
+    }
+
   log_writer_func = func;
   log_writer_user_data = user_data;
   log_writer_user_data_free = user_data_free;
+
   g_mutex_unlock (&g_messages_lock);
 }
 
@@ -2229,6 +2240,7 @@ g_log_writer_is_journald (gint output_fd)
   /* Namespaced journals start with `/run/systemd/journal.${name}/` (see
    * `RuntimeDirectory=systemd/journal.%i` in `systemd-journald@.service`. The
    * default journal starts with `/run/systemd/journal/`. */
+  memset (&addr, 0, sizeof (addr));
   addr_len = sizeof(addr);
   err = getpeername (output_fd, &addr.sa, &addr_len);
   if (err == 0 && addr.storage.ss_family == AF_UNIX)

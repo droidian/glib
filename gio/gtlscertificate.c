@@ -2,6 +2,8 @@
  *
  * Copyright (C) 2010 Red Hat, Inc.
  *
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -571,13 +573,13 @@ parse_and_create_certificate_list (const gchar  *data,
   while (p < end && p && *p)
     {
       gchar *cert_pem;
-      GError *error = NULL;
+      GError *my_error = NULL;
 
-      cert_pem = parse_next_pem_certificate (&p, end, FALSE, &error);
-      if (error)
+      cert_pem = parse_next_pem_certificate (&p, end, FALSE, &my_error);
+      if (my_error)
         {
           g_slist_free_full (pem_list, g_free);
-          g_error_free (error);
+          g_error_free (my_error);
           return first_pem_list;
         }
       else if (!cert_pem)
@@ -624,7 +626,7 @@ create_certificate_chain_from_list (GSList       *pem_list,
 
       /* root will point to the last certificate in the file. */
       if (!root)
-        root = cert;
+        root = g_object_ref (cert);
 
       pem = g_slist_next (pem);
     }
@@ -638,6 +640,8 @@ create_certificate_chain_from_list (GSList       *pem_list,
       /* It wasn't a chain, it's just a bunch of unrelated certs. */
       g_clear_object (&cert);
     }
+
+  g_clear_object (&root);
 
   return cert;
 }

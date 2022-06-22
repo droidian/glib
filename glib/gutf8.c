@@ -3,6 +3,8 @@
  * Copyright (C) 1999 Tom Tromey
  * Copyright (C) 2000 Red Hat, Inc.
  *
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -437,7 +439,7 @@ g_utf8_pointer_to_offset (const gchar *str,
  * must be valid UTF-8 encoded text. (Use g_utf8_validate() on all
  * text before trying to use UTF-8 utility functions with it.)
  * 
- * Note you must ensure @dest is at least 4 * @n to fit the
+ * Note you must ensure @dest is at least 4 * @n + 1 to fit the
  * largest possible UTF-8 characters
  *
  * Returns: (transfer none): @dest

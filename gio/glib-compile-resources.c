@@ -1,6 +1,8 @@
 /*
  * Copyright © 2011 Red Hat, Inc
  *
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -1185,9 +1187,9 @@ main (int argc, char **argv)
       if (external_data)
         {
           g_fprintf (file,
-                     "extern const SECTION union { const guint8 data[%"G_GSIZE_FORMAT"]; const double alignment; void * const ptr;}  %s_resource_data;"
+                     "extern const %s SECTION union { const guint8 data[%" G_GSIZE_FORMAT "]; const double alignment; void * const ptr;}  %s_resource_data;"
                      "\n",
-                     data_size, c_name);
+                     export, data_size, c_name);
         }
       else
         {

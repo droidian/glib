@@ -1,6 +1,8 @@
 /* GLIB - Library of useful routines for C programming
  * Copyright (C) 2011 Red Hat, Inc.
  *
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -55,6 +57,8 @@ glib__private__ (void)
     g_win32_readlink_utf8,
     g_win32_fstat,
     g_win32_find_helper_executable_path,
+    g_win32_reopen_noninherited,
+    g_win32_handle_is_socket,
 #endif
   };
 

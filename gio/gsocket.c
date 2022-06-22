@@ -5,6 +5,8 @@
  * Copyright © 2009 Red Hat, Inc
  * Copyright © 2015 Collabora, Ltd.
  *
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -462,6 +464,8 @@ g_socket_details_from_fd (GSocket *socket)
   guint addrlen;
   int value, family;
   int errsv;
+
+  memset (&address, 0, sizeof (address));
 
   fd = socket->priv->fd;
   if (!g_socket_get_option (socket, SOL_SOCKET, SO_TYPE, &value, NULL))
@@ -2228,7 +2232,7 @@ g_socket_w32_get_adapter_ipv4_addr (const gchar *name_or_ip)
   unsigned int malloc_iterations = 0;
   PIP_ADAPTER_ADDRESSES addr_buf = NULL, eth_adapter;
   wchar_t *wchar_name_or_ip = NULL;
-  gulong ip_result;
+  gulong ip_result = 0;
   NET_IFINDEX if_index;
 
   /*
@@ -2247,8 +2251,7 @@ g_socket_w32_get_adapter_ipv4_addr (const gchar *name_or_ip)
    */
 
   /* Step 1: Check if string is an IP address: */
-  ip_result = inet_addr (name_or_ip);
-  if (ip_result != INADDR_NONE)
+  if (inet_pton (AF_INET, name_or_ip, &ip_result) == 1)
     return ip_result;  /* Success, IP address string was given directly */
 
   /*
@@ -2605,8 +2608,12 @@ g_socket_multicast_group_operation_ssm (GSocket       *socket,
             S_ADDR_FIELD(mc_req_src) = iface_addr->sin_addr.s_addr;
 #endif  /* defined(G_OS_WIN32) && defined (HAVE_IF_NAMETOINDEX) */
           }
+
+        g_assert (g_inet_address_get_native_size (group) == sizeof (mc_req_src.imr_multiaddr));
         memcpy (&mc_req_src.imr_multiaddr, g_inet_address_to_bytes (group),
                 g_inet_address_get_native_size (group));
+
+        g_assert (g_inet_address_get_native_size (source_specific) == sizeof (mc_req_src.imr_sourceaddr));
         memcpy (&mc_req_src.imr_sourceaddr,
                 g_inet_address_to_bytes (source_specific),
                 g_inet_address_get_native_size (source_specific));
@@ -3887,7 +3894,7 @@ update_condition_unlocked (GSocket *socket)
 
   if (socket->priv->current_events & FD_CLOSE)
     {
-      int r, errsv, buffer;
+      int r, errsv = NO_ERROR, buffer;
 
       r = recv (socket->priv->fd, &buffer, sizeof (buffer), MSG_PEEK);
       if (r < 0)
@@ -6070,12 +6077,14 @@ g_socket_get_credentials (GSocket   *socket,
                                       G_CREDENTIALS_NATIVE_TYPE,
                                       &cred);
 
+#ifdef LOCAL_PEERPID
             if (getsockopt (socket->priv->fd,
                             SOL_LOCAL,
                             LOCAL_PEERPID,
                             &pid,
                             &optlen) == 0)
               _g_credentials_set_local_peerid (ret, pid);
+#endif
           }
         else
           {

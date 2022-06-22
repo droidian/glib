@@ -4,6 +4,8 @@
  * gmain.c: Main loop abstraction, timeouts, and idle functions
  * Copyright 1998 Owen Taylor
  *
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -233,6 +235,7 @@
 
 /* Types */
 
+typedef struct _GIdleSource GIdleSource;
 typedef struct _GTimeoutSource GTimeoutSource;
 typedef struct _GChildWatchSource GChildWatchSource;
 typedef struct _GUnixSignalWatchSource GUnixSignalWatchSource;
@@ -330,12 +333,19 @@ struct _GMainLoop
   gint ref_count;  /* (atomic) */
 };
 
+struct _GIdleSource
+{
+  GSource  source;
+  gboolean one_shot;
+};
+
 struct _GTimeoutSource
 {
   GSource     source;
   /* Measured in seconds if 'seconds' is TRUE, or milliseconds otherwise. */
   guint       interval;
   gboolean    seconds;
+  gboolean    one_shot;
 };
 
 struct _GChildWatchSource
@@ -4147,7 +4157,7 @@ g_main_context_iterate (GMainContext *context,
 			gboolean      dispatch,
 			GThread      *self)
 {
-  gint max_priority;
+  gint max_priority = 0;
   gint timeout;
   gboolean some_ready;
   gint nfds, allocated_nfds;
@@ -4968,7 +4978,16 @@ g_timeout_dispatch (GSource     *source,
       return FALSE;
     }
 
-  again = callback (user_data);
+  if (timeout_source->one_shot)
+    {
+      GSourceOnceFunc once_callback = (GSourceOnceFunc) callback;
+      once_callback (user_data);
+      again = G_SOURCE_REMOVE;
+    }
+  else
+    {
+      again = callback (user_data);
+    }
 
   TRACE (GLIB_TIMEOUT_DISPATCH (source, source->context, callback, user_data, again));
 
@@ -4976,6 +4995,23 @@ g_timeout_dispatch (GSource     *source,
     g_timeout_set_expiration (timeout_source, g_source_get_time (source));
 
   return again;
+}
+
+static GSource *
+timeout_source_new (guint    interval,
+                    gboolean seconds,
+                    gboolean one_shot)
+{
+  GSource *source = g_source_new (&g_timeout_funcs, sizeof (GTimeoutSource));
+  GTimeoutSource *timeout_source = (GTimeoutSource *)source;
+
+  timeout_source->interval = interval;
+  timeout_source->seconds = seconds;
+  timeout_source->one_shot = one_shot;
+
+  g_timeout_set_expiration (timeout_source, g_get_monotonic_time ());
+
+  return source;
 }
 
 /**
@@ -4996,13 +5032,7 @@ g_timeout_dispatch (GSource     *source,
 GSource *
 g_timeout_source_new (guint interval)
 {
-  GSource *source = g_source_new (&g_timeout_funcs, sizeof (GTimeoutSource));
-  GTimeoutSource *timeout_source = (GTimeoutSource *)source;
-
-  timeout_source->interval = interval;
-  g_timeout_set_expiration (timeout_source, g_get_monotonic_time ());
-
-  return source;
+  return timeout_source_new (interval, FALSE, FALSE);
 }
 
 /**
@@ -5028,17 +5058,37 @@ g_timeout_source_new (guint interval)
 GSource *
 g_timeout_source_new_seconds (guint interval)
 {
-  GSource *source = g_source_new (&g_timeout_funcs, sizeof (GTimeoutSource));
-  GTimeoutSource *timeout_source = (GTimeoutSource *)source;
-
-  timeout_source->interval = interval;
-  timeout_source->seconds = TRUE;
-
-  g_timeout_set_expiration (timeout_source, g_get_monotonic_time ());
-
-  return source;
+  return timeout_source_new (interval, TRUE, FALSE);
 }
 
+static guint
+timeout_add_full (gint           priority,
+                  guint          interval,
+                  gboolean       seconds,
+                  gboolean       one_shot,
+                  GSourceFunc    function,
+                  gpointer       data,
+                  GDestroyNotify notify)
+{
+  GSource *source;
+  guint id;
+
+  g_return_val_if_fail (function != NULL, 0);
+
+  source = timeout_source_new (interval, seconds, one_shot);
+
+  if (priority != G_PRIORITY_DEFAULT)
+    g_source_set_priority (source, priority);
+
+  g_source_set_callback (source, function, data, notify);
+  id = g_source_attach (source, NULL);
+
+  TRACE (GLIB_TIMEOUT_ADD (source, g_main_context_default (), id, priority, interval, function, data));
+
+  g_source_unref (source);
+
+  return id;
+}
 
 /**
  * g_timeout_add_full: (rename-to g_timeout_add)
@@ -5084,24 +5134,7 @@ g_timeout_add_full (gint           priority,
 		    gpointer       data,
 		    GDestroyNotify notify)
 {
-  GSource *source;
-  guint id;
-  
-  g_return_val_if_fail (function != NULL, 0);
-
-  source = g_timeout_source_new (interval);
-
-  if (priority != G_PRIORITY_DEFAULT)
-    g_source_set_priority (source, priority);
-
-  g_source_set_callback (source, function, data, notify);
-  id = g_source_attach (source, NULL);
-
-  TRACE (GLIB_TIMEOUT_ADD (source, g_main_context_default (), id, priority, interval, function, data));
-
-  g_source_unref (source);
-
-  return id;
+  return timeout_add_full (priority, interval, FALSE, FALSE, function, data, notify);
 }
 
 /**
@@ -5153,6 +5186,33 @@ g_timeout_add (guint32        interval,
 {
   return g_timeout_add_full (G_PRIORITY_DEFAULT, 
 			     interval, function, data, NULL);
+}
+
+/**
+ * g_timeout_add_once:
+ * @interval: the time after which the function will be called, in
+ *   milliseconds (1/1000ths of a second)
+ * @function: function to call
+ * @data: data to pass to @function
+ *
+ * Sets a function to be called after @interval milliseconds have elapsed,
+ * with the default priority, %G_PRIORITY_DEFAULT.
+ *
+ * The given @function is called once and then the source will be automatically
+ * removed from the main context.
+ *
+ * This function otherwise behaves like g_timeout_add().
+ *
+ * Returns: the ID (greater than 0) of the event source
+ *
+ * Since: 2.74
+ */
+guint
+g_timeout_add_once (guint32         interval,
+                    GSourceOnceFunc function,
+                    gpointer        data)
+{
+  return timeout_add_full (G_PRIORITY_DEFAULT, interval, FALSE, TRUE, (GSourceFunc) function, data, NULL);
 }
 
 /**
@@ -5923,6 +5983,7 @@ g_idle_dispatch (GSource    *source,
 		 GSourceFunc callback,
 		 gpointer    user_data)
 {
+  GIdleSource *idle_source = (GIdleSource *)source;
   gboolean again;
 
   if (!callback)
@@ -5932,11 +5993,39 @@ g_idle_dispatch (GSource    *source,
       return FALSE;
     }
 
-  again = callback (user_data);
+  if (idle_source->one_shot)
+    {
+      GSourceOnceFunc once_callback = (GSourceOnceFunc) callback;
+      once_callback (user_data);
+      again = G_SOURCE_REMOVE;
+    }
+  else
+    {
+      again = callback (user_data);
+    }
 
   TRACE (GLIB_IDLE_DISPATCH (source, source->context, callback, user_data, again));
 
   return again;
+}
+
+static GSource *
+idle_source_new (gboolean one_shot)
+{
+  GSource *source;
+  GIdleSource *idle_source;
+
+  source = g_source_new (&g_idle_funcs, sizeof (GIdleSource));
+  idle_source = (GIdleSource *) source;
+
+  idle_source->one_shot = one_shot;
+
+  g_source_set_priority (source, G_PRIORITY_DEFAULT_IDLE);
+
+  /* Set a default name on the source, just in case the caller does not. */
+  g_source_set_static_name (source, "GIdleSource");
+
+  return source;
 }
 
 /**
@@ -5955,15 +6044,34 @@ g_idle_dispatch (GSource    *source,
 GSource *
 g_idle_source_new (void)
 {
+  return idle_source_new (FALSE);
+}
+
+static guint
+idle_add_full (gint           priority,
+               gboolean       one_shot,
+               GSourceFunc    function,
+               gpointer       data,
+               GDestroyNotify notify)
+{
   GSource *source;
+  guint id;
 
-  source = g_source_new (&g_idle_funcs, sizeof (GSource));
-  g_source_set_priority (source, G_PRIORITY_DEFAULT_IDLE);
+  g_return_val_if_fail (function != NULL, 0);
 
-  /* Set a default name on the source, just in case the caller does not. */
-  g_source_set_static_name (source, "GIdleSource");
+  source = idle_source_new (one_shot);
 
-  return source;
+  if (priority != G_PRIORITY_DEFAULT_IDLE)
+    g_source_set_priority (source, priority);
+
+  g_source_set_callback (source, function, data, notify);
+  id = g_source_attach (source, NULL);
+
+  TRACE (GLIB_IDLE_ADD (source, g_main_context_default (), id, priority, function, data));
+
+  g_source_unref (source);
+
+  return id;
 }
 
 /**
@@ -5997,24 +6105,7 @@ g_idle_add_full (gint           priority,
 		 gpointer       data,
 		 GDestroyNotify notify)
 {
-  GSource *source;
-  guint id;
-  
-  g_return_val_if_fail (function != NULL, 0);
-
-  source = g_idle_source_new ();
-
-  if (priority != G_PRIORITY_DEFAULT_IDLE)
-    g_source_set_priority (source, priority);
-
-  g_source_set_callback (source, function, data, notify);
-  id = g_source_attach (source, NULL);
-
-  TRACE (GLIB_IDLE_ADD (source, g_main_context_default (), id, priority, function, data));
-
-  g_source_unref (source);
-
-  return id;
+  return idle_add_full (priority, FALSE, function, data, notify);
 }
 
 /**
@@ -6044,6 +6135,31 @@ g_idle_add (GSourceFunc    function,
 	    gpointer       data)
 {
   return g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, function, data, NULL);
+}
+
+/**
+ * g_idle_add_once:
+ * @function: function to call
+ * @data: data to pass to @function
+ *
+ * Adds a function to be called whenever there are no higher priority
+ * events pending to the default main loop. The function is given the
+ * default idle priority, %G_PRIORITY_DEFAULT_IDLE.
+ *
+ * The function will only be called once and then the source will be
+ * automatically removed from the main context.
+ *
+ * This function otherwise behaves like g_idle_add().
+ *
+ * Returns: the ID (greater than 0) of the event source
+ *
+ * Since: 2.74
+ */
+guint
+g_idle_add_once (GSourceOnceFunc function,
+                 gpointer        data)
+{
+  return idle_add_full (G_PRIORITY_DEFAULT_IDLE, TRUE, (GSourceFunc) function, data, NULL);
 }
 
 /**

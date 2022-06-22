@@ -140,6 +140,7 @@ GLIB_VERSION_2_66
 GLIB_VERSION_2_68
 GLIB_VERSION_2_70
 GLIB_VERSION_2_72
+GLIB_VERSION_2_74
 GLIB_VERSION_CUR_STABLE
 GLIB_VERSION_PREV_STABLE
 GLIB_VERSION_MIN_REQUIRED
@@ -172,6 +173,7 @@ GLIB_AVAILABLE_ENUMERATOR_IN_2_66
 GLIB_AVAILABLE_ENUMERATOR_IN_2_68
 GLIB_AVAILABLE_ENUMERATOR_IN_2_70
 GLIB_AVAILABLE_ENUMERATOR_IN_2_72
+GLIB_AVAILABLE_ENUMERATOR_IN_2_74
 GLIB_AVAILABLE_IN_ALL
 GLIB_AVAILABLE_IN_2_26
 GLIB_AVAILABLE_IN_2_28
@@ -197,6 +199,7 @@ GLIB_AVAILABLE_IN_2_66
 GLIB_AVAILABLE_IN_2_68
 GLIB_AVAILABLE_IN_2_70
 GLIB_AVAILABLE_IN_2_72
+GLIB_AVAILABLE_IN_2_74
 GLIB_AVAILABLE_MACRO_IN_2_26
 GLIB_AVAILABLE_MACRO_IN_2_28
 GLIB_AVAILABLE_MACRO_IN_2_30
@@ -221,6 +224,7 @@ GLIB_AVAILABLE_MACRO_IN_2_66
 GLIB_AVAILABLE_MACRO_IN_2_68
 GLIB_AVAILABLE_MACRO_IN_2_70
 GLIB_AVAILABLE_MACRO_IN_2_72
+GLIB_AVAILABLE_MACRO_IN_2_74
 GLIB_AVAILABLE_STATIC_INLINE_IN_2_44
 GLIB_AVAILABLE_STATIC_INLINE_IN_2_60
 GLIB_AVAILABLE_STATIC_INLINE_IN_2_62
@@ -229,6 +233,7 @@ GLIB_AVAILABLE_STATIC_INLINE_IN_2_66
 GLIB_AVAILABLE_STATIC_INLINE_IN_2_68
 GLIB_AVAILABLE_STATIC_INLINE_IN_2_70
 GLIB_AVAILABLE_STATIC_INLINE_IN_2_72
+GLIB_AVAILABLE_STATIC_INLINE_IN_2_74
 GLIB_AVAILABLE_TYPE_IN_2_26
 GLIB_AVAILABLE_TYPE_IN_2_28
 GLIB_AVAILABLE_TYPE_IN_2_30
@@ -253,6 +258,7 @@ GLIB_AVAILABLE_TYPE_IN_2_66
 GLIB_AVAILABLE_TYPE_IN_2_68
 GLIB_AVAILABLE_TYPE_IN_2_70
 GLIB_AVAILABLE_TYPE_IN_2_72
+GLIB_AVAILABLE_TYPE_IN_2_74
 GLIB_DEPRECATED_ENUMERATOR
 GLIB_DEPRECATED_ENUMERATOR_FOR
 GLIB_DEPRECATED_ENUMERATOR_IN_2_26
@@ -303,6 +309,8 @@ GLIB_DEPRECATED_ENUMERATOR_IN_2_70
 GLIB_DEPRECATED_ENUMERATOR_IN_2_70_FOR
 GLIB_DEPRECATED_ENUMERATOR_IN_2_72
 GLIB_DEPRECATED_ENUMERATOR_IN_2_72_FOR
+GLIB_DEPRECATED_ENUMERATOR_IN_2_74
+GLIB_DEPRECATED_ENUMERATOR_IN_2_74_FOR
 GLIB_DEPRECATED_IN_2_26
 GLIB_DEPRECATED_IN_2_26_FOR
 GLIB_DEPRECATED_IN_2_28
@@ -351,6 +359,8 @@ GLIB_DEPRECATED_IN_2_70
 GLIB_DEPRECATED_IN_2_70_FOR
 GLIB_DEPRECATED_IN_2_72
 GLIB_DEPRECATED_IN_2_72_FOR
+GLIB_DEPRECATED_IN_2_74
+GLIB_DEPRECATED_IN_2_74_FOR
 GLIB_DEPRECATED_MACRO
 GLIB_DEPRECATED_MACRO_FOR
 GLIB_DEPRECATED_MACRO_IN_2_26
@@ -401,6 +411,8 @@ GLIB_DEPRECATED_MACRO_IN_2_70
 GLIB_DEPRECATED_MACRO_IN_2_70_FOR
 GLIB_DEPRECATED_MACRO_IN_2_72
 GLIB_DEPRECATED_MACRO_IN_2_72_FOR
+GLIB_DEPRECATED_MACRO_IN_2_74
+GLIB_DEPRECATED_MACRO_IN_2_74_FOR
 GLIB_DEPRECATED_TYPE
 GLIB_DEPRECATED_TYPE_FOR
 GLIB_DEPRECATED_TYPE_IN_2_26
@@ -451,6 +463,8 @@ GLIB_DEPRECATED_TYPE_IN_2_70
 GLIB_DEPRECATED_TYPE_IN_2_70_FOR
 GLIB_DEPRECATED_TYPE_IN_2_72
 GLIB_DEPRECATED_TYPE_IN_2_72_FOR
+GLIB_DEPRECATED_TYPE_IN_2_74
+GLIB_DEPRECATED_TYPE_IN_2_74_FOR
 GLIB_VERSION_CUR_STABLE
 GLIB_VERSION_PREV_STABLE
 </SECTION>
@@ -890,6 +904,7 @@ g_main_context_pop_thread_default
 g_timeout_source_new
 g_timeout_source_new_seconds
 g_timeout_add
+g_timeout_add_once
 g_timeout_add_full
 g_timeout_add_seconds
 g_timeout_add_seconds_full
@@ -897,6 +912,7 @@ g_timeout_add_seconds_full
 <SUBSECTION>
 g_idle_source_new
 g_idle_add
+g_idle_add_once
 g_idle_add_full
 g_idle_remove_by_data
 
@@ -940,6 +956,7 @@ g_source_get_context
 g_source_set_callback
 GSourceFunc
 G_SOURCE_FUNC
+GSourceOnceFunc
 g_source_set_callback_indirect
 g_source_set_ready_time
 g_source_get_ready_time
@@ -1256,6 +1273,7 @@ g_atomic_int_set
 g_atomic_int_inc
 g_atomic_int_dec_and_test
 g_atomic_int_compare_and_exchange
+g_atomic_int_exchange
 g_atomic_int_add
 g_atomic_int_and
 g_atomic_int_or
@@ -1265,6 +1283,7 @@ g_atomic_int_xor
 g_atomic_pointer_get
 g_atomic_pointer_set
 g_atomic_pointer_compare_and_exchange
+g_atomic_pointer_exchange
 g_atomic_pointer_add
 g_atomic_pointer_and
 g_atomic_pointer_or
@@ -2861,6 +2880,7 @@ g_hash_table_new_full
 g_hash_table_new_similar
 GHashFunc
 GEqualFunc
+GEqualFuncFull
 g_hash_table_insert
 g_hash_table_replace
 g_hash_table_add
@@ -3010,7 +3030,9 @@ g_ptr_array_sized_new
 g_ptr_array_new_with_free_func
 g_ptr_array_copy
 g_ptr_array_new_full
+g_ptr_array_new_null_terminated
 g_ptr_array_set_free_func
+g_ptr_array_is_null_terminated
 g_ptr_array_ref
 g_ptr_array_unref
 g_ptr_array_add
@@ -3205,6 +3227,7 @@ g_datalist_id_set_data_full
 g_datalist_id_get_data
 g_datalist_id_remove_data
 g_datalist_id_remove_no_notify
+g_datalist_id_remove_multiple
 GDuplicateFunc
 g_datalist_id_dup_data
 g_datalist_id_replace_data

@@ -706,6 +706,51 @@ g_param_value_validate (GParamSpec *pspec,
 }
 
 /**
+ * g_param_value_is_valid:
+ * @pspec: a valid #GParamSpec
+ * @value: a #GValue of correct type for @pspec
+ *
+ * Return whether the contents of @value comply with the specifications
+ * set out by @pspec.
+ *
+ * Returns: whether the contents of @value comply with the specifications
+ *   set out by @pspec.
+ *
+ * Since: 2.74
+ */
+gboolean
+g_param_value_is_valid (GParamSpec *pspec,
+                        const GValue *value)
+{
+  GParamSpecClass *class;
+
+  g_return_val_if_fail (G_IS_PARAM_SPEC (pspec), TRUE);
+  g_return_val_if_fail (G_IS_VALUE (value), TRUE);
+  g_return_val_if_fail (PSPEC_APPLIES_TO_VALUE (pspec, value), TRUE);
+
+  class = G_PARAM_SPEC_GET_CLASS (pspec);
+
+  if (class->value_is_valid)
+    return class->value_is_valid (pspec, value);
+  else if (class->value_validate)
+    {
+      GValue val = G_VALUE_INIT;
+      gboolean changed;
+
+      g_value_init (&val, G_VALUE_TYPE (value));
+      g_value_copy (value, &val);
+
+      changed = class->value_validate (pspec, &val);
+
+      g_value_unset (&val);
+
+      return !changed;
+    }
+
+  return TRUE;
+}
+
+/**
  * g_param_value_convert:
  * @pspec: a valid #GParamSpec
  * @src_value: source #GValue
@@ -923,7 +968,8 @@ param_spec_pool_equals (gconstpointer key_spec_1,
   const GParamSpec *key2 = key_spec_2;
 
   return (key1->owner_type == key2->owner_type &&
-	  strcmp (key1->name, key2->name) == 0);
+          (key1->name == key2->name ||
+	   strcmp (key1->name, key2->name) == 0));
 }
 
 /**
@@ -1093,53 +1139,57 @@ g_param_spec_pool_lookup (GParamSpecPool *pool,
 			  gboolean        walk_ancestors)
 {
   GParamSpec *pspec;
-  gchar *delim;
 
   g_return_val_if_fail (pool != NULL, NULL);
   g_return_val_if_fail (param_name != NULL, NULL);
 
   g_mutex_lock (&pool->mutex);
 
-  delim = pool->type_prefixing ? strchr (param_name, ':') : NULL;
-
   /* try quick and away, i.e. without prefix */
-  if (!delim)
+  pspec = param_spec_ht_lookup (pool->hash_table, param_name, owner_type, walk_ancestors);
+  if (pspec)
     {
-      pspec = param_spec_ht_lookup (pool->hash_table, param_name, owner_type, walk_ancestors);
       g_mutex_unlock (&pool->mutex);
-
       return pspec;
     }
 
-  /* strip type prefix */
-  if (pool->type_prefixing && delim[1] == ':')
+  if (pool->type_prefixing)
     {
-      guint l = delim - param_name;
-      gchar stack_buffer[32], *buffer = l < 32 ? stack_buffer : g_new (gchar, l + 1);
-      GType type;
-      
-      strncpy (buffer, param_name, delim - param_name);
-      buffer[l] = 0;
-      type = g_type_from_name (buffer);
-      if (l >= 32)
-	g_free (buffer);
-      if (type)		/* type==0 isn't a valid type pefix */
-	{
-	  /* sanity check, these cases don't make a whole lot of sense */
-	  if ((!walk_ancestors && type != owner_type) || !g_type_is_a (owner_type, type))
-	    {
-	      g_mutex_unlock (&pool->mutex);
+      char *delim;
 
-	      return NULL;
-	    }
-	  owner_type = type;
-	  param_name += l + 2;
-	  pspec = param_spec_ht_lookup (pool->hash_table, param_name, owner_type, walk_ancestors);
-	  g_mutex_unlock (&pool->mutex);
+      delim = strchr (param_name, ':');
 
-	  return pspec;
-	}
+      /* strip type prefix */
+      if (delim && delim[1] == ':')
+        {
+          guint l = delim - param_name;
+          gchar stack_buffer[32], *buffer = l < 32 ? stack_buffer : g_new (gchar, l + 1);
+          GType type;
+
+          strncpy (buffer, param_name, delim - param_name);
+          buffer[l] = 0;
+          type = g_type_from_name (buffer);
+          if (l >= 32)
+            g_free (buffer);
+          if (type)         /* type==0 isn't a valid type pefix */
+            {
+              /* sanity check, these cases don't make a whole lot of sense */
+              if ((!walk_ancestors && type != owner_type) || !g_type_is_a (owner_type, type))
+                {
+                  g_mutex_unlock (&pool->mutex);
+
+                  return NULL;
+                }
+              owner_type = type;
+              param_name += l + 2;
+              pspec = param_spec_ht_lookup (pool->hash_table, param_name, owner_type, walk_ancestors);
+              g_mutex_unlock (&pool->mutex);
+
+              return pspec;
+            }
+        }
     }
+
   /* malformed param_name */
 
   g_mutex_unlock (&pool->mutex);

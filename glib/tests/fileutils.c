@@ -749,9 +749,7 @@ test_mkdir_with_parents (void)
   g_assert_cmpint (g_mkdir_with_parents ("./test", 0), ==, 0);
   g_remove ("./test");
 
-#ifdef G_OS_WIN32
-  g_assert_cmpint (g_mkdir_with_parents ("\\Windows\\b\\c", 0), ==, -1);
-#else
+#ifndef G_OS_WIN32
   g_assert_cmpint (g_mkdir_with_parents ("/usr/b/c", 0), ==, -1);
   /* EPERM may be returned if the filesystem as a whole is read-only */
   if (errno != EPERM)
@@ -932,8 +930,14 @@ test_format_size_for_display (void)
   check_string (g_format_size (1000ULL * 1000 * 1000 * 1000 * 1000 * 1000), "1.0\302\240EB");
 
   check_string (g_format_size_full (0, G_FORMAT_SIZE_IEC_UNITS), "0 bytes");
+  check_string (g_format_size_full (0, G_FORMAT_SIZE_IEC_UNITS | G_FORMAT_SIZE_ONLY_VALUE), "0");
+  check_string (g_format_size_full (0, G_FORMAT_SIZE_IEC_UNITS | G_FORMAT_SIZE_ONLY_UNIT), "bytes");
   check_string (g_format_size_full (1, G_FORMAT_SIZE_IEC_UNITS), "1 byte");
+  check_string (g_format_size_full (1, G_FORMAT_SIZE_IEC_UNITS | G_FORMAT_SIZE_ONLY_VALUE), "1");
+  check_string (g_format_size_full (1, G_FORMAT_SIZE_IEC_UNITS | G_FORMAT_SIZE_ONLY_UNIT), "byte");
   check_string (g_format_size_full (2, G_FORMAT_SIZE_IEC_UNITS), "2 bytes");
+  check_string (g_format_size_full (2, G_FORMAT_SIZE_IEC_UNITS | G_FORMAT_SIZE_ONLY_VALUE), "2");
+  check_string (g_format_size_full (2, G_FORMAT_SIZE_IEC_UNITS | G_FORMAT_SIZE_ONLY_UNIT), "bytes");
 
   check_string (g_format_size_full (2048ULL, G_FORMAT_SIZE_IEC_UNITS), "2.0\302\240KiB");
   check_string (g_format_size_full (2048ULL * 1024, G_FORMAT_SIZE_IEC_UNITS), "2.0\302\240MiB");
@@ -945,11 +949,19 @@ test_format_size_for_display (void)
   check_string (g_format_size_full (238472938, G_FORMAT_SIZE_IEC_UNITS), "227.4\302\240MiB");
   check_string (g_format_size_full (238472938, G_FORMAT_SIZE_DEFAULT), "238.5\302\240MB");
   check_string (g_format_size_full (238472938, G_FORMAT_SIZE_LONG_FORMAT), "238.5\302\240MB (238472938 bytes)");
+  check_string (g_format_size_full (238472938, G_FORMAT_SIZE_IEC_UNITS | G_FORMAT_SIZE_ONLY_VALUE), "227.4");
+  check_string (g_format_size_full (238472938, G_FORMAT_SIZE_IEC_UNITS | G_FORMAT_SIZE_ONLY_UNIT), "MiB");
 
 
   check_string (g_format_size_full (0, G_FORMAT_SIZE_BITS), "0 bits");
+  check_string (g_format_size_full (0, G_FORMAT_SIZE_BITS | G_FORMAT_SIZE_ONLY_VALUE), "0");
+  check_string (g_format_size_full (0, G_FORMAT_SIZE_BITS | G_FORMAT_SIZE_ONLY_UNIT), "bits");
   check_string (g_format_size_full (1, G_FORMAT_SIZE_BITS), "1 bit");
+  check_string (g_format_size_full (1, G_FORMAT_SIZE_BITS | G_FORMAT_SIZE_ONLY_VALUE), "1");
+  check_string (g_format_size_full (1, G_FORMAT_SIZE_BITS | G_FORMAT_SIZE_ONLY_UNIT), "bit");
   check_string (g_format_size_full (2, G_FORMAT_SIZE_BITS), "2 bits");
+  check_string (g_format_size_full (2, G_FORMAT_SIZE_BITS | G_FORMAT_SIZE_ONLY_VALUE), "2");
+  check_string (g_format_size_full (2, G_FORMAT_SIZE_BITS | G_FORMAT_SIZE_ONLY_UNIT), "bits");
 
   check_string (g_format_size_full (2000ULL, G_FORMAT_SIZE_BITS), "2.0\302\240kb");
   check_string (g_format_size_full (2000ULL * 1000, G_FORMAT_SIZE_BITS), "2.0\302\240Mb");
@@ -960,11 +972,19 @@ test_format_size_for_display (void)
 
   check_string (g_format_size_full (238472938, G_FORMAT_SIZE_BITS), "238.5\302\240Mb");
   check_string (g_format_size_full (238472938, G_FORMAT_SIZE_BITS | G_FORMAT_SIZE_LONG_FORMAT), "238.5\302\240Mb (238472938 bits)");
+  check_string (g_format_size_full (238472938, G_FORMAT_SIZE_BITS | G_FORMAT_SIZE_ONLY_VALUE), "238.5");
+  check_string (g_format_size_full (238472938, G_FORMAT_SIZE_BITS | G_FORMAT_SIZE_ONLY_UNIT), "Mb");
 
 
   check_string (g_format_size_full (0, G_FORMAT_SIZE_BITS | G_FORMAT_SIZE_IEC_UNITS), "0 bits");
+  check_string (g_format_size_full (0, G_FORMAT_SIZE_BITS | G_FORMAT_SIZE_IEC_UNITS | G_FORMAT_SIZE_ONLY_VALUE), "0");
+  check_string (g_format_size_full (0, G_FORMAT_SIZE_BITS | G_FORMAT_SIZE_IEC_UNITS | G_FORMAT_SIZE_ONLY_UNIT), "bits");
   check_string (g_format_size_full (1, G_FORMAT_SIZE_BITS | G_FORMAT_SIZE_IEC_UNITS), "1 bit");
+  check_string (g_format_size_full (1, G_FORMAT_SIZE_BITS | G_FORMAT_SIZE_IEC_UNITS | G_FORMAT_SIZE_ONLY_VALUE), "1");
+  check_string (g_format_size_full (1, G_FORMAT_SIZE_BITS | G_FORMAT_SIZE_IEC_UNITS | G_FORMAT_SIZE_ONLY_UNIT), "bit");
   check_string (g_format_size_full (2, G_FORMAT_SIZE_BITS | G_FORMAT_SIZE_IEC_UNITS), "2 bits");
+  check_string (g_format_size_full (2, G_FORMAT_SIZE_BITS | G_FORMAT_SIZE_IEC_UNITS | G_FORMAT_SIZE_ONLY_VALUE), "2");
+  check_string (g_format_size_full (2, G_FORMAT_SIZE_BITS | G_FORMAT_SIZE_IEC_UNITS | G_FORMAT_SIZE_ONLY_UNIT), "bits");
 
   check_string (g_format_size_full (2048ULL, G_FORMAT_SIZE_BITS | G_FORMAT_SIZE_IEC_UNITS), "2.0\302\240Kib");
   check_string (g_format_size_full (2048ULL * 1024, G_FORMAT_SIZE_BITS | G_FORMAT_SIZE_IEC_UNITS), "2.0\302\240Mib");
@@ -975,6 +995,8 @@ test_format_size_for_display (void)
 
   check_string (g_format_size_full (238472938, G_FORMAT_SIZE_BITS | G_FORMAT_SIZE_IEC_UNITS), "227.4\302\240Mib");
   check_string (g_format_size_full (238472938, G_FORMAT_SIZE_BITS | G_FORMAT_SIZE_IEC_UNITS | G_FORMAT_SIZE_LONG_FORMAT), "227.4\302\240Mib (238472938 bits)");
+  check_string (g_format_size_full (238472938, G_FORMAT_SIZE_BITS | G_FORMAT_SIZE_IEC_UNITS | G_FORMAT_SIZE_ONLY_VALUE), "227.4");
+  check_string (g_format_size_full (238472938, G_FORMAT_SIZE_BITS | G_FORMAT_SIZE_IEC_UNITS | G_FORMAT_SIZE_ONLY_UNIT), "Mib");
 }
 
 static void
@@ -1425,6 +1447,7 @@ test_get_contents (void)
   g_assert_no_error (error);
 
   g_free (contents);
+  g_remove (filename);
 }
 
 static void
@@ -1833,6 +1856,7 @@ test_read_link (void)
       g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
                              "*assertion*!= NULL*");
       newpath = g_file_read_link (NULL, &error);
+      g_assert_null (newpath);
       g_test_assert_expected_messages ();
     }
 

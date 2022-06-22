@@ -2,6 +2,8 @@
  * Copyright © 2007, 2008 Ryan Lortie
  * Copyright © 2010 Codethink Limited
  *
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -800,12 +802,13 @@ g_variant_new_array (const GVariantType *child_type,
 
   for (i = 0; i < n_children; i++)
     {
-      if G_UNLIKELY (!g_variant_is_of_type (children[i], child_type))
+      gboolean is_of_child_type = g_variant_is_of_type (children[i], child_type);
+      if G_UNLIKELY (!is_of_child_type)
         {
           while (i != 0)
             g_variant_unref (my_children[--i]);
           g_free (my_children);
-	  g_return_val_if_fail (g_variant_is_of_type (children[i], child_type), NULL);
+          g_return_val_if_fail (is_of_child_type, NULL);
         }
       my_children[i] = g_variant_ref_sink (children[i]);
       trusted &= g_variant_is_trusted (children[i]);
@@ -3481,8 +3484,19 @@ g_variant_builder_init (GVariantBuilder    *builder,
       g_assert_not_reached ();
    }
 
+#ifdef G_ANALYZER_ANALYZING
+  /* Static analysers can’t couple the code in g_variant_builder_init() to the
+   * code in g_variant_builder_end() by GVariantType, so end up assuming that
+   * @offset and @children mismatch and that uninitialised memory is accessed
+   * from @children. At runtime, this is caught by the preconditions at the top
+   * of g_variant_builder_end(). Help the analyser by zero-initialising the
+   * memory to avoid a false positive. */
+  GVSB(builder)->children = g_new0 (GVariant *,
+                                    GVSB(builder)->allocated_children);
+#else
   GVSB(builder)->children = g_new (GVariant *,
                                    GVSB(builder)->allocated_children);
+#endif
 }
 
 static void
@@ -4060,7 +4074,7 @@ g_variant_dict_lookup (GVariantDict *dict,
  * returned.  If @expected_type was specified then any non-%NULL return
  * value will have this type.
  *
- * Returns: (transfer full): the value of the dictionary key, or %NULL
+ * Returns: (transfer full) (nullable): the value of the dictionary key, or %NULL
  *
  * Since: 2.40
  **/

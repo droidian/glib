@@ -1,3 +1,5 @@
+subdir('performance')
+
 marshalers_h = custom_target('marshalers_h',
   output : 'marshalers.h',
   input : 'marshalers.list',
@@ -27,13 +29,30 @@ marshalers_c = custom_target('marshalers_c',
 )
 
 gobject_tests = {
+  'notify-init' : {},
+  'notify-init2' : {},
   'qdata' : {},
+  'accumulator' : {
+    'source' : ['accumulator.c', marshalers_h, marshalers_c],
+  },
+  'basics-gobject' : {},
   'boxed' : {},
   'cxx' : {
     'source' : ['cxx.cpp'],
   },
+  'defaultiface' : {
+    'source' : ['defaultiface.c', 'testmodule.c'],
+  },
+  'deftype' : {},
+  'dynamictype' : {
+    'source' : ['dynamictype.c', 'testmodule.c'],
+  },
   'enums' : {},
+  'override' : {},
   'param' : {},
+  'references' : {},
+  'basic-signals' : {},
+  'singleton' : {},
   'threadtests' : {},
   'dynamictests' : {},
   'binding' : {},
@@ -57,6 +76,28 @@ gobject_tests = {
   'signalgroup' : {},
   'testing' : {},
   'type-flags' : {},
+  'objects-refcount1' : {},
+  'objects-refcount2' : {'suite' : ['slow']},
+  'properties-refcount1' : {},
+  'properties-refcount2' : {'suite' : ['slow']},
+  'properties-refcount3' : {'suite' : ['slow']},
+  'properties-refcount4' : {},
+  'signals-refcount1' : {
+    'source' : 'signals-refcount.c',
+    'c_args' : ['-DTESTNUM=1'],
+  },
+  'signals-refcount2' : {
+    'source' : 'signals-refcount.c',
+    'c_args' : ['-DTESTNUM=2'],
+  },
+  'signals-refcount3' : {
+    'source' : 'signals-refcount.c',
+    'c_args' : ['-DTESTNUM=3'],
+  },
+  'signals-refcount4' : {
+    'source' : 'signals-refcount.c',
+    'c_args' : ['-DTESTNUM=4'],
+  },
 }
 
 if cc.get_id() != 'msvc'
@@ -65,6 +106,7 @@ endif
 
 python_tests = [
   'genmarshal.py',
+  'gobject-query.py',
   'mkenums.py',
 ]
 

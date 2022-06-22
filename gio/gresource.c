@@ -2,6 +2,8 @@
  *
  * Copyright © 2011 Red Hat, Inc
  *
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -1444,6 +1446,10 @@ g_static_resource_fini (GStaticResource *static_resource)
   resource = g_atomic_pointer_get (&static_resource->resource);
   if (resource)
     {
+      /* There should be at least two references to the resource now: one for
+       * static_resource->resource, and one in the registered_resources list. */
+      g_assert (g_atomic_int_get (&resource->ref_count) >= 2);
+
       g_atomic_pointer_set (&static_resource->resource, NULL);
       g_resources_unregister_unlocked (resource);
       g_resource_unref (resource);

@@ -8,12 +8,12 @@ subdir('libcharset')
 libsysprof_capture_dep = dependency('sysprof-capture-4', version: '>= 3.38.0',
   required: get_option('sysprof'),
   default_options: [
-    'enable_examples=false',
-    'enable_gtk=false',
-    'enable_tests=false',
-    'enable_tools=false',
+    'examples=false',
+    'gtk=false',
+    'tests=false',
+    'tools=false',
     'libsysprof=false',
-    'with_sysprofd=none',
+    'sysprofd=none',
     'help=false',
   ],
   fallback: ['sysprof', 'libsysprof_capture_dep'],
@@ -401,17 +401,14 @@ pkg.generate(libglib,
   name : 'GLib',
   description : 'C Utility Library',
 )
-
-if meson.version().version_compare('>=0.54.0')
-  meson.override_dependency('glib-2.0', libglib_dep)
-endif
+meson.override_dependency('glib-2.0', libglib_dep)
 
 # On Windows, glib needs a spawn helper for g_spawn* API
 if host_system == 'windows'
   if host_machine.cpu_family() == 'x86'
     executable('gspawn-win32-helper', 'gspawn-win32-helper.c',
       install : true,
-      gui_app : true,
+      win_subsystem : 'windows',
       include_directories : configinc,
       dependencies : [libglib_dep])
     executable('gspawn-win32-helper-console', 'gspawn-win32-helper.c',
@@ -422,7 +419,7 @@ if host_system == 'windows'
   else
     executable('gspawn-win64-helper', 'gspawn-win32-helper.c',
       install : true,
-      gui_app : true,
+      win_subsystem : 'windows',
       include_directories : configinc,
       dependencies : [libglib_dep])
     executable('gspawn-win64-helper-console', 'gspawn-win32-helper.c',
@@ -453,11 +450,9 @@ configure_file(
 install_data('glib_gdb.py', install_dir : join_paths(glib_pkgdatadir, 'gdb'))
 
 # This is needed to make gdb find glib_gdb.py
-if meson.version().version_compare('>=0.58')
-  env = environment()
-  env.prepend('PYTHONPATH', meson.current_source_dir())
-  meson.add_devenv(env)
-endif
+env = environment()
+env.prepend('PYTHONPATH', meson.current_source_dir())
+meson.add_devenv(env)
 
 gdb_conf = configuration_data()
 gdb_conf.set('datadir', glib_datadir)

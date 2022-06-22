@@ -1,6 +1,8 @@
 /*
  * Copyright 2021 Collabora Ltd.
  *
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -417,7 +419,8 @@ test_search_path_heap_allocation (void)
   if (skip_win32 ())
     return;
 
-  memset (placeholder, '_', sizeof (placeholder));
+  memset (placeholder, '_', sizeof (placeholder) - 1);
+  placeholder[sizeof (placeholder) - 1] = '\0';
   /* Force search_path_buffer to be heap-allocated */
   long_dir = g_test_build_filename (G_TEST_BUILT, "path-test-subdir", placeholder, NULL);
   long_path = g_strjoin (G_SEARCHPATH_SEPARATOR_S, subdir, long_dir, NULL);

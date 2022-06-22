@@ -4,6 +4,8 @@
  * 
  * Copyright (C) 2008 Red Hat, Inc.
  *
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -616,7 +618,7 @@ do_async_connectable (GSocketAddressEnumerator *enumerator)
 }
 
 static void
-do_connectable (const char *arg, gboolean synchronous, guint count)
+do_connectable (const char *arg, gboolean synch, guint count)
 {
   char **parts;
   GSocketConnectable *connectable;
@@ -660,7 +662,7 @@ do_connectable (const char *arg, gboolean synchronous, guint count)
     {
       enumerator = g_socket_connectable_enumerate (connectable);
 
-      if (synchronous)
+      if (synch)
         do_sync_connectable (enumerator);
       else
         do_async_connectable (enumerator);

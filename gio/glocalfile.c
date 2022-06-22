@@ -2,6 +2,8 @@
  * 
  * Copyright (C) 2006-2007 Red Hat, Inc.
  *
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -166,7 +168,7 @@ g_local_file_class_init (GLocalFileClass *klass)
 				  0);
 #endif
   
-#ifdef HAVE_UTIMES
+#if defined(HAVE_UTIMES) || defined(HAVE_UTIMENSAT)
   g_file_attribute_info_list_add (list,
 				  G_FILE_ATTRIBUTE_TIME_MODIFIED,
 				  G_FILE_ATTRIBUTE_TYPE_UINT64,
@@ -186,6 +188,18 @@ g_local_file_class_init (GLocalFileClass *klass)
 				  G_FILE_ATTRIBUTE_INFO_COPY_WHEN_MOVED);
   g_file_attribute_info_list_add (list,
 				  G_FILE_ATTRIBUTE_TIME_ACCESS_USEC,
+				  G_FILE_ATTRIBUTE_TYPE_UINT32,
+				  G_FILE_ATTRIBUTE_INFO_COPY_WHEN_MOVED);
+#endif  /* HAVE_UTIMES || HAVE_UTIMENSAT */
+
+#ifdef HAVE_UTIMENSAT
+  g_file_attribute_info_list_add (list,
+				  G_FILE_ATTRIBUTE_TIME_MODIFIED_NSEC,
+				  G_FILE_ATTRIBUTE_TYPE_UINT32,
+				  G_FILE_ATTRIBUTE_INFO_COPY_WITH_FILE |
+				  G_FILE_ATTRIBUTE_INFO_COPY_WHEN_MOVED);
+  g_file_attribute_info_list_add (list,
+				  G_FILE_ATTRIBUTE_TIME_ACCESS_NSEC,
 				  G_FILE_ATTRIBUTE_TYPE_UINT32,
 				  G_FILE_ATTRIBUTE_INFO_COPY_WHEN_MOVED);
 #endif

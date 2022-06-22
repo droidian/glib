@@ -5,6 +5,8 @@
  * Copyright (C) 2008 Red Hat, Inc.
  * Copyright (C) 2018 Igalia S.L.
  *
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -302,19 +304,19 @@ do_lookup_by_address (GTask         *task,
                       GCancellable  *cancellable)
 {
   GInetAddress *address = task_data;
-  struct sockaddr_storage sockaddr;
-  gsize sockaddr_size;
+  struct sockaddr_storage sockaddr_address;
+  gsize sockaddr_address_size;
   GSocketAddress *gsockaddr;
   gchar name[NI_MAXHOST];
   gint retval;
 
   gsockaddr = g_inet_socket_address_new (address, 0);
-  g_socket_address_to_native (gsockaddr, (struct sockaddr *)&sockaddr,
-                              sizeof (sockaddr), NULL);
-  sockaddr_size = g_socket_address_get_native_size (gsockaddr);
+  g_socket_address_to_native (gsockaddr, (struct sockaddr *)&sockaddr_address,
+                              sizeof (sockaddr_address), NULL);
+  sockaddr_address_size = g_socket_address_get_native_size (gsockaddr);
   g_object_unref (gsockaddr);
 
-  retval = getnameinfo ((struct sockaddr *)&sockaddr, sockaddr_size,
+  retval = getnameinfo ((struct sockaddr *) &sockaddr_address, sockaddr_address_size,
                         name, sizeof (name), NULL, 0, NI_NAMEREQD);
   if (retval == 0)
     g_task_return_pointer (task, g_strdup (name), g_free);

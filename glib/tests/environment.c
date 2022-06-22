@@ -1,6 +1,8 @@
 /* GLIB - Library of useful routines for C programming
  * Copyright (C) 2010 Ryan Lortie
  *
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -118,9 +120,11 @@ test_getenv (void)
   data = g_getenv ("foo=bar");
   if (data != NULL)
     g_assert_cmpstr (data, ==, "baz");
-
-  data = g_getenv ("foo");
-  g_assert_cmpstr (data, ==, "bar=baz");
+  else
+    {
+      data = g_getenv ("foo");
+      g_assert_cmpstr (data, ==, "bar=baz");
+    }
 
   if (g_test_undefined ())
     {
