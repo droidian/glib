@@ -6,7 +6,7 @@ Source: glib2.0
 Section: libs
 Priority: optional
 Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
-Uploaders: Iain Lane <laney@debian.org>, Simon McVittie <smcv@debian.org>
+Uploaders: Iain Lane <laney@debian.org>, Jeremy Bicha <jbicha@ubuntu.com>, Simon McVittie <smcv@debian.org>
 Build-Depends: dbus <!nocheck> <!noinsttest>,
                debhelper-compat (= 13),
                dh-sequence-python3,
@@ -42,7 +42,7 @@ Rules-Requires-Root: no
 Standards-Version: 4.6.0
 Homepage: https://wiki.gnome.org/Projects/GLib
 Vcs-Browser: https://salsa.debian.org/gnome-team/glib
-Vcs-Git: https://salsa.debian.org/gnome-team/glib.git
+Vcs-Git: https://salsa.debian.org/gnome-team/glib.git -b debian/experimental
 
 Package: libglib2.0-0
 Architecture: any
