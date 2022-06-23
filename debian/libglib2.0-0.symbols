@@ -1094,6 +1094,7 @@ libgio-2.0.so.0 libglib2.0-0 #MINVER#
  g_list_store_append@Base 2.43.4
  g_list_store_find@Base 2.63.3
  g_list_store_find_with_equal_func@Base 2.63.3
+ g_list_store_find_with_equal_func_full@Base 2.73.1
  g_list_store_get_type@Base 2.43.4
  g_list_store_insert@Base 2.43.4
  g_list_store_insert_sorted@Base 2.43.4
@@ -2162,6 +2163,7 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_atomic_int_and@Base 2.30.0
  g_atomic_int_compare_and_exchange@Base 2.12.0
  g_atomic_int_dec_and_test@Base 2.30.0
+ g_atomic_int_exchange@Base 2.73.1
  g_atomic_int_exchange_and_add@Base 2.12.0
  g_atomic_int_get@Base 2.12.0
  g_atomic_int_inc@Base 2.30.0
@@ -2171,6 +2173,7 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_atomic_pointer_add@Base 2.30.0
  g_atomic_pointer_and@Base 2.30.0
  g_atomic_pointer_compare_and_exchange@Base 2.12.0
+ g_atomic_pointer_exchange@Base 2.73.1
  g_atomic_pointer_get@Base 2.12.0
  g_atomic_pointer_or@Base 2.30.0
  g_atomic_pointer_set@Base 2.12.0
@@ -2345,6 +2348,7 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_datalist_get_flags@Base 2.12.0
  g_datalist_id_dup_data@Base 2.33.14
  g_datalist_id_get_data@Base 2.12.0
+ g_datalist_id_remove_multiple@Base 2.73.1
  g_datalist_id_remove_no_notify@Base 2.12.0
  g_datalist_id_replace_data@Base 2.33.14
  g_datalist_id_set_data_full@Base 2.12.0
@@ -2604,6 +2608,7 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_iconv_open@Base 2.12.0
  g_idle_add@Base 2.12.0
  g_idle_add_full@Base 2.12.0
+ g_idle_add_once@Base 2.73.1
  g_idle_funcs@Base 2.12.0
  g_idle_remove_by_data@Base 2.12.0
  g_idle_source_new@Base 2.12.0
@@ -2981,8 +2986,10 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_ptr_array_foreach@Base 2.12.0
  g_ptr_array_free@Base 2.12.0
  g_ptr_array_insert@Base 2.39.4
+ g_ptr_array_is_null_terminated@Base 2.73.1
  g_ptr_array_new@Base 2.12.0
  g_ptr_array_new_full@Base 2.30.0
+ g_ptr_array_new_null_terminated@Base 2.73.1
  g_ptr_array_new_with_free_func@Base 2.22.0
  g_ptr_array_ref@Base 2.22.0
  g_ptr_array_remove@Base 2.12.0
@@ -3521,6 +3528,7 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_time_zone_unref@Base 2.26.0
  g_timeout_add@Base 2.12.0
  g_timeout_add_full@Base 2.12.0
+ g_timeout_add_once@Base 2.73.1
  g_timeout_add_seconds@Base 2.14.0
  g_timeout_add_seconds_full@Base 2.14.0
  g_timeout_funcs@Base 2.12.0
@@ -4132,6 +4140,7 @@ libgobject-2.0.so.0 libglib2.0-0 #MINVER#
  g_param_type_register_static@Base 2.12.0
  g_param_value_convert@Base 2.12.0
  g_param_value_defaults@Base 2.12.0
+ g_param_value_is_valid@Base 2.73.1
  g_param_value_set_default@Base 2.12.0
  g_param_value_validate@Base 2.12.0
  g_param_values_cmp@Base 2.12.0
@@ -4157,6 +4166,7 @@ libgobject-2.0.so.0 libglib2.0-0 #MINVER#
  g_signal_group_block@Base 2.71.2
  g_signal_group_connect@Base 2.71.2
  g_signal_group_connect_after@Base 2.71.2
+ g_signal_group_connect_closure@Base 2.73.1
  g_signal_group_connect_data@Base 2.71.2
  g_signal_group_connect_object@Base 2.71.2
  g_signal_group_connect_swapped@Base 2.71.2
