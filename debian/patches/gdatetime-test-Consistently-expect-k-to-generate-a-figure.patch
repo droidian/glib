@@ -8,6 +8,8 @@ only run if a legacy ja_JP.eucjp locale exists. Debian generates a fairly
 comprehensive set of locales (including some that are non-UTF-8) while
 running GLib's installed-tests, so this was caught by CI.
 
+Fixes: 7074122 "gdatetime: Pad numbers with numeric space"
+Forwarded: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/2773
 Signed-off-by: Simon McVittie <smcv@debian.org>
 ---
  glib/tests/gdatetime.c | 2 +-
