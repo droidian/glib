@@ -15,7 +15,7 @@ Forwarded: no
  2 files changed, 25 insertions(+)
 
 diff --git a/glib/tests/mainloop.c b/glib/tests/mainloop.c
-index 2bbb3d8..d6220a6 100644
+index fd3cac1..d510925 100644
 --- a/glib/tests/mainloop.c
 +++ b/glib/tests/mainloop.c
 @@ -520,6 +520,14 @@ test_child_sources (void)
@@ -49,10 +49,10 @@ index 2bbb3d8..d6220a6 100644
    loop = g_main_loop_new (ctx, FALSE);
  
 diff --git a/glib/tests/timeout.c b/glib/tests/timeout.c
-index 9e4d047..1ab8845 100644
+index acbb8f3..60cc5f2 100644
 --- a/glib/tests/timeout.c
 +++ b/glib/tests/timeout.c
-@@ -179,6 +179,15 @@ test_func (gpointer data)
+@@ -177,6 +177,15 @@ test_func (gpointer data)
  static void
  test_rounding (void)
  {

@@ -14,7 +14,7 @@ Forwarded: no
  1 file changed, 6 insertions(+)
 
 diff --git a/glib/tests/timer.c b/glib/tests/timer.c
-index 8ea5c1f..a4c1095 100644
+index 243563e..df961fa 100644
 --- a/glib/tests/timer.c
 +++ b/glib/tests/timer.c
 @@ -33,6 +33,12 @@ test_timer_basic (void)
