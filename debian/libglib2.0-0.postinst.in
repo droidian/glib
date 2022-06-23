@@ -27,25 +27,9 @@ handle_triggers () {
     done
 }
 
-cleanup () {
-    /usr/share/glib-2.0/clean-up-unmanaged-libraries \
-        --bug-ref=896019 \
-        "$@" \
-        "#MULTIARCH#" \
-        libglib-2.0.so.0
-}
-
 if [ "$1" = triggered ]; then
     handle_triggers $2
     exit 0
-fi
-
-# Clean up stale shared libraries on upgrades if necessary. Do this before running
-# glib-compile-schemas, gio-querymodules.
-# This workaround can be removed after Ubuntu 22.04 is released.
-if [ -n "$2" ] && ! cleanup; then
-    echo "$0: Trying cleanup again with more logging..."
-    cleanup --verbose
 fi
 
 #DEBHELPER#
