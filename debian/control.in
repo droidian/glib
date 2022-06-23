@@ -14,7 +14,6 @@ Build-Depends: dbus <!nocheck> <!noinsttest>,
                libdbus-1-dev (>= 1.2.14) <!nocheck> <!noinsttest>,
                libelf-dev (>= 0.142),
                libffi-dev (>= 3.3),
-               libgamin-dev [hurd-any] | libfam-dev [hurd-any],
                libmount-dev (>= 2.35.2-7~) [linux-any],
                libpcre3-dev (>= 1:8.35),
                libselinux1-dev [linux-any],
@@ -50,11 +49,9 @@ Recommends: libglib2.0-data,
 Breaks: gimp (<< 2.10.14-3~),
         glib-networking-tests (<< 2.70.0~),
         gnome-keyring (<< 40.0-3~),
-        libgio-fam (<< 2.64.1-2~) [kfreebsd-any hurd-any],
         libgirepository-1.0-1 (<< 1.62.0-4~),
         libgladeui-2-6 (<< 3.22.2),
         libsoup2.4-tests (<< 2.72.0-3~),
-Replaces: libgio-fam (<< 2.64.1-2~) [kfreebsd-any hurd-any]
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
 Description: GLib library of C routines
