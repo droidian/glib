@@ -36,7 +36,7 @@ fi
 
 # This is shipped in the .deb (see debian/libglib2.0-0.dirs) but would
 # be removed if empty during upgrade by old versions of the postrm (#987913).
-# This workaround can be removed after Ubuntu 22.04 is released.
+# This workaround can be removed after Debian 12 and Ubuntu 22.04 are released.
 install -d "/usr/lib/#MULTIARCH#/gio/modules"
 
 "/usr/lib/#MULTIARCH#/glib-2.0/glib-compile-schemas" /usr/share/glib-2.0/schemas || true
