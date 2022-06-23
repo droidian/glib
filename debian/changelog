@@ -1,8 +1,28 @@
 glib2.0 (2.73.1-1) UNRELEASED; urgency=medium
 
   * New upstream release
+  * d/copyright: Update
+  * d/control.in: Update Meson build-dependency
+  * Refresh patch series
+  * d/control.in, d/rules: Drop GIO fam module.
+    This no longer exists upstream. Hurd users will need to maintain it
+    separately if desired.
+  * d/libglib2.0-0.symbols: Update
+  * d/libglib2.0-0.postinst.in, d/rules, d/tests:
+    Remove workaround for #896019.
+    The version of GLib in Debian 11 cleaned up a potential broken state
+    left behind by Debian 9, and Debian doesn't support skipping a major
+    release, so Debian 12 no longer needs this.
+    Similarly, the version in Ubuntu 22.04 LTS had this cleanup, and Ubuntu
+    doesn't support skipping a LTS release, so 22.10 and 24.04 LTS don't
+    need this.
+  * d/tests/run-with-locales: Show what we generated
+  * d/p/gdatetime-test-Consistently-expect-k-to-generate-a-figure.patch:
+    Add patch to fix an installed-test failure
+  * Update Lintian overrides
+  * Standards-Version: 4.6.1 (no changes required)
 
- -- Simon McVittie <smcv@debian.org>  Wed, 22 Jun 2022 20:12:23 +0100
+ -- Simon McVittie <smcv@debian.org>  Thu, 23 Jun 2022 14:39:54 +0100
 
 glib2.0 (2.72.2-2) unstable; urgency=medium
 
