@@ -157,6 +157,7 @@ while [ "$#" -gt 0 ]; do
 done
 
 if [ -n "$tempdir" ]; then
+    find "$tempdir" >&2
     export LOCPATH="$tempdir"
 fi
 
