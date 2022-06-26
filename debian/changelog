@@ -1,4 +1,4 @@
-glib2.0 (2.73.1-1) UNRELEASED; urgency=medium
+glib2.0 (2.73.1-1) experimental; urgency=medium
 
   * New upstream release
   * d/copyright: Update
@@ -21,8 +21,19 @@ glib2.0 (2.73.1-1) UNRELEASED; urgency=medium
     Add patch to fix an installed-test failure
   * Update Lintian overrides
   * Standards-Version: 4.6.1 (no changes required)
+  * d/p/dataset-Do-not-increment.patch,
+    d/p/glib-tests-dataset-Add-a-test.patch,
+    d/p/In-test_datalist_id_remove_multiple-verify-that-the-data-.patch,
+    d/p/gdataset-Preserve-destruction-order.patch,
+    d/p/glib-tests-dataset-Test-id_remove_multiple.patch,
+    d/p/dataset-Rename-i-as-destroy_index-and-move-it-out-of-dest.patch,
+    d/p/glib-tests-dataset-Use-existing-code.patch:
+    Add patches to preserve order of GDataList destructors.
+    This avoids a crash in GTK.
+  * d/p/Revert-gobject-Use-g_datalist_id_remove_multiple.patch:
+    Add patch to revert optimizations that trigger a gnome-shell crash
 
- -- Simon McVittie <smcv@debian.org>  Thu, 23 Jun 2022 14:39:54 +0100
+ -- Simon McVittie <smcv@debian.org>  Sun, 26 Jun 2022 12:06:36 +0100
 
 glib2.0 (2.72.2-2) unstable; urgency=medium
 
