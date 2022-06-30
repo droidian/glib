@@ -15,7 +15,4 @@ debian/Skip-memory-monitor-dbus-test-if-not-specifically-request.patch
 debian/Add-extra-debug-to-memory-monitor-dbus-test.patch
 debian/tests-Skip-debugcontroller-test.patch
 debian/gdesktopappinfo-Recognize-gnome-console-as-a-terminal-app.patch
-glocalfilemonitor-Avoid-file-monitor-destruction-from-eve.patch
-glocalfilemonitor-Skip-event-handling-if-the-source-has-b.patch
-tests-Add-a-test-for-GFileMonitor-deadlocks.patch
 debian/testfilemonitor-Skip-if-we-are-avoiding-flaky-tests.patch
