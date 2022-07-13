@@ -44,7 +44,11 @@ libgio-2.0.so.0 libglib2.0-0 #MINVER#
  g_app_info_get_all_for_type@Base 2.16.0
  g_app_info_get_commandline@Base 2.20.0
  g_app_info_get_default_for_type@Base 2.16.0
+ g_app_info_get_default_for_type_async@Base 2.73.2
+ g_app_info_get_default_for_type_finish@Base 2.73.2
  g_app_info_get_default_for_uri_scheme@Base 2.16.0
+ g_app_info_get_default_for_uri_scheme_async@Base 2.73.2
+ g_app_info_get_default_for_uri_scheme_finish@Base 2.73.2
  g_app_info_get_description@Base 2.16.0
  g_app_info_get_display_name@Base 2.24.0
  g_app_info_get_executable@Base 2.16.0
@@ -867,6 +871,8 @@ libgio-2.0.so.0 libglib2.0-0 #MINVER#
  g_file_make_directory_finish@Base 2.37.0
  g_file_make_directory_with_parents@Base 2.18.0
  g_file_make_symbolic_link@Base 2.16.0
+ g_file_make_symbolic_link_async@Base 2.73.2
+ g_file_make_symbolic_link_finish@Base 2.73.2
  g_file_measure_disk_usage@Base 2.37.93
  g_file_measure_disk_usage_async@Base 2.37.93
  g_file_measure_disk_usage_finish@Base 2.37.93
@@ -895,6 +901,10 @@ libgio-2.0.so.0 libglib2.0-0 #MINVER#
  g_file_new_for_path@Base 2.16.0
  g_file_new_for_uri@Base 2.16.0
  g_file_new_tmp@Base 2.31.8
+ g_file_new_tmp_async@Base 2.73.2
+ g_file_new_tmp_dir_async@Base 2.73.2
+ g_file_new_tmp_dir_finish@Base 2.73.2
+ g_file_new_tmp_finish@Base 2.73.2
  g_file_open_readwrite@Base 2.22.0
  g_file_open_readwrite_async@Base 2.22.0
  g_file_open_readwrite_finish@Base 2.22.0
@@ -1045,6 +1055,7 @@ libgio-2.0.so.0 libglib2.0-0 #MINVER#
  g_input_stream_skip_finish@Base 2.16.0
  g_io_error_enum_get_type@Base 2.16.0
  g_io_error_from_errno@Base 2.16.0
+ g_io_error_from_file_error@Base 2.73.2
  g_io_error_quark@Base 2.16.0
  g_io_extension_get_name@Base 2.16.0
  g_io_extension_get_priority@Base 2.16.0
@@ -2162,6 +2173,7 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_atomic_int_add@Base 2.12.0
  g_atomic_int_and@Base 2.30.0
  g_atomic_int_compare_and_exchange@Base 2.12.0
+ g_atomic_int_compare_and_exchange_full@Base 2.73.2
  g_atomic_int_dec_and_test@Base 2.30.0
  g_atomic_int_exchange@Base 2.73.1
  g_atomic_int_exchange_and_add@Base 2.12.0
@@ -2173,6 +2185,7 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_atomic_pointer_add@Base 2.30.0
  g_atomic_pointer_and@Base 2.30.0
  g_atomic_pointer_compare_and_exchange@Base 2.12.0
+ g_atomic_pointer_compare_and_exchange_full@Base 2.73.2
  g_atomic_pointer_exchange@Base 2.73.1
  g_atomic_pointer_get@Base 2.12.0
  g_atomic_pointer_or@Base 2.30.0
