@@ -1,8 +1,18 @@
 glib2.0 (2.73.2-1) UNRELEASED; urgency=medium
 
   * New upstream release
+  * d/copyright: Update
+  * d/patches: Drop patches that were applied upstream
+  * Merge packaging from unstable (no functional changes)
 
  -- Simon McVittie <smcv@debian.org>  Wed, 13 Jul 2022 12:34:11 +0100
+
+glib2.0 (2.72.3-1) unstable; urgency=medium
+
+  * New upstream release (LP: #1980408)
+  * Drop GFileMonitor patches applied in new release
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Thu, 30 Jun 2022 16:12:12 -0400
 
 glib2.0 (2.73.1-1) experimental; urgency=medium
 
