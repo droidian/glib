@@ -2,6 +2,8 @@
  *
  * Copyright (C) 2009-2010 Christian Hergert <chris@dronelabs.com>
  *
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * This is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -1708,7 +1710,7 @@ test_non_utf8_printf (void)
   TEST_PRINTF_TIME (12, 0, 0, "%I", "12");
   TEST_PRINTF_TIME (15, 0, 0, "%I", "03");
   TEST_PRINTF ("%j", "297");
-  TEST_PRINTF ("%k", " 0");
+  TEST_PRINTF ("%k", "\u20070");
   TEST_PRINTF_TIME (13, 13, 13, "%k", "13");
   TEST_PRINTF ("%l", "12");
   TEST_PRINTF_TIME (12, 0, 0, "%I", "12");

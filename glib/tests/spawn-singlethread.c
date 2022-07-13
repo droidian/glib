@@ -201,7 +201,7 @@ test_spawn_async_with_fds (void)
     { NO_FD, PIPE, STDOUT_PIPE },  /* Test the same fd for stdout + stderr */
   };
 
-  arg = g_strdup_printf ("thread %d", tnum);
+  arg = g_strdup_printf ("# thread %d\n", tnum);
 
   argv = g_ptr_array_new ();
   g_ptr_array_add (argv, echo_prog_path);
@@ -295,10 +295,12 @@ test_spawn_async_with_fds (void)
 
       if (test_pipe[1][0] >= 0)
         {
+          gchar *tmp = g_strdup_printf ("# thread %d" LINEEND, tnum);
           /* Check for echo on stdout */
           g_assert_true (data.stdout_done);
-          g_assert_cmpstr (data.stdout_buf->str, ==, arg);
+          g_assert_cmpstr (data.stdout_buf->str, ==, tmp);
           g_io_channel_unref (channel);
+          g_free (tmp);
         }
       g_string_free (data.stdout_buf, TRUE);
 
@@ -401,7 +403,7 @@ test_spawn_stderr_socket (void)
       return;
     }
 
-  g_test_trap_subprocess (NULL, 0, 0);
+  g_test_trap_subprocess (NULL, 0, G_TEST_SUBPROCESS_DEFAULT);
   g_test_trap_assert_passed ();
 }
 

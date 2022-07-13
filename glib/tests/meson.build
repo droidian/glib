@@ -89,8 +89,8 @@ glib_tests = {
   },
   'refstring' : {},
   'regex' : {
-    'dependencies' : [pcre],
-    'c_args' : use_pcre_static_flag ? ['-DPCRE_STATIC'] : [],
+    'dependencies' : [pcre2],
+    'c_args' : use_pcre2_static_flag ? ['-DPCRE2_STATIC'] : [],
   },
   'relation' : {},
   'rwlock' : {},
@@ -231,15 +231,11 @@ if installed_tests_enabled
   install_subdir('time-zones', install_dir : installed_tests_execdir)
 endif
 
-# Not entirely random of course, but at least it changes over time
-random_number = minor_version + meson.version().split('.').get(1).to_int()
-
 test_env = environment()
 test_env.set('G_TEST_SRCDIR', meson.current_source_dir())
 test_env.set('G_TEST_BUILDDIR', meson.current_build_dir())
 test_env.set('G_DEBUG', 'gc-friendly')
 test_env.set('MALLOC_CHECK_', '2')
-test_env.set('MALLOC_PERTURB_', '@0@'.format(random_number % 256))
 
 test_deps = [libm, thread_dep, libglib_dep]
 test_cargs = ['-DG_LOG_DOMAIN="GLib"', '-UG_DISABLE_ASSERT']
@@ -285,6 +281,47 @@ if installed_tests_enabled
     install_dir : installed_tests_execdir,
   )
 endif
+
+python_tests = [
+  'assert-msg-test.py',
+]
+
+executable('assert-msg-test', ['assert-msg-test.c'],
+  c_args : test_cargs,
+  dependencies :  test_deps,
+  install_dir : installed_tests_execdir,
+  install : installed_tests_enabled,
+  win_subsystem : extra_args.get('win_subsystem', 'console'),
+)
+
+foreach test_name : python_tests
+  test(
+    test_name,
+    python,
+    args: ['-B', files(test_name)],
+    env: test_env,
+    suite: ['glib', 'no-valgrind'],
+  )
+
+  if installed_tests_enabled
+    install_data(
+      files(test_name),
+      install_dir: installed_tests_execdir,
+      install_mode: 'rwxr-xr-x',
+    )
+
+    test_conf = configuration_data()
+    test_conf.set('installed_tests_dir', installed_tests_execdir)
+    test_conf.set('program', test_name)
+    test_conf.set('env', '')
+    configure_file(
+      input: installed_tests_template_tap,
+      output: test_name + '.test',
+      install_dir: installed_tests_metadir,
+      configuration: test_conf,
+    )
+  endif
+endforeach
 
 executable('spawn-path-search-helper', 'spawn-path-search-helper.c',
   c_args : test_cargs,
