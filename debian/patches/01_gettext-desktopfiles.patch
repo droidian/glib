@@ -16,7 +16,7 @@ Applied-upstream: no, rejected because "this will be solved soon" (in 2013)
  1 file changed, 83 insertions(+)
 
 diff --git a/glib/gkeyfile.c b/glib/gkeyfile.c
-index b5a2ed5..f21616a 100644
+index 6ae738c..2bc43e7 100644
 --- a/glib/gkeyfile.c
 +++ b/glib/gkeyfile.c
 @@ -491,6 +491,17 @@
