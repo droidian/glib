@@ -13,6 +13,7 @@ RUN dnf -y update \
     fuse \
     gcc \
     gcc-c++ \
+    gdb \
     gettext \
     git \
     glibc-devel \
@@ -42,7 +43,7 @@ RUN dnf -y update \
     libxslt \
     ncurses-compat-libs \
     ninja-build \
-    pcre-devel \
+    pcre2-devel \
     "python3-dbusmock >= 0.18.3-2" \
     python3-pip \
     python3-pygments \

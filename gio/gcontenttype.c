@@ -435,7 +435,8 @@ load_comment_for_mime_helper (const char *dir,
   if (!res)
     return NULL;
 
-  context = g_markup_parse_context_new   (&parser, 0, &parse_data, NULL);
+  context = g_markup_parse_context_new (&parser, G_MARKUP_PARSE_FLAGS_NONE,
+                                        &parse_data, NULL);
   res = g_markup_parse_context_parse (context, data, len, NULL);
   g_free (data);
   g_markup_parse_context_free (context);
@@ -485,6 +486,7 @@ gchar *
 g_content_type_get_description (const gchar *type)
 {
   static GHashTable *type_comment_cache = NULL;
+  gchar *type_copy = NULL;
   gchar *comment;
 
   g_return_val_if_fail (type != NULL, NULL);
@@ -499,20 +501,25 @@ g_content_type_get_description (const gchar *type)
 
   comment = g_hash_table_lookup (type_comment_cache, type);
   comment = g_strdup (comment);
-  G_UNLOCK (gio_xdgmime);
 
   if (comment != NULL)
-    return comment;
+    {
+      G_UNLOCK (gio_xdgmime);
+      return g_steal_pointer (&comment);
+    }
 
-  comment = load_comment_for_mime (type);
+  type_copy = g_strdup (type);
 
+  G_UNLOCK (gio_xdgmime);
+  comment = load_comment_for_mime (type_copy);
   G_LOCK (gio_xdgmime);
+
   g_hash_table_insert (type_comment_cache,
-                       g_strdup (type),
+                       g_steal_pointer (&type_copy),
                        g_strdup (comment));
   G_UNLOCK (gio_xdgmime);
 
-  return comment;
+  return g_steal_pointer (&comment);
 }
 
 /**

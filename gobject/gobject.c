@@ -1,6 +1,8 @@
 /* GObject - GLib Type, Object, Parameter and Signal Library
  * Copyright (C) 1998-1999, 2000-2001 Tim Janik and Red Hat, Inc.
  *
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -152,6 +154,10 @@
 #define CLASS_HAS_CUSTOM_CONSTRUCTED(class) \
     ((class)->constructed != g_object_constructed)
 #define CLASS_HAS_NOTIFY(class) ((class)->notify != NULL)
+#define CLASS_HAS_CUSTOM_DISPATCH(class) \
+    ((class)->dispatch_properties_changed != g_object_dispatch_properties_changed)
+#define CLASS_NEEDS_NOTIFY(class) \
+    (CLASS_HAS_NOTIFY(class) || CLASS_HAS_CUSTOM_DISPATCH(class))
 
 #define CLASS_HAS_DERIVED_CLASS_FLAG 0x2
 #define CLASS_HAS_DERIVED_CLASS(class) \
@@ -1237,7 +1243,7 @@ static inline gboolean
 _g_object_has_notify_handler (GObject *object)
 {
 #ifdef HAVE_OPTIONAL_FLAGS
-  return CLASS_HAS_NOTIFY (G_OBJECT_GET_CLASS (object)) ||
+  return CLASS_NEEDS_NOTIFY (G_OBJECT_GET_CLASS (object)) ||
          (object_get_optional_flags (object) & OPTIONAL_FLAG_HAS_NOTIFY_HANDLER) != 0;
 #else
   return TRUE;
@@ -1248,7 +1254,7 @@ static inline gboolean
 _g_object_has_notify_handler_X (GObject *object)
 {
 #ifdef HAVE_OPTIONAL_FLAGS
-  return CLASS_HAS_NOTIFY (G_OBJECT_GET_CLASS (object)) ||
+  return CLASS_NEEDS_NOTIFY (G_OBJECT_GET_CLASS (object)) ||
          (object_get_optional_flags_X (object) & OPTIONAL_FLAG_HAS_NOTIFY_HANDLER) != 0;
 #else
   return TRUE;
@@ -1304,7 +1310,7 @@ g_object_init (GObject		*object,
   object->ref_count = 1;
   object->qdata = NULL;
 
-  if (CLASS_HAS_PROPS (class) && CLASS_HAS_NOTIFY (class))
+  if (CLASS_HAS_PROPS (class) && CLASS_NEEDS_NOTIFY (class))
     {
       /* freeze object's notification queue, g_object_new_internal() preserves pairedness */
       g_object_notify_queue_freeze (object, FALSE);
@@ -1353,17 +1359,10 @@ g_object_do_get_property (GObject     *object,
 static void
 g_object_real_dispose (GObject *object)
 {
-  GQuark keys[3] = {
-    quark_closure_array,
-    quark_weak_refs,
-    quark_weak_locations,
-  };
-
   g_signal_handlers_destroy (object);
-  /* FIXME: This should be simplified down to a single remove_multiple() call.
-   * See https://gitlab.gnome.org/GNOME/glib/-/issues/2672 */
-  g_datalist_id_remove_multiple (&object->qdata, keys, 1);
-  g_datalist_id_remove_multiple (&object->qdata, keys + 1, 2);
+  g_datalist_id_set_data (&object->qdata, quark_closure_array, NULL);
+  g_datalist_id_set_data (&object->qdata, quark_weak_refs, NULL);
+  g_datalist_id_set_data (&object->qdata, quark_weak_locations, NULL);
 }
 
 #ifdef G_ENABLE_DEBUG
@@ -1485,7 +1484,7 @@ g_object_notify_by_spec_internal (GObject    *object,
 #ifdef HAVE_OPTIONAL_FLAGS
   guint object_flags;
 #endif
-  gboolean has_notify;
+  gboolean needs_notify;
   gboolean in_init;
 
   if (G_UNLIKELY (~pspec->flags & G_PARAM_READABLE))
@@ -1496,15 +1495,15 @@ g_object_notify_by_spec_internal (GObject    *object,
 #ifdef HAVE_OPTIONAL_FLAGS
   /* get all flags we need with a single atomic read */
   object_flags = object_get_optional_flags (object);
-  has_notify = ((object_flags & OPTIONAL_FLAG_HAS_NOTIFY_HANDLER) != 0) ||
-               CLASS_HAS_NOTIFY (G_OBJECT_GET_CLASS (object));
+  needs_notify = ((object_flags & OPTIONAL_FLAG_HAS_NOTIFY_HANDLER) != 0) ||
+                  CLASS_NEEDS_NOTIFY (G_OBJECT_GET_CLASS (object));
   in_init = (object_flags & OPTIONAL_FLAG_IN_CONSTRUCTION) != 0;
 #else
-  has_notify = TRUE;
+  needs_notify = TRUE;
   in_init = object_in_construction (object);
 #endif
 
-  if (pspec != NULL && has_notify)
+  if (pspec != NULL && needs_notify)
     {
       GObjectNotifyQueue *nqueue;
       gboolean need_thaw = TRUE;
@@ -3093,8 +3092,8 @@ g_object_get_property (GObject	   *object,
  *
  * The signal specs expected by this function have the form
  * "modifier::signal_name", where modifier can be one of the following:
- * - signal: equivalent to g_signal_connect_data (..., NULL, 0)
- * - object-signal, object_signal: equivalent to g_signal_connect_object (..., 0)
+ * - signal: equivalent to g_signal_connect_data (..., NULL, G_CONNECT_DEFAULT)
+ * - object-signal, object_signal: equivalent to g_signal_connect_object (..., G_CONNECT_DEFAULT)
  * - swapped-signal, swapped_signal: equivalent to g_signal_connect_data (..., NULL, G_CONNECT_SWAPPED)
  * - swapped_object_signal, swapped-object-signal: equivalent to g_signal_connect_object (..., G_CONNECT_SWAPPED)
  * - signal_after, signal-after: equivalent to g_signal_connect_data (..., NULL, G_CONNECT_AFTER)
@@ -3135,12 +3134,12 @@ g_object_connect (gpointer     _object,
       if (strncmp (signal_spec, "signal::", 8) == 0)
 	g_signal_connect_data (object, signal_spec + 8,
 			       callback, data, NULL,
-			       0);
+			       G_CONNECT_DEFAULT);
       else if (strncmp (signal_spec, "object_signal::", 15) == 0 ||
                strncmp (signal_spec, "object-signal::", 15) == 0)
 	g_signal_connect_object (object, signal_spec + 15,
 				 callback, data,
-				 0);
+				 G_CONNECT_DEFAULT);
       else if (strncmp (signal_spec, "swapped_signal::", 16) == 0 ||
                strncmp (signal_spec, "swapped-signal::", 16) == 0)
 	g_signal_connect_data (object, signal_spec + 16,
@@ -3888,15 +3887,10 @@ g_object_unref (gpointer _object)
 	}
 
       /* we are still in the process of taking away the last ref */
+      g_datalist_id_set_data (&object->qdata, quark_closure_array, NULL);
       g_signal_handlers_destroy (object);
-      {
-        GQuark keys[3] = {
-          quark_closure_array,
-          quark_weak_refs,
-          quark_weak_locations,
-        };
-        g_datalist_id_remove_multiple (&object->qdata, keys, G_N_ELEMENTS (keys));
-      }
+      g_datalist_id_set_data (&object->qdata, quark_weak_refs, NULL);
+      g_datalist_id_set_data (&object->qdata, quark_weak_locations, NULL);
 
       /* decrement the last reference */
       old_ref = g_atomic_int_add (&object->ref_count, -1);
@@ -5060,15 +5054,23 @@ g_weak_ref_set (GWeakRef *weak_ref,
       if (old_object != NULL)
         {
           weak_locations = g_datalist_id_get_data (&old_object->qdata, quark_weak_locations);
-          /* for it to point to an object, the object must have had it added once */
-          g_assert (weak_locations != NULL);
-
-          *weak_locations = g_slist_remove (*weak_locations, weak_ref);
-
-          if (!*weak_locations)
+          if (weak_locations == NULL)
             {
-              weak_locations_free_unlocked (weak_locations);
-              g_datalist_id_remove_no_notify (&old_object->qdata, quark_weak_locations);
+#ifndef G_DISABLE_ASSERT
+              gboolean in_weak_refs_notify =
+                  g_datalist_id_get_data (&old_object->qdata, quark_weak_refs) == NULL;
+              g_assert (in_weak_refs_notify);
+#endif /* G_DISABLE_ASSERT */
+            }
+          else
+            {
+              *weak_locations = g_slist_remove (*weak_locations, weak_ref);
+
+              if (!*weak_locations)
+                {
+                  weak_locations_free_unlocked (weak_locations);
+                  g_datalist_id_remove_no_notify (&old_object->qdata, quark_weak_locations);
+                }
             }
         }
 

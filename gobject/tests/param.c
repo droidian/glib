@@ -1,6 +1,8 @@
 /* GLIB - Library of useful routines for C programming
  * Copyright (C) 1995-1997  Peter Mattis, Spencer Kimball and Josh MacDonald
  *
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -750,7 +752,7 @@ test_param_invalid_name (gconstpointer test_data)
       return;
     }
 
-  g_test_trap_subprocess (NULL, 0, 0);
+  g_test_trap_subprocess (NULL, 0, G_TEST_SUBPROCESS_DEFAULT);
   g_test_trap_assert_failed ();
   g_test_trap_assert_stderr ("*CRITICAL*g_param_spec_is_valid_name (name)*");
 }
@@ -1395,7 +1397,8 @@ test_param_implement (void)
             test_path = g_strdup_printf ("/param/implement/subprocess/%d-%d-%d-%d",
                                          change_this_flag, change_this_type,
                                          use_this_flag, use_this_type);
-            g_test_trap_subprocess (test_path, G_TIME_SPAN_SECOND, 0);
+            g_test_trap_subprocess (test_path, G_TIME_SPAN_SECOND,
+                                    G_TEST_SUBPROCESS_DEFAULT);
             g_free (test_path);
 
             /* We want to ensure that any flags mismatch problems are reported first. */

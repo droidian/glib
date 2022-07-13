@@ -1467,8 +1467,8 @@ test_source_unix_fd_api (void)
   gint fds_a[2];
   gint fds_b[2];
 
-  pipe (fds_a);
-  pipe (fds_b);
+  g_assert_cmpint (pipe (fds_a), ==, 0);
+  g_assert_cmpint (pipe (fds_b), ==, 0);
 
   source_a = g_source_new (&no_funcs, sizeof (FlagSource));
   source_b = g_source_new (&no_funcs, sizeof (FlagSource));
@@ -2349,6 +2349,7 @@ test_maincontext_timeout_once (void)
 {
   guint counter = 0, check_counter = 0;
   guint source_id;
+  gint64 t;
   GSource *source;
 
   g_test_summary ("Test g_timeout_add_once() works");
@@ -2360,14 +2361,18 @@ test_maincontext_timeout_once (void)
 
   /* Iterating the main context should dispatch the source, though we have to block. */
   g_assert_cmpuint (counter, ==, 0);
-  g_main_context_iteration (NULL, TRUE);
+  t = g_get_monotonic_time ();
+  while (g_get_monotonic_time () - t < 50 * 1000 && counter == 0)
+    g_main_context_iteration (NULL, TRUE);
   g_assert_cmpuint (counter, ==, 1);
 
   /* Iterating it again should not dispatch the source again. We add a second
    * timeout and block until that is dispatched. Given the ordering guarantees,
    * we should then know whether the first one would have re-dispatched by then. */
   g_timeout_add_once (30 /* ms */, once_cb, &check_counter);
-  g_main_context_iteration (NULL, TRUE);
+  t = g_get_monotonic_time ();
+  while (g_get_monotonic_time () - t < 50 * 1000 && check_counter == 0)
+    g_main_context_iteration (NULL, TRUE);
   g_assert_cmpuint (check_counter, ==, 1);
   g_assert_cmpuint (counter, ==, 1);
   g_assert_true (g_source_is_destroyed (source));

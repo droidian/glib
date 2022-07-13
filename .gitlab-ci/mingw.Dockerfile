@@ -43,7 +43,7 @@ RUN dnf -y install \
     mingw64-zlib \
     ncurses-compat-libs \
     ninja-build \
-    pcre-devel \
+    pcre2-devel \
     python3 \
     python3-pip \
     python3-wheel \
