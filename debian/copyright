@@ -31,33 +31,58 @@ was developed and originally coded by:
 Makoto Matsumoto   <matumoto@math.keio.ac.jp>
 Takuji Nishimura   <nisimura@math.keio.ac.jp>
 
-Major copyright holders:
+Files: *
+Copyright:
+ 1995-1997 Peter Mattis
+ 1995-1997 Spencer Kimball
+ 1995-1997 Josh MacDonald
+ 1995-2022 Red Hat, Inc.
+ 1997-2005 Tim Janik
+ 1998-2001 Sebastian Wilhelmi
+ 1998 University of Karlsruhe
+ 1998 Owen Taylor
+ 1998 Tor Lillqvist
+ 2005-2006 Imendio AB
+ 2006 Behdad Esfahbod
+ 2007-2008 Allison Karlitskaya
+ 2008-2010 Novell, Inc.
+ 2008-2014 Codethink Limited.
+ 2008-2018 Collabora, Ltd.
+ 2009-2022 Christian Hergert
+ 2009 Benjamin Otte
+ 2010 Christian Persch
+ 2010 Intel Corp.
+ 2011-2022 Canonical Ltd.
+ 2011 Nokia Corporation
+ 2011 William Hua
+ 2012 Pavel Vasin
+ 2013 Lars Uebernickel
+ 2014-2015 Patrick Griffis
+ 2015 Garrett Regier
+ 2017 Руслан Ижбулатов
+ 2018-2022 Endless OS Foundation, LLC
+ 2018 Arthur Demchenkov
+ 2018 Collabora Inc.
+ 2018 Igalia S.L.
+ 2018 Tomasz Miąsko
+ 2018 Emmanuele Bassi
+ 2020 Xavier Claessens
+ 2022 Marco Trevisan
+License: LGPL-2.1+ and CC0-1.0
 
-    Copyright © 1995-2021 Red Hat, Inc.
-    Copyright © 2008-2010 Novell, Inc.
-    Copyright © 2008-2010 Codethink Limited.
-    Copyright © 2008-2018 Collabora, Ltd.
-    Copyright © 2018 Endless Mobile, Inc.
-    Copyright © 2018 Emmanuele Bassi
-
-License:
-
+License: LGPL-2.1+
     This package is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
     License as published by the Free Software Foundation; either
-    version 2 of the License, or (at your option) any later version.
-
+    version 2.1 of the License, or (at your option) any later version.
+ .
     This package is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
     Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public
-    License along with this package; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
-
-On Debian systems, the complete text of the GNU Lesser General
-Public License can be found in `/usr/share/common-licenses/LGPL'.
+ .
+ On Debian systems, the complete text of the GNU Lesser General
+ Public License can be found in `/usr/share/common-licenses/LGPL'.
 
 Files:
  glib/tests/NormalizationTest.txt
@@ -66,6 +91,7 @@ Copyright:
 License: Unicode-DFS-2016
 
 Files:
+ glib/tests/taptestrunner.py
  gobject/tests/taptestrunner.py
 Copyright:
  2015 Remko Tronçon
@@ -74,10 +100,18 @@ License: Expat
 Files:
  tests/gen-casefold-txt.py
  tests/gen-casemap-txt.py
+ tools/glib-gettextize.in
 Copyright:
+ 1995-2001 Free Software Foundation, Inc.
  1998-1999 Tom Tromey
  2001 Red Hat Software
 License: GPL-2+
+
+License: CC0-1.0
+ SPDX license expression "CC0-1.0": https://spdx.org/licenses/CC0-1.0.html
+ .
+ On Debian systems, the complete text of the CC0 Public Domain Dedication
+ can be found in "/usr/share/common-licenses/CC0-1.0".
 
 License: Expat
  Permission is hereby granted, free of charge, to any person obtaining a copy
