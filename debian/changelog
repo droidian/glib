@@ -1,11 +1,13 @@
 glib2.0 (2.73.2-1) UNRELEASED; urgency=medium
 
   * New upstream release
+    - d/control.in: Build-depend on PCRE 2 (Closes: #982310, #1000082)
   * d/copyright: Update
   * d/patches: Drop patches that were applied upstream
+  * Update symbols file
   * Merge packaging from unstable (no functional changes)
 
- -- Simon McVittie <smcv@debian.org>  Wed, 13 Jul 2022 12:34:11 +0100
+ -- Simon McVittie <smcv@debian.org>  Wed, 13 Jul 2022 13:36:03 +0100
 
 glib2.0 (2.72.3-1) unstable; urgency=medium
 
