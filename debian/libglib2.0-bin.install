@@ -1,6 +1,8 @@
 usr/bin/gapplication
 usr/bin/gdbus
 usr/bin/gio
+usr/bin/gio-querymodules
+usr/bin/glib-compile-schemas
 usr/bin/gresource
 usr/bin/gsettings
 usr/share/bash-completion
