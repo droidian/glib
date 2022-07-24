@@ -73,6 +73,12 @@
 #include <sys/syscall.h>
 #include <sys/wait.h>
 #include <linux/wait.h>  /* P_PIDFD */
+#ifndef W_EXITCODE
+#define W_EXITCODE(ret, sig) ((ret) << 8 | (sig))
+#endif
+#ifndef W_STOPCODE
+#define W_STOPCODE(sig)      ((sig) << 8 | 0x7f)
+#endif
 #endif  /* HAVE_PIDFD */
 
 #ifdef G_OS_WIN32
@@ -560,10 +566,12 @@ GSourceFuncs g_idle_funcs =
 GMainContext *
 g_main_context_ref (GMainContext *context)
 {
-  g_return_val_if_fail (context != NULL, NULL);
-  g_return_val_if_fail (g_atomic_int_get (&context->ref_count) > 0, NULL); 
+  int old_ref_count;
 
-  g_atomic_int_inc (&context->ref_count);
+  g_return_val_if_fail (context != NULL, NULL);
+
+  old_ref_count = g_atomic_int_add (&context->ref_count, 1);
+  g_return_val_if_fail (old_ref_count > 0, NULL);
 
   return context;
 }
