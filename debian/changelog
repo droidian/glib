@@ -1,8 +1,8 @@
-glib2.0 (2.73.2+git20220724-1) UNRELEASED; urgency=medium
+glib2.0 (2.73.2+git20220725-1) UNRELEASED; urgency=medium
 
   * New upstream snapshot
 
- -- Simon McVittie <smcv@debian.org>  Sun, 24 Jul 2022 20:44:07 +0100
+ -- Simon McVittie <smcv@debian.org>  Mon, 25 Jul 2022 13:42:01 +0100
 
 glib2.0 (2.73.2-1) experimental; urgency=medium
 
