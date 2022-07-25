@@ -1,3 +1,4 @@
+usr/lib/*/glib-2.0/gio-launch-desktop
 usr/lib/*/glib-2.0/gio-querymodules
 usr/lib/*/glib-2.0/glib-compile-schemas
 usr/lib/*/libglib*.so.*

@@ -252,6 +252,7 @@ override_dh_install:
 ifneq ($(filter %-udeb,$(binaries)),)
 	# Unwanted bits from the .udeb build
 	rm -f debian/install/udeb/usr/lib/*/*.so
+	rm -fr debian/install/udeb/usr/libexec/gio-launch-desktop
 	rm -fr debian/install/udeb/usr/share/gdb
 	rm -fr debian/install/udeb/usr/share/gettext/its
 	rm -fr debian/install/udeb/usr/share/glib-2.0/codegen
@@ -264,7 +265,6 @@ ifneq ($(filter %-tests,$(binaries)),)
 	sed -i -e '/^#!.*/,1 d' debian/install/deb/usr/libexec/installed-tests/glib/taptestrunner.py
 endif
 	dh_install --remaining-packages --sourcedir=debian/install/deb
-	install -D -t debian/libglib2.0-0/usr/lib/${DEB_HOST_MULTIARCH}/glib-2.0/ debian/gio-launch-desktop
 
 override_dh_dwz:
 	dh_dwz -Nlibglib2.0-udeb
