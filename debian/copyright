@@ -42,17 +42,19 @@ Copyright:
  1998 University of Karlsruhe
  1998 Owen Taylor
  1998 Tor Lillqvist
+ 2004 Ximian Inc.
  2005-2006 Imendio AB
  2006 Behdad Esfahbod
  2007-2008 Allison Karlitskaya
  2008-2010 Novell, Inc.
  2008-2014 Codethink Limited.
- 2008-2018 Collabora, Ltd.
+ 2008-2022 Collabora, Ltd.
  2009-2022 Christian Hergert
  2009 Benjamin Otte
  2010 Christian Persch
  2010 Intel Corp.
  2011-2022 Canonical Ltd.
+ 2011-2022 systemd contributors
  2011 Nokia Corporation
  2011 William Hua
  2012 Pavel Vasin
@@ -60,12 +62,13 @@ Copyright:
  2014-2015 Patrick Griffis
  2015 Garrett Regier
  2017 Руслан Ижбулатов
- 2018-2022 Endless OS Foundation, LLC
+ 2017-2022 Endless OS Foundation, LLC
  2018 Arthur Demchenkov
  2018 Collabora Inc.
  2018 Igalia S.L.
  2018 Tomasz Miąsko
  2018 Emmanuele Bassi
+ 2018 Will Thompson
  2020 Xavier Claessens
  2022 Marco Trevisan
 License: LGPL-2.1+ and CC0-1.0
