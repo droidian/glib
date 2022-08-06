@@ -1,17 +1,19 @@
-glib2.0 (2.73.3-1) UNRELEASED; urgency=medium
+glib2.0 (2.73.3-1) experimental; urgency=medium
 
-  * New upstream snapshot
+  * New upstream development release
   * d/copyright: Update
   * Ask for multiarch trigger executables via upstream build system.
-    This avoids needing to move the files around ourselves, and also ensures
-    that the architecture-specific paths go into the .pc file.
+    This avoids needing to move the files around ourselves, and also
+    ensures that the architecture-specific paths go into the .pc file.
   * Update packaging for re-inclusion of gio-launch-desktop
   * d/control.in: libglib2.0-tests depends on desktop-file-utils.
     glib/file.test needs update-desktop-database.
-  * d/control.in: add versioned Breaks on libedataserver-1.2-26 for #1015181
-  * New upstream release
+  * d/control.in: add versioned Breaks on old libedataserver-1.2-26.
+    Older versions go into an infinite loop of memory allocation
+    with GLib 2.73.x as a result of not handling the addition of
+    G_TLS_CERTIFICATE_NO_FLAGS correctly (see #1015181).
 
- -- Simon McVittie <smcv@debian.org>  Sat, 06 Aug 2022 15:01:10 +0100
+ -- Simon McVittie <smcv@debian.org>  Sat, 06 Aug 2022 15:11:00 +0100
 
 glib2.0 (2.73.2-1) experimental; urgency=medium
 
