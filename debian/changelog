@@ -8,8 +8,9 @@ glib2.0 (2.73.2+git20220725-1) UNRELEASED; urgency=medium
   * Update packaging for re-inclusion of gio-launch-desktop
   * d/control.in: libglib2.0-tests depends on desktop-file-utils.
     glib/file.test needs update-desktop-database.
+  * d/control.in: add versioned Breaks on libedataserver-1.2-26 for #1015181
 
- -- Simon McVittie <smcv@debian.org>  Mon, 25 Jul 2022 13:49:14 +0100
+ -- Simon McVittie <smcv@debian.org>  Sat, 06 Aug 2022 14:59:28 +0100
 
 glib2.0 (2.73.2-1) experimental; urgency=medium
 
