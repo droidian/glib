@@ -769,8 +769,6 @@ match_info_new (const GRegex *regex,
                       &match_info->n_subpatterns);
 
   match_info->match_context = pcre2_match_context_create (NULL);
-  pcre2_set_match_limit (match_info->match_context, 65536); /* should be plenty */
-  pcre2_set_recursion_limit (match_info->match_context, 64); /* should be plenty */
 
   if (is_dfa)
     {
@@ -1703,7 +1701,7 @@ regex_compile (const gchar *pattern,
   PCRE2_SIZE erroffset;
   gint errcode;
   GRegexCompileFlags nonpcre_compile_options;
-  unsigned long int pcre_compile_options;
+  uint32_t pcre_compile_options;
 
   nonpcre_compile_options = compile_options & G_REGEX_COMPILE_NONPCRE_MASK;
 
