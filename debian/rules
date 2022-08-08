@@ -21,11 +21,21 @@ include /usr/share/dpkg/default.mk
 %:
 	dh $@
 
+DEB_CONFIGURE_EXTRA_FLAGS =
+
+ifneq ($(DEB_HOST_ARCH),$(DEB_BUILD_ARCH))
+# Properties of glibc. These are the same for all Debian architectures,
+# and are auto-detected when doing a native build.
+DEB_CONFIGURE_EXTRA_FLAGS += --cross-file=$(CURDIR)/debian/meson/libc-properties.ini
+
+# The direction of stack growth varies between architectures.
 ifneq ($(filter hppa,$(DEB_HOST_ARCH_CPU)),)
-stack_grows_up = true
+DEB_CONFIGURE_EXTRA_FLAGS += --cross-file=$(CURDIR)/debian/meson/stack-grows-up.ini
 else
-stack_grows_up = false
+DEB_CONFIGURE_EXTRA_FLAGS += --cross-file=$(CURDIR)/debian/meson/stack-grows-down.ini
 endif
+
+endif # cross-compiling
 
 ifneq ($(filter kfreebsd,$(DEB_HOST_ARCH_OS)),)
 have_non_stub_xattr = false
@@ -33,22 +43,7 @@ else
 have_non_stub_xattr = true
 endif
 
-export DH_MESON_CROSS_FILE = debian/cross.txt
-
-# We edit the debcrossgen output to work around unimplemented feature
-# request https://bugs.debian.org/912559
 override_dh_auto_configure:
-ifneq ($(DEB_HOST_ARCH),$(DEB_BUILD_ARCH))
-	/usr/share/meson/debcrossgen \
-		-o debian/cross.txt.in
-	debian/set-cross-properties \
-		have_c99_snprintf=true \
-		have_c99_vsnprintf=true \
-		have_strlcpy=false \
-		have_unix98_printf=true \
-		growing_stack=$(stack_grows_up) \
-		< debian/cross.txt.in > debian/cross.txt
-endif
 	dh_auto_configure \
 		--builddirectory=debian/build/deb \
 		-- \
