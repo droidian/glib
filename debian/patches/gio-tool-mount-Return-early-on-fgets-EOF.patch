@@ -1,0 +1,38 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Tue, 30 Aug 2022 16:10:04 +0200
+Subject: gio-tool-mount: Return early on fgets EOF
+
+As per commit a5390002 we're exiting with error in case fgets failed,
+however it could also fail because of EOF (like on ^D), so in such case
+we can just return early treating it as a non-error.
+
+Otherwise still exit with error.
+
+Fixes: #2737
+
+Origin: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/2870
+---
+ gio/gio-tool-mount.c | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/gio/gio-tool-mount.c b/gio/gio-tool-mount.c
+index 4d4a450..93575c9 100644
+--- a/gio/gio-tool-mount.c
++++ b/gio/gio-tool-mount.c
+@@ -113,7 +113,15 @@ prompt_for (const char *prompt, const char *default_value, gboolean echo)
+ #endif
+ 
+   if (!fgets (data, sizeof (data), stdin))
+-    g_error ("Failed to read from standard input");
++    {
++      if (feof (stdin))
++        {
++          g_print ("\n");
++          return NULL;
++        }
++
++      g_error ("Failed to read from standard input");
++    }
+ 
+ #ifdef HAVE_TERMIOS_H
+   if (restore_flags)
