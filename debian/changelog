@@ -1,4 +1,4 @@
-glib2.0 (2.73.3-3) UNRELEASED; urgency=medium
+glib2.0 (2.73.3-3) unstable; urgency=medium
 
   [ Simon McVittie ]
   * Redo d/copyright in machine-readable format
@@ -6,7 +6,7 @@ glib2.0 (2.73.3-3) UNRELEASED; urgency=medium
   [ Marco Trevisan (Treviño) ]
   * debian/patches: Cherry-pick a regression fix for gio mount on Ctrl+D
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 30 Aug 2022 18:10:15 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 30 Aug 2022 18:12:45 +0200
 
 glib2.0 (2.73.3-2) unstable; urgency=medium
 
