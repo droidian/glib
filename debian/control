@@ -161,7 +161,7 @@ Depends: python3-distutils,
          ${misc:Depends},
          ${python3:Depends},
          ${shlibs:Depends}
-Suggests: libgdk-pixbuf2.0-bin (>= 2.36.12-2~) | libgdk-pixbuf2.0-dev,
+Suggests: libgdk-pixbuf2.0-bin (>= 2.36.12-2~),
           libxml2-utils
 Breaks: libglib2.0-bin (<< 2.54.2-5~),
         libglib2.0-dev (<< 2.53)
