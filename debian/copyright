@@ -200,7 +200,7 @@ Files:
  glib/valgrind.h
 Copyright:
  2000-2017, Julian Seward
-License: bzip2
+License: bzip2-1.0.6
 
 Files: docs/reference/gio/menu-model.png
 Copyright: unspecified

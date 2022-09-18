@@ -1,3 +1,9 @@
+glib2.0 (2.74.0-2) UNRELEASED; urgency=medium
+
+  * d/copyright: Consistently use SPDX name for bzip2-1.0.6 license
+
+ -- Simon McVittie <smcv@debian.org>  Sun, 18 Sep 2022 19:42:54 +0100
+
 glib2.0 (2.74.0-1) unstable; urgency=medium
 
   * New upstream release
