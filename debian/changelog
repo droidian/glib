@@ -1,6 +1,8 @@
 glib2.0 (2.74.0-2) UNRELEASED; urgency=medium
 
   * d/copyright: Consistently use SPDX name for bzip2-1.0.6 license
+  * Add missing mention of libgdk-pixbuf2.0-dev Suggests change to
+    previous changelog entry
 
  -- Simon McVittie <smcv@debian.org>  Sun, 18 Sep 2022 19:42:54 +0100
 
@@ -9,6 +11,8 @@ glib2.0 (2.74.0-1) unstable; urgency=medium
   * New upstream release
   * d/p/gio-tool-mount-Return-early-on-fgets-EOF.patch:
     Drop patch that was included in the upstream release
+  * d/control.in: Drop alternative Suggests on libgdk-pixbuf2.0-dev.
+    libgdk-pixbuf2.0-bin was separated out in 2018, before Debian 10.
 
  -- Simon McVittie <smcv@debian.org>  Sun, 18 Sep 2022 17:49:01 +0100
 
