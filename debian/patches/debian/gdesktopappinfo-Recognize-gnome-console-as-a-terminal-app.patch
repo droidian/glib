@@ -15,7 +15,7 @@ terminal app
  1 file changed, 2 insertions(+)
 
 diff --git a/gio/gdesktopappinfo.c b/gio/gdesktopappinfo.c
-index c46a8f0..96592a8 100644
+index f8cccca..e8b2459 100644
 --- a/gio/gdesktopappinfo.c
 +++ b/gio/gdesktopappinfo.c
 @@ -2676,6 +2676,8 @@ prepend_terminal_to_vector (int    *argc,
