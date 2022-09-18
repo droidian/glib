@@ -1,3 +1,9 @@
+glib2.0 (2.74.0-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+
+ -- Simon McVittie <smcv@debian.org>  Sun, 18 Sep 2022 17:39:49 +0100
+
 glib2.0 (2.73.3-3) unstable; urgency=medium
 
   [ Simon McVittie ]
