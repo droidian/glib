@@ -1,0 +1,28 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Fri, 16 Sep 2022 15:11:47 +0200
+Subject: glocalfileoutputstream: Do not double-close an fd on unlink error
+
+In case we fail unlinking a file we could close again an FD that has
+been already just closed. So avoid this by unsetting it when closing.
+
+Coverity CID: #1474462
+
+Origin: upstream, 2.75.0, commit:2401e1a090dcaac7614a8984cd3e3832a2a476ab
+---
+ gio/glocalfileoutputstream.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/gio/glocalfileoutputstream.c b/gio/glocalfileoutputstream.c
+index 400934b..3ce987f 100644
+--- a/gio/glocalfileoutputstream.c
++++ b/gio/glocalfileoutputstream.c
+@@ -1194,7 +1194,8 @@ handle_overwrite_open (const char    *filename,
+   if (replace_destination_set)
+     {
+       g_close (fd, NULL);
+-      
++      fd = -1;
++
+       if (g_unlink (filename) != 0)
+ 	{
+           errsv = errno;

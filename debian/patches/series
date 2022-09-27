@@ -1,3 +1,12 @@
+Empty-values-are-not-valid-GParamSpec.patch
+Handling-collision-between-standard-i-o-file-descriptors-.patch
+gio-launch-desktop-Fix-the-G_STATIC_ASSERT-expressions-fo.patch
+glib-mkenums-Specify-output-encoding-as-UTF-8-explicitly-.patch
+gbacktrace-Don-t-truncate-gdb-output.patch
+gio-make-g_task_get_cancellable-return-value-nullable.patch
+glocalfileoutputstream-Do-not-double-close-an-fd-on-unlin.patch
+docs-Fix-markup-error-in-code-blocks-for-DEPRECATED-macro.patch
+Consider-the-GLogField.length-of-MESSAGE-GLIB_DOMAIN-fiel.patch
 01_gettext-desktopfiles.patch
 0001-timer-test-use-volatile-for-locals.patch
 gwakeuptest-Be-less-parallel-unless-invoked-with-m-slow.patch

@@ -1,0 +1,22 @@
+From: Mohammed Sadiq <sadiq@sadiqpk.org>
+Date: Thu, 8 Sep 2022 08:45:21 +0530
+Subject: gbacktrace: Don't truncate gdb output
+
+Origin: upstream, 2.75.0, commit:3999badc1ef2c8081a9822f9061571cbf7650441
+---
+ glib/gbacktrace.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/glib/gbacktrace.c b/glib/gbacktrace.c
+index 6f4604e..9c52a7d 100644
+--- a/glib/gbacktrace.c
++++ b/glib/gbacktrace.c
+@@ -449,6 +449,8 @@ stack_trace (const char * const *args)
+   checked_write (in_fd[1], "process detach\n", 15);
+   checked_write (in_fd[1], "quit\n", 5);
+ #else
++  /* Don't wrap so that lines are not truncated */
++  checked_write (in_fd[1], "set width unlimited\n", 20);
+   checked_write (in_fd[1], "backtrace\n", 10);
+   checked_write (in_fd[1], "p x = 0\n", 8);
+   checked_write (in_fd[1], "quit\n", 5);

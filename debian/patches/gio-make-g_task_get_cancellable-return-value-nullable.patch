@@ -1,0 +1,22 @@
+From: Jason Francis <jafrancis999@gmail.com>
+Date: Fri, 16 Sep 2022 01:27:12 -0400
+Subject: gio: make g_task_get_cancellable return value nullable
+
+Origin: upstream, 2.75.0, commit:9cd9787c5262e1039c3e7dee150b7a70e4b51e75
+---
+ gio/gtask.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/gio/gtask.c b/gio/gtask.c
+index 774cba7..e8c2ef2 100644
+--- a/gio/gtask.c
++++ b/gio/gtask.c
+@@ -1136,7 +1136,7 @@ g_task_get_context (GTask *task)
+  *
+  * Gets @task's #GCancellable
+  *
+- * Returns: (transfer none): @task's #GCancellable
++ * Returns: (nullable) (transfer none): @task's #GCancellable
+  *
+  * Since: 2.36
+  */
