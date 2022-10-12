@@ -25,3 +25,5 @@ debian/Add-extra-debug-to-memory-monitor-dbus-test.patch
 debian/tests-Skip-debugcontroller-test.patch
 debian/gdesktopappinfo-Recognize-gnome-console-as-a-terminal-app.patch
 debian/testfilemonitor-Skip-if-we-are-avoiding-flaky-tests.patch
+gio-tests-Add-file-thumbnail-tests.patch
+glocalfileinfo-Add-support-for-xx-large-and-x-large-thumb.patch
