@@ -1,3 +1,10 @@
+glib2.0 (2.74.0-3) unstable; urgency=medium
+
+  * Cherry-pick 2 patches to fix large thumbnails with Nautilus
+    (Closes: #1021588) (LP: #1992690)
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Wed, 12 Oct 2022 14:43:19 -0400
+
 glib2.0 (2.74.0-2) unstable; urgency=medium
 
   * d/p/Empty-values-are-not-valid-GParamSpec.patch:
