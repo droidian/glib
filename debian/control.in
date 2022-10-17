@@ -45,7 +45,8 @@ Depends: ${misc:Depends},
          ${shlibs:Depends}
 Recommends: libglib2.0-data,
             shared-mime-info,
-            xdg-user-dirs
+            xdg-user-dirs,
+            ${lmm:Recommends},
 Breaks: gimp (<< 2.10.14-3~),
         glib-networking-tests (<< 2.70.0~),
         gnome-keyring (<< 40.0-3~),

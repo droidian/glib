@@ -279,3 +279,11 @@ override_dh_missing:
 ifneq ($(filter %-udeb,$(binaries)),)
 	dh_missing --sourcedir=debian/install/udeb
 endif
+
+# Ubuntu uses other fonts
+override_dh_gencontrol:
+ifneq ($(shell dpkg-vendor --query vendor),Ubuntu)
+	dh_gencontrol -- -Vlmm:Recommends='low-memory-monitor [linux-any]'
+else
+	dh_gencontrol
+endif
