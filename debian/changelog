@@ -1,6 +1,6 @@
 glib2.0 (2.74.0-4) UNRELEASED; urgency=medium
 
-  * debian/control.in: Recommend low-memory-monitor daemon
+  * debian/control.in: Suggest the low-memory-monitor daemon
 
  -- Laurent Bigonville <bigon@debian.org>  Mon, 17 Oct 2022 11:45:12 +0200
 
