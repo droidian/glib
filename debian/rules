@@ -43,6 +43,19 @@ else
 have_non_stub_xattr = true
 endif
 
+# This target can be run manually to verify that we have the source code
+# for these files. If all goes well, it should result in no diff.
+# This is not done automatically during the build, because it requires a
+# git checkout of GLib.
+maintainer-update-unicode-data:
+	rm -f glib/gscripttable.h
+	rm -f glib/gunibreak.h
+	rm -f glib/gunichartables.h
+	rm -f glib/gunidecomp.h
+	rm -f glib/tests/casefold.txt
+	rm -f glib/tests/casemap.txt
+	$(CURDIR)/tools/update-unicode-data.sh $(CURDIR)/unicode-data 15.0.0
+
 override_dh_auto_configure:
 	dh_auto_configure \
 		--builddirectory=debian/build/deb \

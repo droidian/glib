@@ -5,3 +5,9 @@ https://download.gnome.org/sources/glib/cache.json \
 #opts="mode=git,compression=xz" \
 #https://gitlab.gnome.org/GNOME/glib.git \
 #refs/tags/@ANY_VERSION@
+
+# Update the version as needed to correspond to the version of Unicode
+# data used to generate glib/gunichartables.h etc.
+opts="component=unicode-data, compression=xz, downloadurlmangle=s#/?$#/UCD.zip#, filenamemangle=s#.*/([^/]+)/?$#UCD-$1.zip#" \
+https://www.unicode.org/Public/zipped/ \
+(15\.0\.0)/?

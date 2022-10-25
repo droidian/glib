@@ -1,6 +1,47 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: GLib
 Source: https://download.gnome.org/sources/glib/
+Comment:
+ Some files are mechanically derived from Unicode data.
+ We do not use the Debian unicode-data package as source for these, because
+ GLib's Unicode data is part of its upstream API/ABI, and the Debian
+ unicode-data package does not necessarily match the version used in GLib.
+ .
+ The files excluded here are not currently needed for GLib.
+Files-Excluded-unicode-data:
+ Arabic*.txt
+ Bidi*.txt
+ Blocks.txt
+ CJK*.txt
+ DerivedAge.txt
+ DerivedCoreProperties.txt
+ DerivedNormalizationProps.txt
+ Emoji*.txt
+ EquivalentUnifiedIdeograph.txt
+ Hangul*.txt
+ Index.txt
+ Indic*.txt
+ Jamo.txt
+ Name*.html
+ Name*.txt
+ Normalization*.txt
+ Nushu*.txt
+ Prop*.txt
+ ScriptExtensions.txt
+ StandardizedVariants.txt
+ Tangut*.txt
+ USource*.txt
+ USource*.pdf
+ VerticalOrientation.txt
+ auxiliary/*
+ emoji/*
+ extracted/DerivedB*.txt
+ extracted/DerivedC*.txt
+ extracted/DerivedD*.txt
+ extracted/DerivedG*.txt
+ extracted/DerivedJ*.txt
+ extracted/DerivedL*.txt
+ extracted/DerivedN*.txt
 
 Files: *
 Copyright:
