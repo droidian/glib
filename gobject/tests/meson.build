@@ -42,6 +42,7 @@ gobject_tests = {
     'source' : ['defaultiface.c', 'testmodule.c'],
   },
   'deftype' : {},
+  'deprecated-properties' : {},
   'dynamictype' : {
     'source' : ['dynamictype.c', 'testmodule.c'],
   },
@@ -102,8 +103,19 @@ if have_cxx
   gobject_tests += {
     'cxx' : {
       'source' : ['cxx.cpp'],
+      'suite' : ['cpp'],
     },
   }
+
+  foreach std, arg: cxx_standards
+    gobject_tests += {
+      'cxx-@0@'.format(std) : {
+        'source' : ['cxx.cpp'],
+        'suite' : ['cpp'],
+        'cpp_args' : [arg],
+      },
+    }
+  endforeach
 endif
 
 if cc.get_id() != 'msvc'
@@ -125,6 +137,7 @@ test_env.set('MALLOC_CHECK_', '2')
 
 test_deps = [libm, thread_dep, libglib_dep, libgobject_dep]
 test_cargs = ['-DG_LOG_DOMAIN="GLib-GObject"', '-UG_DISABLE_ASSERT']
+test_cpp_args = test_cargs
 
 foreach test_name, extra_args : gobject_tests
   source = extra_args.get('source', test_name + '.c')
@@ -139,14 +152,17 @@ foreach test_name, extra_args : gobject_tests
       input: installed_tests_template_tap,
       output: test_name + '.test',
       install_dir: installed_tests_metadir,
+      install_tag: 'tests',
       configuration: test_conf
     )
   endif
 
   exe = executable(test_name, source,
     c_args : test_cargs + extra_args.get('c_args', []),
+    cpp_args : test_cpp_args + extra_args.get('cpp_args', []),
     dependencies : test_deps + extra_args.get('dependencies', []),
     install_dir: installed_tests_execdir,
+    install_tag: 'tests',
     install: install,
   )
 
@@ -175,6 +191,7 @@ foreach test_name : python_tests
     install_data(
       files(test_name),
       install_dir: installed_tests_execdir,
+      install_tag: 'tests',
       install_mode: 'rwxr-xr-x',
     )
 
@@ -186,6 +203,7 @@ foreach test_name : python_tests
       input: installed_tests_template_tap,
       output: test_name + '.test',
       install_dir: installed_tests_metadir,
+      install_tag: 'tests',
       configuration: test_conf,
     )
   endif
@@ -196,5 +214,6 @@ if installed_tests_enabled
   install_data(
     files('taptestrunner.py'),
     install_dir: installed_tests_execdir,
+    install_tag: 'tests',
   )
 endif

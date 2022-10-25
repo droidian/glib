@@ -1,5 +1,5 @@
 project('glib', 'c',
-  version : '2.74.0',
+  version : '2.74.1',
   # NOTE: See the policy in docs/meson-version.md before changing the Meson dependency
   meson_version : '>= 0.60.0',
   default_options : [
@@ -13,6 +13,14 @@ cc = meson.get_compiler('c')
 have_cxx = add_languages('cpp', native: false, required: get_option('oss_fuzz').enabled())
 if have_cxx
   cxx = meson.get_compiler('cpp')
+  cxx_standards = {}
+
+  foreach std : ['98', '03', '11', '14', '17', '20', '2b', 'latest']
+    arg = (cxx.get_id() == 'msvc' ? '/std:' : '-std=') + 'c++' + std
+    if cxx.has_argument(arg)
+      cxx_standards += { std: arg }
+    endif
+  endforeach
 endif
 
 cc_can_run = meson.can_run_host_binaries()
@@ -2271,7 +2279,7 @@ endif
 
 glib_conf.set('HAVE_PROC_SELF_CMDLINE', have_proc_self_cmdline)
 
-python = import('python').find_installation('python3')
+python = import('python').find_installation()
 # used for '#!/usr/bin/env <name>'
 python_name = 'python3'
 
@@ -2391,7 +2399,9 @@ endif
 
 # Install m4 macros that other projects use
 install_data('m4macros/glib-2.0.m4', 'm4macros/glib-gettext.m4', 'm4macros/gsettings.m4',
-  install_dir : join_paths(get_option('datadir'), 'aclocal'))
+  install_dir : get_option('datadir') / 'aclocal',
+  install_tag : 'devel',
+)
 
 configure_file(output : 'config.h', configuration : glib_conf)
 

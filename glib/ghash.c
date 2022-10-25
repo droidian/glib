@@ -1839,6 +1839,10 @@ g_hash_table_steal (GHashTable    *hash_table,
  * You can pass %NULL for @lookup_key, provided the hash and equal functions
  * of @hash_table are %NULL-safe.
  *
+ * The dictionary implementation optimizes for having all values identical to
+ * their keys, for example by using g_hash_table_add(). When stealing both the
+ * key and the value from such a dictionary, the value will be %NULL.
+ *
  * Returns: %TRUE if the key was found in the #GHashTable
  * Since: 2.58
  */
@@ -2323,8 +2327,8 @@ g_hash_table_get_values (GHashTable *hash_table)
  * Returns: %TRUE if the two keys match
  */
 gboolean
-g_str_equal (gconstpointer v1,
-             gconstpointer v2)
+(g_str_equal) (gconstpointer v1,
+               gconstpointer v2)
 {
   const gchar *string1 = v1;
   const gchar *string2 = v2;
