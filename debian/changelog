@@ -1,8 +1,12 @@
-glib2.0 (2.74.0-4) UNRELEASED; urgency=medium
+glib2.0 (2.74.1-1) UNRELEASED; urgency=medium
 
+  [ Laurent Bigonville ]
   * debian/control.in: Suggest the low-memory-monitor daemon
 
- -- Laurent Bigonville <bigon@debian.org>  Mon, 17 Oct 2022 11:45:12 +0200
+  [ Simon McVittie ]
+  * New upstream release
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 25 Oct 2022 16:35:16 +0100
 
 glib2.0 (2.74.0-3) unstable; urgency=medium
 
