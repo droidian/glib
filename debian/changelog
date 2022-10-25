@@ -1,4 +1,4 @@
-glib2.0 (2.74.1-1) UNRELEASED; urgency=medium
+glib2.0 (2.74.1-1) unstable; urgency=medium
 
   [ Laurent Bigonville ]
   * debian/control.in: Suggest the low-memory-monitor daemon
@@ -11,8 +11,9 @@ glib2.0 (2.74.1-1) UNRELEASED; urgency=medium
     no guarantee that the version of the Unicode data used in the current
     version of GLib will line up with the separately-packaged unicode-data,
     and the version used here becomes part of GLib's API/ABI.
+  * d/copyright: Update
 
- -- Simon McVittie <smcv@debian.org>  Tue, 25 Oct 2022 17:29:48 +0100
+ -- Simon McVittie <smcv@debian.org>  Tue, 25 Oct 2022 20:38:27 +0100
 
 glib2.0 (2.74.0-3) unstable; urgency=medium
 
