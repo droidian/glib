@@ -5,8 +5,14 @@ glib2.0 (2.74.1-1) UNRELEASED; urgency=medium
 
   [ Simon McVittie ]
   * New upstream release
+  * d/patches: Drop patches that were applied upstream
+  * d/rules, d/watch, d/copyright: Bundle source for Unicode files.
+    We can't use the unicode-data Debian package for this, because there's
+    no guarantee that the version of the Unicode data used in the current
+    version of GLib will line up with the separately-packaged unicode-data,
+    and the version used here becomes part of GLib's API/ABI.
 
- -- Simon McVittie <smcv@debian.org>  Tue, 25 Oct 2022 16:35:16 +0100
+ -- Simon McVittie <smcv@debian.org>  Tue, 25 Oct 2022 17:29:48 +0100
 
 glib2.0 (2.74.0-3) unstable; urgency=medium
 
