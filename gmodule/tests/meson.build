@@ -15,8 +15,19 @@ if have_cxx
   gmodule_tests += {
     'cxx' : {
       'source' : ['cxx.cpp'],
+      'suite' : ['cpp'],
     }
   }
+
+  foreach std, arg: cxx_standards
+    gmodule_tests += {
+      'cxx-@0@'.format(std) : {
+        'source' : ['cxx.cpp'],
+        'suite' : ['cpp'],
+        'cpp_args' : [arg],
+      },
+    }
+  endforeach
 endif
 
 module_suffix = []
@@ -26,20 +37,24 @@ if ['darwin', 'ios'].contains(host_machine.system())
   module_suffix = 'so'
 endif
 
-foreach module : ['moduletestplugin_a', 'moduletestplugin_b']
-  shared_module(module + '_plugin', 'lib@0@.c'.format(module),
-    dependencies : [libglib_dep, libgmodule_dep],
-    install_dir : installed_tests_execdir,
-    install : installed_tests_enabled,
-    name_suffix : module_suffix
-  )
-  shared_library(module + '_library', 'lib@0@.c'.format(module),
-    dependencies : [libglib_dep, libgmodule_dep],
-    install_dir : installed_tests_execdir,
-    install : installed_tests_enabled,
-    name_suffix : module_suffix
-  )
-endforeach
+if get_option('default_library') != 'static'
+  foreach module : ['moduletestplugin_a', 'moduletestplugin_b']
+    shared_module(module + '_plugin', 'lib@0@.c'.format(module),
+      dependencies : [libglib_dep, libgmodule_dep],
+      install_dir : installed_tests_execdir,
+      install_tag : 'tests',
+      install : installed_tests_enabled,
+      name_suffix : module_suffix
+    )
+    shared_library(module + '_library', 'lib@0@.c'.format(module),
+      dependencies : [libglib_dep, libgmodule_dep],
+      install_dir : installed_tests_execdir,
+      install_tag : 'tests',
+      install : installed_tests_enabled,
+      name_suffix : module_suffix
+    )
+  endforeach
+endif
 
 test_env = environment()
 test_env.set('G_TEST_SRCDIR', meson.current_source_dir())
@@ -49,6 +64,7 @@ test_env.set('MALLOC_CHECK_', '2')
 
 test_deps = [libm, thread_dep, libglib_dep, libgmodule_dep]
 test_cargs = ['-DG_LOG_DOMAIN="GModule"', '-UG_DISABLE_ASSERT']
+test_cpp_args = test_cargs
 
 foreach test_name, extra_args : gmodule_tests
   source = extra_args.get('source', test_name + '.c')
@@ -63,16 +79,19 @@ foreach test_name, extra_args : gmodule_tests
       input: installed_tests_template_tap,
       output: test_name + '.test',
       install_dir: installed_tests_metadir,
+      install_tag: 'tests',
       configuration: test_conf
     )
   endif
 
   exe = executable(test_name, source,
     c_args : test_cargs + extra_args.get('c_args', []),
+    cpp_args : test_cpp_args + extra_args.get('cpp_args', []),
     link_args : extra_args.get('link_args', []),
     dependencies : test_deps + extra_args.get('dependencies', []),
     export_dynamic : extra_args.get('export_dynamic', false),
     install_dir: installed_tests_execdir,
+    install_tag: 'tests',
     install: install,
   )
 

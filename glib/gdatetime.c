@@ -959,6 +959,8 @@ g_date_time_new_now (GTimeZone *tz)
 {
   gint64 now_us;
 
+  g_return_val_if_fail (tz != NULL, NULL);
+
   now_us = g_get_real_time ();
 
   return g_date_time_new_from_unix (tz, now_us);
@@ -3496,6 +3498,8 @@ g_date_time_format_iso8601 (GDateTime *datetime)
   gchar *main_date = NULL;
   gint64 offset;
   gchar *format = "%C%y-%m-%dT%H:%M:%S";
+
+  g_return_val_if_fail (datetime != NULL, NULL);
 
   /* if datetime has sub-second non-zero values below the second precision we
    * should print them as well */

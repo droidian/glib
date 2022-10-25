@@ -89,18 +89,6 @@
  * unescaped "#" outside a character class is encountered. This indicates
  * a comment that lasts until after the next newline.
  *
- * When setting the %G_REGEX_JAVASCRIPT_COMPAT flag, pattern syntax and pattern
- * matching is changed to be compatible with the way that regular expressions
- * work in JavaScript. More precisely, a lonely ']' character in the pattern
- * is a syntax error; the '\x' escape only allows 0 to 2 hexadecimal digits, and
- * you must use the '\u' escape sequence with 4 hex digits to specify a unicode
- * codepoint instead of '\x' or 'x{....}'. If '\x' or '\u' are not followed by
- * the specified number of hex digits, they match 'x' and 'u' literally; also
- * '\U' always matches 'U' instead of being an error in the pattern. Finally,
- * pattern matching is modified so that back references to an unset subpattern
- * group produces a match with the empty string instead of an error. See
- * pcreapi(3) for more information.
- *
  * Creating and manipulating the same #GRegex structure from different
  * threads is not a problem as #GRegex does not modify its internal
  * state between creation and destruction, on the other hand #GMatchInfo
@@ -456,8 +444,25 @@ get_pcre2_bsr_match_options (GRegexMatchFlags match_flags)
   return 0;
 }
 
+static char *
+get_pcre2_error_string (int errcode)
+{
+  PCRE2_UCHAR8 error_msg[2048];
+  int err_length;
+
+  err_length = pcre2_get_error_message (errcode, error_msg,
+                                        G_N_ELEMENTS (error_msg));
+
+  if (err_length <= 0)
+    return NULL;
+
+  /* The array is always filled with a trailing zero */
+  g_assert ((size_t) err_length < G_N_ELEMENTS (error_msg));
+  return g_memdup2 (error_msg, err_length + 1);
+}
+
 static const gchar *
-match_error (gint errcode)
+translate_match_error (gint errcode)
 {
   switch (errcode)
     {
@@ -466,7 +471,7 @@ match_error (gint errcode)
       break;
     case PCRE2_ERROR_NULL:
       /* NULL argument, this should not happen in GRegex */
-      g_warning ("A NULL argument was passed to PCRE");
+      g_critical ("A NULL argument was passed to PCRE");
       break;
     case PCRE2_ERROR_BADOPTION:
       return "bad options";
@@ -511,7 +516,24 @@ match_error (gint errcode)
     default:
       break;
     }
-  return _("unknown error");
+  return NULL;
+}
+
+static char *
+get_match_error_message (int errcode)
+{
+  const char *msg = translate_match_error (errcode);
+  char *error_string;
+
+  if (msg)
+    return g_strdup (msg);
+
+  error_string = get_pcre2_error_string (errcode);
+
+  if (error_string)
+    return error_string;
+
+  return g_strdup (_("unknown error"));
 }
 
 static void
@@ -743,7 +765,6 @@ translate_compile_error (gint *errcode, const gchar **errmsg)
     case PCRE2_ERROR_INTERNAL_BAD_CODE:
     case PCRE2_ERROR_INTERNAL_BAD_CODE_IN_SKIP:
       *errcode = G_REGEX_ERROR_INTERNAL;
-      *errmsg = _("internal error");
       break;
     case PCRE2_ERROR_INVALID_SUBPATTERN_NAME:
     case PCRE2_ERROR_CLASS_INVALID_RANGE:
@@ -772,12 +793,10 @@ translate_compile_error (gint *errcode, const gchar **errmsg)
     case PCRE2_ERROR_BAD_LITERAL_OPTIONS:
     default:
       *errcode = G_REGEX_ERROR_COMPILE;
-      *errmsg = _("internal error");
       break;
     }
 
   g_assert (*errcode != -1);
-  g_assert (*errmsg != NULL);
 }
 
 /* GMatchInfo */
@@ -1096,9 +1115,12 @@ g_match_info_next (GMatchInfo  *match_info,
 
   if (IS_PCRE2_ERROR (match_info->matches))
     {
+      gchar *error_msg = get_match_error_message (match_info->matches);
+
       g_set_error (error, G_REGEX_ERROR, G_REGEX_ERROR_MATCH,
                    _("Error while matching regular expression %s: %s"),
-                   match_info->regex->pattern, match_error (match_info->matches));
+                   match_info->regex->pattern, error_msg);
+      g_clear_pointer (&error_msg, g_free);
       return FALSE;
     }
   else if (match_info->matches == 0)
@@ -1684,7 +1706,10 @@ g_regex_new (const gchar         *pattern,
 
   g_return_val_if_fail (pattern != NULL, NULL);
   g_return_val_if_fail (error == NULL || *error == NULL, NULL);
-  g_return_val_if_fail ((compile_options & ~G_REGEX_COMPILE_MASK) == 0, NULL);
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+  g_return_val_if_fail ((compile_options & ~(G_REGEX_COMPILE_MASK |
+                                             G_REGEX_JAVASCRIPT_COMPAT)) == 0, NULL);
+G_GNUC_END_IGNORE_DEPRECATIONS
   g_return_val_if_fail ((match_options & ~G_REGEX_MATCH_MASK) == 0, NULL);
 
   if (g_once_init_enter (&initialised))
@@ -1800,10 +1825,19 @@ regex_compile (const gchar  *pattern,
     {
       GError *tmp_error;
       gchar *offset_str;
+      gchar *pcre2_errmsg = NULL;
+      int original_errcode;
 
       /* Translate the PCRE error code to GRegexError and use a translated
        * error message if possible */
+      original_errcode = errcode;
       translate_compile_error (&errcode, &errmsg);
+
+      if (!errmsg)
+        {
+          errmsg = _("unknown error");
+          pcre2_errmsg = get_pcre2_error_string (original_errcode);
+        }
 
       /* PCRE uses byte offsets but we want to show character offsets */
       erroffset = g_utf8_pointer_to_offset (pattern, &pattern[erroffset]);
@@ -1812,9 +1846,11 @@ regex_compile (const gchar  *pattern,
       tmp_error = g_error_new (G_REGEX_ERROR, errcode,
                                _("Error while compiling regular expression ‘%s’ "
                                  "at char %s: %s"),
-                               pattern, offset_str, errmsg);
+                               pattern, offset_str,
+                               pcre2_errmsg ? pcre2_errmsg : errmsg);
       g_propagate_error (error, tmp_error);
       g_free (offset_str);
+      g_clear_pointer (&pcre2_errmsg, g_free);
 
       return NULL;
     }
@@ -2402,9 +2438,12 @@ g_regex_match_all_full (const GRegex      *regex,
         }
       else if (IS_PCRE2_ERROR (info->matches))
         {
+          gchar *error_msg = get_match_error_message (info->matches);
+
           g_set_error (error, G_REGEX_ERROR, G_REGEX_ERROR_MATCH,
                        _("Error while matching regular expression %s: %s"),
-                       regex->pattern, match_error (info->matches));
+                       regex->pattern, error_msg);
+          g_clear_pointer (&error_msg, g_free);
         }
       else if (info->matches != PCRE2_ERROR_NOMATCH)
         {

@@ -27,6 +27,8 @@ if cc.has_header('pty.h')
   endif
 endif
 
+test_cpp_args = test_c_args
+
 if host_machine.system() == 'windows'
   common_gio_tests_deps += [iphlpapi_dep, winsock2, cc.find_library ('secur32')]
 endif
@@ -61,6 +63,7 @@ gio_tests = {
   'data-input-stream' : {},
   'data-output-stream' : {},
   'error': {},
+  'file-thumbnail' : {},
   'fileattributematcher' : {},
   'filter-streams' : {},
   'giomodule' : {
@@ -130,8 +133,19 @@ if have_cxx
   gio_tests += {
     'cxx' : {
       'source' : ['cxx.cpp'],
+      'suite': ['C++'],
     },
   }
+
+  foreach std, arg: cxx_standards
+    gio_tests += {
+      'cxx-@0@'.format(std) : {
+        'source' : ['cxx.cpp'],
+        'suite' : ['cpp'],
+        'cpp_args' : [arg],
+      },
+    }
+  endforeach
 endif
 
 test_extra_programs = {
@@ -213,7 +227,7 @@ if host_machine.system() != 'windows'
   }
 
   # LD_PRELOAD modules don't work so well with AddressSanitizer
-  if have_rtld_next and get_option('b_sanitize') == 'none'
+  if have_rtld_next and get_option('default_library') != 'static' and get_option('b_sanitize') == 'none'
     gio_tests += {
       'gsocketclient-slow' : {
         'depends' : [
@@ -222,6 +236,7 @@ if host_machine.system() != 'windows'
             name_prefix : '',
             dependencies: libdl_dep,
             install_dir : installed_tests_execdir,
+            install_tag : 'tests',
             install: installed_tests_enabled,
           )
         ],
@@ -419,6 +434,7 @@ if host_machine.system() != 'windows'
       c_args : test_c_args,
       dependencies : common_gio_tests_deps,
       install_dir : installed_tests_execdir,
+      install_tag : 'tests',
       install : installed_tests_enabled)
 
   gio_tests += {
@@ -544,6 +560,7 @@ foreach appinfo_test_desktop_file : appinfo_test_desktop_files
       input: appinfo_test_desktop_file + '.in',
       output: appinfo_test_desktop_file,
       install_dir: installed_tests_execdir,
+      install_tag: 'tests',
       configuration: cdata,
     )
   else
@@ -566,11 +583,24 @@ if installed_tests_enabled
     'org.gtk.test.dbusappinfo.flatpak.desktop',
     'test1.overlay',
     install_dir : installed_tests_execdir,
+    install_tag : 'tests',
   )
-  install_subdir('x-content', install_dir : installed_tests_execdir)
-  install_subdir('desktop-files', install_dir : installed_tests_execdir)
-  install_subdir('thumbnails', install_dir : installed_tests_execdir)
-  install_subdir('cert-tests', install_dir : installed_tests_execdir)
+  install_subdir('x-content',
+    install_dir : installed_tests_execdir,
+    install_tag : 'tests',
+  )
+  install_subdir('desktop-files',
+    install_dir : installed_tests_execdir,
+    install_tag : 'tests',
+  )
+  install_subdir('thumbnails',
+    install_dir : installed_tests_execdir,
+    install_tag : 'tests',
+  )
+  install_subdir('cert-tests',
+    install_dir : installed_tests_execdir,
+    install_tag : 'tests',
+  )
 
   cdata = configuration_data()
   cdata.set('installed_tests_dir', installed_tests_execdir)
@@ -579,10 +609,17 @@ if installed_tests_enabled
     input: installed_tests_template,
     output: 'static-link.test',
     install_dir: installed_tests_metadir,
+    install_tag: 'tests',
     configuration: cdata
   )
-  install_subdir('static-link', install_dir : installed_tests_execdir)
-  install_data('static-link.py', install_dir : installed_tests_execdir)
+  install_subdir('static-link',
+    install_dir : installed_tests_execdir,
+    install_tag : 'tests',
+  )
+  install_data('static-link.py',
+    install_dir : installed_tests_execdir,
+    install_tag : 'tests',
+  )
 
   monitor_tests = [
     'memory-monitor-dbus',
@@ -600,6 +637,7 @@ if installed_tests_enabled
       input: installed_tests_template_tap,
       output: monitor_test + '.test',
       install_dir: installed_tests_metadir,
+      install_tag: 'tests',
       configuration: cdata
     )
     cdata = configuration_data()
@@ -608,6 +646,7 @@ if installed_tests_enabled
       input: monitor_test + '.py.in',
       output: monitor_test + '.py',
       install_dir : installed_tests_execdir,
+      install_tag : 'tests',
       configuration: cdata,
     )
   endforeach
@@ -617,24 +656,27 @@ if meson.can_run_host_binaries()
 
   compiler_type = '--compiler=@0@'.format(cc.get_id())
 
-  plugin_resources_c = custom_target('plugin-resources.c',
-    input : 'test4.gresource.xml',
-    output : 'plugin-resources.c',
-    command : [glib_compile_resources,
-               compiler_type,
-               '--target=@OUTPUT@',
-               '--sourcedir=' + meson.current_source_dir(),
-               '--internal',
-               '--generate-source',
-               '--c-name', '_g_plugin',
-               '@INPUT@'])
+  if get_option('default_library') != 'static'
+    plugin_resources_c = custom_target('plugin-resources.c',
+      input : 'test4.gresource.xml',
+      output : 'plugin-resources.c',
+      command : [glib_compile_resources,
+                 compiler_type,
+                 '--target=@OUTPUT@',
+                 '--sourcedir=' + meson.current_source_dir(),
+                 '--internal',
+                 '--generate-source',
+                 '--c-name', '_g_plugin',
+                 '@INPUT@'])
 
-  shared_module('resourceplugin', 'resourceplugin.c', plugin_resources_c,
-    link_args : export_dynamic_ldflags,
-    dependencies : common_gio_tests_deps,
-    install_dir : installed_tests_execdir,
-    install : installed_tests_enabled
-  )
+    shared_module('resourceplugin', 'resourceplugin.c', plugin_resources_c,
+      link_args : export_dynamic_ldflags,
+      dependencies : common_gio_tests_deps,
+      install_dir : installed_tests_execdir,
+      install_tag : 'tests',
+      install : installed_tests_enabled
+    )
+  endif
 
   # referenced by test2.gresource.xml
   big_test_resource = custom_target(
@@ -654,6 +696,7 @@ if meson.can_run_host_binaries()
                '--internal',
                '@INPUT@'],
     install_dir : installed_tests_execdir,
+    install_tag : 'tests',
     install : installed_tests_enabled)
 
   test_resources2_c = custom_target('test_resources2.c',
@@ -766,6 +809,7 @@ if meson.can_run_host_binaries()
                  '--internal',
                  '@INPUT@'],
       install_dir : installed_tests_execdir,
+      install_tag : 'tests',
       install : installed_tests_enabled)
 
     # Create resource data file
@@ -847,15 +891,18 @@ foreach test_name, extra_args : gio_tests
       input: installed_tests_template_tap,
       output: test_name + '.test',
       install_dir: installed_tests_metadir,
+      install_tag: 'tests',
       configuration: test_conf
     )
   endif
 
   exe = executable(test_name, [source, extra_sources],
     c_args : test_c_args + extra_args.get('c_args', []),
+    cpp_args : test_cpp_args + extra_args.get('cpp_args', []),
     dependencies : common_gio_tests_deps + extra_args.get('dependencies', []),
     install_rpath : extra_args.get('install_rpath', ''),
     install_dir: installed_tests_execdir,
+    install_tag: 'tests',
     install: install,
   )
 
@@ -885,6 +932,7 @@ foreach program_name, extra_args : test_extra_programs
       c_args : test_c_args,
       dependencies : common_gio_tests_deps + extra_args.get('dependencies', []),
       install_dir : installed_tests_execdir,
+      install_tag : 'tests',
       install : install,
   )
 endforeach
@@ -902,6 +950,7 @@ foreach test_name : python_tests
     install_data(
       files(test_name),
       install_dir: installed_tests_execdir,
+      install_tag: 'tests',
       install_mode: 'rwxr-xr-x',
     )
 
@@ -913,6 +962,7 @@ foreach test_name : python_tests
       input: installed_tests_template_tap,
       output: test_name + '.test',
       install_dir: installed_tests_metadir,
+      install_tag: 'tests',
       configuration: test_conf,
     )
   endif
@@ -923,8 +973,12 @@ if installed_tests_enabled
   install_data(
     files('taptestrunner.py'),
     install_dir: installed_tests_execdir,
+    install_tag: 'tests',
   )
 endif
 
 subdir('services')
-subdir('modules')
+
+if get_option('default_library') != 'static'
+  subdir('modules')
+endif
