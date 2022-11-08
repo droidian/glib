@@ -1,4 +1,4 @@
-glib2.0 (2.74.1-2) UNRELEASED; urgency=medium
+glib2.0 (2.74.1-2) unstable; urgency=medium
 
   * d/patches: Update to upstream 2.74.x branch commit 2.74.1-11-g5ee590045
     - Revert a change to file descriptor management that caused an infinite
@@ -22,7 +22,7 @@ glib2.0 (2.74.1-2) UNRELEASED; urgency=medium
     This will hopefully make it easier to keep track of which ones are still
     flaky and which ones can be re-enabled.
 
- -- Simon McVittie <smcv@debian.org>  Tue, 08 Nov 2022 10:21:24 +0000
+ -- Simon McVittie <smcv@debian.org>  Tue, 08 Nov 2022 10:32:47 +0000
 
 glib2.0 (2.74.1-1) unstable; urgency=medium
 
