@@ -1,0 +1,13 @@
+#!/bin/sh
+# (C) 2013 Canonical Ltd.
+# (C) 2019 Collabora Ltd.
+
+set -eu
+NULL=
+
+export DEB_ALLOW_FLAKY_TESTS=1
+export GIO_USE_VFS=local
+export GIO_USE_VOLUME_MONITOR=unix
+export XDG_RUNTIME_DIR="$AUTOPKGTEST_TMP"
+
+exec gnome-desktop-testing-runner glib/debugcontroller.test
