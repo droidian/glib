@@ -1,3 +1,29 @@
+glib2.0 (2.74.1-2) UNRELEASED; urgency=medium
+
+  * d/patches: Update to upstream 2.74.x branch commit 2.74.1-11-g5ee590045
+    - Revert a change to file descriptor management that caused an infinite
+      loop in some gnome-keyring-daemon use-cases
+    - Fix error behaviour with an invalid proxy address
+    - Fix a memory leak
+    - Fix a header multiple-inclusion guard
+    - Translation updates
+  * d/p/tests-Don-t-rely-on-output-locale-of-sort-in-spawn-test.patch:
+    Add patch from upstream git to fix a test failure in non-English locales.
+    In particular, this should resolve intermittent FTBFS on the
+    reproducible-builds infrastructure.
+  * d/p/debian/Disable-some-tests-on-slow-architectures-which-keep-faili.patch:
+    Mark part of gobject/tests/threadtests.c as flaky on armel, armhf.
+    This test normally passes in 10-15 seconds, but sometimes takes more
+    than 5 minutes, resulting in a timeout. It's not clear whether this
+    is a deadlock, or whether it's just an unlucky access pattern that is
+    much slower than usual but would have passed the test given enough time.
+    (Closes: #1023629, #1023652)
+  * d/tests: Run each flaky test individually.
+    This will hopefully make it easier to keep track of which ones are still
+    flaky and which ones can be re-enabled.
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 08 Nov 2022 10:21:24 +0000
+
 glib2.0 (2.74.1-1) unstable; urgency=medium
 
   [ Laurent Bigonville ]
