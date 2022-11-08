@@ -5,6 +5,7 @@ gproxyresolver-lookup_finish-should-better-parallel-looku.patch
 Revert-Handling-collision-between-standard-i-o-file-descr.patch
 glib-unix-Add-test-to-make-sure-g_unix_open_pipe-will-int.patch
 Update-Dutch-translation.patch
+tests-Don-t-rely-on-output-locale-of-sort-in-spawn-test.patch
 01_gettext-desktopfiles.patch
 0001-timer-test-use-volatile-for-locals.patch
 gwakeuptest-Be-less-parallel-unless-invoked-with-m-slow.patch
