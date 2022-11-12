@@ -10,16 +10,15 @@ environment variable]
 Co-authored-by: Simon McVittie <smcv@debian.org>
 Forwarded: no
 ---
- glib/tests/mainloop.c       | 16 ++++++++++++++++
- glib/tests/timeout.c        |  9 +++++++++
- gobject/tests/threadtests.c |  8 ++++++++
- 3 files changed, 33 insertions(+)
+ glib/tests/mainloop.c | 16 ++++++++++++++++
+ glib/tests/timeout.c  |  9 +++++++++
+ 2 files changed, 25 insertions(+)
 
 diff --git a/glib/tests/mainloop.c b/glib/tests/mainloop.c
-index c18da94..2aec6ff 100644
+index 9904da8..2ec057f 100644
 --- a/glib/tests/mainloop.c
 +++ b/glib/tests/mainloop.c
-@@ -520,6 +520,14 @@ test_child_sources (void)
+@@ -522,6 +522,14 @@ test_child_sources (void)
    GMainLoop *loop;
    GSource *parent, *child_b, *child_c, *end;
  
@@ -34,7 +33,7 @@ index c18da94..2aec6ff 100644
    ctx = g_main_context_new ();
    loop = g_main_loop_new (ctx, FALSE);
  
-@@ -598,6 +606,14 @@ test_recursive_child_sources (void)
+@@ -600,6 +608,14 @@ test_recursive_child_sources (void)
    GMainLoop *loop;
    GSource *parent, *child_b, *child_c, *end;
  
@@ -69,22 +68,3 @@ index acbb8f3..60cc5f2 100644
    loop = g_main_loop_new (NULL, FALSE);
  
    last_time = g_get_monotonic_time ();
-diff --git a/gobject/tests/threadtests.c b/gobject/tests/threadtests.c
-index 3b485eb..6ea9a48 100644
---- a/gobject/tests/threadtests.c
-+++ b/gobject/tests/threadtests.c
-@@ -484,6 +484,14 @@ test_threaded_toggle_notify (void)
-                   "safely from another (the main) thread without causing the "
-                   "notifying thread to abort");
- 
-+#if defined(__arm__)
-+  if (g_getenv ("DEB_ALLOW_FLAKY_TESTS") == NULL)
-+    {
-+      g_test_skip ("Intermittently takes more than 5 minutes on 32-bit ARM (Debian#1023652)");
-+      return;
-+    }
-+#endif
-+
-   g_object_add_toggle_ref (object, on_toggle_notify, &data);
-   g_object_unref (object);
- 

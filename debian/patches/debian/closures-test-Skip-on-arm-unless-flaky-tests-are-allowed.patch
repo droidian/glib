@@ -17,10 +17,10 @@ Forwarded: not-needed
  1 file changed, 8 insertions(+)
 
 diff --git a/gobject/tests/closure-refcount.c b/gobject/tests/closure-refcount.c
-index 5a92005..73185f0 100644
+index 574a5ec..5629298 100644
 --- a/gobject/tests/closure-refcount.c
 +++ b/gobject/tests/closure-refcount.c
-@@ -260,6 +260,14 @@ test_closure_refcount (void)
+@@ -262,6 +262,14 @@ test_closure_refcount (void)
    GTest *object;
    guint i, n_iterations;
  
