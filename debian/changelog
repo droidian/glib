@@ -6,8 +6,10 @@ glib2.0 (2.75.0-1) UNRELEASED; urgency=medium
   * Update symbols file
   * d/p/gio-Use-hidden-symbol-visibility-in-static-libraries.patch:
     Add proposed patch to fix ABI exports
+  * d/p/type-flags-test-Force-G_ENABLE_DIAGNOSTIC-1-to-be-set.patch:
+    Add proposed patch to fix an autopkgtest failure
 
- -- Simon McVittie <smcv@debian.org>  Sat, 12 Nov 2022 19:16:09 +0000
+ -- Simon McVittie <smcv@debian.org>  Sat, 12 Nov 2022 21:00:06 +0000
 
 glib2.0 (2.74.1-2) unstable; urgency=medium
 
