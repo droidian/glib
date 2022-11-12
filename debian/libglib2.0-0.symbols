@@ -1809,6 +1809,7 @@ libgio-2.0.so.0 libglib2.0-0 #MINVER#
  g_task_set_priority@Base 2.35.8
  g_task_set_return_on_cancel@Base 2.35.8
  g_task_set_source_tag@Base 2.35.8
+ g_task_set_static_name@Base 2.75.0
  g_task_set_task_data@Base 2.35.8
  g_tcp_connection_get_graceful_disconnect@Base 2.22.0
  g_tcp_connection_get_type@Base 2.22.0
@@ -2218,6 +2219,7 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_blow_chunks@Base 2.12.0
  g_bookmark_file_add_application@Base 2.12.0
  g_bookmark_file_add_group@Base 2.12.0
+ g_bookmark_file_copy@Base 2.75.0
  g_bookmark_file_error_quark@Base 2.12.0
  g_bookmark_file_free@Base 2.12.0
  g_bookmark_file_get_added@Base 2.12.0
@@ -3945,6 +3947,7 @@ libgobject-2.0.so.0 libglib2.0-0 #MINVER#
  g_binding_group_new@Base 2.71.2
  g_binding_group_set_source@Base 2.71.2
  g_binding_unbind@Base 2.37.1
+ g_bookmark_file_get_type@Base 2.75.0
  g_boxed_copy@Base 2.12.0
  g_boxed_free@Base 2.12.0
  g_boxed_type_register_static@Base 2.12.0
