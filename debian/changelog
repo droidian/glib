@@ -1,4 +1,4 @@
-glib2.0 (2.75.0-1) UNRELEASED; urgency=medium
+glib2.0 (2.75.0-1) experimental; urgency=medium
 
   * d/control.in, d/gbp.conf: Branch for experimental
   * New upstream development release
@@ -9,7 +9,7 @@ glib2.0 (2.75.0-1) UNRELEASED; urgency=medium
   * d/p/type-flags-test-Force-G_ENABLE_DIAGNOSTIC-1-to-be-set.patch:
     Add proposed patch to fix an autopkgtest failure
 
- -- Simon McVittie <smcv@debian.org>  Sat, 12 Nov 2022 21:00:06 +0000
+ -- Simon McVittie <smcv@debian.org>  Sat, 12 Nov 2022 21:13:58 +0000
 
 glib2.0 (2.74.1-2) unstable; urgency=medium
 
