@@ -870,10 +870,17 @@
  */
 #ifndef NULL
 #  ifdef __cplusplus
-#  define NULL        (0L)
+#    if __cplusplus >= 201103L
+#      define NULL (nullptr)
+#    else
+#      define NULL (0L)
+#    endif /* __cplusplus >= 201103L */
 #  else /* !__cplusplus */
 #  define NULL        ((void*) 0)
 #  endif /* !__cplusplus */
+#elif defined (__cplusplus) && __cplusplus >= 201103L
+#  undef NULL
+#  define NULL (nullptr)
 #endif
 
 #ifndef	FALSE
@@ -1174,20 +1181,25 @@
  * putting assignments in g_return_if_fail ().  
  */
 #if G_GNUC_CHECK_VERSION(2, 0) && defined(__OPTIMIZE__)
-#define _G_BOOLEAN_EXPR(expr)                   \
+#define _G_BOOLEAN_EXPR_IMPL(uniq, expr)        \
  G_GNUC_EXTENSION ({                            \
-   int _g_boolean_var_;                         \
+   int G_PASTE (_g_boolean_var_, uniq);         \
    if (expr)                                    \
-      _g_boolean_var_ = 1;                      \
+      G_PASTE (_g_boolean_var_, uniq) = 1;      \
    else                                         \
-      _g_boolean_var_ = 0;                      \
-   _g_boolean_var_;                             \
+      G_PASTE (_g_boolean_var_, uniq) = 0;      \
+   G_PASTE (_g_boolean_var_, uniq);             \
 })
+#define _G_BOOLEAN_EXPR(expr) _G_BOOLEAN_EXPR_IMPL (__COUNTER__, expr)
 #define G_LIKELY(expr) (__builtin_expect (_G_BOOLEAN_EXPR(expr), 1))
 #define G_UNLIKELY(expr) (__builtin_expect (_G_BOOLEAN_EXPR(expr), 0))
 #else
 #define G_LIKELY(expr) (expr)
 #define G_UNLIKELY(expr) (expr)
+#endif
+
+#if __GNUC__ >= 4 && !defined(_WIN32) && !defined(__CYGWIN__)
+#define G_HAVE_GNUC_VISIBILITY 1
 #endif
 
 /* GLIB_CANNOT_IGNORE_DEPRECATIONS is defined above for compilers that do not
@@ -1223,27 +1235,11 @@
 #define G_UNAVAILABLE(maj,min) G_DEPRECATED
 #endif
 
-#ifndef _GLIB_EXTERN
-#define _GLIB_EXTERN extern
-#endif
-
 /* These macros are used to mark deprecated symbols in GLib headers,
  * and thus have to be exposed in installed headers. But please
  * do *not* use them in other projects. Instead, use G_DEPRECATED
  * or define your own wrappers around it.
  */
-
-#ifdef GLIB_DISABLE_DEPRECATION_WARNINGS
-#define GLIB_DEPRECATED _GLIB_EXTERN
-#define GLIB_DEPRECATED_FOR(f) _GLIB_EXTERN
-#define GLIB_UNAVAILABLE(maj,min) _GLIB_EXTERN
-#define GLIB_UNAVAILABLE_STATIC_INLINE(maj,min)
-#else
-#define GLIB_DEPRECATED G_DEPRECATED _GLIB_EXTERN
-#define GLIB_DEPRECATED_FOR(f) G_DEPRECATED_FOR(f) _GLIB_EXTERN
-#define GLIB_UNAVAILABLE(maj,min) G_UNAVAILABLE(maj,min) _GLIB_EXTERN
-#define GLIB_UNAVAILABLE_STATIC_INLINE(maj,min) G_UNAVAILABLE(maj,min)
-#endif
 
 #if !defined(GLIB_DISABLE_DEPRECATION_WARNINGS) && \
     (G_GNUC_CHECK_VERSION(4, 6) ||                 \
@@ -1288,7 +1284,7 @@
 
 #if g_macro__has_attribute(cleanup)
 
-/* these macros are private */
+/* these macros are private; note that gstdio.h also uses _GLIB_CLEANUP */
 #define _GLIB_AUTOPTR_FUNC_NAME(TypeName) glib_autoptr_cleanup_##TypeName
 #define _GLIB_AUTOPTR_CLEAR_FUNC_NAME(TypeName) glib_autoptr_clear_##TypeName
 #define _GLIB_AUTOPTR_TYPENAME(TypeName)  TypeName##_autoptr

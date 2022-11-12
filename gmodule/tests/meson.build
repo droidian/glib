@@ -1,14 +1,5 @@
 gmodule_tests = {
-  'module-test-library' : {
-    'export_dynamic' : true,
-    'source': 'module-test.c',
-    'c_args': ['-DMODULE_TYPE="library"'],
-  },
-  'module-test-plugin' : {
-    'export_dynamic' : true,
-    'source': 'module-test.c',
-    'c_args': ['-DMODULE_TYPE="plugin"'],
-  },
+  'max-version' : {'install': false},
 }
 
 if have_cxx
@@ -37,16 +28,20 @@ if ['darwin', 'ios'].contains(host_machine.system())
   module_suffix = 'so'
 endif
 
-if get_option('default_library') != 'static'
+gmodule_test_modules = []
+gmodule_test_libraries = []
+if glib_build_shared
   foreach module : ['moduletestplugin_a', 'moduletestplugin_b']
-    shared_module(module + '_plugin', 'lib@0@.c'.format(module),
+    gmodule_test_modules += shared_module(module + '_plugin',
+      'lib@0@.c'.format(module),
       dependencies : [libglib_dep, libgmodule_dep],
       install_dir : installed_tests_execdir,
       install_tag : 'tests',
       install : installed_tests_enabled,
       name_suffix : module_suffix
     )
-    shared_library(module + '_library', 'lib@0@.c'.format(module),
+    gmodule_test_libraries += shared_library(module + '_library',
+      'lib@0@.c'.format(module),
       dependencies : [libglib_dep, libgmodule_dep],
       install_dir : installed_tests_execdir,
       install_tag : 'tests',
@@ -56,11 +51,26 @@ if get_option('default_library') != 'static'
   endforeach
 endif
 
+gmodule_tests += {
+  'module-test-library' : {
+    'export_dynamic' : true,
+    'source': 'module-test.c',
+    'depends': gmodule_test_libraries,
+    'c_args': ['-DMODULE_TYPE="library"'],
+    'can_fail': glib_build_static_only,
+  },
+  'module-test-plugin' : {
+    'export_dynamic' : true,
+    'source': 'module-test.c',
+    'depends': gmodule_test_modules,
+    'c_args': ['-DMODULE_TYPE="plugin"'],
+    'can_fail': glib_build_static_only,
+  },
+}
+
 test_env = environment()
 test_env.set('G_TEST_SRCDIR', meson.current_source_dir())
 test_env.set('G_TEST_BUILDDIR', meson.current_build_dir())
-test_env.set('G_DEBUG', 'gc-friendly')
-test_env.set('MALLOC_CHECK_', '2')
 
 test_deps = [libm, thread_dep, libglib_dep, libgmodule_dep]
 test_cargs = ['-DG_LOG_DOMAIN="GModule"', '-UG_DISABLE_ASSERT']
@@ -97,5 +107,17 @@ foreach test_name, extra_args : gmodule_tests
 
   suite = ['gmodule'] + extra_args.get('suite', [])
   timeout = suite.contains('slow') ? test_timeout_slow : test_timeout
-  test(test_name, exe, env : test_env, timeout : timeout, suite : suite)
+  depends = [extra_args.get('depends', [])]
+
+  if extra_args.get('can_fail', false)
+    suite += 'failing'
+  endif
+
+  test(test_name,
+    exe,
+    depends : depends,
+    env : test_env,
+    timeout : timeout,
+    suite : suite,
+  )
 endforeach

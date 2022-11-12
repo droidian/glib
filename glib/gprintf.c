@@ -342,7 +342,14 @@ g_vasprintf (gchar      **string,
     if (len < 0)
       {
         if (saved_errno == ENOMEM)
-          g_error ("%s: failed to allocate memory", G_STRLOC);
+          {
+            /* Try and print a message to be a bit helpful, but stick to the
+             * bare minimum to avoid any code path which could try and fail to
+             * allocate additional memory. */
+            fputs (G_STRLOC, stderr);
+            fputs (": failed to allocate memory\n", stderr);
+            g_abort ();
+          }
         else
           *string = NULL;
       }
@@ -353,7 +360,7 @@ g_vasprintf (gchar      **string,
   {
     va_list args2;
 
-    G_VA_COPY (args2, args);
+    va_copy (args2, args);
 
     *string = g_new (gchar, g_printf_string_upper_bound (format, args));
 

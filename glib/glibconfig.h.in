@@ -12,16 +12,18 @@
 #include <float.h>
 #mesondefine GLIB_HAVE_ALLOCA_H
 
+#mesondefine GLIB_STATIC_COMPILATION
+#mesondefine GOBJECT_STATIC_COMPILATION
+#mesondefine GIO_STATIC_COMPILATION
+#mesondefine GMODULE_STATIC_COMPILATION
+#mesondefine G_INTL_STATIC_COMPILATION
+#mesondefine FFI_STATIC_BUILD
+
 /* Specifies that GLib's g_print*() functions wrap the
  * system printf functions.  This is useful to know, for example,
  * when using glibc's register_printf_function().
  */
 #mesondefine GLIB_USING_SYSTEM_PRINTF
-
-#mesondefine GLIB_STATIC_COMPILATION
-#mesondefine GOBJECT_STATIC_COMPILATION
-#mesondefine G_INTL_STATIC_COMPILATION
-#mesondefine FFI_STATIC_BUILD
 
 G_BEGIN_DECLS
 
@@ -116,6 +118,7 @@ typedef unsigned @glib_intptr_type_define@ guintptr;
 
 @glib_os@
 
+#define G_VA_COPY va_copy
 @glib_vacopy@
 
 #define G_HAVE_ISO_VARARGS 1
@@ -129,7 +132,6 @@ typedef unsigned @glib_intptr_type_define@ guintptr;
 #endif
 
 #mesondefine G_HAVE_GROWING_STACK
-#mesondefine G_HAVE_GNUC_VISIBILITY
 
 #ifndef _MSC_VER
 # define G_HAVE_GNUC_VARARGS 1
@@ -186,7 +188,13 @@ typedef unsigned @glib_intptr_type_define@ guintptr;
 #define GLIB_SYSDEF_POLLERR =@g_pollerr@
 #define GLIB_SYSDEF_POLLNVAL =@g_pollnval@
 
+/* No way to disable deprecation warnings for macros, so only emit deprecation
+ * warnings on platforms where usage of this macro is broken */
+#if defined(__APPLE__) || defined(_MSC_VER) || defined(__CYGWIN__)
+#define G_MODULE_SUFFIX "@g_module_suffix@" GLIB_DEPRECATED_MACRO_IN_2_76
+#else
 #define G_MODULE_SUFFIX "@g_module_suffix@"
+#endif
 
 typedef @g_pid_type@ GPid;
 #define G_PID_FORMAT @g_pid_format@

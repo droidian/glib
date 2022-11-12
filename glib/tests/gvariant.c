@@ -4217,6 +4217,83 @@ test_parser_recursion_typedecls (void)
   g_assert_null (value);
   g_error_free (local_error);
   g_free (silly_array);
+  g_free (silly_type);
+}
+
+static void
+test_parser_recursion_maybes (void)
+{
+  const gchar *hello = "hello";
+  struct
+    {
+      const gchar *text_form;  /* (not nullable) */
+      GVariant *expected_variant;  /* (not nullable) (owned) */
+    }
+  vectors[] =
+    {
+      {
+        /* fixed size base value */
+        "@mmmu 5",
+        g_variant_ref_sink (g_variant_new_maybe (NULL, g_variant_new_maybe (NULL, g_variant_new_maybe (NULL, g_variant_new_uint32 (5)))))
+      },
+      {
+        /* variable size base value */
+        "@mmmas ['hello']",
+        g_variant_ref_sink (g_variant_new_maybe (NULL, g_variant_new_maybe (NULL, g_variant_new_maybe (NULL, g_variant_new_strv (&hello, 1)))))
+      },
+      {
+        /* fixed size base value, unset */
+        "@mmmu just just nothing",
+        g_variant_ref_sink (g_variant_new_maybe (NULL, g_variant_new_maybe (NULL, g_variant_new_maybe (G_VARIANT_TYPE_UINT32, NULL))))
+      },
+      {
+        /* variable size base value, unset */
+        "@mmmas just just nothing",
+        g_variant_ref_sink (g_variant_new_maybe (NULL, g_variant_new_maybe (NULL, g_variant_new_maybe (G_VARIANT_TYPE_STRING_ARRAY, NULL))))
+      },
+      {
+        /* fixed size base value, unset */
+        "@mmmu just nothing",
+        g_variant_ref_sink (g_variant_new_maybe (NULL, g_variant_new_maybe (G_VARIANT_TYPE ("mu"), NULL)))
+      },
+      {
+        /* variable size base value, unset */
+        "@mmmas just nothing",
+        g_variant_ref_sink (g_variant_new_maybe (NULL, g_variant_new_maybe (G_VARIANT_TYPE ("mas"), NULL)))
+      },
+      {
+        /* fixed size base value, unset */
+        "@mmmu nothing",
+        g_variant_ref_sink (g_variant_new_maybe (G_VARIANT_TYPE ("mmu"), NULL))
+      },
+      {
+        /* variable size base value, unset */
+        "@mmmas nothing",
+        g_variant_ref_sink (g_variant_new_maybe (G_VARIANT_TYPE ("mmas"), NULL))
+      },
+    };
+  gsize i;
+
+  g_test_summary ("Test that nested maybes are handled correctly when parsing text-form variants");
+  g_test_bug ("https://gitlab.gnome.org/GNOME/glib/-/issues/2782");
+
+  for (i = 0; i < G_N_ELEMENTS (vectors); i++)
+    {
+      GVariant *value = NULL;
+      GError *local_error = NULL;
+
+      g_test_message ("Text form %" G_GSIZE_FORMAT ": %s", i, vectors[i].text_form);
+
+      value = g_variant_parse (NULL, vectors[i].text_form, NULL, NULL, &local_error);
+      g_assert_no_error (local_error);
+      g_assert_nonnull (value);
+
+      g_assert_cmpvariant (value, vectors[i].expected_variant);
+
+      g_variant_unref (value);
+
+      g_clear_pointer (&vectors[i].expected_variant, g_variant_unref);
+    }
 }
 
 static void
@@ -4880,9 +4957,20 @@ test_stack_dict_init (void)
   GVariantIter iter;
   gchar *key;
   GVariant *value;
+  const gchar *str_value;
+
+  g_assert_true (g_variant_dict_lookup (&dict, "foo", "&s", &str_value, NULL));
+  g_assert_cmpstr (str_value, ==, "FOO");
+  g_assert_true (g_variant_dict_lookup (&dict, "bar", "&s", &str_value, NULL));
+  g_assert_cmpstr (str_value, ==, "BAR");
 
   g_variant_dict_insert_value (&dict, "baz", g_variant_new_string ("BAZ"));
   g_variant_dict_insert_value (&dict, "quux", g_variant_new_string ("QUUX"));
+
+  g_assert_true (g_variant_dict_lookup (&dict, "baz", "&s", &str_value, NULL));
+  g_assert_cmpstr (str_value, ==, "BAZ");
+  g_assert_true (g_variant_dict_lookup (&dict, "quux", "&s", &str_value, NULL));
+  g_assert_cmpstr (str_value, ==, "QUUX");
 
   variant = g_variant_ref_sink (g_variant_dict_end (&dict));
   g_assert_nonnull (variant);
@@ -5194,6 +5282,7 @@ main (int argc, char **argv)
   g_test_add_func ("/gvariant/parser/integer-bounds", test_parser_integer_bounds);
   g_test_add_func ("/gvariant/parser/recursion", test_parser_recursion);
   g_test_add_func ("/gvariant/parser/recursion/typedecls", test_parser_recursion_typedecls);
+  g_test_add_func ("/gvariant/parser/recursion/maybes", test_parser_recursion_maybes);
   g_test_add_func ("/gvariant/parse-failures", test_parse_failures);
   g_test_add_func ("/gvariant/parse-positional", test_parse_positional);
   g_test_add_func ("/gvariant/parse/subprocess/bad-format-char", test_parse_bad_format_char);

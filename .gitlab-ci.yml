@@ -4,6 +4,7 @@ stages:
   - coverage
   - analysis
   - deploy
+  - report
 
 cache:
   paths:
@@ -12,9 +13,9 @@ cache:
 variables:
   FEDORA_IMAGE: "registry.gitlab.gnome.org/gnome/glib/fedora:v19"
   COVERITY_IMAGE: "registry.gitlab.gnome.org/gnome/glib/coverity:v7"
-  DEBIAN_IMAGE: "registry.gitlab.gnome.org/gnome/glib/debian-stable:v13"
+  DEBIAN_IMAGE: "registry.gitlab.gnome.org/gnome/glib/debian-stable:v14"
   MINGW_IMAGE: "registry.gitlab.gnome.org/gnome/glib/mingw:v9"
-  MESON_TEST_TIMEOUT_MULTIPLIER: 2
+  MESON_TEST_TIMEOUT_MULTIPLIER: 4
   G_MESSAGES_DEBUG: all
   MESON_COMMON_OPTIONS: "--buildtype debug --wrap-mode=nodownload --fatal-meson-warnings"
 
@@ -48,17 +49,39 @@ variables:
     - bash .gitlab-ci/show-execution-environment.sh
     - cp -r $HOME/subprojects/* subprojects/
 
-style-check-diff:
+style-check-advisory:
   extends: .only-default
   image: $DEBIAN_IMAGE
   stage: style-check
   allow_failure: true
   script:
     - .gitlab-ci/run-style-check-diff.sh
+    - .gitlab-ci/run-check-todos.sh
+
+sh-and-py-check:
+  extends: .only-default
+  image: $DEBIAN_IMAGE
+  stage: style-check
+  allow_failure: false
+  script:
     - .gitlab-ci/run-shellcheck.sh
     - .gitlab-ci/run-black.sh
     - .gitlab-ci/run-flake8.sh
-    - .gitlab-ci/run-check-todos.sh
+  only:
+    changes:
+      - "**/*.py"
+      - "**/*.sh"
+
+style-check-mandatory:
+  extends: .only-default
+  image: $DEBIAN_IMAGE
+  stage: style-check
+  allow_failure: false
+  script:
+    - .gitlab-ci/run-reuse.sh
+  variables:
+    # The submodules are needed for `reuse lint` to work properly
+    GIT_SUBMODULE_STRATEGY: "normal"
 
 fedora-x86_64:
   extends:
@@ -68,7 +91,7 @@ fedora-x86_64:
   stage: build
   needs: []
   variables:
-    CFLAGS: "-coverage -ftest-coverage -fprofile-arcs"
+    CFLAGS: "-coverage -ftest-coverage -fprofile-arcs -Wnonnull"
   script:
     - meson ${MESON_COMMON_OPTIONS}
             --werror
@@ -88,12 +111,13 @@ fedora-x86_64:
     - lcov --config-file .lcovrc --directory _build --capture --output-file "_coverage/${CI_JOB_NAME}.lcov"
   artifacts:
     reports:
-      junit: "_build/meson-logs/testlog.junit.xml"
+      junit:
+        - _build/meson-logs/testlog.junit.xml
+        - _build/meson-logs/testlog-*.junit.xml
     name: "glib-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
     when: always
     expire_in: 1 week
     paths:
-      - "_build/docs/reference/"
       - "_build/config.h"
       - "_build/glib/glibconfig.h"
       - "_build/meson-logs"
@@ -115,6 +139,8 @@ debian-stable-x86_64:
   image: $DEBIAN_IMAGE
   stage: build
   needs: []
+  variables:
+    CFLAGS: "-Wnonnull"
   script:
     - meson ${MESON_COMMON_OPTIONS}
             --werror
@@ -124,13 +150,14 @@ debian-stable-x86_64:
             --libdir=lib
             -Dsystemtap=true
             -Ddtrace=true
-            -Dinstalled_tests=true
             _build
     - ninja -C _build
     - .gitlab-ci/run-tests.sh
   artifacts:
     reports:
-      junit: "_build/meson-logs/testlog.junit.xml"
+      junit:
+        - _build/meson-logs/testlog.junit.xml
+        - _build/meson-logs/testlog-*.junit.xml
     name: "glib-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
     when: always
     expire_in: 1 week
@@ -196,7 +223,9 @@ G_DISABLE_ASSERT:
     - bash -x ./.gitlab-ci/run-tests.sh
   artifacts:
     reports:
-      junit: "_build/meson-logs/testlog.junit.xml"
+      junit:
+        - _build/meson-logs/testlog.junit.xml
+        - _build/meson-logs/testlog-*.junit.xml
     name: "glib-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
     when: always
     expire_in: 1 week
@@ -271,7 +300,9 @@ cross-mingw64:
     - ninja -C _build
   artifacts:
     reports:
-      junit: "_build/meson-logs/testlog.junit.xml"
+      junit:
+        - _build/meson-logs/testlog.junit.xml
+        - _build/meson-logs/testlog-*.junit.xml
     name: "glib-${env:CI_JOB_NAME}-${env:CI_COMMIT_REF_NAME}"
     when: always
     expire_in: 1 week
@@ -292,6 +323,32 @@ msys2-mingw32:
   variables:
     MSYSTEM: "MINGW32"
     CHERE_INVOKING: "yes"
+    CFLAGS: -coverage -ftest-coverage -fprofile-arcs
+  script:
+    - C:\msys64\usr\bin\pacman --noconfirm -Syyuu --ask 20
+    - C:\msys64\usr\bin\bash .gitlab-ci/show-execution-environment.sh
+    - C:\msys64\usr\bin\bash -lc "bash -x ./.gitlab-ci/test-msys2.sh"
+  artifacts:
+    reports:
+      junit:
+        - _build/meson-logs/testlog.junit.xml
+        - _build/meson-logs/testlog-*.junit.xml
+    name: "glib-${env:CI_JOB_NAME}-${env:CI_COMMIT_REF_NAME}"
+    when: always
+    expire_in: 1 week
+    paths:
+      - _build/meson-logs
+      - _coverage/
+
+msys2-clang64:
+  extends: .only-schedules
+  stage: build
+  tags:
+    - win32-ps
+  needs: []
+  variables:
+    MSYSTEM: "CLANG64"
+    CHERE_INVOKING: "yes"
   script:
     - C:\msys64\usr\bin\pacman --noconfirm -Syyuu --ask 20
     - C:\msys64\usr\bin\bash .gitlab-ci/show-execution-environment.sh
@@ -304,7 +361,6 @@ msys2-mingw32:
     expire_in: 1 week
     paths:
       - _build/meson-logs
-      - _coverage/
 
 vs2017-x64:
   extends: .only-default
@@ -321,7 +377,9 @@ vs2017-x64:
                                --python.purelibdir=C:\Python37\site-packages
   artifacts:
     reports:
-      junit: "_build/meson-logs/testlog.junit.xml"
+      junit:
+        - _build/meson-logs/testlog.junit.xml
+        - _build/meson-logs/testlog-*.junit.xml
     name: "glib-${env:CI_JOB_NAME}-${env:CI_COMMIT_REF_NAME}"
     when: always
     expire_in: 1 week
@@ -349,7 +407,9 @@ vs2017-x64-static:
                                --python.purelibdir=C:\Python37\site-packages
   artifacts:
     reports:
-      junit: "_build/meson-logs/testlog.junit.xml"
+      junit:
+        - _build/meson-logs/testlog.junit.xml
+        - _build/meson-logs/testlog-*.junit.xml
     name: "glib-${env:CI_JOB_NAME}-${env:CI_COMMIT_REF_NAME}"
     when: always
     expire_in: 1 week
@@ -391,7 +451,9 @@ freebsd-12-x86_64:
     - bash -x ./.gitlab-ci/run-tests.sh
   artifacts:
     reports:
-      junit: "_build/meson-logs/testlog.junit.xml"
+      junit:
+        - _build/meson-logs/testlog.junit.xml
+        - _build/meson-logs/testlog-*.junit.xml
     name: "glib-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
     when: always
     expire_in: 1 week
@@ -418,7 +480,9 @@ freebsd-13-x86_64:
     - bash -x ./.gitlab-ci/run-tests.sh
   artifacts:
     reports:
-      junit: "_build/meson-logs/testlog.junit.xml"
+      junit:
+        - _build/meson-logs/testlog.junit.xml
+        - _build/meson-logs/testlog-*.junit.xml
     name: "glib-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
     when: always
     expire_in: 1 week
@@ -458,7 +522,9 @@ macos:
     - .gitlab-ci/run-tests.sh
   artifacts:
     reports:
-      junit: "_build/meson-logs/testlog.junit.xml"
+      junit:
+        - _build/meson-logs/testlog.junit.xml
+        - _build/meson-logs/testlog-*.junit.xml
     name: "glib-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
     when: always
     expire_in: 1 week
@@ -553,7 +619,7 @@ pages:
   stage: deploy
   only:
     - main
-  needs: ['coverage', 'style-check-diff']
+  needs: ['coverage', 'style-check-advisory']
   script:
     - mv _coverage/ public/
   artifacts:
@@ -584,3 +650,11 @@ dist-job:
       - "${CI_PROJECT_DIR}/_build/gobject-docs-$CI_COMMIT_TAG.tar.xz"
       - "${CI_PROJECT_DIR}/_build/gio-docs-$CI_COMMIT_TAG.tar.xz"
       - "${CI_PROJECT_DIR}/_build/meson-dist/glib-*.tar.xz"
+
+issue-bot:
+  stage: report
+  image: registry.gitlab.com/gitlab-org/distribution/issue-bot:latest
+  script: /issue-bot
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE == "schedule"
+      when: on_failure
