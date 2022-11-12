@@ -61,14 +61,14 @@
 #endif
 #include <glib/gstdio.h>
 
-#if defined(G_OS_UNIX) && !defined(HAVE_COCOA)
+#if defined(G_OS_UNIX) && !defined(__APPLE__)
 #include "gdesktopappinfo.h"
 #endif
 #ifdef HAVE_COCOA
 #include "gosxappinfo.h"
 #endif
 
-#ifdef HAVE_COCOA
+#ifdef __APPLE__
 #include <AvailabilityMacros.h>
 #endif
 
@@ -430,9 +430,16 @@ is_valid_module_name (const gchar        *basename,
   gboolean result;
 
 #if !defined(G_OS_WIN32) && !defined(G_WITH_CYGWIN)
+  #if defined(__APPLE__)
+  if (!g_str_has_prefix (basename, "lib") ||
+      !(g_str_has_suffix (basename, ".so") ||
+        g_str_has_suffix (basename, ".dylib")))
+    return FALSE;
+  #else
   if (!g_str_has_prefix (basename, "lib") ||
       !g_str_has_suffix (basename, ".so"))
     return FALSE;
+  #endif
 #else
   if (!g_str_has_suffix (basename, ".dll"))
     return FALSE;
@@ -579,13 +586,15 @@ g_io_modules_scan_all_in_directory_with_scope (const char     *dirname,
 	    {
 	      /* Try to load and init types */
 	      if (g_type_module_use (G_TYPE_MODULE (module)))
-		g_type_module_unuse (G_TYPE_MODULE (module)); /* Unload */
+		{
+		  g_type_module_unuse (G_TYPE_MODULE (module)); /* Unload */
+		  /* module must remain alive, because the type system keeps weak refs */
+		  g_ignore_leak (module);
+		}
 	      else
-		{ /* Failure to load */
+		{
 		  g_printerr ("Failed to load module: %s\n", path);
 		  g_object_unref (module);
-		  g_free (path);
-		  continue;
 		}
 	    }
 
@@ -1183,7 +1192,7 @@ _g_io_modules_ensure_extension_points_registered (void)
 
   if (g_once_init_enter (&registered_extensions))
     {
-#if defined(G_OS_UNIX) && !defined(HAVE_COCOA)
+#if defined(G_OS_UNIX) && !defined(__APPLE__)
 #if !GLIB_CHECK_VERSION (3, 0, 0)
       ep = g_io_extension_point_register (G_DESKTOP_APP_INFO_LOOKUP_EXTENSION_POINT_NAME);
       g_io_extension_point_set_required_type (ep, G_TYPE_DESKTOP_APP_INFO_LOOKUP);
@@ -1262,6 +1271,29 @@ get_gio_module_dir (void)
       g_free (install_dir);
 #else
       module_dir = g_strdup (GIO_MODULE_DIR);
+#ifdef __APPLE__
+#include "TargetConditionals.h"
+#if TARGET_OS_OSX
+#include <dlfcn.h>
+      {
+        g_autofree gchar *path = NULL;
+        g_autofree gchar *possible_dir = NULL;
+        Dl_info info;
+
+        if (dladdr (get_gio_module_dir, &info))
+          {
+            /* Gets path to the PREFIX/lib directory */
+            path = g_path_get_dirname (info.dli_fname);
+            possible_dir = g_build_filename (path, "gio", "modules", NULL);
+            if (g_file_test (possible_dir, G_FILE_TEST_IS_DIR))
+              {
+                g_free (module_dir);
+                module_dir = g_steal_pointer (&possible_dir);
+              }
+          }
+      }
+#endif
+#endif
 #endif
     }
 

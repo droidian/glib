@@ -1758,6 +1758,11 @@ g_utime (const gchar    *filename,
  * attempt to correctly handle %EINTR, which has platform-specific
  * semantics.
  *
+ * It is a bug to call this function with an invalid file descriptor.
+ *
+ * Since 2.76, this function is guaranteed to be async-signal-safe if (and only
+ * if) @error is %NULL and @fd is a valid open file descriptor.
+ *
  * Returns: %TRUE on success, %FALSE if there was an error.
  *
  * Since: 2.36
@@ -1783,11 +1788,16 @@ g_close (gint       fd,
            * on Linux at least.  Anyone who wants to add a conditional check
            * for e.g. HP-UX is welcome to do so later...
            *
+           * close_func_with_invalid_fds() in gspawn.c has similar logic.
+           *
            * https://lwn.net/Articles/576478/
            * http://lkml.indiana.edu/hypermail/linux/kernel/0509.1/0877.html
            * https://bugzilla.gnome.org/show_bug.cgi?id=682819
            * http://utcc.utoronto.ca/~cks/space/blog/unix/CloseEINTR
            * https://sites.google.com/site/michaelsafyan/software-engineering/checkforeintrwheninvokingclosethinkagain
+           *
+           * `close$NOCANCEL()` in gstdioprivate.h, on macOS, ensures that the fd is
+           * closed even if it did return EINTR.
            */
           return TRUE;
         }
@@ -1799,8 +1809,140 @@ g_close (gint       fd,
                                g_strerror (errsv));
         }
 
+      if (errsv == EBADF)
+        {
+          /* There is a bug. Fail an assertion. Note that this function is supposed to be
+           * async-signal-safe, but in case an assertion fails, all bets are already off. */
+          if (fd >= 0)
+            {
+              /* Closing an non-negative, invalid file descriptor is a bug. The bug is
+               * not necessarily in the caller of g_close(), but somebody else
+               * might have wrongly closed fd. In any case, there is a serious bug
+               * somewhere. */
+              g_critical ("g_close(fd:%d) failed with EBADF. The tracking of file descriptors got messed up", fd);
+            }
+          else
+            {
+              /* Closing a negative "file descriptor" is less problematic. It's still a nonsensical action
+               * from the caller. Assert against that too. */
+              g_critical ("g_close(fd:%d) failed with EBADF. This is not a valid file descriptor", fd);
+            }
+        }
+
       errno = errsv;
+
       return FALSE;
     }
+
   return TRUE;
 }
+
+/**
+ * g_clear_fd: (skip)
+ * @fd_ptr: (not nullable): a pointer to a file descriptor
+ * @error: Used to return an error on failure
+ *
+ * If @fd_ptr points to a file descriptor, close it and return
+ * whether closing it was successful, like g_close().
+ * If @fd_ptr points to a negative number, return %TRUE without closing
+ * anything.
+ * In both cases, set @fd_ptr to `-1` before returning.
+ *
+ * Like g_close(), if closing the file descriptor fails, the error is
+ * stored in both %errno and @error. If this function succeeds,
+ * %errno is undefined.
+ *
+ * This function is async-signal-safe if @error is %NULL and @fd_ptr
+ * points to either a negative number or a valid file descriptor.
+ *
+ * It is a programming error for @fd_ptr to point to a non-negative
+ * number that is not a valid file descriptor.
+ *
+ * A typical use of this function is to clean up a file descriptor at
+ * the end of its scope, whether it has been set successfully or not:
+ *
+ * |[
+ * gboolean
+ * operate_on_fd (GError **error)
+ * {
+ *   gboolean ret = FALSE;
+ *   int fd = -1;
+ *
+ *   fd = open_a_fd (error);
+ *
+ *   if (fd < 0)
+ *     goto out;
+ *
+ *   if (!do_something (fd, error))
+ *     goto out;
+ *
+ *   if (!g_clear_fd (&fd, error))
+ *     goto out;
+ *
+ *   ret = TRUE;
+ *
+ * out:
+ *   // OK to call even if fd was never opened or was already closed
+ *   g_clear_fd (&fd, NULL);
+ *   return ret;
+ * }
+ * ]|
+ *
+ * This function is also useful in conjunction with #g_autofd.
+ *
+ * Returns: %TRUE on success
+ * Since: 2.76
+ */
+
+/**
+ * g_autofd: (skip)
+ *
+ * Macro to add an attribute to a file descriptor variable to ensure
+ * automatic cleanup using g_clear_fd().
+ *
+ * This macro behaves like #g_autofree rather than g_autoptr(): it is
+ * an attribute supplied before the type name, rather than wrapping the
+ * type definition.
+ *
+ * Otherwise, this macro has similar constraints as g_autoptr(): it is
+ * only supported on GCC and clang, and the variable must be initialized
+ * (to either a valid file descriptor or a negative number).
+ *
+ * Using this macro is async-signal-safe if the constraints described above
+ * are met, so it can be used in a signal handler or after `fork()`.
+ *
+ * Any error from closing the file descriptor when it goes out of scope
+ * is ignored. Use g_clear_fd() if error-checking is required.
+ *
+ * |[
+ * gboolean
+ * operate_on_fds (GError **error)
+ * {
+ *   g_autofd int fd1 = open_a_fd (..., error);
+ *   g_autofd int fd2 = -1;
+ *
+ *   // it is safe to return early here, nothing will be closed
+ *   if (fd1 < 0)
+ *     return FALSE;
+ *
+ *   fd2 = open_a_fd (..., error);
+ *
+ *   // fd1 will be closed automatically if we return here
+ *   if (fd2 < 0)
+ *     return FALSE;
+ *
+ *   // fd1 and fd2 will be closed automatically if we return here
+ *   if (!do_something_useful (fd1, fd2, error))
+ *     return FALSE;
+ *
+ *   // fd2 will be closed automatically if we return here
+ *   if (!g_clear_fd (&fd1, error))
+ *     return FALSE;
+ *
+ *   // fd2 will be automatically closed here if still open
+ *   return TRUE;
+ * }
+ * ]|
+ *
+ * Since: 2.76
+ */

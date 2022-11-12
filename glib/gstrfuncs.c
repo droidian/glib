@@ -1362,7 +1362,7 @@ g_strerror (gint errnum)
           G_UNLOCK (errors);
 
           errno = saved_errno;
-          return msg;
+          return NULL;
         }
 
       if (!g_get_console_charset (NULL))
@@ -2928,9 +2928,8 @@ g_strrstr_len (const gchar *haystack,
  *
  * Since: 2.2
  */
-gboolean
-g_str_has_suffix (const gchar *str,
-                  const gchar *suffix)
+gboolean (g_str_has_suffix) (const gchar *str,
+                             const gchar *suffix)
 {
   gsize str_len;
   gsize suffix_len;
@@ -2958,9 +2957,8 @@ g_str_has_suffix (const gchar *str,
  *
  * Since: 2.2
  */
-gboolean
-g_str_has_prefix (const gchar *str,
-                  const gchar *prefix)
+gboolean (g_str_has_prefix) (const gchar *str,
+                             const gchar *prefix)
 {
   g_return_val_if_fail (str != NULL, FALSE);
   g_return_val_if_fail (prefix != NULL, FALSE);
