@@ -1,9 +1,10 @@
-glib2.0 (2.75.0-1) UNRELEASED; urgency=medium
+glib2.0 (2.75.0-1) experimental; urgency=medium
 
   * d/control.in, d/gbp.conf: Branch for experimental
   * New upstream development release
+  * Refresh patch series, dropping patches that were applied upstream
 
- -- Simon McVittie <smcv@debian.org>  Sat, 12 Nov 2022 17:30:37 +0000
+ -- Simon McVittie <smcv@debian.org>  Sat, 12 Nov 2022 17:48:25 +0000
 
 glib2.0 (2.74.1-2) unstable; urgency=medium
 
