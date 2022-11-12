@@ -1,4 +1,4 @@
-glib2.0 (2.75.0-1) experimental; urgency=medium
+glib2.0 (2.75.0-1) UNRELEASED; urgency=medium
 
   * d/control.in, d/gbp.conf: Branch for experimental
   * New upstream development release
