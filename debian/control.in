@@ -3,7 +3,7 @@ Section: libs
 Priority: optional
 Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
 Uploaders: @GNOME_TEAM@, Simon McVittie <smcv@debian.org>
-Build-Depends: dbus <!nocheck> <!noinsttest>,
+Build-Depends: dbus-daemon <!nocheck> <!noinsttest>,
                debhelper-compat (= 13),
                dh-sequence-python3,
                dh-sequence-gnome,
