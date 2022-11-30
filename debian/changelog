@@ -1,11 +1,12 @@
-glib2.0 (2.74.1-3) UNRELEASED; urgency=medium
+glib2.0 (2.74.2-1) UNRELEASED; urgency=medium
 
   * d/gbp.conf, d/watch: Only watch for stable releases
   * Build-/test-depend on dbus-daemon rather than dbus.
     We don't necessarily need to be using dbus as the system bus
     implementation: all we need here is dbus-run-session.
+  * New upstream release
 
- -- Simon McVittie <smcv@debian.org>  Wed, 30 Nov 2022 13:47:02 +0000
+ -- Simon McVittie <smcv@debian.org>  Wed, 30 Nov 2022 13:47:40 +0000
 
 glib2.0 (2.74.1-2) unstable; urgency=medium
 
