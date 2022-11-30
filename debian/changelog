@@ -1,12 +1,15 @@
-glib2.0 (2.74.2-1) UNRELEASED; urgency=medium
+glib2.0 (2.74.2-1) unstable; urgency=medium
 
   * d/gbp.conf, d/watch: Only watch for stable releases
-  * Build-/test-depend on dbus-daemon rather than dbus.
+  * New upstream stable release
+  * d/control.in: Build-/test-depend on dbus-daemon rather than dbus.
     We don't necessarily need to be using dbus as the system bus
     implementation: all we need here is dbus-run-session.
-  * New upstream release
+  * d/patches: Drop patches that were applied upstream
+  * d/p/gstrfuncs-Fix-regression-in-C-types-accepted-by-g_str_equ.patch:
+    Add patch from upstream to fix errors when using g_str_equal from C++
 
- -- Simon McVittie <smcv@debian.org>  Wed, 30 Nov 2022 13:47:40 +0000
+ -- Simon McVittie <smcv@debian.org>  Wed, 30 Nov 2022 13:54:35 +0000
 
 glib2.0 (2.74.1-2) unstable; urgency=medium
 
