@@ -1,10 +1,15 @@
-glib2.0 (2.74.3-1) UNRELEASED; urgency=medium
+glib2.0 (2.74.3-1) unstable; urgency=high
 
+  [ Simon McVittie ]
   * New upstream stable release, functionally equivalent to 2.74.2-1
   * d/p/gstrfuncs-Fix-regression-in-C-types-accepted-by-g_str_equ.patch:
     Drop patch, included in the upstream release
 
- -- Simon McVittie <smcv@debian.org>  Tue, 06 Dec 2022 09:17:34 +0000
+  [ Jeremy Bicha ]
+  * d/patches: Update to upstream 2.74.x branch commit e16fb837
+    including multiple security related fixes for non-normal GVariants
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Tue, 13 Dec 2022 15:23:22 -0500
 
 glib2.0 (2.74.2-1) unstable; urgency=medium
 
