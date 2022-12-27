@@ -1,8 +1,10 @@
-glib2.0 (2.74.4-1) UNRELEASED; urgency=medium
+glib2.0 (2.74.4-1) unstable; urgency=high
 
   * New upstream release
+  * Drop patches applied in new release
+  * Cherry-pick patch from 2-74 branch
 
- -- Jeremy Bicha <jbicha@ubuntu.com>  Tue, 27 Dec 2022 14:40:31 -0900
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Tue, 27 Dec 2022 14:42:10 -0900
 
 glib2.0 (2.74.3-1) unstable; urgency=high
 
