@@ -17,7 +17,3 @@ debian/Add-extra-debug-to-memory-monitor-dbus-test.patch
 debian/tests-Skip-debugcontroller-test.patch
 debian/gdesktopappinfo-Recognize-gnome-console-as-a-terminal-app.patch
 debian/testfilemonitor-Skip-if-we-are-avoiding-flaky-tests.patch
-Update-Abkhazian-translation.patch
-Add-Interlingue-translation.patch
-Update-Georgian-translation.patch
-Merge-branch-backport-3125-gvariant-normal-forms-glib-2-7.patch
