@@ -1343,21 +1343,6 @@ dupfd_cloexec (int old_fd, int new_fd_min)
   return fd;
 }
 
-/* fdwalk()-compatible callback to close a valid fd.
- * It is an error to pass an invalid fd (causing EBADF) to this function.
- *
- * This function is called between fork() and exec() and hence must be
- * async-signal-safe (see signal-safety(7)).
- */
-G_GNUC_UNUSED static int
-close_func (void *data, int fd)
-{
-  if (fd >= GPOINTER_TO_INT (data))
-    g_close (fd, NULL);
-
-  return 0;
-}
-
 /* fdwalk()-compatible callback to close a fd for non-compliant
  * implementations of fdwalk() that potentially pass already
  * closed fds.
@@ -1426,6 +1411,8 @@ filename_to_fd (const char *p)
   return fd;
 }
 #endif
+
+static int safe_fdwalk_with_invalid_fds (int (*cb)(void *data, int fd), void *data);
 
 /* This function is called between fork() and exec() and hence must be
  * async-signal-safe (see signal-safety(7)). */
@@ -1508,8 +1495,7 @@ safe_fdwalk (int (*cb)(void *data, int fd), void *data)
   return res;
 #endif
 
-  errno = ENOSYS;
-  return -1;
+  return safe_fdwalk_with_invalid_fds (cb, data);
 #endif
 }
 
@@ -1620,9 +1606,6 @@ safe_fdwalk_set_cloexec (int lowfd)
 
   ret = safe_fdwalk (set_cloexec, GINT_TO_POINTER (lowfd));
 
-  if (ret < 0 && errno == ENOSYS)
-    ret = safe_fdwalk_with_invalid_fds (set_cloexec, GINT_TO_POINTER (lowfd));
-
   return ret;
 }
 
@@ -1634,6 +1617,18 @@ static int
 safe_closefrom (int lowfd)
 {
   int ret;
+
+#if defined(HAVE_CLOSE_RANGE)
+  /* close_range() is available in Linux since kernel 5.9, and on FreeBSD at
+   * around the same time. It was designed for use in async-signal-safe
+   * situations: https://bugs.python.org/issue38061
+   *
+   * Handle ENOSYS in case it’s supported in libc but not the kernel; if so,
+   * fall back to safe_fdwalk(). */
+  ret = close_range (lowfd, G_MAXUINT, 0);
+  if (ret == 0 || errno != ENOSYS)
+    return ret;
+#endif  /* HAVE_CLOSE_RANGE */
 
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || \
   (defined(__sun__) && defined(F_CLOSEFROM))
@@ -1666,22 +1661,7 @@ safe_closefrom (int lowfd)
    */
   return fcntl (lowfd, F_CLOSEM);
 #else
-
-#if defined(HAVE_CLOSE_RANGE)
-  /* close_range() is available in Linux since kernel 5.9, and on FreeBSD at
-   * around the same time. It was designed for use in async-signal-safe
-   * situations: https://bugs.python.org/issue38061
-   *
-   * Handle ENOSYS in case it’s supported in libc but not the kernel; if so,
-   * fall back to safe_fdwalk(). */
-  ret = close_range (lowfd, G_MAXUINT, 0);
-  if (ret == 0 || errno != ENOSYS)
-    return ret;
-#endif  /* HAVE_CLOSE_RANGE */
-  ret = safe_fdwalk (close_func, GINT_TO_POINTER (lowfd));
-
-  if (ret < 0 && errno == ENOSYS)
-    ret = safe_fdwalk_with_invalid_fds (close_func_with_invalid_fds, GINT_TO_POINTER (lowfd));
+  ret = safe_fdwalk (close_func_with_invalid_fds, GINT_TO_POINTER (lowfd));
 
   return ret;
 #endif
@@ -2354,6 +2334,9 @@ fork_exec (gboolean              intermediate_child,
     {
       if (!g_unix_open_pipe (stdin_pipe, pipe_flags, error))
         goto cleanup_and_fail;
+      if (_g_spawn_invalid_source_fd (stdin_pipe[0], source_fds, n_fds, error) ||
+          _g_spawn_invalid_source_fd (stdin_pipe[1], source_fds, n_fds, error))
+        goto cleanup_and_fail;
       child_close_fds[n_child_close_fds++] = stdin_pipe[1];
       stdin_fd = stdin_pipe[0];
     }
@@ -2362,6 +2345,9 @@ fork_exec (gboolean              intermediate_child,
     {
       if (!g_unix_open_pipe (stdout_pipe, pipe_flags, error))
         goto cleanup_and_fail;
+      if (_g_spawn_invalid_source_fd (stdout_pipe[0], source_fds, n_fds, error) ||
+          _g_spawn_invalid_source_fd (stdout_pipe[1], source_fds, n_fds, error))
+        goto cleanup_and_fail;
       child_close_fds[n_child_close_fds++] = stdout_pipe[0];
       stdout_fd = stdout_pipe[1];
     }
@@ -2369,6 +2355,9 @@ fork_exec (gboolean              intermediate_child,
   if (stderr_pipe_out != NULL)
     {
       if (!g_unix_open_pipe (stderr_pipe, pipe_flags, error))
+        goto cleanup_and_fail;
+      if (_g_spawn_invalid_source_fd (stderr_pipe[0], source_fds, n_fds, error) ||
+          _g_spawn_invalid_source_fd (stderr_pipe[1], source_fds, n_fds, error))
         goto cleanup_and_fail;
       child_close_fds[n_child_close_fds++] = stderr_pipe[0];
       stderr_fd = stderr_pipe[1];
@@ -2511,9 +2500,18 @@ fork_exec (gboolean              intermediate_child,
 
   if (!g_unix_open_pipe (child_err_report_pipe, pipe_flags, error))
     goto cleanup_and_fail;
-
-  if (intermediate_child && !g_unix_open_pipe (child_pid_report_pipe, pipe_flags, error))
+  if (_g_spawn_invalid_source_fd (child_err_report_pipe[0], source_fds, n_fds, error) ||
+      _g_spawn_invalid_source_fd (child_err_report_pipe[1], source_fds, n_fds, error))
     goto cleanup_and_fail;
+
+  if (intermediate_child)
+    {
+      if (!g_unix_open_pipe (child_pid_report_pipe, pipe_flags, error))
+        goto cleanup_and_fail;
+      if (_g_spawn_invalid_source_fd (child_pid_report_pipe[0], source_fds, n_fds, error) ||
+          _g_spawn_invalid_source_fd (child_pid_report_pipe[1], source_fds, n_fds, error))
+        goto cleanup_and_fail;
+    }
   
   pid = fork ();
 

@@ -411,6 +411,12 @@ G_GNUC_INTERNAL
 G_GNUC_MAY_ALIAS
 
 <SUBSECTION>
+G_C_STD_VERSION
+G_C_STD_CHECK_VERSION
+G_CXX_STD_VERSION
+G_CXX_STD_CHECK_VERSION
+
+<SUBSECTION>
 G_DEPRECATED
 G_DEPRECATED_FOR
 G_UNAVAILABLE
@@ -2572,13 +2578,17 @@ GHFunc
 g_hash_table_remove
 g_hash_table_steal
 g_hash_table_steal_extended
+g_hash_table_steal_all_keys
+g_hash_table_steal_all_values
 g_hash_table_foreach_remove
 g_hash_table_foreach_steal
 g_hash_table_remove_all
 g_hash_table_steal_all
 g_hash_table_get_keys
 g_hash_table_get_values
+g_hash_table_get_values_as_ptr_array
 g_hash_table_get_keys_as_array
+g_hash_table_get_keys_as_ptr_array
 GHRFunc
 g_hash_table_freeze
 g_hash_table_thaw
@@ -2674,6 +2684,8 @@ g_string_chunk_free
 <FILE>arrays</FILE>
 GArray
 g_array_new
+g_array_new_take
+g_array_new_take_zero_terminated
 g_array_steal
 g_array_sized_new
 g_array_copy
@@ -2709,6 +2721,10 @@ g_ptr_array_new_with_free_func
 g_ptr_array_copy
 g_ptr_array_new_full
 g_ptr_array_new_null_terminated
+g_ptr_array_new_take
+g_ptr_array_new_take_null_terminated
+g_ptr_array_new_from_array
+g_ptr_array_new_from_null_terminated_array
 g_ptr_array_set_free_func
 g_ptr_array_is_null_terminated
 g_ptr_array_ref
@@ -2726,6 +2742,8 @@ g_ptr_array_steal_index
 g_ptr_array_steal_index_fast
 g_ptr_array_sort
 g_ptr_array_sort_with_data
+g_ptr_array_sort_values
+g_ptr_array_sort_values_with_data
 g_ptr_array_set_size
 g_ptr_array_index
 g_ptr_array_free
