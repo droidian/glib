@@ -48,6 +48,7 @@ endif
 
 #  Test programs buildable on all platforms
 gio_tests = {
+  'application-command-line': {},
   'appmonitor' : {
     # FIXME: https://gitlab.gnome.org/GNOME/glib/-/issues/1392
     'can_fail' : host_system == 'darwin',
@@ -108,7 +109,8 @@ gio_tests = {
   'proxy-test' : {},
   'readwrite' : {},
   'sandbox' : {
-    'source': ['sandbox.c', '../gsandbox.c'],
+    'extra_sources': ['../gsandbox.c', 'portal-support-utils.c'],
+    'c_args': ['-DG_PORTAL_SUPPORT_TEST'],
   },
   'simple-async-result' : {},
   'simple-proxy' : {},
@@ -227,6 +229,45 @@ if host_machine.system() != 'windows'
     'gdbus-peer-object-manager' : {},
     'gdbus-sasl' : {},
     'live-g-file' : {},
+    'portal-support-flatpak-none' : {
+      'extra_sources': ['../gportalsupport.c', '../gsandbox.c', 'portal-support-utils.c'],
+      'c_args': ['-DG_PORTAL_SUPPORT_TEST'],
+      'suite': ['portal-support'],
+    },
+    'portal-support-flatpak-full' : {
+      'extra_sources': ['../gportalsupport.c', '../gsandbox.c', 'portal-support-utils.c'],
+      'c_args': ['-DG_PORTAL_SUPPORT_TEST'],
+      'suite': ['portal-support'],
+    },
+    'portal-support-flatpak-network-only' : {
+      'extra_sources': ['../gportalsupport.c', '../gsandbox.c', 'portal-support-utils.c'],
+      'c_args': ['-DG_PORTAL_SUPPORT_TEST'],
+      'suite': ['portal-support'],
+    },
+    'portal-support-flatpak-gsettings-only' : {
+      'extra_sources': ['../gportalsupport.c', '../gsandbox.c', 'portal-support-utils.c'],
+      'c_args': ['-DG_PORTAL_SUPPORT_TEST'],
+      'suite': ['portal-support'],
+    },
+    'portal-support-none' : {
+      'extra_sources': ['../gportalsupport.c', '../gsandbox.c'],
+      'c_args': ['-DG_PORTAL_SUPPORT_TEST'],
+      'suite': ['portal-support'],
+    },
+    'portal-support-env-var' : {
+      'extra_sources': ['../gportalsupport.c', '../gsandbox.c'],
+      'suite': ['portal-support'],
+    },
+    'portal-support-snap' : {
+      'extra_sources': ['../gportalsupport.c', '../gsandbox.c', 'portal-support-utils.c'],
+      'c_args': ['-DG_PORTAL_SUPPORT_TEST'],
+      'suite': ['portal-support'],
+    },
+    'portal-support-snap-classic' : {
+      'extra_sources': ['../gportalsupport.c', '../gsandbox.c', 'portal-support-utils.c'],
+      'c_args': ['-DG_PORTAL_SUPPORT_TEST'],
+      'suite': ['portal-support'],
+    },
     'resolver-parsing' : {'dependencies' : [network_libs]},
     'socket-address' : {},
     'stream-rw_all' : {},
@@ -365,6 +406,7 @@ if host_machine.system() != 'windows'
         'extra_sources' : extra_sources,
         'suite' : ['slow'],
       },
+      'fdo-notification-backend': {},
       'gdbus-auth' : {'extra_sources' : extra_sources},
       'gdbus-bz627724' : {'extra_sources' : extra_sources},
       'gdbus-close-pending' : {'extra_sources' : extra_sources},
@@ -588,6 +630,7 @@ endif
 appinfo_test_desktop_files = [
   'appinfo-test-gnome',
   'appinfo-test-notgnome',
+  'appinfo-test-path',
   'appinfo-test',
   'appinfo-test2',
 ]
@@ -700,7 +743,9 @@ if installed_tests_enabled
   endforeach
 endif
 
-if meson.can_run_host_binaries()
+# FIXME: Work around Meson not automatically using exe_wrapper around glib_compile_resources
+# https://github.com/mesonbuild/meson/issues/11029 
+if not meson.is_cross_build()
 
   resource_plugin = []
   compiler_type = '--compiler=@0@'.format(cc.get_id())

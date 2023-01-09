@@ -1,5 +1,5 @@
 project('glib', 'c',
-  version : '2.75.0',
+  version : '2.75.2',
   # NOTE: See the policy in docs/meson-version.md before changing the Meson dependency
   meson_version : '>= 0.60.0',
   default_options : [
@@ -10,6 +10,15 @@ project('glib', 'c',
 )
 
 cc = meson.get_compiler('c')
+c_standards = {}
+
+foreach std : ['90', '99', '11', '17']
+  arg = (cc.get_id() == 'msvc' ? '/std:' : '-std=') + 'c' + std
+  if cc.has_argument(arg)
+    c_standards += { std: arg }
+  endif
+endforeach
+
 have_cxx = add_languages('cpp', native: false, required: get_option('oss_fuzz').enabled())
 if have_cxx
   cxx = meson.get_compiler('cpp')
@@ -114,10 +123,17 @@ else
   glib_charsetaliasdir = glib_libdir
 endif
 
-glib_localstatedir = get_option('localstatedir')
-if not glib_localstatedir.startswith('/')
-  # See https://mesonbuild.com/Builtin-options.html#directories
-  glib_localstatedir = join_paths(glib_prefix, glib_localstatedir)
+glib_localstatedir = glib_prefix / get_option('localstatedir')
+
+if get_option('runtime_dir') != ''
+  glib_runstatedir = glib_prefix / get_option('runtime_dir')
+else
+  # While we’d normally prefix directories like this with, for example,
+  # glib_localstatedir, `/run` is a bit different in that it’s for runtime state
+  # rather than data files, so it’s typically functionally useless to use a
+  # prefixed version. No other processes will be using it. So we default to the
+  # unprefixed system `/run` directory.
+  glib_runstatedir = '/run'
 endif
 
 installed_tests_metadir = join_paths(glib_datadir, 'installed-tests', meson.project_name())
@@ -477,6 +493,8 @@ if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
     '-Wduplicated-branches',
     '-Wimplicit-fallthrough',
     '-Wmisleading-indentation',
+    '-Wmissing-field-initializers',
+    '-Wnonnull',
     '-Wunused',
     # Due to maintained deprecated code, we do not want to see unused parameters
     '-Wno-unused-parameter',
@@ -869,7 +887,7 @@ if host_system == 'qnx'
 endif
 
 # Check for futex(2)
-if cc.links('''#include <linux/futex.h>
+if cc.compiles('''#include <linux/futex.h>
                #include <sys/syscall.h>
                #include <unistd.h>
                int main (int argc, char ** argv) {
@@ -877,6 +895,15 @@ if cc.links('''#include <linux/futex.h>
                  return 0;
                }''', name : 'futex(2) system call')
   glib_conf.set('HAVE_FUTEX', 1)
+endif
+if cc.compiles('''#include <linux/futex.h>
+               #include <sys/syscall.h>
+               #include <unistd.h>
+               int main (int argc, char ** argv) {
+                 syscall (__NR_futex_time64, NULL, FUTEX_WAKE, FUTEX_WAIT);
+                 return 0;
+               }''', name : 'futex(2) system call')
+  glib_conf.set('HAVE_FUTEX_TIME64', 1)
 endif
 
 # Check for eventfd(2)
@@ -2011,7 +2038,8 @@ else
   libiconv = dependency('iconv')
 endif
 
-pcre2 = dependency('libpcre2-8', version: '>= 10.32', required : false)
+pcre2_req = '>=10.32'
+pcre2 = dependency('libpcre2-8', version: pcre2_req, required: false, allow_fallback: false)
 if not pcre2.found()
   if cc.get_id() == 'msvc' or cc.get_id() == 'clang-cl'
   # MSVC: Search for the PCRE2 library by the configuration, which corresponds
@@ -2027,8 +2055,11 @@ endif
 
 # Try again with the fallback
 if not pcre2.found()
-  pcre2 = dependency('libpcre2-8', required : true, fallback : ['pcre2', 'libpcre2_8'])
-  use_pcre2_static_flag = true
+  pcre2 = dependency('libpcre2-8', version: pcre2_req, allow_fallback: true)
+  assert(pcre2.type_name() == 'internal')
+  # static flags are automatically enabled by the subproject if it's built
+  # with default_library=static
+  use_pcre2_static_flag = false
 elif host_system == 'windows'
   pcre2_static = cc.links('''#define PCRE2_STATIC
                              #define PCRE2_CODE_UNIT_WIDTH 8
@@ -2050,7 +2081,7 @@ subproject('gvdb')
 gvdb_dep = dependency('gvdb')
 
 libm = cc.find_library('m', required : false)
-libffi_dep = dependency('libffi', version : '>= 3.0.0', fallback : ['libffi', 'ffi_dep'])
+libffi_dep = dependency('libffi', version : '>= 3.0.0')
 
 libz_dep = dependency('zlib')
 
@@ -2059,7 +2090,7 @@ libz_dep = dependency('zlib')
 # FIXME: glib-gettext.m4 has much more checks to detect broken/uncompatible
 # implementations. This could be extended if issues are found in some platforms.
 libintl_deps = []
-libintl = dependency('intl', required: false)
+libintl = dependency('intl', required: false, allow_fallback: false)
 if libintl.found()
   # libintl supports different threading APIs, which may not
   # require additional flags, but it defaults to using pthreads if
@@ -2085,7 +2116,8 @@ endif
 if libintl.found()
   have_bind_textdomain_codeset = cc.has_function('bind_textdomain_codeset', dependencies: libintl_deps)
 else
-  libintl = subproject('proxy-libintl').get_variable('intl_dep')
+  libintl = dependency('intl', allow_fallback: true)
+  assert(libintl.type_name() == 'internal')
   libintl_deps = [libintl]
   have_bind_textdomain_codeset = true  # proxy-libintl supports it
 endif
@@ -2097,6 +2129,9 @@ glib_conf.set('HAVE_DCGETTEXT', 1)
 glib_conf.set('HAVE_GETTEXT', 1)
 
 glib_conf.set_quoted('GLIB_LOCALE_DIR', join_paths(glib_datadir, 'locale'))
+
+glib_conf.set_quoted('GLIB_LOCALSTATEDIR', glib_localstatedir)
+glib_conf.set_quoted('GLIB_RUNSTATEDIR', glib_runstatedir)
 
 # libmount is only used by gio, but we need to fetch the libs to generate the
 # pkg-config file below
@@ -2437,6 +2472,7 @@ summary({
   'includedir' : glib_includedir,
   'giomodulesdir' : glib_giomodulesdir,
   'localstatedir' : glib_localstatedir,
+  'runstatedir' : glib_runstatedir,
 }, section: 'Directories')
 
 if get_option('multiarch')
