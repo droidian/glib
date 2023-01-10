@@ -1,5 +1,7 @@
 Include-GObject-s-visibility-header.patch
 build-Don-t-overwrite-build-variables.patch
+garray-Update-NULL-termination-after-copying-array-conten.patch
+garray-Avoid-calling-memcpy-with-no-items.patch
 glib-compile-schemas-Fix-typo-in-comparison-function.patch
 01_gettext-desktopfiles.patch
 0001-timer-test-use-volatile-for-locals.patch

@@ -1,0 +1,35 @@
+From: Simon McVittie <smcv@collabora.com>
+Date: Tue, 10 Jan 2023 12:42:23 +0000
+Subject: garray: Update NULL termination after copying array content
+
+ptr_array_new(len, ., TRUE) ensures that there are at least len+1
+elements in pdata, and that pdata[0] is null, but leaves the rest of
+pdata uninitialized. After copying the array data into pdata[1] to
+pdata[len-1] inclusive, we still need to make sure pdata[len] is a
+null terminator.
+
+Note that if len is 0, then pdata is not guaranteed to be non-null. If
+it's null, then we can't add null-termination to it until its size
+is updated.
+
+Resolves: https://gitlab.gnome.org/GNOME/glib/-/issues/2877
+Signed-off-by: Simon McVittie <smcv@collabora.com>
+Forwarded: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3190
+---
+ glib/garray.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/glib/garray.c b/glib/garray.c
+index 61b1bd0..334a592 100644
+--- a/glib/garray.c
++++ b/glib/garray.c
+@@ -1387,6 +1387,9 @@ ptr_array_new_from_array (gpointer       *data,
+       memcpy (rarray->pdata, data, len * sizeof (gpointer));
+     }
+ 
++  if (null_terminated && rarray->pdata != NULL)
++    rarray->pdata[len] = NULL;
++
+   rarray->len = len;
+ 
+   return array;
