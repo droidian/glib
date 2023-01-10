@@ -1,0 +1,155 @@
+From: Emmanuele Bassi <ebassi@gnome.org>
+Date: Sun, 8 Jan 2023 00:20:50 +0000
+Subject: build: Don't overwrite build variables
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+We cannot use `gvisibility_h` for different visibility header files; you
+never know when you're going to refer to the variable again, and
+projects might end up needing to retrieve the variable contents—like,
+for instance, gobject-introspection using glib as a subproject.
+
+Origin: upstream, 2.75.3, commit:684d9aa0c3ebecfacf7fb43155dcc120e2ade5e3
+---
+ gio/meson.build                                    | 6 +++---
+ gio/tests/gdbus-object-manager-example/meson.build | 4 ++--
+ glib/meson.build                                   | 4 ++--
+ gmodule/meson.build                                | 6 +++---
+ gobject/meson.build                                | 6 +++---
+ 5 files changed, 13 insertions(+), 13 deletions(-)
+
+diff --git a/gio/meson.build b/gio/meson.build
+index 1f7c109..462606f 100644
+--- a/gio/meson.build
++++ b/gio/meson.build
+@@ -748,7 +748,7 @@ gio_headers = files(
+   'gliststore.h',
+ )
+ 
+-gvisibility_h = custom_target(
++gio_visibility_h = custom_target(
+   output: 'gio-visibility.h',
+   command: [gen_visibility_macros, meson.project_version(), 'visibility-macros', 'GIO', '@OUTPUT@'],
+   install: true,
+@@ -756,7 +756,7 @@ gvisibility_h = custom_target(
+   # FIXME: Not needed with Meson >= 0.64.0
+   install_tag: 'devel',
+ )
+-gio_sources += gvisibility_h
++gio_sources += gio_visibility_h
+ 
+ gio_headers += application_headers
+ gio_headers += settings_headers
+@@ -786,7 +786,7 @@ gioenumtypes_c = custom_target('gioenumtypes_c',
+              '--template', files('gioenumtypes.c.template'),
+              '@INPUT@', gnetworking_h])
+ 
+-gioenumtypes_dep = declare_dependency(sources : [gioenumtypes_h, glib_enumtypes_h, gvisibility_h])
++gioenumtypes_dep = declare_dependency(sources : [gioenumtypes_h, glib_enumtypes_h, gio_visibility_h])
+ 
+ # inotify
+ if glib_conf.has('HAVE_SYS_INOTIFY_H') and have_func_inotify_init1
+diff --git a/gio/tests/gdbus-object-manager-example/meson.build b/gio/tests/gdbus-object-manager-example/meson.build
+index ac5e6d4..df09992 100644
+--- a/gio/tests/gdbus-object-manager-example/meson.build
++++ b/gio/tests/gdbus-object-manager-example/meson.build
+@@ -1,4 +1,4 @@
+-gvisibility_h = configure_file(
++gdbus_example_objectmanager_visibility_h = configure_file(
+   output: 'gdbus-example-objectmanager-visibility.h',
+   command: [gen_visibility_macros, '2.0', 'visibility-macros',
+             'GDBUS_OBJECT_MANAGER_EXAMPLE', '@OUTPUT@'],
+@@ -44,7 +44,7 @@ if glib_build_static_only
+ endif
+ 
+ libgdbus_example_objectmanager = library('gdbus-example-objectmanager',
+-    gdbus_example_objectmanager_generated, gvisibility_h,
++    gdbus_example_objectmanager_generated, gdbus_example_objectmanager_visibility_h,
+     c_args : [test_c_args, extra_c_args,
+               '-DGDBUS_OBJECT_MANAGER_EXAMPLE_COMPILATION'],
+     dependencies : [libglib_dep, libgmodule_dep, libgobject_dep, libgio_dep],
+diff --git a/glib/meson.build b/glib/meson.build
+index 4130b1b..b623983 100644
+--- a/glib/meson.build
++++ b/glib/meson.build
+@@ -17,7 +17,7 @@ gversionmacros_h = custom_target(
+   install_tag: 'devel',
+ )
+ 
+-gvisibility_h = custom_target(
++glib_visibility_h = custom_target(
+   output: 'glib-visibility.h',
+   command: [gen_visibility_macros, meson.project_version(), 'visibility-macros', 'GLIB', '@OUTPUT@'],
+   install: true,
+@@ -26,7 +26,7 @@ gvisibility_h = custom_target(
+   install_tag: 'devel',
+ )
+ 
+-glib_built_headers = [gversionmacros_h, gvisibility_h]
++glib_built_headers = [gversionmacros_h, glib_visibility_h]
+ glib_sources += glib_built_headers
+ glib_c_args_internal = [
+   '-DGLIB_COMPILATION',
+diff --git a/gmodule/meson.build b/gmodule/meson.build
+index 5119e0b..4b0778e 100644
+--- a/gmodule/meson.build
++++ b/gmodule/meson.build
+@@ -68,7 +68,7 @@ gmodule_c = files('gmodule.c')
+ 
+ install_headers([gmodule_h], install_dir : glib_includedir)
+ 
+-gvisibility_h = custom_target(
++gmodule_visibility_h = custom_target(
+   output: 'gmodule-visibility.h',
+   command: [gen_visibility_macros, meson.project_version(), 'visibility-macros', 'GMODULE', '@OUTPUT@'],
+   install: true,
+@@ -77,7 +77,7 @@ gvisibility_h = custom_target(
+   install_tag: 'devel',
+ )
+ 
+-gmodule_sources = [gmodule_c, gvisibility_h, 'gmodule-deprecated.c']
++gmodule_sources = [gmodule_c, gmodule_visibility_h, 'gmodule-deprecated.c']
+ 
+ if host_system == 'windows'
+   gmodule_win_rc = configure_file(
+@@ -137,7 +137,7 @@ pkg.generate(libraries : [libgmodule, export_dynamic_ldflags],
+ 
+ libgmodule_dep = declare_dependency(link_with : libgmodule,
+   include_directories : [gmoduleinc],
+-  sources : [gvisibility_h],
++  sources : [gmodule_visibility_h],
+   dependencies : [libglib_dep])
+ 
+ meson.override_dependency('gmodule-no-export-2.0', libgmodule_dep)
+diff --git a/gobject/meson.build b/gobject/meson.build
+index dafc44b..2129aaf 100644
+--- a/gobject/meson.build
++++ b/gobject/meson.build
+@@ -27,7 +27,7 @@ gobject_install_headers = files(
+ 
+ gobject_sources = []
+ 
+-gvisibility_h = custom_target(
++gobject_visibility_h = custom_target(
+   output: 'gobject-visibility.h',
+   command: [gen_visibility_macros, meson.project_version(), 'visibility-macros', 'GOBJECT', '@OUTPUT@'],
+   install: true,
+@@ -35,7 +35,7 @@ gvisibility_h = custom_target(
+   # FIXME: Not needed with Meson >= 0.64.0
+   install_tag: 'devel',
+ )
+-gobject_sources += gvisibility_h
++gobject_sources += gobject_visibility_h
+ 
+ install_headers(gobject_install_headers, install_dir : gobject_includedir)
+ 
+@@ -165,7 +165,7 @@ pkg.generate(libgobject,
+ 
+ libgobject_dep = declare_dependency(link_with : libgobject,
+   include_directories : [gobjectinc],
+-  sources : [gvisibility_h, glib_enumtypes_h],
++  sources : [gobject_visibility_h, glib_enumtypes_h],
+   dependencies : [libglib_dep],
+ )
+ meson.override_dependency('gobject-2.0', libgobject_dep)

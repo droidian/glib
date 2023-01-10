@@ -13,7 +13,7 @@ Forwarded: not-needed
  1 file changed, 4 insertions(+)
 
 diff --git a/gio/glib-compile-schemas.c b/gio/glib-compile-schemas.c
-index 2352f22..c85e764 100644
+index acabfb6..99446e8 100644
 --- a/gio/glib-compile-schemas.c
 +++ b/gio/glib-compile-schemas.c
 @@ -1234,6 +1234,9 @@ parse_state_start_schema (ParseState  *state,
