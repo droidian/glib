@@ -4,9 +4,9 @@ glib-compile-schemas-Fix-typo-in-comparison-function.patch
 01_gettext-desktopfiles.patch
 0001-timer-test-use-volatile-for-locals.patch
 gwakeuptest-Be-less-parallel-unless-invoked-with-m-slow.patch
+tests-Improve-error-message-if-setting-max-processes-to-1.patch
 debian/02_gettext-desktopfiles-ubuntu.patch
 debian/03_disble_glib_compile_schemas_warning.patch
-tests-Improve-error-message-if-setting-max-processes-to-1.patch
 debian/06_thread_test_ignore_prctl_fail.patch
 debian/closures-test-Skip-on-arm-unless-flaky-tests-are-allowed.patch
 debian/Disable-some-tests-on-slow-architectures-which-keep-faili.patch

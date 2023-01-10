@@ -19,10 +19,10 @@ index 9821894..17b838a 100644
    nl.rlim_cur = 1;
  
    if (prlimit (getpid (), RLIMIT_NPROC, &nl, &ol) != 0)
--    g_error ("setting PRLIMIT_NPROC to {cur=%ld,max=%ld} failed: %s",
+-    g_error ("setting RLIMIT_NPROC to {cur=%ld,max=%ld} failed: %s",
 -             (long) nl.rlim_cur, (long) nl.rlim_max, g_strerror (errno));
 +    {
-+      g_test_skip_printf ("setting PRLIMIT_NPROC to {cur=%ld,max=%ld} failed: %s",
++      g_test_skip_printf ("setting RLIMIT_NPROC to {cur=%ld,max=%ld} failed: %s",
 +                          (long) nl.rlim_cur, (long) nl.rlim_max, g_strerror (errno));
 +      return;
 +    }
