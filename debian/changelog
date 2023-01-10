@@ -1,8 +1,17 @@
 glib2.0 (2.75.2-1) UNRELEASED; urgency=medium
 
   * New upstream release
+  * d/copyright: Update
+  * Refresh patch series
+  * d/libglib2.0-0.symbols: Sort lines
+  * d/libglib2.0-0.symbols: Update for new ABI
+  * d/libglib2.0-0.symbols: Use stable-branch versions for older symbols.
+    We don't need to keep track of precisely which development release
+    included each symbol: it's enough to generate dependencies on the first
+    stable release that had it. Debian stable releases shouldn't include
+    GLib development releases anyway.
 
- -- Simon McVittie <smcv@debian.org>  Mon, 09 Jan 2023 20:52:09 +0000
+ -- Simon McVittie <smcv@debian.org>  Tue, 10 Jan 2023 09:55:12 +0000
 
 glib2.0 (2.75.0-1) experimental; urgency=medium
 
