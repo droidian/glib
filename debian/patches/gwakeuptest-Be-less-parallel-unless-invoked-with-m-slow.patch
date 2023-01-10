@@ -18,10 +18,10 @@ Forwarded: no
  1 file changed, 13 insertions(+), 4 deletions(-)
 
 diff --git a/glib/tests/gwakeuptest.c b/glib/tests/gwakeuptest.c
-index b37fb43..a9bef21 100644
+index ab36c85..549b4e6 100644
 --- a/glib/tests/gwakeuptest.c
 +++ b/glib/tests/gwakeuptest.c
-@@ -89,6 +89,9 @@ struct context
+@@ -76,6 +76,9 @@ struct context
  #define NUM_TOKENS       5
  #define TOKEN_TTL   100000
  
@@ -31,7 +31,7 @@ index b37fb43..a9bef21 100644
  static struct context contexts[NUM_THREADS];
  static GThread *threads[NUM_THREADS];
  static GWakeup *last_token_wakeup;
-@@ -158,7 +161,7 @@ dispatch_token (struct token *token)
+@@ -145,7 +148,7 @@ dispatch_token (struct token *token)
        struct context *ctx;
        gint next_ctx;
  
@@ -40,7 +40,7 @@ index b37fb43..a9bef21 100644
        ctx = &contexts[next_ctx];
        token->owner = ctx;
        token->ttl--;
-@@ -213,6 +216,12 @@ test_threaded (void)
+@@ -200,6 +203,12 @@ test_threaded (void)
  {
    gint i;
  
@@ -50,10 +50,10 @@ index b37fb43..a9bef21 100644
 +      token_ttl = TOKEN_TTL / 10;
 +    }
 +
-   /* make sure we don't block forever */
-   alarm (60);
- 
-@@ -230,7 +239,7 @@ test_threaded (void)
+   /* simple mainloop test based on GWakeup.
+    *
+    * create a bunch of contexts and a thread to 'run' each one.  create
+@@ -214,7 +223,7 @@ test_threaded (void)
    last_token_wakeup = g_wakeup_new ();
  
    /* create contexts, assign to threads */
@@ -62,7 +62,7 @@ index b37fb43..a9bef21 100644
      {
        context_init (&contexts[i]);
        threads[i] = g_thread_new ("test", thread_func, &contexts[i]);
-@@ -238,13 +247,13 @@ test_threaded (void)
+@@ -222,13 +231,13 @@ test_threaded (void)
  
    /* dispatch tokens */
    for (i = 0; i < NUM_TOKENS; i++)

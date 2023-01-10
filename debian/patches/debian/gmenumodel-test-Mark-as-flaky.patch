@@ -12,7 +12,7 @@ Forwarded: no
  1 file changed, 6 insertions(+)
 
 diff --git a/gio/tests/gmenumodel.c b/gio/tests/gmenumodel.c
-index 04ae284..5cd7bd4 100644
+index fb52b4c..59f233f 100644
 --- a/gio/tests/gmenumodel.c
 +++ b/gio/tests/gmenumodel.c
 @@ -1155,6 +1155,12 @@ test_dbus_peer_subscriptions (void)
