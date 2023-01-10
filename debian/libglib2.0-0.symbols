@@ -2095,8 +2095,8 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
 * Build-Depends-Package: libglib2.0-dev
  __glib_assert_msg@Base 2.37.6
  g_access@Base 2.12.0
- g_aligned_alloc@Base 2.71.2
  g_aligned_alloc0@Base 2.71.2
+ g_aligned_alloc@Base 2.71.2
  g_aligned_free@Base 2.71.2
  g_allocator_free@Base 2.12.0
  g_allocator_new@Base 2.12.0
@@ -2193,8 +2193,8 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_atomic_pointer_set@Base 2.12.0
  g_atomic_pointer_xor@Base 2.30.0
  g_atomic_rc_box_acquire@Base 2.57.2
- g_atomic_rc_box_alloc@Base 2.57.2
  g_atomic_rc_box_alloc0@Base 2.57.2
+ g_atomic_rc_box_alloc@Base 2.57.2
  g_atomic_rc_box_dup@Base 2.57.2
  g_atomic_rc_box_get_size@Base 2.57.2
  g_atomic_rc_box_release@Base 2.57.2
@@ -3086,8 +3086,8 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_random_int_range@Base 2.12.0
  g_random_set_seed@Base 2.12.0
  g_rc_box_acquire@Base 2.57.2
- g_rc_box_alloc@Base 2.57.2
  g_rc_box_alloc0@Base 2.57.2
+ g_rc_box_alloc@Base 2.57.2
  g_rc_box_dup@Base 2.57.2
  g_rc_box_get_size@Base 2.57.2
  g_rc_box_release@Base 2.57.2
@@ -4079,13 +4079,12 @@ libgobject-2.0.so.0 libglib2.0-0 #MINVER#
  g_object_is_floating@Base 2.12.0
  g_object_new@Base 2.12.0
  g_object_new_valist@Base 2.12.0
- g_object_newv@Base 2.12.0
  g_object_new_with_properties@Base 2.53.1
+ g_object_newv@Base 2.12.0
  g_object_notify@Base 2.12.0
  g_object_notify_by_pspec@Base 2.26.0
  g_object_ref@Base 2.12.0
  g_object_ref_sink@Base 2.12.0
- g_object_take_ref@Base 2.70.0
  g_object_remove_toggle_ref@Base 2.12.0
  g_object_remove_weak_pointer@Base 2.12.0
  g_object_replace_data@Base 2.33.14
@@ -4101,6 +4100,7 @@ libgobject-2.0.so.0 libglib2.0-0 #MINVER#
  g_object_setv@Base 2.53.1
  g_object_steal_data@Base 2.12.0
  g_object_steal_qdata@Base 2.12.0
+ g_object_take_ref@Base 2.70.0
  g_object_thaw_notify@Base 2.12.0
  g_object_unref@Base 2.12.0
  g_object_watch_closure@Base 2.12.0
