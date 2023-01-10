@@ -1,4 +1,4 @@
-glib2.0 (2.75.2-1) UNRELEASED; urgency=medium
+glib2.0 (2.75.2-1) experimental; urgency=medium
 
   * New upstream release
   * d/copyright: Update
@@ -25,7 +25,7 @@ glib2.0 (2.75.2-1) UNRELEASED; urgency=medium
     d/p/garray-Avoid-calling-memcpy-with-no-items.patch:
     Add proposed patches to fix a test failure
 
- -- Simon McVittie <smcv@debian.org>  Tue, 10 Jan 2023 12:54:04 +0000
+ -- Simon McVittie <smcv@debian.org>  Tue, 10 Jan 2023 13:54:58 +0000
 
 glib2.0 (2.75.0-1) experimental; urgency=medium
 
