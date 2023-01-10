@@ -14,8 +14,15 @@ glib2.0 (2.75.2-1) UNRELEASED; urgency=medium
     d/p/build-Don-t-overwrite-build-variables.patch,
     d/p/glib-compile-schemas-Fix-typo-in-comparison-function.patch:
     Add some post-release bug fixes from upstream
+  * d/p/tests-Improve-error-message-if-setting-max-processes-to-1.patch,
+    d/p/debian/06_thread_test_ignore_prctl_fail.patch:
+    Split up patch that skipped a test if unable to set RLIMIT_NPROC.
+    The part that improves the error message could be upstreamable, even if
+    skipping the test as a result isn't.
+  * d/p/debian/06_thread_test_ignore_prctl_fail.patch:
+    Try dropping this patch, to reassess whether we still need it.
 
- -- Simon McVittie <smcv@debian.org>  Tue, 10 Jan 2023 09:59:18 +0000
+ -- Simon McVittie <smcv@debian.org>  Tue, 10 Jan 2023 10:11:37 +0000
 
 glib2.0 (2.75.0-1) experimental; urgency=medium
 
