@@ -4,28 +4,26 @@ Subject: Do not fail the /thread/thread4 test if prlimit() fails
 
 This happens on the Debian buildds.
 
-[smcv: Use g_test_skip()]
+[smcv: Use g_test_skip_printf()]
 
 Forwarded: no, Debian buildd specific
 ---
- glib/tests/thread.c | 9 ++++++++-
- 1 file changed, 8 insertions(+), 1 deletion(-)
+ glib/tests/thread.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
 
 diff --git a/glib/tests/thread.c b/glib/tests/thread.c
-index 18bbde8..9ea58f5 100644
+index 9821894..17b838a 100644
 --- a/glib/tests/thread.c
 +++ b/glib/tests/thread.c
-@@ -147,7 +147,14 @@ test_thread4 (void)
+@@ -147,8 +147,11 @@ test_thread4 (void)
    nl.rlim_cur = 1;
  
    if (prlimit (getpid (), RLIMIT_NPROC, &nl, &ol) != 0)
--    g_error ("prlimit failed: %s", g_strerror (errno));
+-    g_error ("setting PRLIMIT_NPROC to {cur=%ld,max=%ld} failed: %s",
+-             (long) nl.rlim_cur, (long) nl.rlim_max, g_strerror (errno));
 +    {
-+      gchar *message = g_strdup_printf ("setting PRLIMIT_NPROC to {cur=%d,max=%d} failed: %s",
-+                                        (int) nl.rlim_cur, (int) nl.rlim_max,
-+                                        g_strerror (errno));
-+      g_test_skip (message);
-+      g_free (message);
++      g_test_skip_printf ("setting PRLIMIT_NPROC to {cur=%ld,max=%ld} failed: %s",
++                          (long) nl.rlim_cur, (long) nl.rlim_max, g_strerror (errno));
 +      return;
 +    }
  
