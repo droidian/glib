@@ -21,8 +21,11 @@ glib2.0 (2.75.2-1) UNRELEASED; urgency=medium
     skipping the test as a result isn't.
   * d/p/debian/06_thread_test_ignore_prctl_fail.patch:
     Try dropping this patch, to reassess whether we still need it.
+  * d/p/garray-Update-NULL-termination-after-copying-array-conten.patch,
+    d/p/garray-Avoid-calling-memcpy-with-no-items.patch:
+    Add proposed patches to fix a test failure
 
- -- Simon McVittie <smcv@debian.org>  Tue, 10 Jan 2023 10:11:37 +0000
+ -- Simon McVittie <smcv@debian.org>  Tue, 10 Jan 2023 12:54:04 +0000
 
 glib2.0 (2.75.0-1) experimental; urgency=medium
 
