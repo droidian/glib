@@ -10,8 +10,12 @@ glib2.0 (2.75.2-1) UNRELEASED; urgency=medium
     included each symbol: it's enough to generate dependencies on the first
     stable release that had it. Debian stable releases shouldn't include
     GLib development releases anyway.
+  * d/p/Include-GObject-s-visibility-header.patch,
+    d/p/build-Don-t-overwrite-build-variables.patch,
+    d/p/glib-compile-schemas-Fix-typo-in-comparison-function.patch:
+    Add some post-release bug fixes from upstream
 
- -- Simon McVittie <smcv@debian.org>  Tue, 10 Jan 2023 09:55:12 +0000
+ -- Simon McVittie <smcv@debian.org>  Tue, 10 Jan 2023 09:59:18 +0000
 
 glib2.0 (2.75.0-1) experimental; urgency=medium
 
