@@ -2107,6 +2107,8 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_array_get_element_size@Base 2.22.0
  g_array_insert_vals@Base 2.12.0
  g_array_new@Base 2.12.0
+ g_array_new_take@Base 2.75.2
+ g_array_new_take_zero_terminated@Base 2.75.2
  g_array_prepend_vals@Base 2.12.0
  g_array_ref@Base 2.22.0
  g_array_remove_index@Base 2.12.0
@@ -2513,6 +2515,7 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_filename_from_utf8@Base 2.12.0
  g_filename_to_uri@Base 2.12.0
  g_filename_to_utf8@Base 2.12.0
+ g_find_program_for_path@Base 2.75.2
  g_find_program_in_path@Base 2.12.0
  g_fopen@Base 2.12.0
  g_format_size@Base 2.30.0
@@ -2561,7 +2564,9 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_hash_table_foreach_steal@Base 2.12.0
  g_hash_table_get_keys@Base 2.14.0
  g_hash_table_get_keys_as_array@Base 2.39.4
+ g_hash_table_get_keys_as_ptr_array@Base 2.75.2
  g_hash_table_get_values@Base 2.14.0
+ g_hash_table_get_values_as_ptr_array@Base 2.75.2
  g_hash_table_insert@Base 2.12.0
  g_hash_table_iter_get_hash_table@Base 2.16.0
  g_hash_table_iter_init@Base 2.16.0
@@ -2581,6 +2586,8 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_hash_table_size@Base 2.12.0
  g_hash_table_steal@Base 2.12.0
  g_hash_table_steal_all@Base 2.12.0
+ g_hash_table_steal_all_keys@Base 2.75.2
+ g_hash_table_steal_all_values@Base 2.75.2
  g_hash_table_steal_extended@Base 2.57.2
  g_hash_table_unref@Base 2.12.0
  g_hmac_copy@Base 2.30.0
@@ -3003,8 +3010,12 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_ptr_array_insert@Base 2.39.4
  g_ptr_array_is_null_terminated@Base 2.73.1
  g_ptr_array_new@Base 2.12.0
+ g_ptr_array_new_from_array@Base 2.75.2
+ g_ptr_array_new_from_null_terminated_array@Base 2.75.2
  g_ptr_array_new_full@Base 2.30.0
  g_ptr_array_new_null_terminated@Base 2.73.1
+ g_ptr_array_new_take@Base 2.75.2
+ g_ptr_array_new_take_null_terminated@Base 2.75.2
  g_ptr_array_new_with_free_func@Base 2.22.0
  g_ptr_array_ref@Base 2.22.0
  g_ptr_array_remove@Base 2.12.0
@@ -3016,6 +3027,8 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_ptr_array_set_size@Base 2.12.0
  g_ptr_array_sized_new@Base 2.12.0
  g_ptr_array_sort@Base 2.12.0
+ g_ptr_array_sort_values@Base 2.75.2
+ g_ptr_array_sort_values_with_data@Base 2.75.2
  g_ptr_array_sort_with_data@Base 2.12.0
  g_ptr_array_steal@Base 2.63.1
  g_ptr_array_steal_index@Base 2.57.2
