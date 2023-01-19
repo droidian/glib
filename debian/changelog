@@ -1,8 +1,16 @@
 glib2.0 (2.74.5-1) UNRELEASED; urgency=medium
 
-  * New upstream release
+  * New upstream stable release
+  * Drop patch that was applied upstream
+  * Remove version constraints unnecessary since buster (oldstable)
+  * Update standards version to 4.6.2 (no changes needed)
+  * d/rules: Explicitly unset LANG and LANGUAGE.
+    These are not overridden by LC_ALL=C.UTF-8, which can cause a
+    test failure at glib/tests/spawn-test.c:115, particularly on the
+    reproducible-builds infrastructure (which uses a random non-English
+    LANGUAGE for build2).
 
- -- Simon McVittie <smcv@debian.org>  Thu, 19 Jan 2023 16:32:41 +0000
+ -- Simon McVittie <smcv@debian.org>  Thu, 19 Jan 2023 16:45:21 +0000
 
 glib2.0 (2.74.4-1) unstable; urgency=high
 
