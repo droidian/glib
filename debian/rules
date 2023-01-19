@@ -118,8 +118,13 @@ endif
 override_dh_auto_test-arch:
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 	# Remove LD_PRELOAD so we don't run with fakeroot, which makes dbus-related tests fail
+	# Remove LANGUAGE to avoid mismatches between expected and actual
+	# messages in non-English locales (mainly on reproducible-builds)
 	# First run the non-flaky tests, and fail the build if they fail (on linux)
-	env -u LD_PRELOAD \
+	env \
+		-u LANG \
+		-u LANGUAGE \
+		-u LD_PRELOAD \
 		DEB_BUILD_TIME_TESTS=1 \
 		LC_ALL=C.UTF-8 \
 		MESON_TESTTHREADS=1 \
@@ -163,7 +168,10 @@ ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 		--verbose \
 	|| $(handle_test_failure)
 	# and then run the flaky ones, but ignore them failing
-	env -u LD_PRELOAD \
+	env \
+		-u LANG \
+		-u LANGUAGE \
+		-u LD_PRELOAD \
 		DEB_BUILD_TIME_TESTS=1 \
 		LC_ALL=C.UTF-8 \
 		MESON_TESTTHREADS=1 \
