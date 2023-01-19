@@ -1,4 +1,4 @@
-glib2.0 (2.74.5-1) UNRELEASED; urgency=medium
+glib2.0 (2.74.5-1) unstable; urgency=medium
 
   * New upstream stable release
   * Drop patch that was applied upstream
@@ -10,7 +10,7 @@ glib2.0 (2.74.5-1) UNRELEASED; urgency=medium
     reproducible-builds infrastructure (which uses a random non-English
     LANGUAGE for build2).
 
- -- Simon McVittie <smcv@debian.org>  Thu, 19 Jan 2023 16:45:21 +0000
+ -- Simon McVittie <smcv@debian.org>  Thu, 19 Jan 2023 16:48:31 +0000
 
 glib2.0 (2.74.4-1) unstable; urgency=high
 
