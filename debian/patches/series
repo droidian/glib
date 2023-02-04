@@ -14,6 +14,7 @@ debian/Skip-memory-monitor-dbus-test-if-not-specifically-request.patch
 debian/Add-extra-debug-to-memory-monitor-dbus-test.patch
 debian/tests-Skip-debugcontroller-test.patch
 debian/testfilemonitor-Skip-if-we-are-avoiding-flaky-tests.patch
+debian/gdesktopappinfo-Try-using-x-terminal-emulator-for-Termina.patch
 gfile-Fix-file-size-detection-when-copying-on-btrfs.patch
 gfile-Check-ETag-attribute-is-present-before-trying-to-ge.patch
 glocalfileinfo-Mark-the-lost-found-dir-as-hidden-again.patch
