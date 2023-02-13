@@ -501,12 +501,14 @@ struct _GLogHandler
   GLogHandler	*next;
 };
 
+static void g_default_print_func (const gchar *string);
+static void g_default_printerr_func (const gchar *string);
 
 /* --- variables --- */
 static GMutex         g_messages_lock;
 static GLogDomain    *g_log_domains = NULL;
-static GPrintFunc     glib_print_func = NULL;
-static GPrintFunc     glib_printerr_func = NULL;
+static GPrintFunc     glib_print_func = g_default_print_func;
+static GPrintFunc     glib_printerr_func = g_default_printerr_func;
 static GPrivate       g_log_depth;
 static GPrivate       g_log_structured_depth;
 static GLogFunc       default_log_func = g_log_default_handler;
@@ -521,6 +523,11 @@ static gboolean       g_log_debug_enabled = FALSE;  /* (atomic) */
 /* --- functions --- */
 
 static void _g_log_abort (gboolean breakpoint);
+static inline const char * format_string (const char *format,
+                                          va_list     args,
+                                          char      **out_allocated_string)
+                                          G_GNUC_PRINTF (1, 0);
+static inline FILE * log_level_to_file (GLogLevelFlags log_level);
 
 static void
 _g_log_abort (gboolean breakpoint)
@@ -1202,8 +1209,6 @@ mklevel_prefix (gchar          level_prefix[STRING_BUFFER_SIZE],
                 GLogLevelFlags log_level,
                 gboolean       use_color)
 {
-  gboolean to_stdout = !gmessages_use_stderr;
-
   /* we may not call _any_ GLib functions here */
 
   strcpy (level_prefix, log_level_to_color (log_level, use_color));
@@ -1212,19 +1217,15 @@ mklevel_prefix (gchar          level_prefix[STRING_BUFFER_SIZE],
     {
     case G_LOG_LEVEL_ERROR:
       strcat (level_prefix, "ERROR");
-      to_stdout = FALSE;
       break;
     case G_LOG_LEVEL_CRITICAL:
       strcat (level_prefix, "CRITICAL");
-      to_stdout = FALSE;
       break;
     case G_LOG_LEVEL_WARNING:
       strcat (level_prefix, "WARNING");
-      to_stdout = FALSE;
       break;
     case G_LOG_LEVEL_MESSAGE:
       strcat (level_prefix, "Message");
-      to_stdout = FALSE;
       break;
     case G_LOG_LEVEL_INFO:
       strcat (level_prefix, "INFO");
@@ -1254,7 +1255,7 @@ mklevel_prefix (gchar          level_prefix[STRING_BUFFER_SIZE],
   if ((log_level & G_LOG_FLAG_FATAL) != 0 && !g_test_initialized ())
     win32_keep_fatal_message = TRUE;
 #endif
-  return to_stdout ? stdout : stderr;
+  return log_level_to_file (log_level);
 }
 
 typedef struct {
@@ -1294,7 +1295,8 @@ g_logv (const gchar   *log_domain,
 {
   gboolean was_fatal = (log_level & G_LOG_FLAG_FATAL) != 0;
   gboolean was_recursion = (log_level & G_LOG_FLAG_RECURSION) != 0;
-  gchar buffer[1025], *msg, *msg_alloc = NULL;
+  char buffer[1025], *msg_alloc = NULL;
+  const char *msg;
   gint i;
 
   log_level &= G_LOG_LEVEL_MASK;
@@ -1312,7 +1314,9 @@ g_logv (const gchar   *log_domain,
       msg = buffer;
     }
   else
-    msg = msg_alloc = g_strdup_vprintf (format, args);
+    {
+      msg = format_string (format, args, &msg_alloc);
+    }
 
   if (expected_messages)
     {
@@ -1480,7 +1484,7 @@ log_level_to_priority (GLogLevelFlags log_level)
   return "5";
 }
 
-static FILE *
+static inline FILE *
 log_level_to_file (GLogLevelFlags log_level)
 {
   if (gmessages_use_stderr)
@@ -1783,7 +1787,7 @@ g_log_structured (const gchar    *log_domain,
     }
   else
     {
-      message = message_allocated = g_strdup_vprintf (format, args);
+      message = format_string (format, args, &message_allocated);
     }
 
   /* Add MESSAGE, PRIORITY and GLIB_DOMAIN. */
@@ -2027,7 +2031,7 @@ g_log_structured_standard (const gchar    *log_domain,
     }
   else
     {
-      fields[4].value = message_allocated = g_strdup_vprintf (message_format, args);
+      fields[4].value = format_string (message_format, args, &message_allocated);
     }
 
   va_end (args);
@@ -3282,29 +3286,32 @@ g_log_default_handler (const gchar   *log_domain,
 
 /**
  * g_set_print_handler:
- * @func: the new print handler
+ * @func: (nullable): the new print handler or %NULL to
+ *   reset to the default
  *
- * Sets the print handler.
+ * Sets the print handler to @func, or resets it to the
+ * default GLib handler if %NULL.
  *
  * Any messages passed to g_print() will be output via
- * the new handler. The default handler simply outputs
- * the message to stdout. By providing your own handler
+ * the new handler. The default handler outputs
+ * the encoded message to stdout. By providing your own handler
  * you can redirect the output, to a GTK+ widget or a
  * log file for example.
  *
- * Returns: the old print handler
+ * Since 2.76 this functions always returns a valid
+ * #GPrintFunc, and never returns %NULL. If no custom
+ * print handler was set, it will return the GLib
+ * default print handler and that can be re-used to
+ * decorate its output and/or to write to stderr
+ * in all platforms. Before GLib 2.76, this was %NULL.
+ *
+ * Returns: (not nullable): the old print handler
  */
 GPrintFunc
 g_set_print_handler (GPrintFunc func)
 {
-  GPrintFunc old_print_func;
-
-  g_mutex_lock (&g_messages_lock);
-  old_print_func = glib_print_func;
-  glib_print_func = func;
-  g_mutex_unlock (&g_messages_lock);
-
-  return old_print_func;
+  return g_atomic_pointer_exchange (&glib_print_func,
+                                    func ? func : g_default_print_func);
 }
 
 static void
@@ -3336,13 +3343,47 @@ print_string (FILE        *stream,
   fflush (stream);
 }
 
+G_ALWAYS_INLINE static inline const char *
+format_string (const char *format,
+               va_list     args,
+               char      **out_allocated_string)
+{
+#ifdef G_ENABLE_DEBUG
+  g_assert (out_allocated_string != NULL);
+#endif
+
+  /* If there is no formatting to be done, avoid an allocation */
+  if (strchr (format, '%') == NULL)
+    {
+      *out_allocated_string = NULL;
+      return format;
+    }
+  else
+    {
+      *out_allocated_string = g_strdup_vprintf (format, args);
+      return *out_allocated_string;
+    }
+}
+
+static void
+g_default_print_func (const gchar *string)
+{
+  print_string (stdout, string);
+}
+
+static void
+g_default_printerr_func (const gchar *string)
+{
+  print_string (stderr, string);
+}
+
 /**
  * g_print:
  * @format: the message format. See the printf() documentation
  * @...: the parameters to insert into the format string
  *
  * Outputs a formatted message via the print handler.
- * The default print handler simply outputs the message to stdout, without
+ * The default print handler outputs the encoded message to stdout, without
  * appending a trailing new-line character. Typically, @format should end with
  * its own new-line character.
  *
@@ -3357,52 +3398,49 @@ g_print (const gchar *format,
          ...)
 {
   va_list args;
-  gchar *string;
+  const gchar *string;
+  gchar *free_me = NULL;
   GPrintFunc local_glib_print_func;
 
   g_return_if_fail (format != NULL);
 
   va_start (args, format);
-  string = g_strdup_vprintf (format, args);
+  string = format_string (format, args, &free_me);
   va_end (args);
 
-  g_mutex_lock (&g_messages_lock);
-  local_glib_print_func = glib_print_func;
-  g_mutex_unlock (&g_messages_lock);
-
-  if (local_glib_print_func)
-    local_glib_print_func (string);
-  else
-    print_string (stdout, string);
-
-  g_free (string);
+  local_glib_print_func = g_atomic_pointer_get (&glib_print_func);
+  local_glib_print_func (string);
+  g_free (free_me);
 }
 
 /**
  * g_set_printerr_handler:
- * @func: the new error message handler
+ * @func: (nullable): he new error message handler or %NULL
+ *  to reset to the default
  *
- * Sets the handler for printing error messages.
+ * Sets the handler for printing error messages to @func,
+ * or resets it to the default GLib handler if %NULL.
  *
  * Any messages passed to g_printerr() will be output via
- * the new handler. The default handler simply outputs the
+ * the new handler. The default handler outputs the encoded
  * message to stderr. By providing your own handler you can
  * redirect the output, to a GTK+ widget or a log file for
  * example.
  *
- * Returns: the old error message handler
+ * Since 2.76 this functions always returns a valid
+ * #GPrintFunc, and never returns %NULL. If no custom error
+ * print handler was set, it will return the GLib default
+ * error print handler and that can be re-used to decorate
+ * its output and/or to write to stderr in all platforms.
+ * Before GLib 2.76, this was %NULL.
+ *
+ * Returns: (not nullable): the old error message handler
  */
 GPrintFunc
 g_set_printerr_handler (GPrintFunc func)
 {
-  GPrintFunc old_printerr_func;
-
-  g_mutex_lock (&g_messages_lock);
-  old_printerr_func = glib_printerr_func;
-  glib_printerr_func = func;
-  g_mutex_unlock (&g_messages_lock);
-
-  return old_printerr_func;
+  return g_atomic_pointer_exchange (&glib_printerr_func,
+                                    func ? func : g_default_printerr_func);
 }
 
 /**
@@ -3411,7 +3449,7 @@ g_set_printerr_handler (GPrintFunc func)
  * @...: the parameters to insert into the format string
  *
  * Outputs a formatted message via the error message handler.
- * The default handler simply outputs the message to stderr, without appending
+ * The default handler outputs the encoded message to stderr, without appending
  * a trailing new-line character. Typically, @format should end with its own
  * new-line character.
  *
@@ -3424,25 +3462,19 @@ g_printerr (const gchar *format,
             ...)
 {
   va_list args;
-  gchar *string;
+  const char *string;
+  char *free_me = NULL;
   GPrintFunc local_glib_printerr_func;
 
   g_return_if_fail (format != NULL);
 
   va_start (args, format);
-  string = g_strdup_vprintf (format, args);
+  string = format_string (format, args, &free_me);
   va_end (args);
 
-  g_mutex_lock (&g_messages_lock);
-  local_glib_printerr_func = glib_printerr_func;
-  g_mutex_unlock (&g_messages_lock);
-
-  if (local_glib_printerr_func)
-    local_glib_printerr_func (string);
-  else
-    print_string (stderr, string);
-
-  g_free (string);
+  local_glib_printerr_func = g_atomic_pointer_get (&glib_printerr_func);
+  local_glib_printerr_func (string);
+  g_free (free_me);
 }
 
 /**

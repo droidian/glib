@@ -1159,6 +1159,7 @@ test_replace (gconstpointer data)
       gboolean name_lost = FALSE;
       TestReplaceData data;
       GTestDBus *bus;
+      guint timeout_id = 0;
 
       data.allow_replacement = allow;
       data.subprocess = NULL;
@@ -1173,7 +1174,7 @@ test_replace (gconstpointer data)
       g_signal_connect (app, "activate", G_CALLBACK (activate), NULL);
 
       if (!allow)
-        g_timeout_add_seconds (1, quit_already, app);
+        timeout_id = g_timeout_add_seconds (1, quit_already, app);
 
       g_application_run (app, G_N_ELEMENTS (argv) - 1, argv);
 
@@ -1183,6 +1184,7 @@ test_replace (gconstpointer data)
       else
         g_assert_false (name_lost);
 
+      g_clear_handle_id (&timeout_id, g_source_remove);
       g_object_unref (app);
       g_free (binpath);
 
@@ -1685,6 +1687,8 @@ int
 main (int argc, char **argv)
 {
   g_setenv ("LC_ALL", "C", TRUE);
+
+  g_log_writer_default_set_use_stderr (TRUE);
 
   g_test_init (&argc, &argv, NULL);
 
