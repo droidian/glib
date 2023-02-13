@@ -2098,6 +2098,7 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_aligned_alloc0@Base 2.72.0
  g_aligned_alloc@Base 2.72.0
  g_aligned_free@Base 2.72.0
+ g_aligned_free_sized@Base 2.75.3
  g_allocator_free@Base 2.12.0
  g_allocator_new@Base 2.12.0
  g_array_append_vals@Base 2.12.0
@@ -2515,7 +2516,6 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_filename_from_utf8@Base 2.12.0
  g_filename_to_uri@Base 2.12.0
  g_filename_to_utf8@Base 2.12.0
- g_find_program_for_path@Base 2.75.2
  g_find_program_in_path@Base 2.12.0
  g_fopen@Base 2.12.0
  g_format_size@Base 2.30.0
@@ -2523,6 +2523,7 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_format_size_full@Base 2.30.0
  g_fprintf@Base 2.12.0
  g_free@Base 2.12.0
+ g_free_sized@Base 2.75.3
  g_freopen@Base 2.12.0
  g_fsync@Base 2.64.0
  g_get_application_name@Base 2.12.0
@@ -2970,6 +2971,21 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_option_group_set_translation_domain@Base 2.12.0
  g_option_group_unref@Base 2.44.0
  g_parse_debug_string@Base 2.12.0
+ g_path_buf_clear@Base 2.75.3
+ g_path_buf_clear_to_path@Base 2.75.3
+ g_path_buf_copy@Base 2.75.3
+ g_path_buf_equal@Base 2.75.3
+ g_path_buf_free@Base 2.75.3
+ g_path_buf_free_to_path@Base 2.75.3
+ g_path_buf_init@Base 2.75.3
+ g_path_buf_init_from_path@Base 2.75.3
+ g_path_buf_new@Base 2.75.3
+ g_path_buf_new_from_path@Base 2.75.3
+ g_path_buf_pop@Base 2.75.3
+ g_path_buf_push@Base 2.75.3
+ g_path_buf_set_extension@Base 2.75.3
+ g_path_buf_set_filename@Base 2.75.3
+ g_path_buf_to_path@Base 2.75.3
  g_path_get_basename@Base 2.12.0
  g_path_get_dirname@Base 2.12.0
  g_path_is_absolute@Base 2.12.0
@@ -3235,7 +3251,6 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_set_prgname@Base 2.12.0
  g_set_print_handler@Base 2.12.0
  g_set_printerr_handler@Base 2.12.0
- g_set_user_dirs@Base 2.60.0
  g_setenv@Base 2.12.0
  g_shell_error_quark@Base 2.12.0
  g_shell_parse_argv@Base 2.12.0
@@ -3398,6 +3413,7 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_string_equal@Base 2.12.0
  g_string_erase@Base 2.12.0
  g_string_free@Base 2.12.0
+ g_string_free_and_steal@Base 2.75.3
  g_string_free_to_bytes@Base 2.34.0
  g_string_hash@Base 2.12.0
  g_string_insert@Base 2.12.0
