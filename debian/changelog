@@ -4,8 +4,12 @@ glib2.0 (2.75.3-1) UNRELEASED; urgency=medium
     - Resolves a crash when creating threads in a process with elevated
       priority, such as wireplumber (Closes: #1031129)
   * d/copyright: Update
+  * Drop patches that were applied upstream
+  * d/libglib2.0-0.symbols: Update.
+    Two private symbols that were not intended to appear in the ABI were
+    removed. Other Debian packages don't seem to use either.
 
- -- Simon McVittie <smcv@debian.org>  Mon, 13 Feb 2023 19:57:49 +0000
+ -- Simon McVittie <smcv@debian.org>  Mon, 13 Feb 2023 20:22:32 +0000
 
 glib2.0 (2.75.2-1) experimental; urgency=medium
 
