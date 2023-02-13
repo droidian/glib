@@ -34,7 +34,9 @@
 #include <glib/gtypes.h>
 #include <glib/gunicode.h>
 #include <glib/gbytes.h>
+#include <glib/gstrfuncs.h>
 #include <glib/gutils.h>  /* for G_CAN_INLINE */
+#include <string.h>
 
 G_BEGIN_DECLS
 
@@ -55,8 +57,23 @@ GString*     g_string_new_len           (const gchar     *init,
 GLIB_AVAILABLE_IN_ALL
 GString*     g_string_sized_new         (gsize            dfl_size);
 GLIB_AVAILABLE_IN_ALL
-gchar*       g_string_free              (GString         *string,
+gchar*      (g_string_free)             (GString         *string,
                                          gboolean         free_segment);
+GLIB_AVAILABLE_IN_2_76
+gchar*       g_string_free_and_steal    (GString         *string) G_GNUC_WARN_UNUSED_RESULT;
+
+#if G_GNUC_CHECK_VERSION (2, 0) && (GLIB_VERSION_MIN_REQUIRED >= GLIB_VERSION_2_76)
+
+#define g_string_free(str, free_segment)        \
+  (__builtin_constant_p (free_segment) ?        \
+    ((free_segment) ?                           \
+      (g_string_free) ((str), (free_segment)) : \
+      g_string_free_and_steal (str))            \
+    :                                           \
+    (g_string_free) ((str), (free_segment)))
+
+#endif /* G_GNUC_CHECK_VERSION (2, 0) && (GLIB_VERSION_MIN_REQUIRED >= GLIB_VERSION_2_76) */
+
 GLIB_AVAILABLE_IN_2_34
 GBytes*      g_string_free_to_bytes     (GString         *string);
 GLIB_AVAILABLE_IN_ALL
@@ -162,13 +179,16 @@ GString*     g_string_append_uri_escaped (GString         *string,
                                           const gchar     *reserved_chars_allowed,
                                           gboolean         allow_utf8);
 
-/* -- optimize g_strig_append_c --- */
+#ifndef __GTK_DOC_IGNORE__
+
 #ifdef G_CAN_INLINE
+G_ALWAYS_INLINE
 static inline GString*
 g_string_append_c_inline (GString *gstring,
                           gchar    c)
 {
-  if (gstring->len + 1 < gstring->allocated_len)
+  if (G_LIKELY (gstring != NULL &&
+                gstring->len + 1 < gstring->allocated_len))
     {
       gstring->str[gstring->len++] = c;
       gstring->str[gstring->len] = 0;
@@ -177,9 +197,75 @@ g_string_append_c_inline (GString *gstring,
     g_string_insert_c (gstring, -1, c);
   return gstring;
 }
-#define g_string_append_c(gstr,c)       g_string_append_c_inline (gstr, c)
+
+#define g_string_append_c(gstr,c) \
+  g_string_append_c_inline (gstr, c)
+
+G_ALWAYS_INLINE
+static inline GString *
+g_string_append_len_inline (GString    *gstring,
+                            const char *val,
+                            gssize      len)
+{
+  if G_UNLIKELY (gstring == NULL)
+    return g_string_append_len (gstring, val, len);
+
+  if G_UNLIKELY (val == NULL)
+    return (len != 0) ? g_string_append_len (gstring, val, len) : gstring;
+
+  if (len < 0)
+    len = strlen (val);
+
+  if (G_LIKELY (gstring->len + len < gstring->allocated_len))
+    {
+      char *end = gstring->str + gstring->len;
+      if (G_LIKELY (val + len <= end || val > end + len))
+        memcpy (end, val, len);
+      else
+        memmove (end, val, len);
+      gstring->len += len;
+      gstring->str[gstring->len] = 0;
+      return gstring;
+    }
+  else
+    return g_string_insert_len (gstring, -1, val, len);
+}
+
+#define g_string_append_len(gstr, val, len) \
+  g_string_append_len_inline (gstr, val, len)
+
+G_ALWAYS_INLINE
+static inline GString *
+g_string_truncate_inline (GString *gstring,
+                          gsize    len)
+{
+  gstring->len = MIN (len, gstring->len);
+  gstring->str[gstring->len] = '\0';
+  return gstring;
+}
+
+#define g_string_truncate(gstr, len) \
+  g_string_truncate_inline (gstr, len)
+
+#if G_GNUC_CHECK_VERSION (2, 0)
+
+#define g_string_append(gstr, val)                  \
+  (__builtin_constant_p (val) ?                     \
+    G_GNUC_EXTENSION ({                             \
+      const char * const __val = (val);             \
+      g_string_append_len (gstr, __val,             \
+        G_LIKELY (__val != NULL) ?                  \
+          (gssize) strlen (_G_STR_NONNULL (__val))  \
+        : (gssize) -1);                             \
+    })                                              \
+    :                                               \
+    g_string_append_len (gstr, val, (gssize) -1))
+
+#endif /* G_GNUC_CHECK_VERSION (2, 0) */
+
 #endif /* G_CAN_INLINE */
 
+#endif /* __GTK_DOC_IGNORE__ */
 
 GLIB_DEPRECATED
 GString *g_string_down (GString *string);

@@ -1026,7 +1026,7 @@ g_array_sort_with_data (GArray           *farray,
  *
  * This example defines a comparison function and search an element in a #GArray:
  * |[<!-- language="C" -->
- * static gint*
+ * static gint
  * cmpint (gconstpointer a, gconstpointer b)
  * {
  *   const gint *_a = a;
@@ -1382,10 +1382,13 @@ ptr_array_new_from_array (gpointer       *data,
       for (gsize i = 0; i < len; i++)
         rarray->pdata[i] = copy_func (data[i], copy_func_user_data);
     }
-  else
+  else if (len != 0)
     {
       memcpy (rarray->pdata, data, len * sizeof (gpointer));
     }
+
+  if (null_terminated && rarray->pdata != NULL)
+    rarray->pdata[len] = NULL;
 
   rarray->len = len;
 

@@ -304,6 +304,7 @@ test_str_equal (void)
 {
   const char *str_a = "a";
   char *str_b = g_strdup ("b");
+  char *str_null = g_strdup (NULL);
   gconstpointer str_a_ptr = str_a, str_b_ptr = str_b;
   const unsigned char *str_c = (const unsigned char *) "c";
 
@@ -317,8 +318,188 @@ test_str_equal (void)
   g_assert_true (g_str_equal (str_a, str_a_ptr));
   g_assert_false (g_str_equal (str_a_ptr, str_b_ptr));
   g_assert_false (g_str_equal (str_c, str_b));
+  g_assert_cmpstr (str_b, !=, str_null);
 
   g_free (str_b);
+}
+
+static void
+test_strdup (void)
+{
+  gchar *str;
+
+  g_assert_null ((g_strdup) (NULL));
+
+  str = (g_strdup) ("C++ is cool too!");
+  g_assert_nonnull (str);
+  g_assert_cmpstr (str, ==, "C++ is cool too!");
+  g_free (str);
+}
+
+static void
+test_strdup_macro (void)
+{
+  gchar *str;
+
+  g_assert_null (g_strdup (NULL));
+
+  str = g_strdup ("C++ is cool too!");
+  g_assert_nonnull (str);
+  g_assert_cmpstr (str, ==, "C++ is cool too!");
+  g_free (str);
+}
+
+static void
+test_str_has_prefix (void)
+{
+  g_assert_true ((g_str_has_prefix) ("C++ is cool!", "C++"));
+}
+
+static void
+test_str_has_prefix_macro (void)
+{
+  g_assert_true (g_str_has_prefix ("C++ is cool!", "C++"));
+}
+
+static void
+test_str_has_suffix (void)
+{
+  g_assert_true ((g_str_has_suffix) ("C++ is cool!", "cool!"));
+}
+
+static void
+test_str_has_suffix_macro (void)
+{
+  g_assert_true (g_str_has_suffix ("C++ is cool!", "cool!"));
+}
+
+static void
+test_string_append (void)
+{
+  GString *string;
+  char *tmp;
+  int i;
+
+  tmp = g_strdup ("more");
+
+  /* append */
+  string = g_string_new ("firsthalf");
+  g_string_append (string, "last");
+  (g_string_append) (string, "half");
+
+  g_assert_cmpstr (string->str, ==, "firsthalflasthalf");
+
+  i = 0;
+  g_string_append (string, &tmp[i++]);
+  (g_string_append) (string, &tmp[i++]);
+  g_assert_true (i == 2);
+  g_assert_cmpstr (string->str, ==, "firsthalflasthalfmoreore");
+
+  g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                         "*assertion*string != NULL*failed*");
+  g_assert_null (g_string_append (NULL, NULL));
+  g_test_assert_expected_messages ();
+
+  g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                         "*assertion*string != NULL*failed*");
+  g_assert_null ((g_string_append) (NULL, NULL));
+  g_test_assert_expected_messages ();
+
+  g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                         "*assertion*val != NULL*failed*");
+  g_assert_true (g_string_append (string, NULL) == string);
+  g_test_assert_expected_messages ();
+
+  g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                         "*assertion*val != NULL*failed*");
+  g_assert_true ((g_string_append) (string, NULL) == string);
+  g_test_assert_expected_messages ();
+
+  g_string_free (string, TRUE);
+
+  /* append_len */
+  string = g_string_new ("firsthalf");
+  g_string_append_len (string, "lasthalfjunkjunk", strlen ("last"));
+  (g_string_append_len) (string, "halfjunkjunk", strlen ("half"));
+  g_string_append_len (string, "more", -1);
+  (g_string_append_len) (string, "ore", -1);
+
+  g_assert_true (g_string_append_len (string, NULL, 0) == string);
+  g_assert_true ((g_string_append_len) (string, NULL, 0) == string);
+
+  g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                         "*assertion*string != NULL*failed*");
+  g_assert_null (g_string_append_len (NULL, NULL, -1));
+  g_test_assert_expected_messages ();
+
+  g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                         "*assertion*string != NULL*failed*");
+  g_assert_null ((g_string_append_len) (NULL, NULL, -1));
+  g_test_assert_expected_messages ();
+
+  g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                         "*assertion*val != NULL*failed*");
+  g_assert_true (g_string_append_len (string, NULL, -1) == string);
+  g_test_assert_expected_messages ();
+
+  g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                         "*assertion*val != NULL*failed*");
+  g_assert_true ((g_string_append_len) (string, NULL, -1) == string);
+  g_test_assert_expected_messages ();
+
+  g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                         "*assertion*val != NULL*failed*");
+  g_assert_true (g_string_append_len (string, NULL, 1) == string);
+  g_test_assert_expected_messages ();
+
+  g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                         "*assertion*val != NULL*failed*");
+  g_assert_true ((g_string_append_len) (string, NULL, 1) == string);
+  g_test_assert_expected_messages ();
+
+  g_assert_cmpstr (string->str, ==, "firsthalflasthalfmoreore");
+
+  char c = 'A';
+  g_string_append_c (string, c++);
+  (g_string_append_c) (string, c++);
+  g_assert_cmpstr (string->str, ==, "firsthalflasthalfmoreoreAB");
+
+  i = string->len;
+  g_string_truncate (string, --i);
+  (g_string_truncate) (string, --i);
+  g_assert_cmpstr (string->str, ==, "firsthalflasthalfmoreore");
+
+  g_string_free (string, TRUE);
+  g_free (tmp);
+}
+
+static void
+test_string_free (void)
+{
+  GString *str;
+  gchar *data;
+
+  g_test_message ("Test that g_string_free() macro compiles and doesn’t "
+                  "cause any compiler warnings in C++ mode");
+
+  /* Test that g_string_free (_, TRUE) does not cause a warning if
+   * its return value is unused. */
+  str = g_string_new ("test");
+  g_string_free (str, TRUE);
+
+  /* Test that g_string_free (_, FALSE) does not emit a warning if
+   * its return value is used. */
+  str = g_string_new ("test");
+  data = g_string_free (str, FALSE);
+  g_free (data);
+
+  /* Test that g_string_free () with an expression that is always FALSE
+   * at runtime, but the compiler can't know it, does not cause any
+   * warnings if its return value is unused. */
+  str = g_string_new ("test");
+  data = str->str;
+  g_string_free (str, g_test_get_path ()[0] == 0);
+  g_free (data);
 }
 
 int
@@ -344,6 +525,14 @@ main (int argc, char *argv[])
   g_test_add_func ("/C++/clear-pointer", test_clear_pointer);
   g_test_add_func ("/C++/steal-pointer", test_steal_pointer);
   g_test_add_func ("/C++/str-equal", test_str_equal);
+  g_test_add_func ("/C++/strdup", test_strdup);
+  g_test_add_func ("/C++/strdup/macro", test_strdup_macro);
+  g_test_add_func ("/C++/str-has-prefix", test_str_has_prefix);
+  g_test_add_func ("/C++/str-has-prefix/macro", test_str_has_prefix_macro);
+  g_test_add_func ("/C++/str-has-suffix", test_str_has_suffix);
+  g_test_add_func ("/C++/str-has-suffix/macro", test_str_has_suffix_macro);
+  g_test_add_func ("/C++/string-append", test_string_append);
+  g_test_add_func ("/C++/string-free", test_string_free);
 
   return g_test_run ();
 }

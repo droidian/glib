@@ -193,8 +193,11 @@ test_string_append_c (void)
     else
       (g_string_append_c) (string, 'a'+(i%26));
 
-  g_assert((strlen("hi pete!") + 10000) == string->len);
-  g_assert((strlen("hi pete!") + 10000) == strlen(string->str));
+  g_assert_true ((strlen("hi pete!") + 10000) == string->len);
+  g_assert_true ((strlen("hi pete!") + 10000) == strlen(string->str));
+
+  for (i = 0; i < 10000; i++)
+    g_assert_true (string->str[strlen ("Hi pete!") + i] == 'a' + (i%26));
 
   g_string_free (string, TRUE);
 }
@@ -203,17 +206,89 @@ static void
 test_string_append (void)
 {
   GString *string;
+  char *tmp;
+  int i;
+
+  tmp = g_strdup ("more");
 
   /* append */
   string = g_string_new ("firsthalf");
-  g_string_append (string, "lasthalf");
+  g_string_append (string, "last");
+  (g_string_append) (string, "half");
+
   g_assert_cmpstr (string->str, ==, "firsthalflasthalf");
+
+  i = 0;
+  g_string_append (string, &tmp[i++]);
+  (g_string_append) (string, &tmp[i++]);
+  g_assert_true (i == 2);
+
+  g_assert_cmpstr (string->str, ==, "firsthalflasthalfmoreore");
+
+  g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                         "*assertion*string != NULL*failed*");
+  g_assert_null (g_string_append (NULL, NULL));
+  g_test_assert_expected_messages ();
+
+  g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                         "*assertion*string != NULL*failed*");
+  g_assert_null ((g_string_append) (NULL, NULL));
+  g_test_assert_expected_messages ();
+
+  g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                         "*assertion*val != NULL*failed*");
+  g_assert_true (g_string_append (string, NULL) == string);
+  g_test_assert_expected_messages ();
+
+  g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                         "*assertion*val != NULL*failed*");
+  g_assert_true ((g_string_append) (string, NULL) == string);
+  g_test_assert_expected_messages ();
+
   g_string_free (string, TRUE);
+  g_free (tmp);
 
   /* append_len */
   string = g_string_new ("firsthalf");
-  g_string_append_len (string, "lasthalfjunkjunk", strlen ("lasthalf"));
-  g_assert_cmpstr (string->str, ==, "firsthalflasthalf");
+  g_string_append_len (string, "lasthalfjunkjunk", strlen ("last"));
+  (g_string_append_len) (string, "halfjunkjunk", strlen ("half"));
+  g_string_append_len (string, "more", -1);
+  (g_string_append_len) (string, "ore", -1);
+
+  g_assert_true (g_string_append_len (string, NULL, 0) == string);
+  g_assert_true ((g_string_append_len) (string, NULL, 0) == string);
+
+  g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                         "*assertion*string != NULL*failed*");
+  g_assert_null (g_string_append_len (NULL, NULL, -1));
+  g_test_assert_expected_messages ();
+
+  g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                         "*assertion*string != NULL*failed*");
+  g_assert_null ((g_string_append_len) (NULL, NULL, -1));
+  g_test_assert_expected_messages ();
+
+  g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                         "*assertion*val != NULL*failed*");
+  g_assert_true (g_string_append_len (string, NULL, -1) == string);
+  g_test_assert_expected_messages ();
+
+  g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                         "*assertion*val != NULL*failed*");
+  g_assert_true ((g_string_append_len) (string, NULL, -1) == string);
+  g_test_assert_expected_messages ();
+
+  g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                         "*assertion*val != NULL*failed*");
+  g_assert_true (g_string_append_len (string, NULL, 1) == string);
+  g_test_assert_expected_messages ();
+
+  g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                         "*assertion*val != NULL*failed*");
+  g_assert_true ((g_string_append_len) (string, NULL, 1) == string);
+  g_test_assert_expected_messages ();
+
+  g_assert_cmpstr (string->str, ==, "firsthalflasthalfmoreore");
   g_string_free (string, TRUE);
 }
 
@@ -415,7 +490,7 @@ test_string_truncate (void)
   g_assert (string->len == strlen("testing"));
   g_assert_cmpstr (string->str, ==, "testing");
 
-  g_string_truncate (string, 4);
+  (g_string_truncate) (string, 4);
   g_assert (string->len == 4);
   g_assert_cmpstr (string->str, ==, "test");
 
@@ -608,6 +683,32 @@ test_string_replace (void)
     }
 }
 
+static void
+test_string_steal (void)
+{
+  GString *string;
+  char *str;
+
+  string = g_string_new ("One");
+  g_string_append (string, ", two");
+  g_string_append (string, ", three");
+  g_string_append_c (string, '.');
+
+  str = g_string_free (string, FALSE);
+
+  g_assert_cmpstr (str, ==, "One, two, three.");
+  g_free (str);
+
+  string = g_string_new ("1");
+  g_string_append (string, " 2");
+  g_string_append (string, " 3");
+
+  str = g_string_free_and_steal (string);
+
+  g_assert_cmpstr (str, ==, "1 2 3");
+  g_free (str);
+}
+
 int
 main (int   argc,
       char *argv[])
@@ -634,6 +735,7 @@ main (int   argc,
   g_test_add_func ("/string/test-string-set-size", test_string_set_size);
   g_test_add_func ("/string/test-string-to-bytes", test_string_to_bytes);
   g_test_add_func ("/string/test-string-replace", test_string_replace);
+  g_test_add_func ("/string/test-string-steal", test_string_steal);
 
   return g_test_run();
 }

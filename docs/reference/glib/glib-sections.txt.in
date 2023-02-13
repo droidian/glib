@@ -1082,6 +1082,7 @@ g_try_realloc_n
 
 <SUBSECTION>
 g_free
+g_free_sized
 g_clear_pointer
 g_steal_pointer
 g_mem_gc_friendly
@@ -1096,6 +1097,7 @@ g_newa0
 g_aligned_alloc
 g_aligned_alloc0
 g_aligned_free
+g_aligned_free_sized
 
 <SUBSECTION>
 g_memmove
@@ -2652,6 +2654,7 @@ g_string_truncate
 g_string_set_size
 g_string_free
 g_string_free_to_bytes
+g_string_free_and_steal
 
 <SUBSECTION>
 g_string_up
@@ -3729,4 +3732,25 @@ g_ref_string_new_len
 g_ref_string_acquire
 g_ref_string_release
 g_ref_string_length
+</SECTION>
+
+<SECTION>
+<FILE>gpathbuf</FILE>
+GPathBuf
+G_PATH_BUF_INIT
+g_path_buf_new
+g_path_buf_new_from_path
+g_path_buf_init
+g_path_buf_init_from_path
+g_path_buf_clear
+g_path_buf_clear_to_path
+g_path_buf_free
+g_path_buf_free_to_path
+g_path_buf_push
+g_path_buf_pop
+g_path_buf_set_filename
+g_path_buf_set_extension
+g_path_buf_to_path
+g_path_buf_copy
+g_path_buf_equal
 </SECTION>

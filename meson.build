@@ -1,5 +1,5 @@
 project('glib', 'c',
-  version : '2.75.2',
+  version : '2.75.3',
   # NOTE: See the policy in docs/meson-version.md before changing the Meson dependency
   meson_version : '>= 0.60.0',
   default_options : [
@@ -151,6 +151,10 @@ common_test_env = [
   'MALLOC_CHECK_=2',
 ]
 
+# Note: this may cause the tests output not to be printed when running in
+# verbose mode, see https://github.com/mesonbuild/meson/issues/11185
+# Can be changed it to 'exitcode' if required during development.
+test_protocol = 'tap'
 test_timeout = 30
 test_timeout_slow = 90
 
@@ -610,6 +614,8 @@ functions = [
   'fchmod',
   'fchown',
   'fdwalk',
+  'free_aligned_sized',
+  'free_sized',
   'fsync',
   'getauxval',
   'getc_unlocked',
@@ -1473,8 +1479,6 @@ long_long_align = cc.alignment('long long')
 # be 64-bit in C99, and it is available on all supported compilers
 sizet_align = cc.alignment('size_t')
 
-glib_conf.set('ALIGNOF_UNSIGNED_LONG', long_align)
-
 glib_conf.set('SIZEOF_CHAR', char_size)
 glib_conf.set('SIZEOF_INT', int_size)
 glib_conf.set('SIZEOF_SHORT', short_size)
@@ -1528,7 +1532,6 @@ glibconfig_conf.set('gint32', gint32)
 glibconfig_conf.set_quoted('gint32_modifier', gint32_modifier)
 glibconfig_conf.set_quoted('gint32_format', gint32_format)
 glibconfig_conf.set_quoted('guint32_format', guint32_format)
-glib_conf.set('ALIGNOF_GUINT32', guint32_align)
 
 if int_size == 8
   gint64 = 'int'
@@ -1567,7 +1570,6 @@ glibconfig_conf.set_quoted('gint64_format', gint64_format)
 glibconfig_conf.set_quoted('guint64_format', guint64_format)
 glibconfig_conf.set('gint64_constant', gint64_constant)
 glibconfig_conf.set('guint64_constant', guint64_constant)
-glib_conf.set('ALIGNOF_GUINT64', guint64_align)
 
 if host_system == 'windows'
   glibconfig_conf.set('g_pid_type', 'void*')
@@ -1950,10 +1952,6 @@ else
   endif
   if cc.has_header_symbol('pthread.h', 'pthread_getname_np', prefix : pthread_prefix)
     glib_conf.set('HAVE_PTHREAD_GETNAME_NP', 1)
-  endif
-
-  if cc.has_header_symbol('sys/syscall.h', 'SYS_sched_getattr')
-    glib_conf.set('HAVE_SYS_SCHED_GETATTR', 1)
   endif
 
   # Assume that pthread_setname_np is available in some form; same as configure
