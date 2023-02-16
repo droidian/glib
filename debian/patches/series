@@ -15,3 +15,4 @@ debian/Skip-memory-monitor-dbus-test-if-not-specifically-request.patch
 debian/Add-extra-debug-to-memory-monitor-dbus-test.patch
 debian/tests-Skip-debugcontroller-test.patch
 debian/testfilemonitor-Skip-if-we-are-avoiding-flaky-tests.patch
+g_string_append_len_inline-fix-implicit-conversion-change.patch
