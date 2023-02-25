@@ -1,3 +1,9 @@
+glib2.0 (2.75.3-3) experimental; urgency=medium
+
+  * Cherry-pick build test fix for glibc 2.37
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Sat, 25 Feb 2023 09:22:04 -0500
+
 glib2.0 (2.75.3-2) experimental; urgency=medium
 
   [ Simon McVittie ]
