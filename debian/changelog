@@ -1,10 +1,10 @@
-glib2.0 (2.74.6-1) UNRELEASED; urgency=medium
+glib2.0 (2.74.6-1) unstable; urgency=medium
 
   * New upstream stable release
     - !3239 Backport !3237 “Fix safe_wspawnve #define” to glib-2-74
     - Translation updates
 
- -- Jeremy Bicha <jbicha@ubuntu.com>  Thu, 02 Mar 2023 15:24:56 -0500
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Thu, 02 Mar 2023 15:53:53 -0500
 
 glib2.0 (2.74.5-1) unstable; urgency=medium
 
