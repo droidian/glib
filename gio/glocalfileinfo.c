@@ -92,6 +92,10 @@
 #endif
 #endif
 
+#ifndef O_CLOEXEC
+#define O_CLOEXEC 0
+#endif
+
 #include "glocalfileinfo.h"
 #include "gioerror.h"
 #include "gthemedicon.h"
@@ -1391,11 +1395,11 @@ get_content_type (const char          *basename,
 	    sniff_length = 4096;
 
 #ifdef O_NOATIME	  
-          fd = g_open (path, O_RDONLY | O_NOATIME, 0);
+          fd = g_open (path, O_RDONLY | O_NOATIME | O_CLOEXEC, 0);
           errsv = errno;
           if (fd < 0 && errsv == EPERM)
 #endif
-	    fd = g_open (path, O_RDONLY, 0);
+	    fd = g_open (path, O_RDONLY | O_CLOEXEC, 0);
 
 	  if (fd != -1)
 	    {
@@ -2024,6 +2028,8 @@ _g_local_file_info_get (const char             *basename,
 	    symlink_broken = TRUE;
 	}
     }
+  else
+    g_file_info_set_is_symlink (info, FALSE);
 
   if (stat_ok)
     set_info_from_stat (info, &statbuf, attribute_matcher);
@@ -2037,10 +2043,10 @@ _g_local_file_info_get (const char             *basename,
   if (_g_file_attribute_matcher_matches_id (attribute_matcher,
 					    G_FILE_ATTRIBUTE_ID_STANDARD_IS_HIDDEN))
     {
-      if (basename != NULL &&
-          (basename[0] == '.' ||
-           file_is_hidden (path, basename)))
-        g_file_info_set_is_hidden (info, TRUE);
+      g_file_info_set_is_hidden (info,
+                                 (basename != NULL &&
+                                  (basename[0] == '.' ||
+                                   file_is_hidden (path, basename))));
     }
 
   if (basename != NULL && basename[strlen (basename) -1] == '~' &&
