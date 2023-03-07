@@ -14,3 +14,11 @@ debian/Skip-memory-monitor-dbus-test-if-not-specifically-request.patch
 debian/Add-extra-debug-to-memory-monitor-dbus-test.patch
 debian/tests-Skip-debugcontroller-test.patch
 debian/testfilemonitor-Skip-if-we-are-avoiding-flaky-tests.patch
+gfile-Fix-file-size-detection-when-copying-on-btrfs.patch
+gfile-Check-ETag-attribute-is-present-before-trying-to-ge.patch
+glocalfileinfo-Mark-the-lost-found-dir-as-hidden-again.patch
+glocalfileinfo-Ensure-that-is-backup-is-always-set.patch
+glocalfileinfo-Set-is-backup-attribute-also-on-Windows.patch
+glocalfile-Set-various-file-attributes-if-their-value-is-.patch
+glocalfileinfo-Set-is-backup-attribute-on-Windows.patch
+gresourcefile-Fix-a-missing-newline-in-GResourceFile.patch

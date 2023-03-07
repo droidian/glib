@@ -1,0 +1,54 @@
+From: Ondrej Holy <oholy@redhat.com>
+Date: Mon, 6 Mar 2023 13:06:47 +0100
+Subject: glocalfileinfo: Mark the lost+found dir as hidden again
+
+The lost+found dir isn't detected as hidden currently. This is regression
+caused by the commit 728ad64b. Let's change the code a bit to be sure that
+the lost+found dir is marked as hidden again.
+
+(cherry picked from commit 43066d696032a8d33994bf611a60bcfddb3b28ef)
+---
+ gio/glocalfile.c     | 2 +-
+ gio/glocalfileinfo.c | 9 +++------
+ 2 files changed, 4 insertions(+), 7 deletions(-)
+
+diff --git a/gio/glocalfile.c b/gio/glocalfile.c
+index 2b43ff4..ca9e183 100644
+--- a/gio/glocalfile.c
++++ b/gio/glocalfile.c
+@@ -1929,7 +1929,7 @@ _g_local_file_has_trash_dir (const char *dirname, dev_t dir_dev)
+   return res;
+ }
+ 
+-#ifdef G_OS_UNIX
++#ifndef G_OS_WIN32
+ gboolean
+ _g_local_file_is_lost_found_dir (const char *path, dev_t path_dev)
+ {
+diff --git a/gio/glocalfileinfo.c b/gio/glocalfileinfo.c
+index 7b9e90b..593722a 100644
+--- a/gio/glocalfileinfo.c
++++ b/gio/glocalfileinfo.c
+@@ -2034,11 +2034,6 @@ _g_local_file_info_get (const char             *basename,
+   if (stat_ok)
+     set_info_from_stat (info, &statbuf, attribute_matcher);
+ 
+-#ifdef G_OS_UNIX
+-  if (stat_ok && _g_local_file_is_lost_found_dir (path, _g_stat_dev (&statbuf)))
+-    g_file_info_set_is_hidden (info, TRUE);
+-#endif
+-
+ #ifndef G_OS_WIN32
+   if (_g_file_attribute_matcher_matches_id (attribute_matcher,
+ 					    G_FILE_ATTRIBUTE_ID_STANDARD_IS_HIDDEN))
+@@ -2046,7 +2041,9 @@ _g_local_file_info_get (const char             *basename,
+       g_file_info_set_is_hidden (info,
+                                  (basename != NULL &&
+                                   (basename[0] == '.' ||
+-                                   file_is_hidden (path, basename))));
++                                   file_is_hidden (path, basename) ||
++                                   (stat_ok &&
++                                    _g_local_file_is_lost_found_dir (path, _g_stat_dev (&statbuf))))));
+     }
+ 
+   if (basename != NULL && basename[strlen (basename) -1] == '~' &&

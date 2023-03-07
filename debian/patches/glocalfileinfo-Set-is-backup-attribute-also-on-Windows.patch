@@ -1,0 +1,26 @@
+From: Ondrej Holy <oholy@redhat.com>
+Date: Mon, 6 Mar 2023 14:22:05 +0100
+Subject: glocalfileinfo: Set is-backup attribute also on Windows
+
+The `is-backup` attribute isn't currently set on Windows. It would
+be nice to set such basic attributes on all platforms. Let's set
+the attribute to `FALSE` there.
+
+(cherry picked from commit c965bf23a8f2b480139b3791c15da1d617f039a8)
+---
+ gio/glocalfileinfo.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/gio/glocalfileinfo.c b/gio/glocalfileinfo.c
+index 7adbeae..d02606f 100644
+--- a/gio/glocalfileinfo.c
++++ b/gio/glocalfileinfo.c
+@@ -2065,6 +2065,8 @@ _g_local_file_info_get (const char             *basename,
+ 
+   if (statbuf.reparse_tag != 0)
+     _g_file_info_set_attribute_uint32_by_id (info, G_FILE_ATTRIBUTE_ID_DOS_REPARSE_POINT_TAG, statbuf.reparse_tag);
++
++  _g_file_info_set_attribute_boolean_by_id (info, G_FILE_ATTRIBUTE_ID_STANDARD_IS_BACKUP, FALSE);
+ #endif
+ 
+   symlink_target = NULL;
