@@ -1,8 +1,16 @@
-glib2.0 (2.75.4-1) UNRELEASED; urgency=medium
+glib2.0 (2.75.4-1) experimental; urgency=medium
 
+  [ Jeremy Bicha ]
   * New upstream release
+  * Drop 3 patches applied in new release
+  * Cherry-pick several patches that will be included in 2.76.0
 
- -- Jeremy Bicha <jbicha@ubuntu.com>  Fri, 03 Mar 2023 10:29:22 -0500
+  [ Simon McVittie ]
+  * Add patch to try x-terminal-emulator for Terminal=true apps
+    (Closes: #773915)
+  * README.Debian: Add notes on how to choose how Terminal=true apps launch
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Tue, 07 Mar 2023 10:51:15 -0500
 
 glib2.0 (2.75.3-3) experimental; urgency=medium
 
