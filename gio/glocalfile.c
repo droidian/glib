@@ -845,10 +845,10 @@ get_mount_info (GFileInfo             *fs_info,
       G_UNLOCK (mount_info_hash);
     }
 
-  if (mount_info & MOUNT_INFO_READONLY &&
-      g_file_attribute_matcher_matches (matcher,
+  if (g_file_attribute_matcher_matches (matcher,
                                         G_FILE_ATTRIBUTE_FILESYSTEM_READONLY))
-    g_file_info_set_attribute_boolean (fs_info, G_FILE_ATTRIBUTE_FILESYSTEM_READONLY, TRUE);
+    g_file_info_set_attribute_boolean (fs_info, G_FILE_ATTRIBUTE_FILESYSTEM_READONLY,
+                                       (mount_info & MOUNT_INFO_READONLY));
 
   if (g_file_attribute_matcher_matches (matcher,
                                         G_FILE_ATTRIBUTE_FILESYSTEM_REMOTE))
@@ -1929,7 +1929,7 @@ _g_local_file_has_trash_dir (const char *dirname, dev_t dir_dev)
   return res;
 }
 
-#ifdef G_OS_UNIX
+#ifndef G_OS_WIN32
 gboolean
 _g_local_file_is_lost_found_dir (const char *path, dev_t path_dev)
 {
