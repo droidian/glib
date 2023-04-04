@@ -1,0 +1,28 @@
+From: Philip Withnall <pwithnall@endlessos.org>
+Date: Wed, 22 Feb 2023 12:50:10 +0000
+Subject: gdbusconnection: Make GDBusMethodInvocation transfer a bit clearer
+
+Add a missing steal call in `schedule_method_call()`. This introduces no
+functional changes, but documents the ownership transfer more clearly.
+
+Signed-off-by: Philip Withnall <pwithnall@endlessos.org>
+Bug: https://gitlab.gnome.org/GNOME/glib/-/issues/2924
+Origin: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3298
+Applied-upstream: 2.74.7, commit:2da9ca2727a559a5e6b517582d14ba05d963f603
+---
+ gio/gdbusconnection.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/gio/gdbusconnection.c b/gio/gdbusconnection.c
+index 663cd95..368898d 100644
+--- a/gio/gdbusconnection.c
++++ b/gio/gdbusconnection.c
+@@ -5048,7 +5048,7 @@ schedule_method_call (GDBusConnection            *connection,
+   g_source_set_priority (idle_source, G_PRIORITY_DEFAULT);
+   g_source_set_callback (idle_source,
+                          call_in_idle_cb,
+-                         invocation,
++                         g_steal_pointer (&invocation),
+                          g_object_unref);
+   g_source_set_static_name (idle_source, "[gio, " __FILE__ "] call_in_idle_cb");
+   g_source_attach (idle_source, main_context);

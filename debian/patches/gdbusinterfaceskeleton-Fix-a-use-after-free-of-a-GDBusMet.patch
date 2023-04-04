@@ -1,0 +1,58 @@
+From: Philip Withnall <pwithnall@endlessos.org>
+Date: Wed, 22 Feb 2023 12:47:36 +0000
+Subject: gdbusinterfaceskeleton: Fix a use-after-free of a
+ GDBusMethodInvocation
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+This `GDBusMethodInvocation` may be shared across threads, with no
+guarantee on the strong ref in one thread outlasting any refs in other
+threads — so it needs a ref in this helper struct.
+
+This should fix a use-after-free where the `GDBusMethodInvocation` is
+freed from `g_value_unset()` after `g_signal_emit()` returns in
+`dispatch_in_thread_func()` in one thread; but then dereferenced again
+in `g_source_destroy_internal()` from another thread.
+
+Signed-off-by: Philip Withnall <pwithnall@endlessos.org>
+Bug: https://gitlab.gnome.org/GNOME/glib/-/issues/2924
+Origin: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3298
+Applied-upstream: 2.74.7, commit:b29892237d3d0fa9b4615c9428d438aec60f1d82
+---
+ gio/gdbusinterfaceskeleton.c | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/gio/gdbusinterfaceskeleton.c b/gio/gdbusinterfaceskeleton.c
+index d28282f..a2a79fe 100644
+--- a/gio/gdbusinterfaceskeleton.c
++++ b/gio/gdbusinterfaceskeleton.c
+@@ -462,14 +462,17 @@ typedef struct
+ {
+   gint ref_count;  /* (atomic) */
+   GDBusInterfaceMethodCallFunc  method_call_func;
+-  GDBusMethodInvocation        *invocation;
++  GDBusMethodInvocation        *invocation;  /* (owned) */
+ } DispatchData;
+ 
+ static void
+ dispatch_data_unref (DispatchData *data)
+ {
+   if (g_atomic_int_dec_and_test (&data->ref_count))
+-    g_slice_free (DispatchData, data);
++    {
++      g_clear_object (&data->invocation);
++      g_slice_free (DispatchData, data);
++    }
+ }
+ 
+ static DispatchData *
+@@ -628,7 +631,7 @@ g_dbus_interface_method_dispatch_helper (GDBusInterfaceSkeleton       *interface
+ 
+       data = g_slice_new0 (DispatchData);
+       data->method_call_func = method_call_func;
+-      data->invocation = invocation;
++      data->invocation = g_object_ref (invocation);
+       data->ref_count = 1;
+ 
+       task = g_task_new (interface, NULL, NULL, NULL);

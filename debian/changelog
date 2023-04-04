@@ -1,3 +1,16 @@
+glib2.0 (2.74.6-2) UNRELEASED; urgency=medium
+
+  * d/patches: Update to upstream 2.74.x branch commit
+    2.74.6-12-ga1e169129, omitting Windows-specific changes
+    - Fix GDBus server interop with sd-bus clients (GNOME/glib#2916)
+    - Fix use-after-free of a GDBusMethodInvocation in some threaded
+      use patterns (GNOME/glib#2924)
+    - Fix a test failure resulting in FTBFS in some container environments
+      if gdb happens to be installed, but access to ptrace and
+      /proc/PID/mem is disallowed (GNOME/glib#3307)
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 04 Apr 2023 09:48:52 +0100
+
 glib2.0 (2.74.6-1) unstable; urgency=medium
 
   * New upstream stable release

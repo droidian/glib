@@ -1,0 +1,83 @@
+From: Philip Withnall <pwithnall@endlessos.org>
+Date: Wed, 22 Feb 2023 12:40:49 +0000
+Subject: gdbusinterfaceskeleton: Remove an unnecessary helper struct member
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+The `GDBusInterfaceSkeleton` is already stored as the source object of
+the `GTask` here, with a strong reference.
+
+Storing it again in the task’s data struct is redundant, and makes it
+look like the `GDBusInterfaceSkeleton` is being used without holding a
+strong reference. (There’s not actually a bug there though: the strong
+reference from the `GTask` outlives the data struct, so is sufficient.)
+
+Remove the unnecessary helper struct member to clarify the code a bit.
+
+Signed-off-by: Philip Withnall <pwithnall@endlessos.org>
+Bug: https://gitlab.gnome.org/GNOME/glib/-/issues/2924
+Origin: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3298
+Applied-upstream: 2.74.7, commit:d90fbc36367534f941941abb7e76e4c7cd8ed6b8
+---
+ gio/gdbusinterfaceskeleton.c | 15 +++++++--------
+ 1 file changed, 7 insertions(+), 8 deletions(-)
+
+diff --git a/gio/gdbusinterfaceskeleton.c b/gio/gdbusinterfaceskeleton.c
+index 3f07d4d..d28282f 100644
+--- a/gio/gdbusinterfaceskeleton.c
++++ b/gio/gdbusinterfaceskeleton.c
+@@ -461,7 +461,6 @@ dbus_interface_interface_init (GDBusInterfaceIface *iface)
+ typedef struct
+ {
+   gint ref_count;  /* (atomic) */
+-  GDBusInterfaceSkeleton       *interface;
+   GDBusInterfaceMethodCallFunc  method_call_func;
+   GDBusMethodInvocation        *invocation;
+ } DispatchData;
+@@ -502,16 +501,17 @@ dispatch_in_thread_func (GTask        *task,
+                          GCancellable *cancellable)
+ {
+   DispatchData *data = task_data;
++  GDBusInterfaceSkeleton *interface = g_task_get_source_object (task);
+   GDBusInterfaceSkeletonFlags flags;
+   GDBusObject *object;
+   gboolean authorized;
+ 
+-  g_mutex_lock (&data->interface->priv->lock);
+-  flags = data->interface->priv->flags;
+-  object = data->interface->priv->object;
++  g_mutex_lock (&interface->priv->lock);
++  flags = interface->priv->flags;
++  object = interface->priv->object;
+   if (object != NULL)
+     g_object_ref (object);
+-  g_mutex_unlock (&data->interface->priv->lock);
++  g_mutex_unlock (&interface->priv->lock);
+ 
+   /* first check on the enclosing object (if any), then the interface */
+   authorized = TRUE;
+@@ -519,13 +519,13 @@ dispatch_in_thread_func (GTask        *task,
+     {
+       g_signal_emit_by_name (object,
+                              "authorize-method",
+-                             data->interface,
++                             interface,
+                              data->invocation,
+                              &authorized);
+     }
+   if (authorized)
+     {
+-      g_signal_emit (data->interface,
++      g_signal_emit (interface,
+                      signals[G_AUTHORIZE_METHOD_SIGNAL],
+                      0,
+                      data->invocation,
+@@ -627,7 +627,6 @@ g_dbus_interface_method_dispatch_helper (GDBusInterfaceSkeleton       *interface
+       DispatchData *data;
+ 
+       data = g_slice_new0 (DispatchData);
+-      data->interface = interface;
+       data->method_call_func = method_call_func;
+       data->invocation = invocation;
+       data->ref_count = 1;

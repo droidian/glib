@@ -1,0 +1,31 @@
+From: Philip Withnall <pwithnall@endlessos.org>
+Date: Thu, 2 Mar 2023 12:37:48 +0000
+Subject: gdbus: Fix an accidental string freeze break
+
+Commit d982c8607 accidentally broke the string freeze on `glib-2-74` by
+adding a new translatable string.
+
+We can avoid that by reusing an existing string which has a similar
+meaning.
+
+Signed-off-by: Philip Withnall <pwithnall@endlessos.org>
+Bug: https://gitlab.gnome.org/Teams/Translation/Coordination/-/issues/47
+Origin: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3303
+Applied-upstream: 2.74.7, commit:be83335ecae64b0cd7a133966eba42e803cf8695
+---
+ gio/gdbusauth.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/gio/gdbusauth.c b/gio/gdbusauth.c
+index b52a06e..455484d 100644
+--- a/gio/gdbusauth.c
++++ b/gio/gdbusauth.c
+@@ -1042,7 +1042,7 @@ _g_dbus_auth_run_server (GDBusAuth              *auth,
+             g_set_error_literal (error,
+                                  G_IO_ERROR,
+                                  G_IO_ERROR_FAILED,
+-                                 _ ("Unexpected lack of content trying to read a byte"));
++                                 _ ("Unexpected lack of content trying to read a line"));
+           else
+             g_propagate_error (error, local_error);
+           goto out;
