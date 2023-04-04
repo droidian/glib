@@ -1,4 +1,4 @@
-glib2.0 (2.74.6-2) UNRELEASED; urgency=medium
+glib2.0 (2.74.6-2) unstable; urgency=medium
 
   * d/patches: Update to upstream 2.74.x branch commit
     2.74.6-12-ga1e169129, omitting Windows-specific changes
@@ -9,7 +9,7 @@ glib2.0 (2.74.6-2) UNRELEASED; urgency=medium
       if gdb happens to be installed, but access to ptrace and
       /proc/PID/mem is disallowed (GNOME/glib#3307)
 
- -- Simon McVittie <smcv@debian.org>  Tue, 04 Apr 2023 09:48:52 +0100
+ -- Simon McVittie <smcv@debian.org>  Tue, 04 Apr 2023 09:55:32 +0100
 
 glib2.0 (2.74.6-1) unstable; urgency=medium
 
