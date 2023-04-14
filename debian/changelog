@@ -1,3 +1,13 @@
+glib2.0 (2.74.7-1) UNRELEASED; urgency=medium
+
+  * New upstream stable release
+    - Functionally equivalent to 2.74.6-2
+      (other than the version number, the only differences are
+      Windows-specific fixes which do not affect the Debian package)
+    - d/patches: Drop patches that are no longer required
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 14 Apr 2023 15:45:07 +0100
+
 glib2.0 (2.74.6-2) unstable; urgency=medium
 
   * d/patches: Update to upstream 2.74.x branch commit
