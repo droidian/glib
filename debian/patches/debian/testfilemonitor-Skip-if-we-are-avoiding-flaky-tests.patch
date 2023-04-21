@@ -11,7 +11,7 @@ Forwarded: no
  1 file changed, 37 insertions(+), 1 deletion(-)
 
 diff --git a/gio/tests/testfilemonitor.c b/gio/tests/testfilemonitor.c
-index 7274f79..c2ba382 100644
+index 52a5302..99c1dd0 100644
 --- a/gio/tests/testfilemonitor.c
 +++ b/gio/tests/testfilemonitor.c
 @@ -32,6 +32,12 @@ setup (Fixture       *fixture,
