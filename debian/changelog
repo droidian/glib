@@ -1,9 +1,9 @@
-glib2.0 (2.76.2-1) UNRELEASED; urgency=medium
+glib2.0 (2.76.2-1) experimental; urgency=medium
 
   * New upstream release
   * debian/patches: Refresh
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 21 Apr 2023 17:29:25 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 21 Apr 2023 17:29:31 +0200
 
 glib2.0 (2.76.1-1) experimental; urgency=medium
 
