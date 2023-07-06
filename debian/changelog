@@ -1,8 +1,8 @@
-glib2.0 (2.76.4-1) UNRELEASED; urgency=medium
+glib2.0 (2.76.4-1) experimental; urgency=medium
 
   * New upstream release
 
- -- Jeremy Bícha <jbicha@ubuntu.com>  Thu, 06 Jul 2023 12:33:58 -0400
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Thu, 06 Jul 2023 13:31:47 -0400
 
 glib2.0 (2.76.3-1) experimental; urgency=medium
 
