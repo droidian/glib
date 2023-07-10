@@ -29,6 +29,7 @@ libgio-2.0.so.0 libglib2.0-0 #MINVER#
  g_action_map_get_type@Base 2.32.0
  g_action_map_lookup_action@Base 2.32.0
  g_action_map_remove_action@Base 2.32.0
+ g_action_map_remove_action_entries@Base 2.77.0
  g_action_name_is_valid@Base 2.38.0
  g_action_parse_detailed_name@Base 2.38.0
  g_action_print_detailed_name@Base 2.38.0
@@ -896,6 +897,7 @@ libgio-2.0.so.0 libglib2.0-0 #MINVER#
  g_file_move_async@Base 2.72.0
  g_file_move_finish@Base 2.72.0
  g_file_new_build_filename@Base 2.56.0
+ g_file_new_build_filenamev@Base 2.77.0
  g_file_new_for_commandline_arg@Base 2.16.0
  g_file_new_for_commandline_arg_and_cwd@Base 2.36.0
  g_file_new_for_path@Base 2.16.0
@@ -1388,6 +1390,7 @@ libgio-2.0.so.0 libglib2.0-0 #MINVER#
  g_resolver_free_addresses@Base 2.22.0
  g_resolver_free_targets@Base 2.22.0
  g_resolver_get_default@Base 2.22.0
+ g_resolver_get_timeout@Base 2.77.0
  g_resolver_get_type@Base 2.22.0
  g_resolver_lookup_by_address@Base 2.22.0
  g_resolver_lookup_by_address_async@Base 2.22.0
@@ -1409,6 +1412,7 @@ libgio-2.0.so.0 libglib2.0-0 #MINVER#
  g_resolver_record_type_to_rrtype@Base 2.72.1
  g_resolver_records_from_res_query@Base 2.72.0
  g_resolver_set_default@Base 2.22.0
+ g_resolver_set_timeout@Base 2.77.0
  g_resource_enumerate_children@Base 2.32.0
  g_resource_error_get_type@Base 2.32.0
  g_resource_error_quark@Base 2.32.0
@@ -2140,6 +2144,7 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_ascii_xdigit_value@Base 2.12.0
  g_assert_warning@Base 2.12.0
  g_assertion_message@Base 2.16.0
+ g_assertion_message_cmpint@Base 2.77.0
  g_assertion_message_cmpnum@Base 2.16.0
  g_assertion_message_cmpstr@Base 2.16.0
  g_assertion_message_cmpstrv@Base 2.68.0
@@ -3422,6 +3427,7 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_string_insert_unichar@Base 2.12.0
  g_string_new@Base 2.12.0
  g_string_new_len@Base 2.12.0
+ g_string_new_take@Base 2.77.0
  g_string_overwrite@Base 2.14.0
  g_string_overwrite_len@Base 2.14.0
  g_string_prepend@Base 2.12.0
@@ -3575,6 +3581,7 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_timeout_add_once@Base 2.74.0
  g_timeout_add_seconds@Base 2.14.0
  g_timeout_add_seconds_full@Base 2.14.0
+ g_timeout_add_seconds_once@Base 2.77.0
  g_timeout_funcs@Base 2.12.0
  g_timeout_source_new@Base 2.12.0
  g_timeout_source_new_seconds@Base 2.14.0
@@ -3747,6 +3754,7 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_utf8_to_ucs4@Base 2.12.0
  g_utf8_to_ucs4_fast@Base 2.12.0
  g_utf8_to_utf16@Base 2.12.0
+ g_utf8_truncate_middle@Base 2.77.0
  g_utf8_validate@Base 2.12.0
  g_utf8_validate_len@Base 2.60.0
  g_utime@Base 2.18.0
