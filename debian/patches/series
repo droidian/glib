@@ -15,3 +15,5 @@ debian/Add-extra-debug-to-memory-monitor-dbus-test.patch
 debian/tests-Skip-debugcontroller-test.patch
 debian/testfilemonitor-Skip-if-we-are-avoiding-flaky-tests.patch
 debian/gdesktopappinfo-Try-using-x-terminal-emulator-for-Termina.patch
+gkeyfile-Ensure-we-don-t-add-extra-blank-line-above-new-g.patch
+gkeyfile-Skip-group-comment-when-adding-a-new-key-to-a-gr.patch
