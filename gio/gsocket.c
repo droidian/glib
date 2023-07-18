@@ -461,7 +461,7 @@ g_socket_details_from_fd (GSocket *socket)
     struct sockaddr sa;
   } address;
   gint fd;
-  guint addrlen;
+  socklen_t addrlen;
   int value, family;
   int errsv;
 
@@ -503,7 +503,7 @@ g_socket_details_from_fd (GSocket *socket)
   if (addrlen > 0)
     {
       g_assert (G_STRUCT_OFFSET (struct sockaddr, sa_family) +
-		sizeof address.storage.ss_family <= addrlen);
+		(socklen_t) sizeof address.storage.ss_family <= addrlen);
       family = address.storage.ss_family;
     }
   else
@@ -1990,7 +1990,7 @@ g_socket_get_local_address (GSocket  *socket,
     struct sockaddr_storage storage;
     struct sockaddr sa;
   } buffer;
-  guint len = sizeof (buffer);
+  socklen_t len = sizeof (buffer);
 
   g_return_val_if_fail (G_IS_SOCKET (socket), NULL);
 
@@ -2026,7 +2026,7 @@ g_socket_get_remote_address (GSocket  *socket,
     struct sockaddr_storage storage;
     struct sockaddr sa;
   } buffer;
-  guint len = sizeof (buffer);
+  socklen_t len = sizeof (buffer);
 
   g_return_val_if_fail (G_IS_SOCKET (socket), NULL);
 
@@ -2858,6 +2858,9 @@ g_socket_accept (GSocket       *socket,
 		 GCancellable  *cancellable,
 		 GError       **error)
 {
+#ifdef HAVE_ACCEPT4
+  gboolean try_accept4 = TRUE;
+#endif
   GSocket *new_socket;
   gint ret;
 
@@ -2871,7 +2874,28 @@ g_socket_accept (GSocket       *socket,
 
   while (TRUE)
     {
-      if ((ret = accept (socket->priv->fd, NULL, 0)) < 0)
+      gboolean try_accept = TRUE;
+
+#ifdef HAVE_ACCEPT4
+      if (try_accept4)
+        {
+          ret = accept4 (socket->priv->fd, NULL, 0, SOCK_CLOEXEC);
+          if (ret < 0 && errno == ENOSYS)
+            {
+              try_accept4 = FALSE;
+            }
+          else
+            {
+              try_accept = FALSE;
+            }
+        }
+
+      g_assert (try_accept4 || try_accept);
+#endif
+      if (try_accept)
+        ret = accept (socket->priv->fd, NULL, 0);
+
+      if (ret < 0)
 	{
 	  int errsv = get_socket_errno ();
 
@@ -3363,7 +3387,7 @@ g_socket_receive_with_blocking (GSocket       *socket,
  *     pointer, or %NULL
  * @buffer: (array length=size) (element-type guint8) (out caller-allocates):
  *     a buffer to read data into (which should be at least @size bytes long).
- * @size: the number of bytes you want to read from the socket
+ * @size: (in): the number of bytes you want to read from the socket
  * @cancellable: (nullable): a %GCancellable or %NULL
  * @error: #GError for error reporting, or %NULL to ignore.
  *
@@ -4679,7 +4703,7 @@ input_message_from_msghdr (const struct msghdr  *msg,
     GPtrArray *my_messages = NULL;
     struct cmsghdr *cmsg;
 
-    if (msg->msg_controllen >= sizeof (struct cmsghdr))
+    if (msg->msg_controllen >= (socklen_t) sizeof (struct cmsghdr))
       {
         g_assert (message->control_messages != NULL);
         for (cmsg = CMSG_FIRSTHDR (msg);
@@ -6220,7 +6244,7 @@ g_socket_get_option (GSocket  *socket,
 		     gint     *value,
 		     GError  **error)
 {
-  guint size;
+  socklen_t size;
 
   g_return_val_if_fail (G_IS_SOCKET (socket), FALSE);
 

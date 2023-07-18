@@ -1144,6 +1144,10 @@ gvs_tuple_needed_size (GVariantTypeInfo         *type_info,
 
   offset = 0;
 
+  /* We must go through at least one iteration below. If the tuple had no
+   * children, it would have a fixed size. */
+  g_assert (n_children > 0);
+
   for (i = 0; i < n_children; i++)
     {
       guint alignment;
@@ -1644,7 +1648,7 @@ g_variant_serialiser_serialise (GVariantSerialised        serialised,
  *
  * Determines how much memory would be needed to serialize this value.
  *
- * This function is only resonsible for performing calculations for the
+ * This function is only responsible for performing calculations for the
  * top-level container.  @gvs_filler is called on each child of the
  * container in order to determine its size.
  */

@@ -30,17 +30,17 @@ Forwarded: no
  1 file changed, 6 insertions(+)
 
 diff --git a/gio/tests/gdbus-threading.c b/gio/tests/gdbus-threading.c
-index 8323dd2..da1f7e6 100644
+index 755b490..bba070d 100644
 --- a/gio/tests/gdbus-threading.c
 +++ b/gio/tests/gdbus-threading.c
 @@ -679,6 +679,12 @@ main (int   argc,
  
-   g_test_init (&argc, &argv, NULL);
+   g_test_init (&argc, &argv, G_TEST_OPTION_ISOLATE_DIRS, NULL);
  
 +  if (g_getenv ("DEB_ALLOW_FLAKY_TESTS") == NULL)
 +    {
-+      g_print("ok 1 # SKIP all gdbus-threading tests skipped because they are too unreliable (glib#1515)\n");
-+      return 77;
++      g_print("1..0 # SKIP all gdbus-threading tests skipped because they are too unreliable (glib#1515)\n");
++      return 0;
 +    }
 +
    session_bus_up ();

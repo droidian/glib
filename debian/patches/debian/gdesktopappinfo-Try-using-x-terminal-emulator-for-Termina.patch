@@ -1,0 +1,42 @@
+From: Simon McVittie <smcv@debian.org>
+Date: Sat, 4 Feb 2023 18:35:11 +0000
+Subject: gdesktopappinfo: Try using x-terminal-emulator for Terminal=true
+ apps
+
+Debian Policy provides x-terminal-emulator as an interface for launching
+a preferred terminal, for some definition of "preferred". However, the
+x-terminal-emulator alternative is a system-wide choice, so in situations
+where for example a GNOME user and a KDE user share a computer, only one
+of them can have the terminal that will match their desktop environment's
+appearance and behaviour conventions as the x-terminal-emulator.
+
+As a result, we still try to use a GTK-based terminal as a higher
+preference than x-terminal-emulator. This is done on the assumption
+that when apps are launched using GLib interfaces, they are most likely
+to have been launched from a GTK application or GTK-based desktop
+environment, and therefore a GTK-based terminal will be the best fit for
+the desktop environment's conventions and appearance.
+
+I've somewhat arbitrarily sorted x-terminal-emulator as less preferred
+than KDE's Konsole, but more preferred than rxvt and various xterm
+variants which are not associated with a particular desktop environment.
+
+Bug-Debian: https://bugs.debian.org/773915
+Forwarded: not-needed, Debian-specific
+Signed-off-by: Simon McVittie <smcv@debian.org>
+---
+ gio/gdesktopappinfo.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/gio/gdesktopappinfo.c b/gio/gdesktopappinfo.c
+index 1f16132..ab61017 100644
+--- a/gio/gdesktopappinfo.c
++++ b/gio/gdesktopappinfo.c
+@@ -2706,6 +2706,7 @@ prepend_terminal_to_vector (int          *argc,
+     { "xfce4-terminal", "-x" },
+     { "tilix", "-e" },
+     { "konsole", "-e" },
++    { "x-terminal-emulator", "-e" },
+     { "nxterm", "-e" },
+     { "color-xterm", "-e" },
+     { "rxvt", "-e" },

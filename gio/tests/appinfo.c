@@ -16,12 +16,6 @@ test_launch_for_app_info (GAppInfo *appinfo)
   const gchar *path;
   gchar *uri;
 
-  if (g_getenv ("DISPLAY") == NULL || g_getenv ("DISPLAY")[0] == '\0')
-    {
-      g_test_skip ("No DISPLAY set");
-      return;
-    }
-
   success = g_app_info_launch (appinfo, NULL, NULL, &error);
   g_assert_no_error (error);
   g_assert_true (success);
@@ -62,12 +56,7 @@ test_launch (void)
 
   path = g_test_get_filename (G_TEST_BUILT, "appinfo-test.desktop", NULL);
   appinfo = (GAppInfo*)g_desktop_app_info_new_from_filename (path);
-
-  if (appinfo == NULL)
-    {
-      g_test_skip ("appinfo-test binary not installed");
-      return;
-    }
+  g_assert_true (G_IS_APP_INFO (appinfo));
 
   test_launch_for_app_info (appinfo);
   g_object_unref (appinfo);
@@ -226,12 +215,7 @@ test_show_in (void)
 
   path = g_test_get_filename (G_TEST_BUILT, "appinfo-test.desktop", NULL);
   appinfo = (GAppInfo*)g_desktop_app_info_new_from_filename (path);
-
-  if (appinfo == NULL)
-    {
-      g_test_skip ("appinfo-test binary not installed");
-      return;
-    }
+  g_assert_true (G_IS_APP_INFO (appinfo));
 
   g_assert_true (g_app_info_should_show (appinfo));
   g_object_unref (appinfo);

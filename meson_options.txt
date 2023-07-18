@@ -1,13 +1,8 @@
 option('runtime_libdir',
        type : 'string',
        value : '',
-       description : 'install runtime libraries relative to libdir')
-
-option('iconv',
-       type : 'combo',
-       choices : ['auto', 'libc', 'external'],
-       value : 'auto',
-       deprecated: true,)
+       description : 'install runtime libraries relative to libdir',
+       deprecated: true)
 
 option('charsetalias_dir',
        type : 'string',
@@ -18,6 +13,14 @@ option('gio_module_dir',
        type : 'string',
        value : '',
        description : 'load gio modules from this directory (default to \'libdir/gio/modules\' if unset)')
+
+# FIXME: Deliberately not named runstatedir to avoid colliding with
+# https://github.com/mesonbuild/meson/issues/4141; port to that when Meson
+# supports it
+option('runtime_dir',
+       type: 'string',
+       value: '',
+       description: 'Directory for transient runtime state [default: /run]')
 
 option('selinux',
        type : 'feature',

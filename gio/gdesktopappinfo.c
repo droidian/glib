@@ -56,6 +56,7 @@
 #include "gappinfo.h"
 #include "gappinfoprivate.h"
 #include "glocalfilemonitor.h"
+#include "gutilsprivate.h"
 
 #ifdef G_OS_UNIX
 #include "gdocumentportal.h"
@@ -455,6 +456,14 @@ const gchar desktop_key_match_category[N_DESKTOP_KEYS] = {
   [DESKTOP_KEY_Comment]          = 6
 };
 
+typedef enum {
+  /* Lower numbers have higher priority.
+   * Prefix match should put before substring match.
+   */
+  MATCH_TYPE_PREFIX = 1,
+  MATCH_TYPE_SUBSTRING = 2
+} MatchType;
+
 /* Common prefix commands to ignore from Exec= lines */
 const char * const exec_key_match_blocklist[] = {
   "bash",
@@ -536,6 +545,7 @@ struct search_result
 {
   const gchar *app_name;
   gint         category;
+  gint         match_type;
 };
 
 static struct search_result *static_token_results;
@@ -557,13 +567,20 @@ compare_results (gconstpointer a,
   const struct search_result *rb = b;
 
   if (ra->app_name < rb->app_name)
-    return -1;
-
+    {
+      return -1;
+    }
   else if (ra->app_name > rb->app_name)
-    return 1;
-
+    {
+      return 1;
+    }
   else
-    return ra->category - rb->category;
+    {
+      if (ra->category == rb->category)
+        return ra->match_type - rb->match_type;
+
+      return ra->category - rb->category;
+    }
 }
 
 static gint
@@ -573,12 +590,19 @@ compare_categories (gconstpointer a,
   const struct search_result *ra = a;
   const struct search_result *rb = b;
 
+  /* Also compare match types so we can put prefix match in a group while
+   * substring match in another group.
+   */
+  if (ra->category == rb->category)
+    return ra->match_type - rb->match_type;
+
   return ra->category - rb->category;
 }
 
 static void
 add_token_result (const gchar *app_name,
-                  guint16      category)
+                  guint16      category,
+                  guint16      match_type)
 {
   if G_UNLIKELY (static_token_results_size == static_token_results_allocated)
     {
@@ -588,6 +612,7 @@ add_token_result (const gchar *app_name,
 
   static_token_results[static_token_results_size].app_name = app_name;
   static_token_results[static_token_results_size].category = category;
+  static_token_results[static_token_results_size].match_type = match_type;
   static_token_results_size++;
 }
 
@@ -671,10 +696,22 @@ merge_token_results (gboolean first)
                *
                * Category should be the worse of the two (ie:
                * numerically larger).
+               *
+               * Match type should also be the worse, so if an app has two
+               * prefix matches it will has higher priority than one prefix
+               * matches and one substring matches, for example, LibreOffice
+               * Writer should be higher priority than LibreOffice Draw with
+               * `lib w`.
+               *
+               * (This ignores the difference between partly prefix matches and
+               * all substring matches, however most time we just focus on exact
+               * prefix matches, who cares the 10th-20th search results?)
                */
               static_search_results[j].app_name = static_search_results[k].app_name;
               static_search_results[j].category = MAX (static_search_results[k].category,
                                                        static_token_results[i].category);
+              static_search_results[j].match_type = MAX (static_search_results[k].match_type,
+                                                         static_token_results[i].match_type);
               j++;
             }
         }
@@ -1216,6 +1253,8 @@ desktop_file_dir_unindexed_search (DesktopFileDir  *dir,
   GHashTableIter iter;
   gpointer key, value;
 
+  g_assert (search_token != NULL);
+
   if (!dir->memory_index)
     desktop_file_dir_unindexed_setup_search (dir);
 
@@ -1223,13 +1262,24 @@ desktop_file_dir_unindexed_search (DesktopFileDir  *dir,
   while (g_hash_table_iter_next (&iter, &key, &value))
     {
       MemoryIndexEntry *mie = value;
+      const char *p;
+      MatchType match_type;
 
-      if (!g_str_has_prefix (key, search_token))
+      /* strstr(haystack, needle) returns haystack if needle is empty, so if
+       * needle is not empty and return value equals to haystack means a prefix
+       * match.
+       */
+      p = strstr (key, search_token);
+      if (p == NULL)
         continue;
+      else if (p == key && *search_token != '\0')
+        match_type = MATCH_TYPE_PREFIX;
+      else
+        match_type = MATCH_TYPE_SUBSTRING;
 
       while (mie)
         {
-          add_token_result (mie->app_name, mie->match_category);
+          add_token_result (mie->app_name, mie->match_category, match_type);
           mie = mie->next;
         }
     }
@@ -1830,6 +1880,7 @@ g_desktop_app_info_load_from_keyfile (GDesktopAppInfo *info,
   char *type;
   char *try_exec;
   char *exec;
+  char *path;
   gboolean bus_activatable;
 
   start_group = g_key_file_get_start_group (key_file);
@@ -1851,6 +1902,10 @@ g_desktop_app_info_load_from_keyfile (GDesktopAppInfo *info,
     }
   g_free (type);
 
+  path = g_key_file_get_string (key_file,
+                                G_KEY_FILE_DESKTOP_GROUP,
+                                G_KEY_FILE_DESKTOP_KEY_PATH, NULL);
+
   try_exec = g_key_file_get_string (key_file,
                                     G_KEY_FILE_DESKTOP_GROUP,
                                     G_KEY_FILE_DESKTOP_KEY_TRY_EXEC,
@@ -1858,9 +1913,11 @@ g_desktop_app_info_load_from_keyfile (GDesktopAppInfo *info,
   if (try_exec && try_exec[0] != '\0')
     {
       char *t;
-      t = g_find_program_in_path (try_exec);
+      /* Use the desktop file path (if any) as working dir to search program */
+      t = GLIB_PRIVATE_CALL (g_find_program_for_path) (try_exec, NULL, path);
       if (t == NULL)
         {
+          g_free (path);
           g_free (try_exec);
           return FALSE;
         }
@@ -1877,6 +1934,7 @@ g_desktop_app_info_load_from_keyfile (GDesktopAppInfo *info,
       char **argv;
       if (!g_shell_parse_argv (exec, &argc, &argv, NULL))
         {
+          g_free (path);
           g_free (exec);
           g_free (try_exec);
           return FALSE;
@@ -1888,11 +1946,13 @@ g_desktop_app_info_load_from_keyfile (GDesktopAppInfo *info,
           /* Since @exec is not an empty string, there must be at least one
            * argument, so dereferencing argv[0] should return non-NULL. */
           g_assert (argc > 0);
-          t = g_find_program_in_path (argv[0]);
+          /* Use the desktop file path (if any) as working dir to search program */
+          t = GLIB_PRIVATE_CALL (g_find_program_for_path) (argv[0], NULL, path);
           g_strfreev (argv);
 
           if (t == NULL)
             {
+              g_free (path);
               g_free (exec);
               g_free (try_exec);
               return FALSE;
@@ -1912,7 +1972,7 @@ g_desktop_app_info_load_from_keyfile (GDesktopAppInfo *info,
   info->not_show_in = g_key_file_get_string_list (key_file, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_NOT_SHOW_IN, NULL, NULL);
   info->try_exec = try_exec;
   info->exec = exec;
-  info->path = g_key_file_get_string (key_file, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_PATH, NULL);
+  info->path = g_steal_pointer (&path);
   info->terminal = g_key_file_get_boolean (key_file, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_TERMINAL, NULL) != FALSE;
   info->startup_notify = g_key_file_get_boolean (key_file, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_STARTUP_NOTIFY, NULL) != FALSE;
   info->no_fuse = g_key_file_get_boolean (key_file, G_KEY_FILE_DESKTOP_GROUP, "X-GIO-NoFuse", NULL) != FALSE;
@@ -2622,17 +2682,36 @@ expand_application_parameters (GDesktopAppInfo   *info,
 }
 
 static gboolean
-prepend_terminal_to_vector (int    *argc,
-                            char ***argv)
+prepend_terminal_to_vector (int          *argc,
+                            char       ***argv,
+                            const char   *path,
+                            const char   *working_dir)
 {
 #ifndef G_OS_WIN32
   char **real_argv;
-  int real_argc;
-  int i, j;
-  char **term_argv = NULL;
-  int term_argc = 0;
-  char *check;
+  size_t real_argc;
+  size_t i;
+  size_t term_argc;
+  char *found_terminal;
   char **the_argv;
+  const char *term_arg;
+  static const struct {
+    const char *exec;
+    const char *exec_arg;
+  } known_terminals[] = {
+    { "xdg-terminal-exec", NULL },
+    { "kgx", "-e" },
+    { "gnome-terminal", "--" },
+    { "mate-terminal", "-x" },
+    { "xfce4-terminal", "-x" },
+    { "tilix", "-e" },
+    { "konsole", "-e" },
+    { "nxterm", "-e" },
+    { "color-xterm", "-e" },
+    { "rxvt", "-e" },
+    { "dtterm", "-e" },
+    { "xterm", "-e" }
+  };
 
   g_return_val_if_fail (argc != NULL, FALSE);
   g_return_val_if_fail (argv != NULL, FALSE);
@@ -2646,69 +2725,42 @@ prepend_terminal_to_vector (int    *argc,
   /* compute size if not given */
   if (*argc < 0)
     {
-      for (i = 0; the_argv[i] != NULL; i++)
+      for ((*argc) = 0; the_argv[*argc] != NULL; (*argc)++)
         ;
-      *argc = i;
     }
 
-  term_argc = 2;
-  term_argv = g_new0 (char *, 3);
+  for (i = 0, found_terminal = NULL; i < G_N_ELEMENTS (known_terminals); i++)
+    {
+      found_terminal = GLIB_PRIVATE_CALL (g_find_program_for_path) (known_terminals[i].exec,
+                                                                    path, working_dir);
+      if (found_terminal != NULL)
+        {
+          term_arg = known_terminals[i].exec_arg;
+          break;
+        }
+    }
 
-  check = g_find_program_in_path ("gnome-terminal");
-  if (check != NULL)
+  if (found_terminal == NULL)
     {
-      term_argv[0] = check;
-      /* Since 2017, gnome-terminal has preferred `--` over `-x` or `-e`. */
-      term_argv[1] = g_strdup ("--");
+      g_debug ("Couldn’t find a known terminal");
+      return FALSE;
     }
-  else
-    {
-      if (check == NULL)
-        check = g_find_program_in_path ("mate-terminal");
-      if (check == NULL)
-        check = g_find_program_in_path ("xfce4-terminal");
-      if (check != NULL)
-        {
-          term_argv[0] = check;
-          /* Note that gnome-terminal takes -x and
-           * as -e in gnome-terminal is broken we use that. */
-          term_argv[1] = g_strdup ("-x");
-        }
-      else
-        {
-          if (check == NULL)
-            check = g_find_program_in_path ("tilix");
-          if (check == NULL)
-            check = g_find_program_in_path ("konsole");
-          if (check == NULL)
-            check = g_find_program_in_path ("nxterm");
-          if (check == NULL)
-            check = g_find_program_in_path ("color-xterm");
-          if (check == NULL)
-            check = g_find_program_in_path ("rxvt");
-          if (check == NULL)
-            check = g_find_program_in_path ("dtterm");
-          if (check == NULL)
-            check = g_find_program_in_path ("xterm");
-          if (check == NULL)
-            {
-              g_debug ("Couldn’t find a known terminal");
-              g_free (term_argv);
-              return FALSE;
-            }
-          term_argv[0] = check;
-          term_argv[1] = g_strdup ("-e");
-        }
-    }
+
+  /* check if the terminal require an option */
+  term_argc = term_arg ? 2 : 1;
 
   real_argc = term_argc + *argc;
   real_argv = g_new (char *, real_argc + 1);
 
-  for (i = 0; i < term_argc; i++)
-    real_argv[i] = term_argv[i];
+  i = 0;
+  real_argv[i++] = found_terminal;
 
-  for (j = 0; j < *argc; j++, i++)
-    real_argv[i] = (char *)the_argv[j];
+  if (term_arg)
+    real_argv[i++] = g_strdup (term_arg);
+
+  g_assert (i == term_argc);
+  for (int j = 0; j < *argc; j++)
+    real_argv[i++] = the_argv[j];
 
   real_argv[i] = NULL;
 
@@ -2716,9 +2768,6 @@ prepend_terminal_to_vector (int    *argc,
   *argv = real_argv;
   *argc = real_argc;
 
-  /* we use g_free here as we sucked all the inner strings
-   * out from it into real_argv */
-  g_free (term_argv);
   return TRUE;
 #else
   return FALSE;
@@ -2885,7 +2934,9 @@ g_desktop_app_info_launch_uris_with_spawn (GDesktopAppInfo            *info,
         launched_uris = g_list_prepend (launched_uris, iter->data);
       launched_uris = g_list_reverse (launched_uris);
 
-      if (info->terminal && !prepend_terminal_to_vector (&argc, &argv))
+      if (info->terminal && !prepend_terminal_to_vector (&argc, &argv,
+                                                         g_environ_getenv (envp, "PATH"),
+                                                         info->path))
         {
           g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_FAILED,
                                _("Unable to find terminal required for application"));
@@ -2909,12 +2960,55 @@ g_desktop_app_info_launch_uris_with_spawn (GDesktopAppInfo            *info,
                                                                   G_APP_INFO (info),
                                                                   launched_files);
               if (sn_id)
-                envp = g_environ_setenv (envp, "DESKTOP_STARTUP_ID", sn_id, TRUE);
+                {
+                  envp = g_environ_setenv (envp, "DESKTOP_STARTUP_ID", sn_id, TRUE);
+                  envp = g_environ_setenv (envp, "XDG_ACTIVATION_TOKEN", sn_id, TRUE);
+                }
             }
 
           g_list_free_full (launched_files, g_object_unref);
 
           emit_launch_started (launch_context, info, sn_id);
+        }
+
+      g_assert (argc > 0);
+
+      if (!g_path_is_absolute (argv[0]) ||
+          !g_file_test (argv[0], G_FILE_TEST_IS_EXECUTABLE) ||
+          g_file_test (argv[0], G_FILE_TEST_IS_DIR))
+        {
+          char *program = g_steal_pointer (&argv[0]);
+          char *program_path = NULL;
+
+          if (!g_path_is_absolute (program))
+            {
+              const char *env_path = g_environ_getenv (envp, "PATH");
+
+              program_path = GLIB_PRIVATE_CALL (g_find_program_for_path) (program,
+                                                                          env_path,
+                                                                          info->path);
+            }
+
+          if (program_path)
+            {
+              argv[0] = g_steal_pointer (&program_path);
+            }
+          else
+            {
+              if (sn_id)
+                g_app_launch_context_launch_failed (launch_context, sn_id);
+
+              g_set_error (error, G_SPAWN_ERROR, G_SPAWN_ERROR_NOENT,
+                           _("Program ‘%s’ not found in $PATH"),
+                           program);
+
+              g_free (program);
+              g_clear_pointer (&sn_id, g_free);
+              g_clear_list (&launched_uris, NULL);
+              goto out;
+            }
+
+          g_free (program);
         }
 
       if (g_once_init_enter (&gio_launch_desktop_path))
@@ -3046,7 +3140,10 @@ g_desktop_app_info_make_platform_data (GDesktopAppInfo   *info,
 
           sn_id = g_app_launch_context_get_startup_notify_id (launch_context, G_APP_INFO (info), launched_files);
           if (sn_id)
-            g_variant_builder_add (&builder, "{sv}", "desktop-startup-id", g_variant_new_take_string (sn_id));
+            {
+              g_variant_builder_add (&builder, "{sv}", "desktop-startup-id", g_variant_new_string (sn_id));
+              g_variant_builder_add (&builder, "{sv}", "activation-token", g_variant_new_take_string (g_steal_pointer (&sn_id)));
+            }
         }
 
       g_list_free_full (launched_files, g_object_unref);
@@ -3060,7 +3157,7 @@ typedef struct
   GDesktopAppInfo     *info; /* (owned) */
   GAppLaunchContext   *launch_context; /* (owned) (nullable) */
   GAsyncReadyCallback  callback;
-  gchar               *startup_id; /* (owned) */
+  gchar               *startup_id; /* (owned) (nullable) */
   gpointer             user_data;
 } LaunchUrisWithDBusData;
 
@@ -3085,7 +3182,10 @@ launch_uris_with_dbus_signal_cb (GObject      *object,
   if (data->launch_context)
     {
       if (g_task_had_error (G_TASK (result)))
-        g_app_launch_context_launch_failed (data->launch_context, data->startup_id);
+        {
+          if (data->startup_id != NULL)
+            g_app_launch_context_launch_failed (data->launch_context, data->startup_id);
+        }
       else
         {
           GVariant *platform_data;
@@ -3455,11 +3555,11 @@ g_desktop_app_info_launch (GAppInfo           *appinfo,
  * @uris: (element-type utf8): List of URIs
  * @launch_context: (nullable): a #GAppLaunchContext
  * @spawn_flags: #GSpawnFlags, used for each process
- * @user_setup: (scope async) (nullable): a #GSpawnChildSetupFunc, used once
+ * @user_setup: (scope async) (nullable) (closure user_setup_data): a #GSpawnChildSetupFunc, used once
  *     for each process.
- * @user_setup_data: (closure user_setup) (nullable): User data for @user_setup
- * @pid_callback: (scope call) (nullable): Callback for child processes
- * @pid_callback_data: (closure pid_callback) (nullable): User data for @callback
+ * @user_setup_data: User data for @user_setup
+ * @pid_callback: (scope call) (nullable) (closure pid_callback_data): Callback for child processes
+ * @pid_callback_data: User data for @callback
  * @stdin_fd: file descriptor to use for child's stdin, or -1
  * @stdout_fd: file descriptor to use for child's stdout, or -1
  * @stderr_fd: file descriptor to use for child's stderr, or -1
@@ -4728,9 +4828,10 @@ g_desktop_app_info_search (const gchar *search_string)
 {
   gchar **search_tokens;
   gint last_category = -1;
+  gint last_match_type = -1;
   gchar ***results;
-  gint n_categories = 0;
-  gint start_of_category;
+  gint n_groups = 0;
+  gint start_of_group;
   gint i, j;
   guint k;
 
@@ -4752,36 +4853,41 @@ g_desktop_app_info_search (const gchar *search_string)
 
   sort_total_search_results ();
 
-  /* Count the total number of unique categories */
+  /* Count the total number of unique categories and match types */
   for (i = 0; i < static_total_results_size; i++)
-    if (static_total_results[i].category != last_category)
+    if (static_total_results[i].category != last_category ||
+        static_total_results[i].match_type != last_match_type)
       {
         last_category = static_total_results[i].category;
-        n_categories++;
+        last_match_type = static_total_results[i].match_type;
+        n_groups++;
       }
 
-  results = g_new (gchar **, n_categories + 1);
+  results = g_new (gchar **, n_groups + 1);
 
   /* Start loading into the results list */
-  start_of_category = 0;
-  for (i = 0; i < n_categories; i++)
+  start_of_group = 0;
+  for (i = 0; i < n_groups; i++)
     {
-      gint n_items_in_category = 0;
+      gint n_items_in_group = 0;
       gint this_category;
+      gint this_match_type;
       gint j;
 
-      this_category = static_total_results[start_of_category].category;
+      this_category = static_total_results[start_of_group].category;
+      this_match_type = static_total_results[start_of_group].match_type;
 
-      while (start_of_category + n_items_in_category < static_total_results_size &&
-             static_total_results[start_of_category + n_items_in_category].category == this_category)
-        n_items_in_category++;
+      while (start_of_group + n_items_in_group < static_total_results_size &&
+             static_total_results[start_of_group + n_items_in_group].category == this_category &&
+             static_total_results[start_of_group + n_items_in_group].match_type == this_match_type)
+        n_items_in_group++;
 
-      results[i] = g_new (gchar *, n_items_in_category + 1);
-      for (j = 0; j < n_items_in_category; j++)
-        results[i][j] = g_strdup (static_total_results[start_of_category + j].app_name);
+      results[i] = g_new (gchar *, n_items_in_group + 1);
+      for (j = 0; j < n_items_in_group; j++)
+        results[i][j] = g_strdup (static_total_results[start_of_group + j].app_name);
       results[i][j] = NULL;
 
-      start_of_category += n_items_in_category;
+      start_of_group += n_items_in_group;
     }
   results[i] = NULL;
 

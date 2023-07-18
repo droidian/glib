@@ -38,6 +38,9 @@ if get_option('gtk_doc')
     'gutilsprivate.h',
     'gvalgrind.h',
     'dirent.h',
+    'glib-unixprivate.h',
+    'glib-visibility.h',
+    'gmodule-visibility.h',
   ]
 
   docpath = join_paths(glib_datadir, 'gtk-doc', 'html')
@@ -49,13 +52,20 @@ if get_option('gtk_doc')
     configuration: version_conf
   )
 
+  configure_file(
+    input: 'glib-sections.txt.in',
+    output: 'glib-sections.txt',
+    command: [gen_visibility_macros, meson.project_version(), 'doc-sections', '@INPUT@', '@OUTPUT@'],
+  )
+
   gnome.gtkdoc('glib',
                main_xml : 'glib-docs.xml',
                namespace : 'g',
                mode : 'none',
                src_dir : [ 'glib', 'gmodule' ],
                dependencies : libglib_dep,
-               scan_args : gtkdoc_common_scan_args + [
+               scan_args : [
+                 '--ignore-decorators=' + ignore_decorators + '|' + ignore_decorators.replace('GLIB', 'GMODULE'),
                  '--ignore-headers=' + ' '.join(ignore_headers),
                ],
                content_files : [
@@ -101,4 +111,37 @@ if get_option('man')
       install: true,
       install_dir: man1_dir)
   endforeach
+endif
+
+# GVariant specification is currently standalone
+rst2html5 = find_program('rst2html5', 'rst2html5.py', required: false)
+
+if rst2html5.found()
+  spec_path = glib_datadir / 'doc' / 'glib-2.0'
+
+  figures = files(
+    'gvariant-byte-boundaries.svg',
+    'gvariant-integer-and-string-structure.svg',
+    'gvariant-integer-array.svg',
+    'gvariant-string-array.svg',
+  )
+
+  custom_target('gvariant-specification-1.0',
+    input: 'gvariant-specification-1.0.rst',
+    output: 'gvariant-specification-1.0.html',
+    command: [
+      rst2html5,
+      '@INPUT@',
+    ],
+    capture: true,
+    install: true,
+    install_dir: spec_path,
+    install_tag: 'doc',
+    depend_files: figures,
+  )
+
+  install_data(figures,
+    install_dir : spec_path,
+    install_tag : 'doc',
+  )
 endif

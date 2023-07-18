@@ -16,10 +16,10 @@ Forwarded: not-needed
  1 file changed, 7 insertions(+)
 
 diff --git a/gio/tests/gdbus-server-auth.c b/gio/tests/gdbus-server-auth.c
-index c683f61..8b230c3 100644
+index 319a994..e7f112a 100644
 --- a/gio/tests/gdbus-server-auth.c
 +++ b/gio/tests/gdbus-server-auth.c
-@@ -326,6 +326,13 @@ do_test_server_auth (InteropFlags flags)
+@@ -327,6 +327,13 @@ do_test_server_auth (InteropFlags flags)
      }
  #endif
  

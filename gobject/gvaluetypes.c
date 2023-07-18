@@ -1108,7 +1108,7 @@ g_value_set_string_take_ownership (GValue *value,
 /**
  * g_value_take_string:
  * @value: a valid #GValue of type %G_TYPE_STRING
- * @v_string: (nullable): string to take ownership of
+ * @v_string: (nullable) (transfer full): string to take ownership of
  *
  * Sets the contents of a %G_TYPE_STRING #GValue to @v_string.
  *
@@ -1133,7 +1133,7 @@ g_value_take_string (GValue *value,
  *
  * Get the contents of a %G_TYPE_STRING #GValue.
  *
- * Returns: string content of @value
+ * Returns: (nullable) (transfer none): string content of @value
  */
 const gchar*
 g_value_get_string (const GValue *value)
@@ -1149,7 +1149,7 @@ g_value_get_string (const GValue *value)
  *
  * Get a copy the contents of a %G_TYPE_STRING #GValue.
  *
- * Returns: a newly allocated copy of the string content of @value
+ * Returns: (nullable) (transfer full): a newly allocated copy of the string content of @value
  */
 gchar*
 g_value_dup_string (const GValue *value)

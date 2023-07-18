@@ -1,10 +1,8 @@
-tests-Don-t-rely-on-output-locale-of-sort-in-spawn-test.patch
 01_gettext-desktopfiles.patch
 0001-timer-test-use-volatile-for-locals.patch
 gwakeuptest-Be-less-parallel-unless-invoked-with-m-slow.patch
 debian/02_gettext-desktopfiles-ubuntu.patch
 debian/03_disble_glib_compile_schemas_warning.patch
-debian/06_thread_test_ignore_prctl_fail.patch
 debian/closures-test-Skip-on-arm-unless-flaky-tests-are-allowed.patch
 debian/Disable-some-tests-on-slow-architectures-which-keep-faili.patch
 debian/Skip-test-which-performs-some-unreliable-floating-point-c.patch
@@ -15,5 +13,5 @@ debian/gdbus-server-auth-Normally-skip-flaky-DBUS_COOKIE_SHA1-te.patch
 debian/Skip-memory-monitor-dbus-test-if-not-specifically-request.patch
 debian/Add-extra-debug-to-memory-monitor-dbus-test.patch
 debian/tests-Skip-debugcontroller-test.patch
-debian/gdesktopappinfo-Recognize-gnome-console-as-a-terminal-app.patch
 debian/testfilemonitor-Skip-if-we-are-avoiding-flaky-tests.patch
+debian/gdesktopappinfo-Try-using-x-terminal-emulator-for-Termina.patch

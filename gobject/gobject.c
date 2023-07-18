@@ -333,8 +333,8 @@ g_object_notify_queue_thaw (GObject            *object,
   if (G_UNLIKELY (nqueue->freeze_count == 0))
     {
       G_UNLOCK (notify_lock);
-      g_warning ("%s: property-changed notification for %s(%p) is not frozen",
-                 G_STRFUNC, G_OBJECT_TYPE_NAME (object), object);
+      g_critical ("%s: property-changed notification for %s(%p) is not frozen",
+                  G_STRFUNC, G_OBJECT_TYPE_NAME (object), object);
       return;
     }
 
@@ -598,9 +598,9 @@ install_property_internal (GType       g_type,
 
   if (g_param_spec_pool_lookup (pspec_pool, pspec->name, g_type, FALSE))
     {
-      g_warning ("When installing property: type '%s' already has a property named '%s'",
-		 g_type_name (g_type),
-		 pspec->name);
+      g_critical ("When installing property: type '%s' already has a property named '%s'",
+		  g_type_name (g_type),
+		  pspec->name);
       g_param_spec_unref (pspec);
       return FALSE;
     }
@@ -1096,8 +1096,8 @@ g_object_class_override_property (GObjectClass *oclass,
 
   if (!overridden)
     {
-      g_warning ("%s: Can't find property to override for '%s::%s'",
-		 G_STRFUNC, G_OBJECT_CLASS_NAME (oclass), name);
+      g_critical ("%s: Can't find property to override for '%s::%s'",
+		  G_STRFUNC, G_OBJECT_CLASS_NAME (oclass), name);
       return;
     }
 
@@ -1469,8 +1469,16 @@ g_object_freeze_notify (GObject *object)
 {
   g_return_if_fail (G_IS_OBJECT (object));
 
-  if (g_atomic_int_get (&object->ref_count) == 0)
-    return;
+#ifndef G_DISABLE_CHECKS
+  if (G_UNLIKELY (g_atomic_int_get (&object->ref_count) == 0))
+    {
+      g_critical ("Attempting to freeze the notification queue for object %s[%p]; "
+                  "Property notification does not work during instance finalization.",
+                  G_OBJECT_TYPE_NAME (object),
+                  object);
+      return;
+    }
+#endif
 
   g_object_ref (object);
   g_object_notify_queue_freeze (object, FALSE);
@@ -1586,10 +1594,10 @@ g_object_notify (GObject     *object,
 				    TRUE);
 
   if (!pspec)
-    g_warning ("%s: object class '%s' has no property named '%s'",
-	       G_STRFUNC,
-	       G_OBJECT_TYPE_NAME (object),
-	       property_name);
+    g_critical ("%s: object class '%s' has no property named '%s'",
+	        G_STRFUNC,
+	        G_OBJECT_TYPE_NAME (object),
+	        property_name);
   else
     g_object_notify_by_spec_internal (object, pspec);
 }
@@ -1670,9 +1678,19 @@ g_object_thaw_notify (GObject *object)
   GObjectNotifyQueue *nqueue;
   
   g_return_if_fail (G_IS_OBJECT (object));
-  if (g_atomic_int_get (&object->ref_count) == 0)
-    return;
-  
+
+#ifndef G_DISABLE_CHECKS
+  if (G_UNLIKELY (g_atomic_int_get (&object->ref_count) == 0))
+    {
+      g_critical ("Attempting to thaw the notification queue for object %s[%p]; "
+                  "Property notification does not work during instance finalization.",
+                  G_OBJECT_TYPE_NAME (object),
+                  object);
+      return;
+    }
+#endif
+
+
   g_object_ref (object);
 
   /* FIXME: Freezing is the only way to get at the notify queue.
@@ -1801,19 +1819,19 @@ object_set_property (GObject             *object,
       g_value_init (&tmp_value, pspec->value_type);
 
       if (!g_value_transform (value, &tmp_value))
-        g_warning ("unable to set property '%s' of type '%s' from value of type '%s'",
-                   pspec->name,
-                   g_type_name (pspec->value_type),
-                   G_VALUE_TYPE_NAME (value));
+        g_critical ("unable to set property '%s' of type '%s' from value of type '%s'",
+                    pspec->name,
+                    g_type_name (pspec->value_type),
+                    G_VALUE_TYPE_NAME (value));
       else if (g_param_value_validate (pspec, &tmp_value) && !(pspec->flags & G_PARAM_LAX_VALIDATION))
         {
           gchar *contents = g_strdup_value_contents (value);
 
-          g_warning ("value \"%s\" of type '%s' is invalid or out of range for property '%s' of type '%s'",
-                     contents,
-                     G_VALUE_TYPE_NAME (value),
-                     pspec->name,
-                     g_type_name (pspec->value_type));
+          g_critical ("value \"%s\" of type '%s' is invalid or out of range for property '%s' of type '%s'",
+                      contents,
+                      G_VALUE_TYPE_NAME (value),
+                      pspec->name,
+                      g_type_name (pspec->value_type));
           g_free (contents);
         }
       else
@@ -1992,7 +2010,7 @@ g_object_get_type (void)
  * @object_type: the type id of the #GObject subtype to instantiate
  * @first_property_name: the name of the first property
  * @...: the value of the first property, followed optionally by more
- *  name/value pairs, followed by %NULL
+ *   name/value pairs, followed by %NULL
  *
  * Creates a new instance of a #GObject subtype and sets its properties.
  *
@@ -2002,22 +2020,22 @@ g_object_get_type (void)
  * per g_type_create_instance().
  *
  * Note that in C, small integer types in variable argument lists are promoted
- * up to #gint or #guint as appropriate, and read back accordingly. #gint is 32
- * bits on every platform on which GLib is currently supported. This means that
- * you can use C expressions of type #gint with g_object_new() and properties of
- * type #gint or #guint or smaller. Specifically, you can use integer literals
+ * up to `gint` or `guint` as appropriate, and read back accordingly. `gint` is
+ * 32 bits on every platform on which GLib is currently supported. This means that
+ * you can use C expressions of type `gint` with g_object_new() and properties of
+ * type `gint` or `guint` or smaller. Specifically, you can use integer literals
  * with these property types.
  *
- * When using property types of #gint64 or #guint64, you must ensure that the
+ * When using property types of `gint64` or `guint64`, you must ensure that the
  * value that you provide is 64 bit. This means that you should use a cast or
  * make use of the %G_GINT64_CONSTANT or %G_GUINT64_CONSTANT macros.
  *
- * Similarly, #gfloat is promoted to #gdouble, so you must ensure that the value
- * you provide is a #gdouble, even for a property of type #gfloat.
+ * Similarly, `gfloat` is promoted to `gdouble`, so you must ensure that the value
+ * you provide is a `gdouble`, even for a property of type `gfloat`.
  *
  * Since GLib 2.72, all #GObjects are guaranteed to be aligned to at least the
- * alignment of the largest basic GLib type (typically this is #guint64 or
- * #gdouble). If you need larger alignment for an element in a #GObject, you
+ * alignment of the largest basic GLib type (typically this is `guint64` or
+ * `gdouble`). If you need larger alignment for an element in a #GObject, you
  * should allocate it on the heap (aligned), or arrange for your #GObject to be
  * appropriately padded.
  *
@@ -2639,20 +2657,20 @@ g_object_set_is_valid_property (GObject         *object,
 {
   if (G_UNLIKELY (pspec == NULL))
     {
-      g_warning ("%s: object class '%s' has no property named '%s'",
-                 G_STRFUNC, G_OBJECT_TYPE_NAME (object), property_name);
+      g_critical ("%s: object class '%s' has no property named '%s'",
+                  G_STRFUNC, G_OBJECT_TYPE_NAME (object), property_name);
       return FALSE;
     }
   if (G_UNLIKELY (!(pspec->flags & G_PARAM_WRITABLE)))
     {
-      g_warning ("%s: property '%s' of object class '%s' is not writable",
-                 G_STRFUNC, pspec->name, G_OBJECT_TYPE_NAME (object));
+      g_critical ("%s: property '%s' of object class '%s' is not writable",
+                  G_STRFUNC, pspec->name, G_OBJECT_TYPE_NAME (object));
       return FALSE;
     }
   if (G_UNLIKELY (((pspec->flags & G_PARAM_CONSTRUCT_ONLY) && !object_in_construction (object))))
     {
-      g_warning ("%s: construct property \"%s\" for object '%s' can't be set after construction",
-                 G_STRFUNC, pspec->name, G_OBJECT_TYPE_NAME (object));
+      g_critical ("%s: construct property \"%s\" for object '%s' can't be set after construction",
+                  G_STRFUNC, pspec->name, G_OBJECT_TYPE_NAME (object));
       return FALSE;
     }
   return TRUE;
@@ -2754,7 +2772,7 @@ g_object_set_valist (GObject	 *object,
       G_VALUE_COLLECT_INIT2 (&value, vtab, pspec->value_type, var_args, G_VALUE_NOCOPY_CONTENTS, &error);
       if (error)
 	{
-	  g_warning ("%s: %s", G_STRFUNC, error);
+	  g_critical ("%s: %s", G_STRFUNC, error);
 	  g_free (error);
           g_value_unset (&value);
 	  break;
@@ -2784,14 +2802,14 @@ g_object_get_is_valid_property (GObject          *object,
 {
   if (G_UNLIKELY (pspec == NULL))
     {
-      g_warning ("%s: object class '%s' has no property named '%s'",
-                 G_STRFUNC, G_OBJECT_TYPE_NAME (object), property_name);
+      g_critical ("%s: object class '%s' has no property named '%s'",
+                  G_STRFUNC, G_OBJECT_TYPE_NAME (object), property_name);
       return FALSE;
     }
   if (G_UNLIKELY (!(pspec->flags & G_PARAM_READABLE)))
     {
-      g_warning ("%s: property '%s' of object class '%s' is not readable",
-                 G_STRFUNC, pspec->name, G_OBJECT_TYPE_NAME (object));
+      g_critical ("%s: property '%s' of object class '%s' is not readable",
+                  G_STRFUNC, pspec->name, G_OBJECT_TYPE_NAME (object));
       return FALSE;
     }
   return TRUE;
@@ -2893,7 +2911,7 @@ g_object_get_valist (GObject	 *object,
       G_VALUE_LCOPY (&value, var_args, 0, &error);
       if (error)
 	{
-	  g_warning ("%s: %s", G_STRFUNC, error);
+	  g_critical ("%s: %s", G_STRFUNC, error);
 	  g_free (error);
 	  g_value_unset (&value);
 	  break;
@@ -3061,10 +3079,10 @@ g_object_get_property (GObject	   *object,
         }
       else if (!g_value_type_transformable (pspec->value_type, G_VALUE_TYPE (value)))
         {
-          g_warning ("%s: can't retrieve property '%s' of type '%s' as value of type '%s'",
-                     G_STRFUNC, pspec->name,
-                     g_type_name (pspec->value_type),
-                     G_VALUE_TYPE_NAME (value));
+          g_critical ("%s: can't retrieve property '%s' of type '%s' as value of type '%s'",
+                      G_STRFUNC, pspec->name,
+                      g_type_name (pspec->value_type),
+                      G_VALUE_TYPE_NAME (value));
           g_object_unref (object);
           return;
         }
@@ -3176,7 +3194,7 @@ g_object_connect (gpointer     _object,
 				 G_CONNECT_SWAPPED | G_CONNECT_AFTER);
       else
 	{
-	  g_warning ("%s: invalid signal spec \"%s\"", G_STRFUNC, signal_spec);
+	  g_critical ("%s: invalid signal spec \"%s\"", G_STRFUNC, signal_spec);
 	  break;
 	}
       signal_spec = va_arg (var_args, gchar*);
@@ -3233,17 +3251,17 @@ g_object_disconnect (gpointer     _object,
 	}
       else
 	{
-	  g_warning ("%s: invalid signal spec \"%s\"", G_STRFUNC, signal_spec);
+	  g_critical ("%s: invalid signal spec \"%s\"", G_STRFUNC, signal_spec);
 	  break;
 	}
 
       if ((mask & G_SIGNAL_MATCH_ID) &&
 	  !g_signal_parse_name (signal_spec, G_OBJECT_TYPE (object), &sid, &detail, FALSE))
-	g_warning ("%s: invalid signal name \"%s\"", G_STRFUNC, signal_spec);
+	g_critical ("%s: invalid signal name \"%s\"", G_STRFUNC, signal_spec);
       else if (!g_signal_handlers_disconnect_matched (object, mask | (detail ? G_SIGNAL_MATCH_DETAIL : 0),
 						      sid, detail,
 						      NULL, (gpointer)callback, data))
-	g_warning ("%s: signal handler %p(%p) is not connected", G_STRFUNC, callback, data);
+	g_critical ("%s: signal handler %p(%p) is not connected", G_STRFUNC, callback, data);
       signal_spec = va_arg (var_args, gchar*);
     }
   va_end (var_args);
@@ -3357,7 +3375,7 @@ g_object_weak_unref (GObject    *object,
     }
   G_UNLOCK (weak_refs_mutex);
   if (!found_one)
-    g_warning ("%s: couldn't find weak ref %p(%p)", G_STRFUNC, notify, data);
+    g_critical ("%s: couldn't find weak ref %p(%p)", G_STRFUNC, notify, data);
 }
 
 /**
@@ -3731,7 +3749,7 @@ g_object_remove_toggle_ref (GObject       *object,
   if (found_one)
     g_object_unref (object);
   else
-    g_warning ("%s: couldn't find toggle ref %p(%p)", G_STRFUNC, notify, data);
+    g_critical ("%s: couldn't find toggle ref %p(%p)", G_STRFUNC, notify, data);
 }
 
 /**
@@ -3789,23 +3807,29 @@ g_object_unref (gpointer _object)
   g_return_if_fail (G_IS_OBJECT (object));
   
   /* here we want to atomically do: if (ref_count>1) { ref_count--; return; } */
- retry_atomic_decrement1:
   old_ref = g_atomic_int_get (&object->ref_count);
-  if (old_ref > 1)
+ retry_atomic_decrement1:
+  while (old_ref > 1)
     {
       /* valid if last 2 refs are owned by this call to unref and the toggle_ref */
-      gboolean has_toggle_ref = OBJECT_HAS_TOGGLE_REF (object);
 
-      if (!g_atomic_int_compare_and_exchange ((int *)&object->ref_count, old_ref, old_ref - 1))
-	goto retry_atomic_decrement1;
+      if (!g_atomic_int_compare_and_exchange_full ((int *)&object->ref_count,
+                                                   old_ref, old_ref - 1,
+                                                   &old_ref))
+        continue;
 
       TRACE (GOBJECT_OBJECT_UNREF(object,G_TYPE_FROM_INSTANCE(object),old_ref));
 
       /* if we went from 2->1 we need to notify toggle refs if any */
-      if (old_ref == 2 && has_toggle_ref) /* The last ref being held in this case is owned by the toggle_ref */
-	toggle_refs_notify (object, TRUE);
+      if (old_ref == 2 && OBJECT_HAS_TOGGLE_REF (object))
+        {
+          /* The last ref being held in this case is owned by the toggle_ref */
+          toggle_refs_notify (object, TRUE);
+        }
+
+      return;
     }
-  else
+
     {
       GSList **weak_locations;
       GObjectNotifyQueue *nqueue;
@@ -3868,24 +3892,29 @@ g_object_unref (gpointer _object)
       TRACE (GOBJECT_OBJECT_DISPOSE_END(object,G_TYPE_FROM_INSTANCE(object), 1));
 
       /* may have been re-referenced meanwhile */
-    retry_atomic_decrement2:
       old_ref = g_atomic_int_get ((int *)&object->ref_count);
-      if (old_ref > 1)
+
+      while (old_ref > 1)
         {
           /* valid if last 2 refs are owned by this call to unref and the toggle_ref */
-          gboolean has_toggle_ref = OBJECT_HAS_TOGGLE_REF (object);
 
-          if (!g_atomic_int_compare_and_exchange ((int *)&object->ref_count, old_ref, old_ref - 1))
-	    goto retry_atomic_decrement2;
+          if (!g_atomic_int_compare_and_exchange_full ((int *)&object->ref_count,
+                                                       old_ref, old_ref - 1,
+                                                       &old_ref))
+            continue;
+
+          TRACE (GOBJECT_OBJECT_UNREF (object, G_TYPE_FROM_INSTANCE (object), old_ref));
 
           /* emit all notifications that have been queued during dispose() */
           g_object_notify_queue_thaw (object, nqueue);
 
-	  TRACE (GOBJECT_OBJECT_UNREF(object,G_TYPE_FROM_INSTANCE(object),old_ref));
-
           /* if we went from 2->1 we need to notify toggle refs if any */
-          if (old_ref == 2 && has_toggle_ref) /* The last ref being held in this case is owned by the toggle_ref */
-	    toggle_refs_notify (object, TRUE);
+          if (old_ref == 2 && OBJECT_HAS_TOGGLE_REF (object) &&
+              g_atomic_int_get ((int *)&object->ref_count) == 1)
+            {
+              /* The last ref being held in this case is owned by the toggle_ref */
+              toggle_refs_notify (object, TRUE);
+            }
 
 	  return;
 	}
@@ -4367,18 +4396,15 @@ g_value_object_init (GValue *value)
 static void
 g_value_object_free_value (GValue *value)
 {
-  if (value->data[0].v_pointer)
-    g_object_unref (value->data[0].v_pointer);
+  g_clear_object ((GObject**) &value->data[0].v_pointer);
 }
 
 static void
 g_value_object_copy_value (const GValue *src_value,
 			   GValue	*dest_value)
 {
-  if (src_value->data[0].v_pointer)
-    dest_value->data[0].v_pointer = g_object_ref (src_value->data[0].v_pointer);
-  else
-    dest_value->data[0].v_pointer = NULL;
+  g_set_object ((GObject**) &dest_value->data[0].v_pointer,
+                src_value->data[0].v_pointer);
 }
 
 static void
@@ -4470,24 +4496,23 @@ g_value_set_object (GValue   *value,
 		    gpointer  v_object)
 {
   GObject *old;
-	
+
   g_return_if_fail (G_VALUE_HOLDS_OBJECT (value));
 
-  old = value->data[0].v_pointer;
-  
+  if G_UNLIKELY (value->data[0].v_pointer == v_object)
+    return;
+
+  old = g_steal_pointer (&value->data[0].v_pointer);
+
   if (v_object)
     {
       g_return_if_fail (G_IS_OBJECT (v_object));
       g_return_if_fail (g_value_type_compatible (G_OBJECT_TYPE (v_object), G_VALUE_TYPE (value)));
 
-      value->data[0].v_pointer = v_object;
-      g_object_ref (value->data[0].v_pointer);
+      value->data[0].v_pointer = g_object_ref (v_object);
     }
-  else
-    value->data[0].v_pointer = NULL;
-  
-  if (old)
-    g_object_unref (old);
+
+  g_clear_object (&old);
 }
 
 /**
@@ -4527,18 +4552,14 @@ g_value_take_object (GValue  *value,
 {
   g_return_if_fail (G_VALUE_HOLDS_OBJECT (value));
 
-  if (value->data[0].v_pointer)
-    {
-      g_object_unref (value->data[0].v_pointer);
-      value->data[0].v_pointer = NULL;
-    }
+  g_clear_object ((GObject **) &value->data[0].v_pointer);
 
   if (v_object)
     {
       g_return_if_fail (G_IS_OBJECT (v_object));
       g_return_if_fail (g_value_type_compatible (G_OBJECT_TYPE (v_object), G_VALUE_TYPE (value)));
 
-      value->data[0].v_pointer = v_object; /* we take over the reference count */
+      value->data[0].v_pointer = g_steal_pointer (&v_object);
     }
 }
 
@@ -4548,7 +4569,7 @@ g_value_take_object (GValue  *value,
  * 
  * Get the contents of a %G_TYPE_OBJECT derived #GValue.
  * 
- * Returns: (type GObject.Object) (transfer none): object contents of @value
+ * Returns: (type GObject.Object) (transfer none) (nullable): object contents of @value
  */
 gpointer
 g_value_get_object (const GValue *value)
@@ -4566,7 +4587,7 @@ g_value_get_object (const GValue *value)
  * its reference count. If the contents of the #GValue are %NULL, then
  * %NULL will be returned.
  *
- * Returns: (type GObject.Object) (transfer full): object content of @value,
+ * Returns: (type GObject.Object) (transfer full) (nullable): object content of @value,
  *          should be unreferenced when no longer needed.
  */
 gpointer

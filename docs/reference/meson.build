@@ -37,9 +37,7 @@ foreach i : range(first_version, last_version + 2, 2)
   ]
 endforeach
 
-gtkdoc_common_scan_args = [
-  '--ignore-decorators=' + '|'.join(ignore_decorators),
-]
+ignore_decorators = '|'.join(ignore_decorators)
 
 if get_option('gtk_doc')
   # Check we have the minimum gtk-doc version required. Older versions won't
@@ -47,12 +45,12 @@ if get_option('gtk_doc')
   dependency('gtk-doc', version : '>=1.32.1',
     fallback : ['gtk-doc', 'dummy_dep'],
     default_options : ['tests=false'])
-endif
 
-# We cannot built the API reference off of a static library,
-# as symbols might get dropped by the linker
-if get_option('gtk_doc') and get_option('default_library') == 'static'
-  error('The API reference can only be built against a shared library')
+  # We cannot built the API reference off of a static library,
+  # as symbols might get dropped by the linker
+  if not glib_build_shared
+    error('The API reference can only be built against a shared library')
+  endif
 endif
 
 subdir('gio')

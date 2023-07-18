@@ -352,12 +352,12 @@ get_C_locale (void)
  * Returns: a newly-allocated copy of @str
  */
 gchar*
-g_strdup (const gchar *str)
+(g_strdup) (const gchar *str)
 {
   gchar *new_str;
   gsize length;
 
-  if (str)
+  if G_LIKELY (str)
     {
       length = strlen (str) + 1;
       new_str = g_new (char, length);
@@ -495,12 +495,12 @@ g_strnfill (gsize length,
  * @dest: destination buffer.
  * @src: source string.
  *
- * Copies a nul-terminated string into the dest buffer, include the
- * trailing nul, and return a pointer to the trailing nul byte.
- * This is useful for concatenating multiple strings together
- * without having to repeatedly scan for the end.
+ * Copies a nul-terminated string into the destination buffer, including
+ * the trailing nul byte, and returns a pointer to the trailing nul byte
+ * in `dest`.  The return value is useful for concatenating multiple
+ * strings without having to repeatedly scan for the end.
  *
- * Returns: a pointer to trailing nul byte.
+ * Returns: a pointer to the trailing nul byte in `dest`.
  **/
 gchar *
 g_stpcpy (gchar       *dest,
@@ -1362,14 +1362,17 @@ g_strerror (gint errnum)
           G_UNLOCK (errors);
 
           errno = saved_errno;
-          return msg;
+          return NULL;
         }
 
       if (!g_get_console_charset (NULL))
         {
           msg = g_locale_to_utf8 (msg, -1, NULL, NULL, &error);
           if (error)
-            g_print ("%s\n", error->message);
+            {
+              g_print ("%s\n", error->message);
+              g_error_free (error);
+            }
         }
       else if (msg == (const gchar *)buf)
         msg = g_strdup (buf);
@@ -2765,7 +2768,7 @@ g_strjoin (const gchar *separator,
  *
  * Searches the string @haystack for the first occurrence
  * of the string @needle, limiting the length of the search
- * to @haystack_len.
+ * to @haystack_len or a nul terminator byte (whichever is reached first).
  *
  * Returns: a pointer to the found occurrence, or
  *    %NULL if not found.
@@ -2928,9 +2931,8 @@ g_strrstr_len (const gchar *haystack,
  *
  * Since: 2.2
  */
-gboolean
-g_str_has_suffix (const gchar *str,
-                  const gchar *suffix)
+gboolean (g_str_has_suffix) (const gchar *str,
+                             const gchar *suffix)
 {
   gsize str_len;
   gsize suffix_len;
@@ -2958,9 +2960,8 @@ g_str_has_suffix (const gchar *str,
  *
  * Since: 2.2
  */
-gboolean
-g_str_has_prefix (const gchar *str,
-                  const gchar *prefix)
+gboolean (g_str_has_prefix) (const gchar *str,
+                             const gchar *prefix)
 {
   g_return_val_if_fail (str != NULL, FALSE);
   g_return_val_if_fail (prefix != NULL, FALSE);

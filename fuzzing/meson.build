@@ -33,8 +33,10 @@ fuzz_targets = [
   'fuzz_uri_escape',
   'fuzz_uri_parse',
   'fuzz_uri_parse_params',
+  'fuzz_utf8_validate',
   'fuzz_uuid_string_is_valid',
   'fuzz_variant_binary',
+  'fuzz_variant_binary_byteswap',
   'fuzz_variant_text',
 ]
 
@@ -65,7 +67,7 @@ foreach target_name : fuzz_targets
   # If the FuzzingEngine isn’t available, build some unit tests to check that
   # the fuzzing files do basically work. This doesn’t do any actual fuzzing though.
   # Pass in the README as an arbitrary fuzzing input, just so we have something.
-  if not have_fuzzing_engine
+  if build_tests and not have_fuzzing_engine
     test(target_name, exe,
       args : files('README.md'),
       suite : 'fuzzing',

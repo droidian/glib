@@ -1,6 +1,8 @@
 /* Unit tests for utilities
  * Copyright (C) 2010 Red Hat, Inc.
  *
+ * SPDX-License-Identifier: LicenseRef-old-glib-tests
+ *
  * This work is provided "as is"; redistribution and modification
  * in whole or in part, in any medium, physical or electronic is
  * permitted without restriction.
@@ -27,6 +29,8 @@
 
 #include "glib.h"
 #include "glib-private.h"
+#include "gutilsprivate.h"
+#include "glib/gstdio.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -481,6 +485,153 @@ test_find_program (void)
 
   res = g_find_program_in_path ("/etc/passwd");
   g_assert (res == NULL);
+}
+
+static char *
+find_program_for_path (const char *program,
+                       const char *path,
+                       const char *working_dir)
+{
+  return GLIB_PRIVATE_CALL(g_find_program_for_path) (program, path, working_dir);
+}
+
+static void
+test_find_program_for_path (void)
+{
+  GError *error = NULL;
+  /* Using .cmd extension to make windows to consider it an executable */
+  const char *command_to_find = "just-an-exe-file.cmd";
+  char *path;
+  char *exe_path;
+  char *found_path;
+  char *old_cwd;
+  char *tmp;
+
+  tmp = g_dir_make_tmp ("find_program_for_path_XXXXXXX", &error);
+  g_assert_no_error (error);
+
+  path = g_build_filename (tmp, "sub-path", NULL);
+  g_mkdir (path, 0700);
+  g_assert_true (g_file_test (path, G_FILE_TEST_IS_DIR));
+
+  exe_path = g_build_filename (path, command_to_find, NULL);
+  g_file_set_contents (exe_path, "", -1, &error);
+  g_assert_no_error (error);
+  g_assert_true (g_file_test (exe_path, G_FILE_TEST_EXISTS));
+
+#ifdef G_OS_UNIX
+  g_assert_no_errno (g_chmod (exe_path, 0500));
+#endif
+  g_assert_true (g_file_test (exe_path, G_FILE_TEST_IS_EXECUTABLE));
+
+  g_assert_null (g_find_program_in_path (command_to_find));
+  g_assert_null (find_program_for_path (command_to_find, NULL, NULL));
+
+  found_path = find_program_for_path (command_to_find, path, NULL);
+#ifdef __APPLE__
+  g_assert_nonnull (found_path);
+  g_assert_true (g_str_has_suffix (found_path, exe_path));
+#else
+  g_assert_cmpstr (exe_path, ==, found_path);
+#endif
+  g_clear_pointer (&found_path, g_free);
+
+  found_path = find_program_for_path (command_to_find, path, path);
+#ifdef __APPLE__
+  g_assert_nonnull (found_path);
+  g_assert_true (g_str_has_suffix (found_path, exe_path));
+#else
+  g_assert_cmpstr (exe_path, ==, found_path);
+#endif
+  g_clear_pointer (&found_path, g_free);
+
+  found_path = find_program_for_path (command_to_find, NULL, path);
+#ifdef __APPLE__
+  g_assert_nonnull (found_path);
+  g_assert_true (g_str_has_suffix (found_path, exe_path));
+#else
+  g_assert_cmpstr (exe_path, ==, found_path);
+#endif
+  g_clear_pointer (&found_path, g_free);
+
+  found_path = find_program_for_path (command_to_find, "::", path);
+#ifdef __APPLE__
+  g_assert_nonnull (found_path);
+  g_assert_true (g_str_has_suffix (found_path, exe_path));
+#else
+  g_assert_cmpstr (exe_path, ==, found_path);
+#endif
+  g_clear_pointer (&found_path, g_free);
+
+  old_cwd = g_get_current_dir ();
+  g_chdir (path);
+  found_path =
+    find_program_for_path (command_to_find,
+      G_SEARCHPATH_SEPARATOR_S G_SEARCHPATH_SEPARATOR_S, NULL);
+  g_chdir (old_cwd);
+  g_clear_pointer (&old_cwd, g_free);
+#ifdef __APPLE__
+  g_assert_nonnull (found_path);
+  g_assert_true (g_str_has_suffix (found_path, exe_path));
+#else
+  g_assert_cmpstr (exe_path, ==, found_path);
+#endif
+  g_clear_pointer (&found_path, g_free);
+
+  old_cwd = g_get_current_dir ();
+  g_chdir (tmp);
+  found_path =
+    find_program_for_path (command_to_find,
+      G_SEARCHPATH_SEPARATOR_S G_SEARCHPATH_SEPARATOR_S, "sub-path");
+  g_chdir (old_cwd);
+  g_clear_pointer (&old_cwd, g_free);
+#ifdef __APPLE__
+  g_assert_nonnull (found_path);
+  g_assert_true (g_str_has_suffix (found_path, exe_path));
+#else
+  g_assert_cmpstr (exe_path, ==, found_path);
+#endif
+  g_clear_pointer (&found_path, g_free);
+
+  g_assert_null (
+    find_program_for_path (command_to_find,
+      G_SEARCHPATH_SEPARATOR_S G_SEARCHPATH_SEPARATOR_S, "other-sub-path"));
+
+  found_path = find_program_for_path (command_to_find,
+    G_SEARCHPATH_SEPARATOR_S "sub-path" G_SEARCHPATH_SEPARATOR_S, tmp);
+#ifdef __APPLE__
+  g_assert_nonnull (found_path);
+  g_assert_true (g_str_has_suffix (found_path, exe_path));
+#else
+  g_assert_cmpstr (exe_path, ==, found_path);
+#endif
+  g_clear_pointer (&found_path, g_free);
+
+  g_assert_null (find_program_for_path (command_to_find,
+    G_SEARCHPATH_SEPARATOR_S "other-sub-path" G_SEARCHPATH_SEPARATOR_S, tmp));
+
+#ifdef G_OS_UNIX
+  found_path = find_program_for_path ("sh", NULL, tmp);
+  g_assert_nonnull (found_path);
+  g_clear_pointer (&found_path, g_free);
+
+  old_cwd = g_get_current_dir ();
+  g_chdir ("/");
+  found_path = find_program_for_path ("sh", "sbin:bin:usr/bin:usr/sbin", NULL);
+  g_chdir (old_cwd);
+  g_clear_pointer (&old_cwd, g_free);
+  g_assert_nonnull (found_path);
+  g_clear_pointer (&found_path, g_free);
+
+  found_path = find_program_for_path ("sh", "sbin:bin:usr/bin:usr/sbin", "/");
+  g_assert_nonnull (found_path);
+  g_clear_pointer (&found_path, g_free);
+#endif /* G_OS_UNIX */
+
+  g_clear_pointer (&exe_path, g_free);
+  g_clear_pointer (&path, g_free);
+  g_clear_pointer (&tmp, g_free);
+  g_clear_error (&error);
 }
 
 static void
@@ -943,13 +1094,13 @@ test_aligned_mem (void)
 
   g_test_summary ("Aligned memory allocator");
 
-  a = g_aligned_alloc (0, sizeof(int), 8);
+  a = g_aligned_alloc (0, sizeof (int), MAX (sizeof (void *), 8));
   g_assert_null (a);
 
-  a = g_aligned_alloc0 (0, sizeof(int), 8);
+  a = g_aligned_alloc0 (0, sizeof (int), MAX (sizeof (void *), 8));
   g_assert_null (a);
 
-  a = g_aligned_alloc (16, 0, 8);
+  a = g_aligned_alloc (16, 0, MAX (sizeof (void *), 8));
   g_assert_null (a);
 
 #define CHECK_SUBPROCESS_FAIL(name,msg) do { \
@@ -997,6 +1148,39 @@ test_aligned_mem_zeroed (void)
     g_assert_cmpuint (p[i], ==, 0);
 
   g_aligned_free (p);
+}
+
+static void
+test_aligned_mem_free_sized (void)
+{
+  gsize n_blocks = 10;
+  guint *p;
+
+  g_test_summary ("Check that g_aligned_free_sized() works");
+
+  p = g_aligned_alloc (n_blocks, sizeof (*p), 16);
+  g_assert_nonnull (p);
+
+  g_aligned_free_sized (p, sizeof (*p), n_blocks * 16);
+
+  /* NULL should be ignored */
+  g_aligned_free_sized (NULL, sizeof (*p), n_blocks * 16);
+}
+
+static void
+test_free_sized (void)
+{
+  gpointer p;
+
+  g_test_summary ("Check that g_free_sized() works");
+
+  p = g_malloc (123);
+  g_assert_nonnull (p);
+
+  g_free_sized (p, 123);
+
+  /* NULL should be ignored */
+  g_free_sized (NULL, 123);
 }
 
 static void
@@ -1147,6 +1331,7 @@ main (int   argc,
   g_test_add_func ("/utils/bits", test_bits);
   g_test_add_func ("/utils/swap", test_swap);
   g_test_add_func ("/utils/find-program", test_find_program);
+  g_test_add_func ("/utils/find-program-for-path", test_find_program_for_path);
   g_test_add_func ("/utils/debug", test_debug);
   g_test_add_func ("/utils/codeset", test_codeset);
   g_test_add_func ("/utils/codeset2", test_codeset2);
@@ -1173,6 +1358,8 @@ main (int   argc,
   g_test_add_func ("/utils/aligned-mem/subprocess/aligned_alloc_nmov", aligned_alloc_nmov);
   g_test_add_func ("/utils/aligned-mem/alignment", test_aligned_mem_alignment);
   g_test_add_func ("/utils/aligned-mem/zeroed", test_aligned_mem_zeroed);
+  g_test_add_func ("/utils/aligned-mem/free-sized", test_aligned_mem_free_sized);
+  g_test_add_func ("/utils/free-sized", test_free_sized);
   g_test_add_func ("/utils/nullify", test_nullify);
   g_test_add_func ("/utils/atexit", test_atexit);
   g_test_add_func ("/utils/check-setuid", test_check_setuid);

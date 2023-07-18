@@ -1157,9 +1157,6 @@ typedef struct
   GMutex    lock;
 
   void *(*proxy) (void *);
-
-  /* Must be statically allocated and valid forever */
-  const GThreadSchedulerSettings *scheduler_settings;
 } GThreadPosix;
 
 void
@@ -1175,106 +1172,9 @@ g_system_thread_free (GRealThread *thread)
   g_slice_free (GThreadPosix, pt);
 }
 
-gboolean
-g_system_thread_get_scheduler_settings (GThreadSchedulerSettings *scheduler_settings)
-{
-  /* FIXME: Implement the same for macOS and the BSDs so it doesn't go through
-   * the fallback code using an additional thread. */
-#if defined(HAVE_SYS_SCHED_GETATTR)
-  pid_t tid;
-  int res;
-  /* FIXME: The struct definition does not seem to be possible to pull in
-   * via any of the normal system headers and it's only declared in the
-   * kernel headers. That's why we hardcode 56 here right now. */
-  guint size = 56; /* Size as of Linux 5.3.9 */
-  guint flags = 0;
-
-  tid = (pid_t) syscall (SYS_gettid);
-
-  scheduler_settings->attr = g_malloc0 (size);
-
-  do
-    {
-      int errsv;
-
-      res = syscall (SYS_sched_getattr, tid, scheduler_settings->attr, size, flags);
-      errsv = errno;
-      if (res == -1)
-        {
-          if (errsv == EAGAIN)
-            {
-              continue;
-            }
-          else if (errsv == E2BIG)
-            {
-              g_assert (size < G_MAXINT);
-              size *= 2;
-              scheduler_settings->attr = g_realloc (scheduler_settings->attr, size);
-              /* Needs to be zero-initialized */
-              memset (scheduler_settings->attr, 0, size);
-            }
-          else
-            {
-              g_debug ("Failed to get thread scheduler attributes: %s", g_strerror (errsv));
-              g_free (scheduler_settings->attr);
-
-              return FALSE;
-            }
-        }
-    }
-  while (res == -1);
-
-  /* Try setting them on the current thread to see if any system policies are
-   * in place that would disallow doing so */
-  res = syscall (SYS_sched_setattr, tid, scheduler_settings->attr, flags);
-  if (res == -1)
-    {
-      int errsv = errno;
-
-      g_debug ("Failed to set thread scheduler attributes: %s", g_strerror (errsv));
-      g_free (scheduler_settings->attr);
-
-      return FALSE;
-    }
-
-  return TRUE;
-#else
-  return FALSE;
-#endif
-}
-
-#if defined(HAVE_SYS_SCHED_GETATTR)
-static void *
-linux_pthread_proxy (void *data)
-{
-  GThreadPosix *thread = data;
-  static gboolean printed_scheduler_warning = FALSE;  /* (atomic) */
-
-  /* Set scheduler settings first if requested */
-  if (thread->scheduler_settings)
-    {
-      pid_t tid = 0;
-      guint flags = 0;
-      int res;
-      int errsv;
-
-      tid = (pid_t) syscall (SYS_gettid);
-      res = syscall (SYS_sched_setattr, tid, thread->scheduler_settings->attr, flags);
-      errsv = errno;
-      if (res == -1 && g_atomic_int_compare_and_exchange (&printed_scheduler_warning, FALSE, TRUE))
-        g_critical ("Failed to set scheduler settings: %s", g_strerror (errsv));
-      else if (res == -1)
-        g_debug ("Failed to set scheduler settings: %s", g_strerror (errsv));
-    }
-
-  return thread->proxy (data);
-}
-#endif
-
 GRealThread *
 g_system_thread_new (GThreadFunc proxy,
                      gulong stack_size,
-                     const GThreadSchedulerSettings *scheduler_settings,
                      const char *name,
                      GThreadFunc func,
                      gpointer data,
@@ -1293,7 +1193,6 @@ g_system_thread_new (GThreadFunc proxy,
   base_thread->thread.func = func;
   base_thread->thread.data = data;
   base_thread->name = g_strdup (name);
-  thread->scheduler_settings = scheduler_settings;
   thread->proxy = proxy;
 
   posix_check_cmd (pthread_attr_init (&attr));
@@ -1313,18 +1212,13 @@ g_system_thread_new (GThreadFunc proxy,
 #endif /* HAVE_PTHREAD_ATTR_SETSTACKSIZE */
 
 #ifdef HAVE_PTHREAD_ATTR_SETINHERITSCHED
-  if (!scheduler_settings)
     {
       /* While this is the default, better be explicit about it */
       pthread_attr_setinheritsched (&attr, PTHREAD_INHERIT_SCHED);
     }
 #endif /* HAVE_PTHREAD_ATTR_SETINHERITSCHED */
 
-#if defined(HAVE_SYS_SCHED_GETATTR)
-  ret = pthread_create (&thread->system_thread, &attr, linux_pthread_proxy, thread);
-#else
   ret = pthread_create (&thread->system_thread, &attr, (void* (*)(void*))proxy, thread);
-#endif
 
   posix_check_cmd (pthread_attr_destroy (&attr));
 
@@ -1629,16 +1523,18 @@ g_cond_wait_until (GCond  *cond,
    * have any relation to the one used by the kernel for the `futex` syscall.
    *
    * Specifically, the libc headers might use 64-bit `time_t` while the kernel
-   * headers use 32-bit `__kernel_old_time_t` on certain systems.
+   * headers use 32-bit types on certain systems.
    *
    * To get around this problem we
    *   a) check if `futex_time64` is available, which only exists on 32-bit
    *      platforms and always uses 64-bit `time_t`.
    *   b) otherwise (or if that returns `ENOSYS`), we call the normal `futex`
-   *      syscall with the `struct timespec` used by the kernel, which uses
-   *      `__kernel_long_t` for both its fields. We use that instead of
-   *      `__kernel_old_time_t` because it is equivalent and available in the
-   *      kernel headers for a longer time.
+   *      syscall with the `struct timespec` used by the kernel. By default, we
+   *      use `__kernel_long_t` for both its fields, which is equivalent to
+   *      `__kernel_old_time_t` and is available in the kernel headers for a
+   *      longer time.
+   *   c) With very old headers (~2.6.x), `__kernel_long_t` is not available, and
+   *      we use an older definition that uses `__kernel_time_t` and `long`.
    *
    * Also some 32-bit systems do not define `__NR_futex` at all and only
    * define `__NR_futex_time64`.
@@ -1678,14 +1574,24 @@ g_cond_wait_until (GCond  *cond,
 
 #ifdef __NR_futex
   {
+#  ifdef __kernel_long_t
+#    define KERNEL_SPAN_SEC_TYPE __kernel_long_t
     struct
     {
       __kernel_long_t tv_sec;
       __kernel_long_t tv_nsec;
     } span_arg;
-
+#  else
+    /* Very old kernel headers: version 2.6.32 and thereabouts */
+#    define KERNEL_SPAN_SEC_TYPE __kernel_time_t
+    struct
+    {
+      __kernel_time_t tv_sec;
+      long            tv_nsec;
+    } span_arg;
+#  endif
     /* Make sure to only ever call this if the end time actually fits into the target type */
-    if (G_UNLIKELY (sizeof (__kernel_long_t) < 8 && span.tv_sec > G_MAXINT32))
+    if (G_UNLIKELY (sizeof (KERNEL_SPAN_SEC_TYPE) < 8 && span.tv_sec > G_MAXINT32))
       g_error ("%s: Can’t wait for more than %us", G_STRFUNC, G_MAXINT32);
 
     span_arg.tv_sec = span.tv_sec;
@@ -1697,6 +1603,7 @@ g_cond_wait_until (GCond  *cond,
 
     return success;
   }
+#  undef KERNEL_SPAN_SEC_TYPE
 #endif /* defined(__NR_futex) */
 
   /* We can't end up here because of the checks above */

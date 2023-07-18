@@ -61,7 +61,7 @@ class TestCodegen(unittest.TestCase):
     cwd = ""
 
     def setUp(self):
-        self.timeout_seconds = 100  # seconds per test
+        self.timeout_seconds = 6  # seconds per test
         self.tmpdir = tempfile.TemporaryDirectory()
         self.cwd = os.getcwd()
         os.chdir(self.tmpdir.name)
@@ -410,6 +410,26 @@ G_END_DECLS
         with open("test-org.project.Bar.Frobnicator.xml", "r") as f:
             xml_data = f.readlines()
             self.assertTrue(len(xml_data) != 0)
+
+    def test_generate_md(self):
+        """Test the basic functionality of the markdown generator."""
+        xml_contents = """
+        <node>
+          <interface name="org.project.Bar.Frobnicator">
+            <method name="RandomMethod"/>
+          </interface>
+        </node>
+        """
+        res = self.runCodegenWithInterface(
+            xml_contents,
+            "--generate-md",
+            "test",
+        )
+        self.assertEqual("", res.err)
+        self.assertEqual("", res.out)
+        with open("test-org.project.Bar.Frobnicator.md", "r") as f:
+            rst = f.readlines()
+            self.assertTrue(len(rst) != 0)
 
     def test_generate_rst(self):
         """Test the basic functionality of the rst generator."""

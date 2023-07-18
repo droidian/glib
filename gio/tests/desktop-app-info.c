@@ -25,9 +25,69 @@
 #include <glib/gstdio.h>
 #include <gio/gio.h>
 #include <gio/gdesktopappinfo.h>
+#include <gio/gunixinputstream.h>
+#include <glib-unix.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
+G_DECLARE_FINAL_TYPE (TestLaunchContext, test_launch_context, TEST,
+                      LAUNCH_CONTEXT, GAppLaunchContext);
+
+struct _TestLaunchContext {
+  GAppLaunchContext parent;
+
+  char *overriden_startup_notify_id;
+};
+
+struct _TestLaunchContextClass {
+  GAppLaunchContextClass parent;
+};
+
+G_DEFINE_FINAL_TYPE (TestLaunchContext, test_launch_context,
+                     G_TYPE_APP_LAUNCH_CONTEXT);
+
+static void
+test_launch_context_init (TestLaunchContext *test_context)
+{
+}
+
+static char *
+test_launch_context_get_startup_notify_id (GAppLaunchContext *context,
+                                           GAppInfo *app_info,
+                                           GList *files)
+{
+  TestLaunchContext *test_context = TEST_LAUNCH_CONTEXT (context);
+
+  if (test_context->overriden_startup_notify_id)
+    return g_strdup (test_context->overriden_startup_notify_id);
+
+  if (g_app_info_get_id (app_info))
+    return g_strdup (g_app_info_get_id (app_info));
+
+  if (g_app_info_get_display_name (app_info))
+    return g_strdup (g_app_info_get_display_name (app_info));
+
+  return g_strdup (g_app_info_get_commandline (app_info));
+}
+
+static void
+test_launch_context_get_startup_notify_dispose (GObject *object)
+{
+  TestLaunchContext *test_context = TEST_LAUNCH_CONTEXT (object);
+
+  g_clear_pointer (&test_context->overriden_startup_notify_id, g_free);
+  G_OBJECT_CLASS (test_launch_context_parent_class)->dispose (object);
+}
+
+static void
+test_launch_context_class_init (TestLaunchContextClass *klass)
+{
+  G_APP_LAUNCH_CONTEXT_CLASS (klass)->get_startup_notify_id = test_launch_context_get_startup_notify_id;
+  G_OBJECT_CLASS (klass)->dispose = test_launch_context_get_startup_notify_dispose;
+}
 
 static GAppInfo *
 create_command_line_app_info (const char *name,
@@ -522,20 +582,8 @@ wait_for_file (const gchar *want_this,
                const gchar *but_not_this,
                const gchar *or_this)
 {
-  guint retries = 600;
-
-  /* I hate time-based conditions in tests, but this will wait up to one
-   * whole minute for "touch file" to finish running.  I think it should
-   * be OK.
-   *
-   * 600 * 100ms = 60 seconds.
-   */
   while (access (want_this, F_OK) != 0)
-    {
-      g_usleep (100000); /* 100ms */
-      g_assert_cmpuint (retries, >, 0);
-      retries--;
-    }
+    g_usleep (100000); /* 100ms */
 
   g_assert_cmpuint (access (but_not_this, F_OK), !=, 0);
   g_assert_cmpuint (access (or_this, F_OK), !=, 0);
@@ -627,6 +675,7 @@ run_apps (const gchar *command,
   argv[2] = g_strdup (arg);
   argv[3] = NULL;
 
+  g_assert_true (g_file_test (argv[0], G_FILE_TEST_IS_EXECUTABLE));
   envp = g_get_environ ();
 
   if (with_usr)
@@ -818,9 +867,12 @@ test_search (void)
   assert_search ("image viewer", "", TRUE, TRUE, NULL, NULL);
 
   /* There're "flatpak" apps (clocks) installed as well - they should *not*
-   * match the prefix command ("/bin/sh") in the Exec= line though.
+   * match the prefix command ("/bin/sh") in the Exec= line though. Then with
+   * substring matching, Image Viewer (eog) should be in next group because it
+   * contains "Slideshow" in its keywords.
    */
-  assert_search ("sh", "gnome-terminal.desktop\n", TRUE, FALSE, NULL, NULL);
+  assert_search ("sh", "gnome-terminal.desktop\n"
+                       "eog.desktop\n", TRUE, FALSE, NULL, NULL);
 
   /* "frobnicator.desktop" is ignored by get_all() because the binary is
    * missing, but search should still find it (to avoid either stale results
@@ -835,11 +887,12 @@ test_search (void)
   assert_search ("files file fil fi f", "nautilus.desktop\n"
                                         "gedit.desktop\n", TRUE, TRUE, NULL, NULL);
 
-  /* "con" will match "connect" and "contacts" on name but dconf only on
-   * the "config" keyword
+  /* "con" will match "connect" and "contacts" on name with prefix match in
+   * first group, then match "Dconf Editor" and "Desktop Icons" with substring
+   * match in next group.
    */
-  assert_search ("con", "nautilus-connect-server.desktop gnome-contacts.desktop\n"
-                        "dconf-editor.desktop\n", TRUE, TRUE, NULL, NULL);
+  assert_search ("con", "gnome-contacts.desktop nautilus-connect-server.desktop\n"
+                        "dconf-editor.desktop nautilus-classic.desktop\n", TRUE, TRUE, NULL, NULL);
 
   /* "gnome" will match "eye of gnome" from the user's directory, plus
    * matching "GNOME Clocks" X-GNOME-FullName.  It's only a comment on
@@ -947,9 +1000,61 @@ on_launch_started (GAppLaunchContext *context, GAppInfo *info, GVariant *platfor
   gboolean *invoked = data;
 
   g_assert_true (G_IS_APP_LAUNCH_CONTEXT (context));
+
+  if (TEST_IS_LAUNCH_CONTEXT (context))
+    {
+      GVariantDict dict;
+      const char *sni;
+      char *expected_sni;
+
+      g_assert_nonnull (platform_data);
+      g_variant_dict_init (&dict, platform_data);
+      g_assert_true (
+        g_variant_dict_lookup (&dict, "startup-notification-id", "&s", &sni));
+      expected_sni = g_app_launch_context_get_startup_notify_id (context, info, NULL);
+      g_assert_cmpstr (sni, ==, expected_sni);
+
+      g_free (expected_sni);
+      g_variant_dict_clear (&dict);
+    }
+  else
+    {
+      /* Our default context doesn't fill in any platform data */
+      g_assert_null (platform_data);
+    }
+
+  g_assert_false (*invoked);
+  *invoked = TRUE;
+}
+
+static void
+on_launched (GAppLaunchContext *context, GAppInfo *info, GVariant *platform_data, gpointer data)
+{
+  gboolean *launched = data;
+  GVariantDict dict;
+  int pid;
+
+  g_assert_true (G_IS_APP_LAUNCH_CONTEXT (context));
   g_assert_true (G_IS_APP_INFO (info));
-  /* Our default context doesn't fill in any platform data */
-  g_assert_null (platform_data);
+  g_assert_nonnull (platform_data);
+  g_variant_dict_init (&dict, platform_data);
+  g_assert_true (g_variant_dict_lookup (&dict, "pid", "i", &pid, NULL));
+  g_assert_cmpint (pid, >, 1);
+
+  g_assert_false (*launched);
+  *launched = TRUE;
+
+  g_variant_dict_clear (&dict);
+}
+
+static void
+on_launch_failed (GAppLaunchContext *context, const char *startup_notify_id, gpointer data)
+{
+  gboolean *invoked = data;
+
+  g_assert_true (G_IS_APP_LAUNCH_CONTEXT (context));
+  g_assert_nonnull (startup_notify_id);
+  g_test_message ("Application launch failed: %s", startup_notify_id);
 
   g_assert_false (*invoked);
   *invoked = TRUE;
@@ -966,27 +1071,24 @@ test_launch_as_manager (void)
   gboolean retval;
   const gchar *path;
   gboolean invoked = FALSE;
+  gboolean launched = FALSE;
+  gboolean failed = FALSE;
   GAppLaunchContext *context;
-
-  if (g_getenv ("DISPLAY") == NULL || g_getenv ("DISPLAY")[0] == '\0')
-    {
-      g_test_skip ("No DISPLAY.  Skipping test.");
-      return;
-    }
 
   path = g_test_get_filename (G_TEST_BUILT, "appinfo-test.desktop", NULL);
   appinfo = g_desktop_app_info_new_from_filename (path);
+  g_assert_true (G_IS_APP_INFO (appinfo));
 
-  if (appinfo == NULL)
-    {
-      g_test_skip ("appinfo-test binary not installed");
-      return;
-    }
-
-  context = g_app_launch_context_new ();
+  context = g_object_new (test_launch_context_get_type (), NULL);
   g_signal_connect (context, "launch-started",
                     G_CALLBACK (on_launch_started),
                     &invoked);
+  g_signal_connect (context, "launched",
+                    G_CALLBACK (on_launched),
+                    &launched);
+  g_signal_connect (context, "launch-failed",
+                    G_CALLBACK (on_launch_failed),
+                    &failed);
   retval = g_desktop_app_info_launch_uris_as_manager (appinfo, NULL, context, 0,
                                                       NULL, NULL,
                                                       NULL, NULL,
@@ -994,8 +1096,12 @@ test_launch_as_manager (void)
   g_assert_no_error (error);
   g_assert_true (retval);
   g_assert_true (invoked);
+  g_assert_true (launched);
+  g_assert_false (failed);
 
   invoked = FALSE;
+  launched = FALSE;
+  failed = FALSE;
   retval = g_desktop_app_info_launch_uris_as_manager_with_fds (appinfo,
                                                                NULL, context, 0,
                                                                NULL, NULL,
@@ -1005,7 +1111,56 @@ test_launch_as_manager (void)
   g_assert_no_error (error);
   g_assert_true (retval);
   g_assert_true (invoked);
+  g_assert_true (launched);
+  g_assert_false (failed);
 
+  g_object_unref (appinfo);
+  g_assert_finalize_object (context);
+}
+
+static void
+test_launch_as_manager_fail (void)
+{
+  GAppLaunchContext *context;
+  GDesktopAppInfo *appinfo;
+  GError *error = NULL;
+  gboolean retval;
+  const gchar *path;
+  gboolean launch_started = FALSE;
+  gboolean launched = FALSE;
+  gboolean failed = FALSE;
+
+  g_test_summary ("Tests that launch-errors are properly handled, we force " \
+                  "this by using invalid FD's values when launching as manager");
+
+  path = g_test_get_filename (G_TEST_BUILT, "appinfo-test.desktop", NULL);
+  appinfo = g_desktop_app_info_new_from_filename (path);
+  g_assert_true (G_IS_APP_INFO (appinfo));
+
+  context = g_object_new (test_launch_context_get_type (), NULL);
+  g_signal_connect (context, "launch-started",
+                    G_CALLBACK (on_launch_started),
+                    &launch_started);
+  g_signal_connect (context, "launched",
+                    G_CALLBACK (on_launched),
+                    &launched);
+  g_signal_connect (context, "launch-failed",
+                    G_CALLBACK (on_launch_failed),
+                    &failed);
+
+  retval = g_desktop_app_info_launch_uris_as_manager_with_fds (appinfo,
+                                                               NULL, context, 0,
+                                                               NULL, NULL,
+                                                               NULL, NULL,
+                                                               3000, 3001, 3002,
+                                                               &error);
+  g_assert_error (error, G_SPAWN_ERROR, G_SPAWN_ERROR_FAILED);
+  g_assert_false (retval);
+  g_assert_true (launch_started);
+  g_assert_false (launched);
+  g_assert_true (failed);
+
+  g_clear_error (&error);
   g_object_unref (appinfo);
   g_assert_finalize_object (context);
 }
@@ -1120,6 +1275,7 @@ test_default_uri_handler_async (void)
   GAppInfo *info;
   GMainLoop *loop;
   gboolean called = FALSE;
+  gint64 start_time, touch_time;
 
   loop = g_main_loop_new (NULL, FALSE);
   info = create_app_info_toucher ("Touch Handled", "handled-async",
@@ -1128,6 +1284,7 @@ test_default_uri_handler_async (void)
   g_assert_true (G_IS_APP_INFO (info));
   g_assert_nonnull (file_path);
 
+  start_time = g_get_real_time ();
   g_app_info_launch_default_for_uri_async ("glib-async-touch://touch-me", NULL,
                                            NULL,
                                            on_launch_default_for_uri_success_cb,
@@ -1136,6 +1293,7 @@ test_default_uri_handler_async (void)
   while (!g_file_test (file_path, G_FILE_TEST_IS_REGULAR) || !called)
     g_main_context_iteration (NULL, FALSE);
 
+  touch_time = g_get_real_time () - start_time;
   g_assert_true (called);
   g_assert_true (g_file_test (file_path, G_FILE_TEST_IS_REGULAR));
 
@@ -1156,11 +1314,13 @@ test_default_uri_handler_async (void)
   g_cancellable_cancel (cancellable);
   g_main_loop_run (loop);
 
-  /* Once started our touch app may take some time before having written the
-   * file, so let's wait a bit here before ensuring that the file has been
-   * created as expected.
+  /* If started, our touch app would take some time to actually write the
+   * file to disk, so let's wait a bit here to ensure that the file isn't
+   * inadvertently getting created when a launch operation is canceled up
+   * front. Give it 3× as long as the successful case took, to allow for 
+   * some variance.
    */
-  g_usleep (G_USEC_PER_SEC / 10);
+  g_usleep (touch_time * 3);
   g_assert_false (g_file_test (file_path, G_FILE_TEST_IS_REGULAR));
 
   g_object_unref (info);
@@ -1180,10 +1340,543 @@ test_id (void)
   g_free (result);
 }
 
+static const char *
+get_terminal_divider (const char *terminal_name)
+{
+  if (g_str_equal (terminal_name, "xdg-terminal-exec"))
+    return NULL;
+  if (g_str_equal (terminal_name, "kgx"))
+    return "-e";
+  if (g_str_equal (terminal_name, "gnome-terminal"))
+    return "--";
+  if (g_str_equal (terminal_name, "tilix"))
+    return "-e";
+  if (g_str_equal (terminal_name, "konsole"))
+    return "-e";
+  if (g_str_equal (terminal_name, "nxterm"))
+    return "-e";
+  if (g_str_equal (terminal_name, "color-xterm"))
+    return "-e";
+  if (g_str_equal (terminal_name, "rxvt"))
+    return "-e";
+  if (g_str_equal (terminal_name, "dtterm"))
+    return "-e";
+  if (g_str_equal (terminal_name, "xterm"))
+    return "-e";
+  if (g_str_equal (terminal_name, "mate-terminal"))
+    return "-x";
+  if (g_str_equal (terminal_name, "xfce4-terminal"))
+    return "-x";
+
+  g_return_val_if_reached (NULL);
+}
+
+typedef enum {
+  TERMINAL_LAUNCH_TYPE_COMMAND_LINE_WITH_PATH_OVERRIDE,
+  TERMINAL_LAUNCH_TYPE_COMMAND_LINE_WITH_CONTEXT,
+  TERMINAL_LAUNCH_TYPE_KEY_FILE_WITH_PATH,
+} TerminalLaunchType;
+
+typedef struct {
+  const char *exec;
+  TerminalLaunchType type;
+} TerminalLaunchData;
+
+static TerminalLaunchData *
+terminal_launch_data_new (const char *exec, TerminalLaunchType type)
+{
+  TerminalLaunchData *d = NULL;
+
+  d = g_new0 (TerminalLaunchData, 1);
+  d->exec = exec;
+  d->type = type;
+
+  return d;
+}
+
+static void
+test_launch_uris_with_terminal (gconstpointer data)
+{
+  int fd;
+  int ret;
+  int flags;
+  int terminal_divider_arg_length;
+  const TerminalLaunchData *launch_data = data;
+  const char *terminal_exec = launch_data->exec;
+  char *old_path = NULL;
+  char *command_line;
+  char *bin_path;
+  char *terminal_path;
+  char *output_fd_path;
+  char *script_contents;
+  char *output_contents = NULL;
+  char *sh;
+  GAppInfo *app_info;
+  GList *uris;
+  GList *paths;
+  GStrv output_args;
+  GError *error = NULL;
+  GInputStream *input_stream;
+  GDataInputStream *data_input_stream;
+  GAppLaunchContext *launch_context;
+
+  sh = g_find_program_in_path ("sh");
+  g_assert_nonnull (sh);
+
+  bin_path = g_dir_make_tmp ("bin-path-XXXXXX", &error);
+  g_assert_no_error (error);
+
+  launch_context = g_object_new (test_launch_context_get_type (), NULL);
+
+  switch (launch_data->type)
+    {
+    case TERMINAL_LAUNCH_TYPE_COMMAND_LINE_WITH_PATH_OVERRIDE:
+      old_path = g_strdup (g_getenv ("PATH"));
+      g_assert_true (g_setenv ("PATH", bin_path, TRUE));
+      break;
+
+    case TERMINAL_LAUNCH_TYPE_COMMAND_LINE_WITH_CONTEXT:
+      g_app_launch_context_setenv (launch_context, "PATH", bin_path);
+      break;
+
+    case TERMINAL_LAUNCH_TYPE_KEY_FILE_WITH_PATH:
+      g_app_launch_context_setenv (launch_context, "PATH", "/not/valid");
+      break;
+
+    default:
+      g_assert_not_reached ();
+    }
+
+  terminal_path = g_build_filename (bin_path, terminal_exec, NULL);
+  output_fd_path = g_build_filename (bin_path, "fifo", NULL);
+
+  ret = mkfifo (output_fd_path, 0600);
+  g_assert_cmpint (ret, ==, 0);
+
+  fd = g_open (output_fd_path, O_RDONLY | O_CLOEXEC | O_NONBLOCK, 0);
+  g_assert_cmpint (fd, >=, 0);
+
+  flags = fcntl (fd, F_GETFL);
+  g_assert_cmpint (flags, >=, 0);
+
+  ret = fcntl (fd, F_SETFL,  flags & ~O_NONBLOCK);
+  g_assert_cmpint (ret, ==, 0);
+
+  input_stream = g_unix_input_stream_new (fd, TRUE);
+  data_input_stream = g_data_input_stream_new (input_stream);
+  script_contents = g_strdup_printf ("#!%s\n" \
+                                     "out='%s'\n"
+                                     "printf '%%s\\n' \"$*\" > \"$out\"\n",
+                                     sh,
+                                     output_fd_path);
+  g_file_set_contents (terminal_path, script_contents, -1, &error);
+  g_assert_no_error (error);
+  g_assert_cmpint (g_chmod (terminal_path, 0500), ==, 0);
+
+  g_test_message ("Fake '%s' terminal created as: %s", terminal_exec, terminal_path);
+
+  command_line = g_strdup_printf ("true %s-argument", terminal_exec);
+
+  if (launch_data->type == TERMINAL_LAUNCH_TYPE_KEY_FILE_WITH_PATH)
+    {
+      GKeyFile *key_file;
+      char *key_file_contents;
+      const char base_file[] =
+        "[Desktop Entry]\n"
+        "Type=Application\n"
+        "Name=terminal launched app\n"
+        "Terminal=true\n"
+        "Path=%s\n"
+        "Exec=%s\n";
+
+      key_file = g_key_file_new ();
+      key_file_contents = g_strdup_printf (base_file, bin_path, command_line);
+
+      g_assert_true (
+        g_key_file_load_from_data (key_file, key_file_contents, -1,
+                                   G_KEY_FILE_NONE, NULL));
+
+      app_info = (GAppInfo*) g_desktop_app_info_new_from_keyfile (key_file);
+      g_assert_true (G_IS_DESKTOP_APP_INFO (app_info));
+      g_assert_true (
+        g_desktop_app_info_get_boolean (G_DESKTOP_APP_INFO (app_info), "Terminal"));
+
+      g_key_file_unref (key_file);
+      g_free (key_file_contents);
+    }
+  else
+    {
+      app_info = g_app_info_create_from_commandline (command_line,
+                                                     "Test App on Terminal",
+                                                     G_APP_INFO_CREATE_NEEDS_TERMINAL |
+                                                     G_APP_INFO_CREATE_SUPPORTS_URIS,
+                                                     &error);
+      g_assert_no_error (error);
+    }
+
+  paths = g_list_prepend (NULL, bin_path);
+  uris = g_list_prepend (NULL, g_filename_to_uri (bin_path, NULL, &error));
+  g_assert_no_error (error);
+
+  paths = g_list_prepend (paths, (gpointer) g_get_user_data_dir ());
+  uris = g_list_append (uris, g_filename_to_uri (g_get_user_data_dir (), NULL, &error));
+  g_assert_no_error (error);
+
+  g_assert_cmpint (g_list_length (paths), ==, 2);
+  g_app_info_launch_uris (app_info, uris, launch_context, &error);
+  g_assert_no_error (error);
+
+  while (output_contents == NULL)
+    {
+      output_contents =
+        g_data_input_stream_read_upto (data_input_stream, "\n", 1, NULL, NULL, &error);
+      g_assert_no_error (error);
+
+      if (output_contents == NULL)
+        g_usleep (G_USEC_PER_SEC / 10);
+    }
+  g_test_message ("'%s' called with arguments: '%s'", terminal_exec, output_contents);
+
+  g_data_input_stream_read_byte (data_input_stream, NULL, &error);
+  g_assert_no_error (error);
+
+  output_args = g_strsplit (output_contents, " ", -1);
+  g_clear_pointer (&output_contents, g_free);
+
+  terminal_divider_arg_length = (get_terminal_divider (terminal_exec) != NULL) ? 1 : 0;
+  g_assert_cmpuint (g_strv_length (output_args), ==, 3 + terminal_divider_arg_length);
+  if (terminal_divider_arg_length == 1)
+    {
+      g_assert_cmpstr (output_args[0], ==, get_terminal_divider (terminal_exec));
+      g_assert_cmpstr (output_args[1], ==, "true");
+      g_assert_cmpstr (output_args[2], ==, command_line + 5);
+    }
+  else
+    {
+      g_assert_cmpstr (output_args[0], ==, "true");
+      g_assert_cmpstr (output_args[1], ==, command_line + 5);
+    }
+  paths = g_list_delete_link (paths,
+    g_list_find_custom (paths, output_args[2 + terminal_divider_arg_length], g_str_equal));
+  g_assert_cmpint (g_list_length (paths), ==, 1);
+  g_clear_pointer (&output_args, g_strfreev);
+
+  while (output_contents == NULL)
+    {
+      output_contents =
+        g_data_input_stream_read_upto (data_input_stream, "\n", 1, NULL, NULL, &error);
+      g_assert_no_error (error);
+
+      if (output_contents == NULL)
+        g_usleep (G_USEC_PER_SEC / 10);
+    }
+  g_test_message ("'%s' called with arguments: '%s'", terminal_exec, output_contents);
+
+  g_data_input_stream_read_byte (data_input_stream, NULL, &error);
+  g_assert_no_error (error);
+
+  output_args = g_strsplit (output_contents, " ", -1);
+  g_clear_pointer (&output_contents, g_free);
+  g_assert_cmpuint (g_strv_length (output_args), ==, 3 + terminal_divider_arg_length);
+  if (terminal_divider_arg_length > 0)
+    {
+      g_assert_cmpstr (output_args[0], ==, get_terminal_divider (terminal_exec));
+      g_assert_cmpstr (output_args[1], ==, "true");
+      g_assert_cmpstr (output_args[2], ==, command_line + 5);
+    }
+  else
+    {
+      g_assert_cmpstr (output_args[0], ==, "true");
+      g_assert_cmpstr (output_args[1], ==, command_line + 5);
+    }
+  paths = g_list_delete_link (paths,
+    g_list_find_custom (paths, output_args[2 + terminal_divider_arg_length], g_str_equal));
+  g_assert_cmpint (g_list_length (paths), ==, 0);
+  g_clear_pointer (&output_args, g_strfreev);
+
+  g_assert_null (paths);
+
+  if (launch_data->type == TERMINAL_LAUNCH_TYPE_COMMAND_LINE_WITH_PATH_OVERRIDE)
+    g_assert_true (g_setenv ("PATH", old_path, TRUE));
+
+  g_close (fd, &error);
+  g_assert_no_error (error);
+
+  g_free (sh);
+  g_free (command_line);
+  g_free (bin_path);
+  g_free (terminal_path);
+  g_free (output_fd_path);
+  g_free (script_contents);
+  g_free (old_path);
+  g_clear_pointer (&output_args, g_strfreev);
+  g_clear_pointer (&output_contents, g_free);
+  g_clear_object (&data_input_stream);
+  g_clear_object (&input_stream);
+  g_clear_object (&app_info);
+  g_clear_object (&launch_context);
+  g_clear_error (&error);
+  g_clear_list (&paths, NULL);
+  g_clear_list (&uris, g_free);
+}
+
+static void
+test_launch_uris_with_invalid_terminal (void)
+{
+  char *old_path;
+  char *bin_path;
+  GAppInfo *app_info;
+  GError *error = NULL;
+
+  bin_path = g_dir_make_tmp ("bin-path-XXXXXX", &error);
+  g_assert_no_error (error);
+
+  old_path = g_strdup (g_getenv ("PATH"));
+  g_assert_true (g_setenv ("PATH", bin_path, TRUE));
+
+  app_info = g_app_info_create_from_commandline ("true invalid-glib-terminal",
+                                                 "Test App on Invalid Terminal",
+                                                 G_APP_INFO_CREATE_NEEDS_TERMINAL |
+                                                 G_APP_INFO_CREATE_SUPPORTS_URIS,
+                                                 &error);
+  g_assert_no_error (error);
+
+  g_app_info_launch_uris (app_info, NULL, NULL, &error);
+  g_assert_error (error, G_IO_ERROR, G_IO_ERROR_FAILED);
+  g_clear_error (&error);
+
+  g_assert_true (g_setenv ("PATH", old_path, TRUE));
+
+  g_clear_object (&app_info);
+  g_clear_error (&error);
+  g_free (bin_path);
+  g_free (old_path);
+}
+
+static void
+test_app_path (void)
+{
+  GDesktopAppInfo *appinfo;
+  const char *desktop_path;
+
+  desktop_path = g_test_get_filename (G_TEST_BUILT, "appinfo-test-path.desktop", NULL);
+  appinfo = g_desktop_app_info_new_from_filename (desktop_path);
+
+  g_assert_true (G_IS_DESKTOP_APP_INFO (appinfo));
+
+  g_clear_object (&appinfo);
+}
+
+static void
+test_app_path_wrong (void)
+{
+  GKeyFile *key_file;
+  GDesktopAppInfo *appinfo;
+  const gchar bad_try_exec_file_contents[] =
+    "[Desktop Entry]\n"
+    "Type=Application\n"
+    "Name=appinfo-test\n"
+    "TryExec=appinfo-test\n"
+    "Path=this-must-not-exist‼\n"
+    "Exec=true\n";
+  const gchar bad_exec_file_contents[] =
+    "[Desktop Entry]\n"
+    "Type=Application\n"
+    "Name=appinfo-test\n"
+    "TryExec=true\n"
+    "Path=this-must-not-exist‼\n"
+    "Exec=appinfo-test\n";
+
+  g_assert_true (
+    g_file_test (g_test_get_filename (G_TEST_BUILT, "appinfo-test", NULL),
+      G_FILE_TEST_IS_REGULAR | G_FILE_TEST_IS_EXECUTABLE));
+
+  key_file = g_key_file_new ();
+
+  g_assert_true (
+    g_key_file_load_from_data (key_file, bad_try_exec_file_contents, -1,
+                               G_KEY_FILE_NONE, NULL));
+
+  appinfo = g_desktop_app_info_new_from_keyfile (key_file);
+  g_assert_false (G_IS_DESKTOP_APP_INFO (appinfo));
+
+  g_assert_true (
+    g_key_file_load_from_data (key_file, bad_exec_file_contents, -1,
+                               G_KEY_FILE_NONE, NULL));
+
+  appinfo = g_desktop_app_info_new_from_keyfile (key_file);
+  g_assert_false (G_IS_DESKTOP_APP_INFO (appinfo));
+
+  g_clear_pointer (&key_file, g_key_file_unref);
+  g_clear_object (&appinfo);
+}
+
+static void
+test_launch_startup_notify_fail (void)
+{
+  GAppInfo *app_info;
+  GAppLaunchContext *context;
+  GError *error = NULL;
+  gboolean launch_started;
+  gboolean launch_failed;
+  gboolean launched;
+  GList *uris;
+
+  app_info = g_app_info_create_from_commandline ("this-must-not-exist‼",
+                                                 "failing app",
+                                                 G_APP_INFO_CREATE_NONE |
+                                                 G_APP_INFO_CREATE_SUPPORTS_STARTUP_NOTIFICATION,
+                                                 &error);
+  g_assert_no_error (error);
+
+  context = g_object_new (test_launch_context_get_type (), NULL);
+  g_signal_connect (context, "launch-started",
+                    G_CALLBACK (on_launch_started),
+                    &launch_started);
+  g_signal_connect (context, "launched",
+                    G_CALLBACK (on_launch_started),
+                    &launched);
+  g_signal_connect (context, "launch-failed",
+                    G_CALLBACK (on_launch_failed),
+                    &launch_failed);
+
+  launch_started = FALSE;
+  launch_failed = FALSE;
+  launched = FALSE;
+  uris = g_list_prepend (NULL, g_file_new_for_uri ("foo://bar"));
+  uris = g_list_prepend (uris, g_file_new_for_uri ("bar://foo"));
+  g_assert_false (g_app_info_launch (app_info, uris, context, &error));
+  g_assert_error (error, G_SPAWN_ERROR, G_SPAWN_ERROR_NOENT);
+  g_assert_true (launch_started);
+  g_assert_true (launch_failed);
+  g_assert_false (launched);
+
+  g_clear_error (&error);
+  g_clear_object (&app_info);
+  g_clear_object (&context);
+  g_clear_list (&uris, g_object_unref);
+}
+
+static void
+test_launch_fail (void)
+{
+  GAppInfo *app_info;
+  GError *error = NULL;
+
+  app_info = g_app_info_create_from_commandline ("this-must-not-exist‼",
+                                                 "failing app",
+                                                 G_APP_INFO_CREATE_NONE,
+                                                 &error);
+  g_assert_no_error (error);
+
+  g_assert_false (g_app_info_launch (app_info, NULL, NULL, &error));
+  g_assert_error (error, G_SPAWN_ERROR, G_SPAWN_ERROR_NOENT);
+
+  g_clear_error (&error);
+  g_clear_object (&app_info);
+}
+
+static void
+test_launch_fail_absolute_path (void)
+{
+  GAppInfo *app_info;
+  GError *error = NULL;
+
+  app_info = g_app_info_create_from_commandline ("/nothing/of/this-must-exist‼",
+                                                 NULL,
+                                                 G_APP_INFO_CREATE_NONE,
+                                                 &error);
+  g_assert_no_error (error);
+
+  g_assert_false (g_app_info_launch (app_info, NULL, NULL, &error));
+  g_assert_error (error, G_SPAWN_ERROR, G_SPAWN_ERROR_NOENT);
+
+  g_clear_error (&error);
+  g_clear_object (&app_info);
+
+  app_info = g_app_info_create_from_commandline ("/",
+                                                 NULL,
+                                                 G_APP_INFO_CREATE_NONE,
+                                                 &error);
+  g_assert_no_error (error);
+
+  g_assert_false (g_app_info_launch (app_info, NULL, NULL, &error));
+  g_assert_error (error, G_SPAWN_ERROR, G_SPAWN_ERROR_NOENT);
+
+  g_clear_error (&error);
+  g_clear_object (&app_info);
+}
+
+static void
+async_result_cb (GObject      *source_object,
+                 GAsyncResult *result,
+                 gpointer      user_data)
+{
+  GAsyncResult **result_out = user_data;
+
+  g_assert (*result_out == NULL);
+  *result_out = g_object_ref (result);
+  g_main_context_wakeup (g_main_context_get_thread_default ());
+}
+
+static void
+test_launch_fail_dbus (void)
+{
+  GTestDBus *bus = NULL;
+  GDesktopAppInfo *app_info = NULL;
+  GAppLaunchContext *context = NULL;
+  GAsyncResult *result = NULL;
+  GError *error = NULL;
+
+  /* Set up a test session bus to ensure that launching the app happens using
+   * D-Bus rather than spawning. */
+  bus = g_test_dbus_new (G_TEST_DBUS_NONE);
+  g_test_dbus_up (bus);
+
+  app_info = g_desktop_app_info_new_from_filename (g_test_get_filename (G_TEST_DIST, "org.gtk.test.dbusappinfo.desktop", NULL));
+  g_assert_nonnull (app_info);
+
+  g_assert_true (g_desktop_app_info_has_key (app_info, "DBusActivatable"));
+
+  context = g_app_launch_context_new ();
+
+  g_app_info_launch_uris_async (G_APP_INFO (app_info), NULL, context, NULL, async_result_cb, &result);
+
+  while (result == NULL)
+    g_main_context_iteration (NULL, TRUE);
+
+  g_assert_false (g_app_info_launch_uris_finish (G_APP_INFO (app_info), result, &error));
+  g_assert_error (error, G_DBUS_ERROR, G_DBUS_ERROR_SERVICE_UNKNOWN);
+
+  g_test_dbus_down (bus);
+  g_clear_object (&bus);
+
+  g_clear_error (&error);
+  g_clear_object (&result);
+  g_clear_object (&context);
+  g_clear_object (&app_info);
+}
+
 int
 main (int   argc,
       char *argv[])
 {
+  guint i;
+  const gchar *supported_terminals[] = {
+    "xdg-terminal-exec",
+    "kgx",
+    "gnome-terminal",
+    "mate-terminal",
+    "xfce4-terminal",
+    "tilix",
+    "konsole",
+    "nxterm",
+    "color-xterm",
+    "rxvt",
+    "dtterm",
+    "xterm",
+  };
+
   /* While we use %G_TEST_OPTION_ISOLATE_DIRS to create temporary directories
    * for each of the tests, we want to use the system MIME registry, assuming
    * that it exists and correctly has shared-mime-info installed. */
@@ -1201,10 +1894,49 @@ main (int   argc,
   g_test_add_func ("/desktop-app-info/search", test_search);
   g_test_add_func ("/desktop-app-info/implements", test_implements);
   g_test_add_func ("/desktop-app-info/show-in", test_show_in);
+  g_test_add_func ("/desktop-app-info/app-path", test_app_path);
+  g_test_add_func ("/desktop-app-info/app-path/wrong", test_app_path_wrong);
+  g_test_add_func ("/desktop-app-info/launch/fail", test_launch_fail);
+  g_test_add_func ("/desktop-app-info/launch/fail-absolute-path", test_launch_fail_absolute_path);
+  g_test_add_func ("/desktop-app-info/launch/fail-startup-notify", test_launch_startup_notify_fail);
+  g_test_add_func ("/desktop-app-info/launch/fail-dbus", test_launch_fail_dbus);
   g_test_add_func ("/desktop-app-info/launch-as-manager", test_launch_as_manager);
+  g_test_add_func ("/desktop-app-info/launch-as-manager/fail", test_launch_as_manager_fail);
   g_test_add_func ("/desktop-app-info/launch-default-uri-handler", test_default_uri_handler);
   g_test_add_func ("/desktop-app-info/launch-default-uri-handler-async", test_default_uri_handler_async);
   g_test_add_func ("/desktop-app-info/id", test_id);
+
+  for (i = 0; i < G_N_ELEMENTS (supported_terminals); i++)
+    {
+      char *path;
+
+      path = g_strdup_printf ("/desktop-app-info/launch-uris-with-terminal/with-path/%s",
+                              supported_terminals[i]);
+      g_test_add_data_func_full (path,
+                                 terminal_launch_data_new (supported_terminals[i],
+                                                           TERMINAL_LAUNCH_TYPE_COMMAND_LINE_WITH_PATH_OVERRIDE),
+                                 test_launch_uris_with_terminal, g_free);
+      g_clear_pointer (&path, g_free);
+
+      path = g_strdup_printf ("/desktop-app-info/launch-uris-with-terminal/with-context/%s",
+                              supported_terminals[i]);
+      g_test_add_data_func_full (path,
+                                 terminal_launch_data_new (supported_terminals[i],
+                                                           TERMINAL_LAUNCH_TYPE_COMMAND_LINE_WITH_CONTEXT),
+                                 test_launch_uris_with_terminal, g_free);
+      g_clear_pointer (&path, g_free);
+
+      path = g_strdup_printf ("/desktop-app-info/launch-uris-with-terminal/with-desktop-path/%s",
+                              supported_terminals[i]);
+      g_test_add_data_func_full (path,
+                                 terminal_launch_data_new (supported_terminals[i],
+                                                           TERMINAL_LAUNCH_TYPE_KEY_FILE_WITH_PATH),
+                                 test_launch_uris_with_terminal, g_free);
+      g_clear_pointer (&path, g_free);
+    }
+
+  g_test_add_func ("/desktop-app-info/launch-uris-with-terminal/invalid-glib-terminal",
+                   test_launch_uris_with_invalid_terminal);
 
   return g_test_run ();
 }

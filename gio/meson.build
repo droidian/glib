@@ -1,14 +1,18 @@
 gio_c_args = [
   '-DG_LOG_DOMAIN="GLib-GIO"',
-  '-DGIO_COMPILATION',
   '-DGIO_LAUNCH_DESKTOP="@0@"'.format(glib_prefix / multiarch_libexecdir / 'gio-launch-desktop'),
   '-DGIO_MODULE_DIR="@0@"'.format(glib_giomodulesdir),
   '-DLOCALSTATEDIR="@0@"'.format(glib_localstatedir),
 ]
 
-gio_c_args += glib_hidden_visibility_args
+gio_c_args_internal = [
+  '-DGIO_COMPILATION',
+]
 
-# FIXME: Install empty glib_giomodulesdir
+# Install empty glib_giomodulesdir
+install_emptydir(glib_giomodulesdir)
+
+gio_includedir = glib_includedir / 'gio'
 
 gnetworking_h_conf = configuration_data()
 
@@ -168,7 +172,7 @@ gnetworking_h_conf.set('NAMESER_COMPAT_INCLUDE', gnetworking_h_nameser_compat_in
 
 gnetworking_h = configure_file(input : 'gnetworking.h.in',
                                output : 'gnetworking.h',
-                               install_dir : join_paths(get_option('includedir'), 'glib-2.0/gio'),
+                               install_dir : gio_includedir,
                                configuration : gnetworking_h_conf)
 
 gdbus_headers = files(
@@ -366,15 +370,17 @@ if host_system != 'windows'
   )
 
   portal_sources = [files(
-    'gdocumentportal.c',
-    'gopenuriportal.c',
-    'gmemorymonitorportal.c',
-    'gnetworkmonitorportal.c',
-    'gpowerprofilemonitorportal.c',
-    'gproxyresolverportal.c',
-    'gtrashportal.c',
-    'gportalsupport.c',
-    'gportalnotificationbackend.c'),
+      'gdocumentportal.c',
+      'gopenuriportal.c',
+      'gmemorymonitorportal.c',
+      'gnetworkmonitorportal.c',
+      'gpowerprofilemonitorportal.c',
+      'gproxyresolverportal.c',
+      'gtrashportal.c',
+      'gportalsupport.c',
+      'gportalnotificationbackend.c',
+      'gsandbox.c',
+    ),
     xdp_dbus_generated
   ]
 
@@ -598,7 +604,7 @@ gio_sources = files(
   'gliststore.c',
 )
 
-if get_option('default_library') != 'static'
+if glib_build_shared
   gio_sources += files ('../glib/gtrace.c')
 endif
 
@@ -742,10 +748,20 @@ gio_headers = files(
   'gliststore.h',
 )
 
+gio_visibility_h = custom_target(
+  output: 'gio-visibility.h',
+  command: [gen_visibility_macros, meson.project_version(), 'visibility-macros', 'GIO', '@OUTPUT@'],
+  install: true,
+  install_dir: gio_includedir,
+  # FIXME: Not needed with Meson >= 0.64.0
+  install_tag: 'devel',
+)
+gio_sources += gio_visibility_h
+
 gio_headers += application_headers
 gio_headers += settings_headers
 gio_headers += gdbus_headers
-install_headers(gio_headers, subdir : 'glib-2.0/gio/')
+install_headers(gio_headers, install_dir : gio_includedir)
 
 # We can't use gnome.mkenums() because the GNOME module looks for glib-mkenums
 # in PATH, which means you can't bootstrap glib with its own glib-mkenums.
@@ -754,7 +770,9 @@ gioenumtypes_h = custom_target('gioenumtypes_h',
   capture : true,
   input : gio_headers,
   install : true,
-  install_dir : join_paths(get_option('includedir'), 'glib-2.0/gio'),
+  install_dir : gio_includedir,
+  # FIXME: Not needed with Meson >= 0.64.0
+  install_tag: 'devel',
   command : [python, glib_mkenums,
              '--template', files('gioenumtypes.h.template'),
              '@INPUT@', gnetworking_h])
@@ -768,7 +786,7 @@ gioenumtypes_c = custom_target('gioenumtypes_c',
              '--template', files('gioenumtypes.c.template'),
              '@INPUT@', gnetworking_h])
 
-gioenumtypes_dep = declare_dependency(sources : [gioenumtypes_h, glib_enumtypes_h])
+gioenumtypes_dep = declare_dependency(sources : [gioenumtypes_h, glib_enumtypes_h, gio_visibility_h])
 
 # inotify
 if glib_conf.has('HAVE_SYS_INOTIFY_H') and have_func_inotify_init1
@@ -833,8 +851,9 @@ libgio = library('gio-2.0',
                   libgobject_dep, libgmodule_dep, selinux_dep, xattr_dep,
                   platform_deps, network_libs, libsysprof_capture_dep,
                   gioenumtypes_dep, gvdb_dep],
-  c_args : gio_c_args,
-  objc_args : gio_c_args,
+  c_args : [gio_c_args, gio_c_args_internal],
+  objc_args : [gio_c_args, gio_c_args_internal],
+  gnu_symbol_visibility : 'hidden',
   # intl.lib is not compatible with SAFESEH
   link_args : [noseh_link_args, glib_link_flags],
 )
@@ -1051,6 +1070,7 @@ if enable_systemtap
     output : '@0@.stp'.format(libgio.full_path().split('/').get(-1)),
     configuration : stp_cdata,
     install_dir : tapset_install_dir,
+    install_tag : 'systemtap',
   )
 endif
 

@@ -409,7 +409,7 @@ struct _GDBusConnection
   GDBusConnectionFlags flags;
 
   /* Map used for managing method replies, protected by @lock */
-  GHashTable *map_method_serial_to_task;  /* guint32 -> GTask* */
+  GHashTable *map_method_serial_to_task;  /* guint32 -> owned GTask* */
 
   /* Maps used for managing signal subscription, protected by @lock */
   GHashTable *map_rule_to_signal_data;                      /* match rule (gchar*)    -> SignalData */
@@ -1061,7 +1061,7 @@ g_dbus_connection_init (GDBusConnection *connection)
   g_mutex_init (&connection->lock);
   g_mutex_init (&connection->init_lock);
 
-  connection->map_method_serial_to_task = g_hash_table_new (g_direct_hash, g_direct_equal);
+  connection->map_method_serial_to_task = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, g_object_unref);
 
   connection->map_rule_to_signal_data = g_hash_table_new (g_str_hash,
                                                           g_str_equal);
@@ -1750,8 +1750,9 @@ typedef struct
   guint32 serial;
 
   gulong cancellable_handler_id;
+  GSource *cancelled_idle_source;  /* (owned) (nullable) */
 
-  GSource *timeout_source;
+  GSource *timeout_source;  /* (owned) (nullable) */
 
   gboolean delivered;
 } SendMessageData;
@@ -1760,6 +1761,7 @@ typedef struct
 static void
 send_message_data_free (SendMessageData *data)
 {
+  /* These should already have been cleared by send_message_with_reply_cleanup(). */
   g_assert (data->timeout_source == NULL);
   g_assert (data->cancellable_handler_id == 0);
 
@@ -1768,7 +1770,7 @@ send_message_data_free (SendMessageData *data)
 
 /* ---------------------------------------------------------------------------------------------------- */
 
-/* can be called from any thread with lock held; @task is (transfer full) */
+/* can be called from any thread with lock held; @task is (transfer none) */
 static void
 send_message_with_reply_cleanup (GTask *task, gboolean remove)
 {
@@ -1784,12 +1786,17 @@ send_message_with_reply_cleanup (GTask *task, gboolean remove)
   if (data->timeout_source != NULL)
     {
       g_source_destroy (data->timeout_source);
-      data->timeout_source = NULL;
+      g_clear_pointer (&data->timeout_source, g_source_unref);
     }
   if (data->cancellable_handler_id > 0)
     {
       g_cancellable_disconnect (g_task_get_cancellable (task), data->cancellable_handler_id);
       data->cancellable_handler_id = 0;
+    }
+  if (data->cancelled_idle_source != NULL)
+    {
+      g_source_destroy (data->cancelled_idle_source);
+      g_clear_pointer (&data->cancelled_idle_source, g_source_unref);
     }
 
   if (remove)
@@ -1798,13 +1805,11 @@ send_message_with_reply_cleanup (GTask *task, gboolean remove)
                                               GUINT_TO_POINTER (data->serial));
       g_warn_if_fail (removed);
     }
-
-  g_object_unref (task);
 }
 
 /* ---------------------------------------------------------------------------------------------------- */
 
-/* Called from GDBus worker thread with lock held; @task is (transfer full). */
+/* Called from GDBus worker thread with lock held; @task is (transfer none). */
 static void
 send_message_data_deliver_reply_unlocked (GTask           *task,
                                           GDBusMessage    *reply)
@@ -1822,7 +1827,7 @@ send_message_data_deliver_reply_unlocked (GTask           *task,
   ;
 }
 
-/* Called from a user thread, lock is not held */
+/* Called from a user thread, lock is not held; @task is (transfer none) */
 static void
 send_message_data_deliver_error (GTask      *task,
                                  GQuark      domain,
@@ -1839,7 +1844,10 @@ send_message_data_deliver_error (GTask      *task,
       return;
     }
 
+  /* Hold a ref on @task as send_message_with_reply_cleanup() will remove it
+   * from the task map and could end up dropping the last reference */
   g_object_ref (task);
+
   send_message_with_reply_cleanup (task, TRUE);
   CONNECTION_UNLOCK (connection);
 
@@ -1849,7 +1857,7 @@ send_message_data_deliver_error (GTask      *task,
 
 /* ---------------------------------------------------------------------------------------------------- */
 
-/* Called from a user thread, lock is not held; @task is (transfer full) */
+/* Called from a user thread, lock is not held; @task is (transfer none) */
 static gboolean
 send_message_with_reply_cancelled_idle_cb (gpointer user_data)
 {
@@ -1857,7 +1865,7 @@ send_message_with_reply_cancelled_idle_cb (gpointer user_data)
 
   send_message_data_deliver_error (task, G_IO_ERROR, G_IO_ERROR_CANCELLED,
                                    _("Operation was cancelled"));
-  return FALSE;
+  return G_SOURCE_REMOVE;
 }
 
 /* Can be called from any thread with or without lock held */
@@ -1866,20 +1874,22 @@ send_message_with_reply_cancelled_cb (GCancellable *cancellable,
                                       gpointer      user_data)
 {
   GTask *task = user_data;
-  GSource *idle_source;
+  SendMessageData *data = g_task_get_task_data (task);
 
   /* postpone cancellation to idle handler since we may be called directly
    * via g_cancellable_connect() (e.g. holding lock)
    */
-  idle_source = g_idle_source_new ();
-  g_source_set_static_name (idle_source, "[gio] send_message_with_reply_cancelled_idle_cb");
-  g_task_attach_source (task, idle_source, send_message_with_reply_cancelled_idle_cb);
-  g_source_unref (idle_source);
+  if (data->cancelled_idle_source != NULL)
+    return;
+
+  data->cancelled_idle_source = g_idle_source_new ();
+  g_source_set_static_name (data->cancelled_idle_source, "[gio] send_message_with_reply_cancelled_idle_cb");
+  g_task_attach_source (task, data->cancelled_idle_source, send_message_with_reply_cancelled_idle_cb);
 }
 
 /* ---------------------------------------------------------------------------------------------------- */
 
-/* Called from a user thread, lock is not held; @task is (transfer full) */
+/* Called from a user thread, lock is not held; @task is (transfer none) */
 static gboolean
 send_message_with_reply_timeout_cb (gpointer user_data)
 {
@@ -1887,7 +1897,7 @@ send_message_with_reply_timeout_cb (gpointer user_data)
 
   send_message_data_deliver_error (task, G_IO_ERROR, G_IO_ERROR_TIMED_OUT,
                                    _("Timeout was reached"));
-  return FALSE;
+  return G_SOURCE_REMOVE;
 }
 
 /* ---------------------------------------------------------------------------------------------------- */
@@ -1945,9 +1955,9 @@ g_dbus_connection_send_message_with_reply_unlocked (GDBusConnection     *connect
   if (timeout_msec != G_MAXINT)
     {
       data->timeout_source = g_timeout_source_new (timeout_msec);
+      g_source_set_static_name (data->timeout_source, "[gio] send_message_with_reply_unlocked");
       g_task_attach_source (task, data->timeout_source,
                             (GSourceFunc) send_message_with_reply_timeout_cb);
-      g_source_unref (data->timeout_source);
     }
 
   g_hash_table_insert (connection->map_method_serial_to_task,
@@ -2388,7 +2398,8 @@ on_worker_message_about_to_be_sent (GDBusWorker  *worker,
   return message;
 }
 
-/* called with connection lock held, in GDBusWorker thread */
+/* called with connection lock held, in GDBusWorker thread
+ * @key, @value and @user_data are (transfer none) */
 static gboolean
 cancel_method_on_close (gpointer key, gpointer value, gpointer user_data)
 {
@@ -3443,7 +3454,7 @@ is_signal_data_for_name_lost_or_acquired (SignalData *signal_data)
  * @user_data_free_func: (nullable): function to free @user_data with when
  *     subscription is removed or %NULL
  *
- * Subscribes to signals on @connection and invokes @callback with a whenever
+ * Subscribes to signals on @connection and invokes @callback whenever
  * the signal is received. Note that @callback will be invoked in the 
  * [thread-default main context][g-main-context-push-thread-default]
  * of the thread you are calling this method from.
@@ -3740,7 +3751,7 @@ g_dbus_connection_signal_unsubscribe (GDBusConnection *connection,
 typedef struct
 {
   SignalSubscriber    *subscriber;  /* (owned) */
-  GDBusMessage        *message;
+  GDBusMessage        *message;  /* (owned) */
   GDBusConnection     *connection;
   const gchar         *sender;  /* (nullable) for peer-to-peer connections */
   const gchar         *path;
@@ -3804,7 +3815,7 @@ emit_signal_instance_in_idle_cb (gpointer data)
 static void
 signal_instance_free (SignalInstance *signal_instance)
 {
-  g_object_unref (signal_instance->message);
+  g_clear_object (&signal_instance->message);
   g_object_unref (signal_instance->connection);
   signal_subscriber_unref (signal_instance->subscriber);
   g_free (signal_instance);
@@ -4216,7 +4227,7 @@ has_object_been_unregistered (GDBusConnection    *connection,
 typedef struct
 {
   GDBusConnection *connection;
-  GDBusMessage *message;
+  GDBusMessage *message;  /* (owned) */
   gpointer user_data;
   const gchar *property_name;
   const GDBusInterfaceVTable *vtable;
@@ -4230,7 +4241,7 @@ static void
 property_data_free (PropertyData *data)
 {
   g_object_unref (data->connection);
-  g_object_unref (data->message);
+  g_clear_object (&data->message);
   g_free (data);
 }
 
@@ -4572,7 +4583,7 @@ handle_getset_property (GDBusConnection *connection,
 typedef struct
 {
   GDBusConnection *connection;
-  GDBusMessage *message;
+  GDBusMessage *message;  /* (owned) */
   gpointer user_data;
   const GDBusInterfaceVTable *vtable;
   GDBusInterfaceInfo *interface_info;
@@ -4581,10 +4592,10 @@ typedef struct
 } PropertyGetAllData;
 
 static void
-property_get_all_data_free (PropertyData *data)
+property_get_all_data_free (PropertyGetAllData *data)
 {
   g_object_unref (data->connection);
-  g_object_unref (data->message);
+  g_clear_object (&data->message);
   g_free (data);
 }
 
@@ -4869,8 +4880,6 @@ g_dbus_connection_list_registered_unlocked (GDBusConnection *connection,
   const gchar *object_path;
   gsize path_len;
   GHashTable *set;
-  GList *keys;
-  GList *l;
 
   CONNECTION_ENSURE_LOCK (connection);
 
@@ -4888,12 +4897,8 @@ g_dbus_connection_list_registered_unlocked (GDBusConnection *connection,
   while (g_hash_table_iter_next (&hash_iter, (gpointer) &object_path, NULL))
     maybe_add_path (path, path_len, object_path, set);
 
-  p = g_ptr_array_new ();
-  keys = g_hash_table_get_keys (set);
-  for (l = keys; l != NULL; l = l->next)
-    g_ptr_array_add (p, l->data);
+  p = g_hash_table_steal_all_keys (set);
   g_hash_table_unref (set);
-  g_list_free (keys);
 
   g_ptr_array_add (p, NULL);
   ret = (gchar **) g_ptr_array_free (p, FALSE);
@@ -6818,7 +6823,7 @@ typedef struct
 static void
 subtree_deferred_data_free (SubtreeDeferredData *data)
 {
-  g_object_unref (data->message);
+  g_clear_object (&data->message);
   exported_subtree_unref (data->es);
   g_free (data);
 }

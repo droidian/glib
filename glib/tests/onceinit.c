@@ -1,6 +1,8 @@
 /* g_once_init_*() test
  * Copyright (C) 2007 Tim Janik
  *
+ * SPDX-License-Identifier: LicenseRef-old-glib-tests
+ *
  * This work is provided "as is"; redistribution and modification
  * in whole or in part, in any medium, physical or electronic is
  * permitted without restriction.
@@ -264,16 +266,22 @@ test_onceinit (void)
       g_cond_broadcast (&tcond);
     }
 
+  for (i = 0; i < N_THREADS; i++)
+    g_thread_join (threads[i]);
+
   /* call multiple (unoptimized) initializers from multiple threads */
   g_mutex_lock (&tmutex);
   g_atomic_int_set (&thread_call_count, 0);
 
   for (i = 0; i < N_THREADS; i++)
-    g_thread_new (NULL, stress_concurrent_initializers, NULL);
+    threads[i] = g_thread_new (NULL, stress_concurrent_initializers, NULL);
   g_mutex_unlock (&tmutex);
 
   while (g_atomic_int_get (&thread_call_count) < 256 * 4 * N_THREADS)
     g_usleep (50 * 1000); /* wait for all 5 threads to complete */
+
+  for (i = 0; i < N_THREADS; i++)
+    g_thread_join (threads[i]);
 }
 
 int

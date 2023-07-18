@@ -896,7 +896,6 @@ test_dbus_export (void)
   ensure_state (G_ACTION_GROUP (group), "lang", "'spanish'");
 
   /* check that various error conditions are rejected */
-  {
   struct
     {
       const gchar *action_name;
@@ -940,7 +939,6 @@ test_dbus_export (void)
       g_clear_error (&error);
       g_clear_object (&async_result);
     }
-  }
 
   /* check that setting an action’s state over D-Bus works */
   g_assert_cmpint (activation_count ("lang"), ==, 1);
@@ -973,7 +971,6 @@ test_dbus_export (void)
   ensure_state (G_ACTION_GROUP (group), "lang", "'portuguese'");
 
   /* check that various error conditions are rejected */
-  {
   struct
     {
       const gchar *action_name;
@@ -1013,7 +1010,6 @@ test_dbus_export (void)
       g_clear_error (&error);
       g_clear_object (&async_result);
     }
-  }
 
   /* test that the initial transfer works */
   g_assert_true (G_IS_DBUS_ACTION_GROUP (proxy));

@@ -1087,29 +1087,13 @@ handle_list_names (_GFreedesktopDBus *object,
 {
   GDBusDaemon *daemon = G_DBUS_DAEMON (object);
   GPtrArray *array;
-  GList *clients, *names, *l;
+  GPtrArray *clients, *names;
 
-  array = g_ptr_array_new ();
+  clients = g_hash_table_get_values_as_ptr_array (daemon->clients);
+  array = g_steal_pointer (&clients);
 
-  clients = g_hash_table_get_values (daemon->clients);
-  for (l = clients; l != NULL; l = l->next)
-    {
-      Client *client = l->data;
-
-      g_ptr_array_add (array, client->id);
-    }
-
-  g_list_free (clients);
-
-  names = g_hash_table_get_values (daemon->names);
-  for (l = names; l != NULL; l = l->next)
-    {
-      Name *name = l->data;
-
-      g_ptr_array_add (array, name->name);
-    }
-
-  g_list_free (names);
+  names = g_hash_table_get_values_as_ptr_array (daemon->names);
+  g_ptr_array_extend_and_steal (array, g_steal_pointer (&names));
 
   g_ptr_array_add (array, NULL);
 
@@ -1618,13 +1602,8 @@ initable_init (GInitable     *initable,
   if (daemon->address == NULL)
     {
 #ifdef G_OS_UNIX
-      if (g_unix_socket_address_abstract_names_supported ())
-	daemon->address = g_strdup ("unix:tmpdir=/tmp/gdbus-daemon");
-      else
-	{
-	  daemon->tmpdir = g_dir_make_tmp ("gdbus-daemon-XXXXXX", NULL);
-	  daemon->address = g_strdup_printf ("unix:tmpdir=%s", daemon->tmpdir);
-	}
+      daemon->tmpdir = g_dir_make_tmp ("gdbus-daemon-XXXXXX", NULL);
+      daemon->address = g_strdup_printf ("unix:tmpdir=%s", daemon->tmpdir);
       flags |= G_DBUS_SERVER_FLAGS_AUTHENTICATION_REQUIRE_SAME_USER;
 #else
       /* Don’t require authentication on Windows as that hasn’t been

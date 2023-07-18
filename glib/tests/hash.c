@@ -460,6 +460,19 @@ int64_hash_test (void)
 }
 
 static void
+int64_hash_collision_test (void)
+{
+  gint64 m;
+  gint64 n;
+
+  g_test_summary ("Check int64 Hash collisions caused by ignoring high word");
+
+  m = 722;
+  n = ((gint64) 2003 << 32) + 722;
+  g_assert_cmpuint (g_int64_hash (&m), !=, g_int64_hash (&n));
+}
+
+static void
 double_hash_test (void)
 {
   gint       i, rc;
@@ -486,6 +499,27 @@ double_hash_test (void)
     }
 
   g_hash_table_destroy (h);
+}
+
+static void
+double_hash_collision_test (void)
+{
+  gdouble m;
+  gdouble n;
+
+  g_test_summary ("Check double Hash collisions caused by int conversion " \
+                  "and by numbers larger than 2^64-1 (G_MAXUINT64)");
+  g_test_bug ("https://gitlab.gnome.org/GNOME/glib/-/issues/2771");
+
+  /* Equal when directly converted to integers */
+  m = 0.1;
+  n = 0.2;
+  g_assert_cmpuint (g_double_hash (&m), !=, g_double_hash (&n));
+
+  /* Numbers larger than 2^64-1 (G_MAXUINT64) */
+  m = 1e100;
+  n = 1e200;
+  g_assert_cmpuint (g_double_hash (&m), !=, g_double_hash (&n));
 }
 
 static void
@@ -1658,6 +1692,163 @@ test_set_to_strv (void)
   g_strfreev (strv);
 }
 
+static void
+test_set_get_keys_as_ptr_array (void)
+{
+  GHashTable *set;
+  GPtrArray *array;
+
+  set = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+  g_hash_table_add (set, g_strdup ("xyz"));
+  g_hash_table_add (set, g_strdup ("xyz"));
+  g_hash_table_add (set, g_strdup ("abc"));
+
+  array = g_hash_table_get_keys_as_ptr_array (set);
+  g_hash_table_steal_all (set);
+  g_hash_table_unref (set);
+  g_ptr_array_set_free_func (array, g_free);
+
+  g_assert_cmpint (array->len, ==, 2);
+  g_ptr_array_add (array, NULL);
+
+  g_assert_true (
+    g_strv_equal ((const gchar * const[]) { "xyz", "abc", NULL },
+                  (const gchar * const*) array->pdata) ||
+    g_strv_equal ((const gchar * const[]) { "abc", "xyz", NULL },
+                  (const gchar * const*) array->pdata)
+  );
+
+  g_clear_pointer (&array, g_ptr_array_unref);
+}
+
+static void
+test_set_get_values_as_ptr_array (void)
+{
+  GHashTable *table;
+  GPtrArray *array;
+
+  table = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+  g_hash_table_insert (table, g_strdup ("xyz"), GUINT_TO_POINTER (0));
+  g_hash_table_insert (table, g_strdup ("xyz"), GUINT_TO_POINTER (1));
+  g_hash_table_insert (table, g_strdup ("abc"), GUINT_TO_POINTER (2));
+
+  array = g_hash_table_get_values_as_ptr_array (table);
+  g_clear_pointer (&table, g_hash_table_unref);
+
+  g_assert_cmpint (array->len, ==, 2);
+  g_assert_true (g_ptr_array_find (array, GUINT_TO_POINTER (1), NULL));
+  g_assert_true (g_ptr_array_find (array, GUINT_TO_POINTER (2), NULL));
+
+  g_assert_true (
+    memcmp ((gpointer []) { GUINT_TO_POINTER (1), GUINT_TO_POINTER (2) },
+            array->pdata, array->len * sizeof (gpointer)) == 0 ||
+    memcmp ((gpointer []) { GUINT_TO_POINTER (2), GUINT_TO_POINTER (1) },
+            array->pdata, array->len * sizeof (gpointer)) == 0
+  );
+
+  g_clear_pointer (&array, g_ptr_array_unref);
+}
+
+static void
+test_steal_all_keys (void)
+{
+  GHashTable *table;
+  GPtrArray *array;
+
+  table = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+  g_hash_table_insert (table, g_strdup ("xyz"), GUINT_TO_POINTER (0));
+  g_hash_table_insert (table, g_strdup ("xyz"), GUINT_TO_POINTER (1));
+  g_hash_table_insert (table, g_strdup ("abc"), GUINT_TO_POINTER (2));
+
+  array = g_hash_table_steal_all_keys (table);
+  g_assert_cmpuint (g_hash_table_size (table), ==, 0);
+
+  g_hash_table_insert (table, g_strdup ("do-not-leak-me"), GUINT_TO_POINTER (5));
+  g_clear_pointer (&table, g_hash_table_unref);
+
+  g_assert_cmpint (array->len, ==, 2);
+  g_ptr_array_add (array, NULL);
+
+  g_assert_true (
+    g_strv_equal ((const gchar * const[]) { "xyz", "abc", NULL },
+                  (const gchar * const*) array->pdata) ||
+    g_strv_equal ((const gchar * const[]) { "abc", "xyz", NULL },
+                  (const gchar * const*) array->pdata)
+  );
+
+  g_clear_pointer (&array, g_ptr_array_unref);
+
+  table = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, g_free);
+  g_hash_table_insert (table, GUINT_TO_POINTER (0), g_strdup ("xyz"));
+  g_hash_table_insert (table, GUINT_TO_POINTER (1), g_strdup ("xyz"));
+  g_hash_table_insert (table, GUINT_TO_POINTER (2), g_strdup ("abc"));
+
+  array = g_hash_table_steal_all_keys (table);
+  g_assert_cmpuint (g_hash_table_size (table), ==, 0);
+
+  g_hash_table_insert (table, GUINT_TO_POINTER (5), g_strdup ("do-not-leak-me"));
+  g_clear_pointer (&table, g_hash_table_unref);
+
+  g_assert_cmpint (array->len, ==, 3);
+  g_assert_true (g_ptr_array_find (array, GUINT_TO_POINTER (0), NULL));
+  g_assert_true (g_ptr_array_find (array, GUINT_TO_POINTER (1), NULL));
+  g_assert_true (g_ptr_array_find (array, GUINT_TO_POINTER (2), NULL));
+
+  g_clear_pointer (&array, g_ptr_array_unref);
+}
+
+static void
+test_steal_all_values (void)
+{
+  GHashTable *table;
+  GPtrArray *array;
+
+  table = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+  g_hash_table_insert (table, g_strdup ("xyz"), GUINT_TO_POINTER (0));
+  g_hash_table_insert (table, g_strdup ("xyz"), GUINT_TO_POINTER (1));
+  g_hash_table_insert (table, g_strdup ("abc"), GUINT_TO_POINTER (2));
+
+  array = g_hash_table_steal_all_values (table);
+  g_assert_cmpuint (g_hash_table_size (table), ==, 0);
+
+  g_hash_table_insert (table, g_strdup ("do-not-leak-me"), GUINT_TO_POINTER (5));
+  g_clear_pointer (&table, g_hash_table_unref);
+
+  g_assert_cmpint (array->len, ==, 2);
+  g_assert_true (g_ptr_array_find (array, GUINT_TO_POINTER (1), NULL));
+  g_assert_true (g_ptr_array_find (array, GUINT_TO_POINTER (2), NULL));
+
+  g_assert_true (
+    memcmp ((gpointer []) { GUINT_TO_POINTER (1), GUINT_TO_POINTER (2) },
+            array->pdata, array->len * sizeof (gpointer)) == 0 ||
+    memcmp ((gpointer []) { GUINT_TO_POINTER (2), GUINT_TO_POINTER (1) },
+            array->pdata, array->len * sizeof (gpointer)) == 0
+  );
+
+  g_clear_pointer (&array, g_ptr_array_unref);
+
+  table = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, g_free);
+  g_hash_table_insert (table, GUINT_TO_POINTER (0), g_strdup ("xyz"));
+  g_hash_table_insert (table, GUINT_TO_POINTER (1), g_strdup ("foo"));
+  g_hash_table_insert (table, GUINT_TO_POINTER (2), g_strdup ("abc"));
+
+  array = g_hash_table_steal_all_values (table);
+  g_assert_cmpuint (g_hash_table_size (table), ==, 0);
+
+  g_hash_table_insert (table, GUINT_TO_POINTER (5), g_strdup ("do-not-leak-me"));
+  g_clear_pointer (&table, g_hash_table_unref);
+
+  g_assert_cmpint (array->len, ==, 3);
+  g_assert_true (
+    g_ptr_array_find_with_equal_func (array, "xyz", g_str_equal, NULL));
+  g_assert_true (
+    g_ptr_array_find_with_equal_func (array, "foo", g_str_equal, NULL));
+  g_assert_true (
+    g_ptr_array_find_with_equal_func (array, "abc", g_str_equal, NULL));
+
+  g_clear_pointer (&array, g_ptr_array_unref);
+}
+
 static gboolean
 is_prime (guint p)
 {
@@ -1715,7 +1906,9 @@ main (int argc, char *argv[])
   g_test_add_func ("/hash/direct2", direct_hash_test2);
   g_test_add_func ("/hash/int", int_hash_test);
   g_test_add_func ("/hash/int64", int64_hash_test);
+  g_test_add_func ("/hash/int64/collisions", int64_hash_collision_test);
   g_test_add_func ("/hash/double", double_hash_test);
+  g_test_add_func ("/hash/double/collisions", double_hash_collision_test);
   g_test_add_func ("/hash/string", string_hash_test);
   g_test_add_func ("/hash/set", set_hash_test);
   g_test_add_func ("/hash/set-ref", set_ref_hash_test);
@@ -1728,6 +1921,8 @@ main (int argc, char *argv[])
   g_test_add_func ("/hash/foreach-steal", test_foreach_steal);
   g_test_add_func ("/hash/steal-extended", test_steal_extended);
   g_test_add_func ("/hash/steal-extended/optional", test_steal_extended_optional);
+  g_test_add_func ("/hash/steal-all-keys", test_steal_all_keys);
+  g_test_add_func ("/hash/steal-all-values", test_steal_all_values);
   g_test_add_func ("/hash/lookup-extended", test_lookup_extended);
   g_test_add_func ("/hash/new-similar", test_new_similar);
 
@@ -1738,6 +1933,8 @@ main (int argc, char *argv[])
   g_test_add_func ("/hash/iter-replace", test_iter_replace);
   g_test_add_func ("/hash/set-insert-corruption", test_set_insert_corruption);
   g_test_add_func ("/hash/set-to-strv", test_set_to_strv);
+  g_test_add_func ("/hash/get-keys-as-ptr-array", test_set_get_keys_as_ptr_array);
+  g_test_add_func ("/hash/get-values-as-ptr-array", test_set_get_values_as_ptr_array);
   g_test_add_func ("/hash/primes", test_primes);
 
   return g_test_run ();

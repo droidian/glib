@@ -209,7 +209,7 @@ main (int   argc,
   GDBusNodeInfo *introspection_data = NULL;
   gchar *tmpdir = NULL;
 
-  g_test_init (&argc, &argv, NULL);
+  g_test_init (&argc, &argv, G_TEST_OPTION_ISOLATE_DIRS, NULL);
 
   introspection_data = g_dbus_node_info_new_for_xml (test_interface_introspection_xml, NULL);
   g_assert (introspection_data != NULL);
@@ -219,13 +219,8 @@ main (int   argc,
 
   if (is_unix)
     {
-      if (g_unix_socket_address_abstract_names_supported ())
-	tmp_address = g_strdup ("unix:tmpdir=/tmp/gdbus-test-");
-      else
-	{
-	  tmpdir = g_dir_make_tmp ("gdbus-test-XXXXXX", NULL);
-	  tmp_address = g_strdup_printf ("unix:tmpdir=%s", tmpdir);
-	}
+      tmpdir = g_dir_make_tmp ("gdbus-test-XXXXXX", NULL);
+      tmp_address = g_strdup_printf ("unix:tmpdir=%s", tmpdir);
     }
   else
     tmp_address = g_strdup ("nonce-tcp:");

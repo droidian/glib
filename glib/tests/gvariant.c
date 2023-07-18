@@ -1340,7 +1340,9 @@ align_malloc (gsize size)
   gpointer mem;
 
 #ifdef HAVE_POSIX_MEMALIGN
-  if (posix_memalign (&mem, 8, size))
+  /* posix_memalign() requires the alignment to be a multiple of
+   * sizeof(void*), and a power of 2. */
+  if (posix_memalign (&mem, MAX (sizeof (void *), 8), size))
     g_error ("posix_memalign failed");
 #else
   /* NOTE: there may be platforms that lack posix_memalign() and also
@@ -4301,6 +4303,7 @@ test_parser_recursion_typedecls (void)
   g_assert_null (value);
   g_error_free (local_error);
   g_free (silly_array);
+  g_free (silly_type);
 }
 
 static void
@@ -5040,9 +5043,20 @@ test_stack_dict_init (void)
   GVariantIter iter;
   gchar *key;
   GVariant *value;
+  const gchar *str_value;
+
+  g_assert_true (g_variant_dict_lookup (&dict, "foo", "&s", &str_value, NULL));
+  g_assert_cmpstr (str_value, ==, "FOO");
+  g_assert_true (g_variant_dict_lookup (&dict, "bar", "&s", &str_value, NULL));
+  g_assert_cmpstr (str_value, ==, "BAR");
 
   g_variant_dict_insert_value (&dict, "baz", g_variant_new_string ("BAZ"));
   g_variant_dict_insert_value (&dict, "quux", g_variant_new_string ("QUUX"));
+
+  g_assert_true (g_variant_dict_lookup (&dict, "baz", "&s", &str_value, NULL));
+  g_assert_cmpstr (str_value, ==, "BAZ");
+  g_assert_true (g_variant_dict_lookup (&dict, "quux", "&s", &str_value, NULL));
+  g_assert_cmpstr (str_value, ==, "QUUX");
 
   variant = g_variant_ref_sink (g_variant_dict_end (&dict));
   g_assert_nonnull (variant);

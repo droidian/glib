@@ -1,5 +1,5 @@
 project('glib', 'c',
-  version : '2.74.7',
+  version : '2.76.4',
   # NOTE: See the policy in docs/meson-version.md before changing the Meson dependency
   meson_version : '>= 0.60.0',
   default_options : [
@@ -10,6 +10,15 @@ project('glib', 'c',
 )
 
 cc = meson.get_compiler('c')
+c_standards = {}
+
+foreach std : ['90', '99', '11', '17']
+  arg = (cc.get_id() == 'msvc' ? '/std:' : '-std=') + 'c' + std
+  if cc.has_argument(arg)
+    c_standards += { std: arg }
+  endif
+endforeach
+
 have_cxx = add_languages('cpp', native: false, required: get_option('oss_fuzz').enabled())
 if have_cxx
   cxx = meson.get_compiler('cpp')
@@ -83,7 +92,7 @@ glib_libdir = join_paths(glib_prefix, get_option('libdir'))
 glib_libexecdir = join_paths(glib_prefix, get_option('libexecdir'))
 glib_datadir = join_paths(glib_prefix, get_option('datadir'))
 glib_pkgdatadir = join_paths(glib_datadir, 'glib-2.0')
-glib_includedir = join_paths(glib_prefix, get_option('includedir'))
+glib_includedir = join_paths(glib_prefix, get_option('includedir'), 'glib-2.0')
 if get_option('gio_module_dir') != ''
   glib_giomodulesdir = join_paths(glib_prefix, get_option('gio_module_dir'))
 else
@@ -114,10 +123,17 @@ else
   glib_charsetaliasdir = glib_libdir
 endif
 
-glib_localstatedir = get_option('localstatedir')
-if not glib_localstatedir.startswith('/')
-  # See https://mesonbuild.com/Builtin-options.html#directories
-  glib_localstatedir = join_paths(glib_prefix, glib_localstatedir)
+glib_localstatedir = glib_prefix / get_option('localstatedir')
+
+if get_option('runtime_dir') != ''
+  glib_runstatedir = glib_prefix / get_option('runtime_dir')
+else
+  # While we’d normally prefix directories like this with, for example,
+  # glib_localstatedir, `/run` is a bit different in that it’s for runtime state
+  # rather than data files, so it’s typically functionally useless to use a
+  # prefixed version. No other processes will be using it. So we default to the
+  # unprefixed system `/run` directory.
+  glib_runstatedir = '/run'
 endif
 
 installed_tests_metadir = join_paths(glib_datadir, 'installed-tests', meson.project_name())
@@ -129,13 +145,41 @@ installed_tests_template_tap = files('tests/template-tap.test.in')
 # Don’t build the tests unless we can run them (either natively, in an exe wrapper, or by installing them for later use)
 build_tests = get_option('tests') and (meson.can_run_host_binaries() or installed_tests_enabled)
 
+common_test_env = [
+  'G_DEBUG=gc-friendly',
+  'G_ENABLE_DIAGNOSTIC=1',
+  'MALLOC_CHECK_=2',
+]
+
+# Note: this may cause the tests output not to be printed when running in
+# verbose mode, see https://github.com/mesonbuild/meson/issues/11185
+# Can be changed it to 'exitcode' if required during development.
+test_protocol = 'tap'
+test_timeout = 30
+test_timeout_slow = 90
+
+add_test_setup('default',
+  is_default: true,
+  exclude_suites: ['flaky', 'failing'],
+  env: common_test_env,
+  timeout_multiplier: 2,
+)
+
+add_test_setup('unstable_tests',
+  env: common_test_env,
+  timeout_multiplier: 2,
+  # Empty test setup, used for having different results set for flaky tests
+  # Sadly we can't use (https://github.com/mesonbuild/meson/issues/10934):
+  #suites: ['flaky', 'unstable']
+)
+
 # Allow the tests to be easily run under valgrind using --setup=valgrind
 valgrind = find_program('valgrind', required: false)
 if valgrind.found()
   suppression_file = files('tools' / 'glib.supp')
 
   add_test_setup('valgrind',
-    exclude_suites: [ 'no-valgrind' ],
+    exclude_suites: [ 'no-valgrind', 'flaky' ],
     exe_wrapper: [
       valgrind,
       '--tool=memcheck',
@@ -149,7 +193,8 @@ if valgrind.found()
       '--suppressions=@0@'.format(meson.project_source_root() /
         '@0@'.format(suppression_file[0])),
     ],
-    timeout_multiplier: 10,
+    env: common_test_env,
+    timeout_multiplier: 20,
   )
 endif
 
@@ -210,64 +255,31 @@ if host_system == 'windows' and cc.get_id() != 'msvc' and cc.get_id() != 'clang-
   glib_conf.set('_FILE_OFFSET_BITS', 64)
 endif
 
-# Check for GNU visibility attributes
-g_have_gnuc_visibility = cc.compiles('''
-  void
-  __attribute__ ((visibility ("hidden")))
-       f_hidden (void)
-  {
-  }
-  void
-  __attribute__ ((visibility ("internal")))
-       f_internal (void)
-  {
-  }
-  void
-  __attribute__ ((visibility ("default")))
-       f_default (void)
-  {
-  }
-  int main (void)
-  {
-    f_hidden();
-    f_internal();
-    f_default();
-    return 0;
-  }
-  ''',
-  # Not supported by MSVC, but MSVC also won't support visibility,
-  # so it's OK to pass -Werror explicitly. Replace with
-  # override_options : 'werror=true' once that is supported
-  args: ['-Werror'],
-  name : 'GNU C visibility attributes test')
-
-if g_have_gnuc_visibility
-  glibconfig_conf.set('G_HAVE_GNUC_VISIBILITY', '1')
+glib_build_shared = false
+glib_build_static = false
+if get_option('default_library') == 'both'
+  glib_build_static = true
+  glib_build_shared = true
+elif get_option('default_library') == 'static'
+  glib_build_static = true
+elif get_option('default_library') == 'shared'
+  glib_build_shared = true
 endif
 
-# Detect and set symbol visibility
-glib_hidden_visibility_args = []
-if get_option('default_library') != 'static'
-  if host_system == 'windows' or host_system == 'cygwin'
-    if get_option('default_library') != 'shared'
-      error('On Windows default_library must be "shared" or "static" but not "both"')
-    endif
-    glib_conf.set('DLL_EXPORT', true)
-    if cc.get_id() == 'msvc' or cc.get_id() == 'clang-cl'
-      glib_conf.set('_GLIB_EXTERN', '__declspec(dllexport) extern')
-    elif cc.has_argument('-fvisibility=hidden')
-      glib_conf.set('_GLIB_EXTERN', '__attribute__((visibility("default"))) __declspec(dllexport) extern')
-      glib_hidden_visibility_args = ['-fvisibility=hidden']
-    endif
-  elif cc.has_argument('-fvisibility=hidden')
-    glib_conf.set('_GLIB_EXTERN', '__attribute__((visibility("default"))) extern')
-    glib_hidden_visibility_args = ['-fvisibility=hidden']
-  endif
+glib_build_both = glib_build_static and glib_build_shared
+glib_build_static_only = glib_build_static and not glib_build_shared
+glib_build_shared_only = glib_build_shared and not glib_build_static
+
+if glib_build_shared and glib_build_static and (
+  host_system == 'windows' or host_system == 'cygwin')
+  error('On Windows default_library must be "shared" or "static" but not "both"')
 endif
 
-if get_option('default_library') == 'static'
+if glib_build_static_only
   glibconfig_conf.set('GLIB_STATIC_COMPILATION', '1')
   glibconfig_conf.set('GOBJECT_STATIC_COMPILATION', '1')
+  glibconfig_conf.set('GIO_STATIC_COMPILATION', '1')
+  glibconfig_conf.set('GMODULE_STATIC_COMPILATION', '1')
   glibconfig_conf.set('G_INTL_STATIC_COMPILATION', '1')
   glibconfig_conf.set('FFI_STATIC_BUILD', '1')
 endif
@@ -306,11 +318,11 @@ endif
 # optimization is 0 or g; otherwise, we have a production build.
 glib_debug_cflags = []
 glib_debug = get_option('glib_debug')
-optimized_build = get_option('optimization') not in [ '0', 'g' ]
-if glib_debug.enabled() or (glib_debug.auto() and get_option('debug') and not optimized_build)
+if (glib_debug.enabled() or (
+    glib_debug.auto() and get_option('debug') and get_option('optimization') in [ '0', 'g' ]))
   glib_debug_cflags += ['-DG_ENABLE_DEBUG']
   message('Enabling various debug infrastructure')
-elif optimized_build
+else
   glib_debug_cflags += ['-DG_DISABLE_CAST_CHECKS']
   message('Disabling cast checks')
 endif
@@ -485,6 +497,8 @@ if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
     '-Wduplicated-branches',
     '-Wimplicit-fallthrough',
     '-Wmisleading-indentation',
+    '-Wmissing-field-initializers',
+    '-Wnonnull',
     '-Wunused',
     # Due to maintained deprecated code, we do not want to see unused parameters
     '-Wno-unused-parameter',
@@ -510,10 +524,10 @@ if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
     # Due to pervasive use of things like GPOINTER_TO_UINT(), we do not support
     # building with -Wbad-function-cast.
     '-Wno-bad-function-cast',
-    '-Werror=declaration-after-statement',
     '-Werror=implicit-function-declaration',
     '-Werror=missing-prototypes',
     '-Werror=pointer-sign',
+    '-Wno-string-plus-int',
   ]
   warning_cxx_args = warning_common_args
   warning_objc_args = warning_c_args
@@ -592,6 +606,7 @@ if host_system == 'windows'
 endif
 
 functions = [
+  'accept4',
   'close_range',
   'endmntent',
   'endservent',
@@ -600,6 +615,8 @@ functions = [
   'fchmod',
   'fchown',
   'fdwalk',
+  'free_aligned_sized',
+  'free_sized',
   'fsync',
   'getauxval',
   'getc_unlocked',
@@ -709,17 +726,9 @@ foreach f : functions
 endforeach
 
 # Check that stpcpy() is usable; must use header.
-# cc.has_function() in some cases (clang, gcc 10+) assumes that if the
-# compiler provides a builtin of the same name that the function exists, while
-# it's in fact not provided by any header or library. This is true for
-# stpcpy() on Windows using clang and gcc as well as posix_memalign() using
-# gcc on Windows. Skip these checks on Windows for now to avoid false
-# positives. See https://github.com/mesonbuild/meson/pull/7116,
-# https://github.com/mesonbuild/meson/issues/3672 and
+# See:
 # https://github.com/mesonbuild/meson/issues/5628.
-# FIXME: Once meson no longer returns success for stpcpy() and
-# posix_memalign() on Windows using GCC and clang we can remove this.
-if host_system != 'windows' and cc.has_function('stpcpy', prefix : '#include <string.h>')
+if cc.has_function('stpcpy', prefix : '#include <string.h>')
   glib_conf.set('HAVE_STPCPY', 1)
 endif
 
@@ -955,6 +964,8 @@ endif
 
 dlopen_dlsym_test_code = '''
 #include <dlfcn.h>
+#include <stdio.h>
+int r;
 int glib_underscore_test (void) { return 42; }
 int main (int argc, char ** argv) {
   void *f1 = (void*)0, *f2 = (void*)0, *handle;
@@ -963,7 +974,8 @@ int main (int argc, char ** argv) {
     f1 = dlsym (handle, "glib_underscore_test");
     f2 = dlsym (handle, "_glib_underscore_test");
   }
-  return (!f2 || f1);
+  r = (!f2 || f1) ? puts ("1") : puts ("0");
+  return r > 0 ? 0 : r;
 }'''
 libdl_dep = []
 if cc.links(dlopen_dlsym_test_code, name : 'dlopen() and dlsym() in system libraries')
@@ -1468,8 +1480,6 @@ long_long_align = cc.alignment('long long')
 # be 64-bit in C99, and it is available on all supported compilers
 sizet_align = cc.alignment('size_t')
 
-glib_conf.set('ALIGNOF_UNSIGNED_LONG', long_align)
-
 glib_conf.set('SIZEOF_CHAR', char_size)
 glib_conf.set('SIZEOF_INT', int_size)
 glib_conf.set('SIZEOF_SHORT', short_size)
@@ -1523,7 +1533,6 @@ glibconfig_conf.set('gint32', gint32)
 glibconfig_conf.set_quoted('gint32_modifier', gint32_modifier)
 glibconfig_conf.set_quoted('gint32_format', gint32_format)
 glibconfig_conf.set_quoted('guint32_format', guint32_format)
-glib_conf.set('ALIGNOF_GUINT32', guint32_align)
 
 if int_size == 8
   gint64 = 'int'
@@ -1562,7 +1571,6 @@ glibconfig_conf.set_quoted('gint64_format', gint64_format)
 glibconfig_conf.set_quoted('guint64_format', guint64_format)
 glibconfig_conf.set('gint64_constant', gint64_constant)
 glibconfig_conf.set('guint64_constant', guint64_constant)
-glib_conf.set('ALIGNOF_GUINT64', guint64_align)
 
 if host_system == 'windows'
   glibconfig_conf.set('g_pid_type', 'void*')
@@ -1702,38 +1710,11 @@ else
 endif
 
 # === va_copy checks ===
-# we currently check for all three va_copy possibilities, so we get
-# all results in config.log for bug reports.
 
-va_copy_func = ''
-foreach try_func : [ '__va_copy', 'va_copy' ]
-  if cc.compiles('''#include <stdarg.h>
-                    #include <stdlib.h>
-                    #ifdef _MSC_VER
-                    # include "msvc_recommended_pragmas.h"
-                    #endif
-                    void f (int i, ...) {
-                    va_list args1, args2;
-                    va_start (args1, i);
-                    @0@ (args2, args1);
-                    if (va_arg (args2, int) != 42 || va_arg (args1, int) != 42)
-                      exit (1);
-                    va_end (args1); va_end (args2);
-                    }
-                    int main() {
-                      f (0, 42);
-                      return 0;
-                    }'''.format(try_func),
-                    name : try_func + ' check')
-    va_copy_func = try_func
-  endif
-endforeach
-if va_copy_func != ''
-  glib_conf.set('G_VA_COPY', va_copy_func)
-  glib_vacopy = '#define G_VA_COPY ' + va_copy_func
-else
-  glib_vacopy = '/* #undef G_VA_COPY */'
-endif
+glib_vacopy = ''
+
+# We check for G_VA_COPY_AS_ARRAY for historical reasons, but we no longer
+# use it: use Standard C va_copy() instead.
 
 va_list_val_copy_prog = '''
   #include <stdarg.h>
@@ -1974,10 +1955,6 @@ else
     glib_conf.set('HAVE_PTHREAD_GETNAME_NP', 1)
   endif
 
-  if cc.has_header_symbol('sys/syscall.h', 'SYS_sched_getattr')
-    glib_conf.set('HAVE_SYS_SCHED_GETATTR', 1)
-  endif
-
   # Assume that pthread_setname_np is available in some form; same as configure
   if cc.links(pthread_prefix + '''
               int main() {
@@ -2060,7 +2037,8 @@ else
   libiconv = dependency('iconv')
 endif
 
-pcre2 = dependency('libpcre2-8', version: '>= 10.32', required : false)
+pcre2_req = '>=10.32'
+pcre2 = dependency('libpcre2-8', version: pcre2_req, required: false, allow_fallback: false)
 if not pcre2.found()
   if cc.get_id() == 'msvc' or cc.get_id() == 'clang-cl'
   # MSVC: Search for the PCRE2 library by the configuration, which corresponds
@@ -2076,8 +2054,11 @@ endif
 
 # Try again with the fallback
 if not pcre2.found()
-  pcre2 = dependency('libpcre2-8', required : true, fallback : ['pcre2', 'libpcre2_8'])
-  use_pcre2_static_flag = true
+  pcre2 = dependency('libpcre2-8', version: pcre2_req, allow_fallback: true)
+  assert(pcre2.type_name() == 'internal')
+  # static flags are automatically enabled by the subproject if it's built
+  # with default_library=static
+  use_pcre2_static_flag = false
 elif host_system == 'windows'
   pcre2_static = cc.links('''#define PCRE2_STATIC
                              #define PCRE2_CODE_UNIT_WIDTH 8
@@ -2099,7 +2080,7 @@ subproject('gvdb')
 gvdb_dep = dependency('gvdb')
 
 libm = cc.find_library('m', required : false)
-libffi_dep = dependency('libffi', version : '>= 3.0.0', fallback : ['libffi', 'ffi_dep'])
+libffi_dep = dependency('libffi', version : '>= 3.0.0')
 
 libz_dep = dependency('zlib')
 
@@ -2108,7 +2089,7 @@ libz_dep = dependency('zlib')
 # FIXME: glib-gettext.m4 has much more checks to detect broken/uncompatible
 # implementations. This could be extended if issues are found in some platforms.
 libintl_deps = []
-libintl = dependency('intl', required: false)
+libintl = dependency('intl', required: false, allow_fallback: false)
 if libintl.found()
   # libintl supports different threading APIs, which may not
   # require additional flags, but it defaults to using pthreads if
@@ -2134,7 +2115,8 @@ endif
 if libintl.found()
   have_bind_textdomain_codeset = cc.has_function('bind_textdomain_codeset', dependencies: libintl_deps)
 else
-  libintl = subproject('proxy-libintl').get_variable('intl_dep')
+  libintl = dependency('intl', allow_fallback: true)
+  assert(libintl.type_name() == 'internal')
   libintl_deps = [libintl]
   have_bind_textdomain_codeset = true  # proxy-libintl supports it
 endif
@@ -2146,6 +2128,9 @@ glib_conf.set('HAVE_DCGETTEXT', 1)
 glib_conf.set('HAVE_GETTEXT', 1)
 
 glib_conf.set_quoted('GLIB_LOCALE_DIR', join_paths(glib_datadir, 'locale'))
+
+glib_conf.set_quoted('GLIB_LOCALSTATEDIR', glib_localstatedir)
+glib_conf.set_quoted('GLIB_RUNSTATEDIR', glib_runstatedir)
 
 # libmount is only used by gio, but we need to fetch the libs to generate the
 # pkg-config file below
@@ -2363,11 +2348,21 @@ if want_dtrace
   dtrace_obj_gen = generator(dtrace,
     output : '@BASENAME@.o',
     arguments : ['-G', '-s', '@INPUT@', '-o', '@OUTPUT@'])
-  # FIXME: $(SED) -e "s,define STAP_HAS_SEMAPHORES 1,undef STAP_HAS_SEMAPHORES,"
-  #               -e "s,define _SDT_HAS_SEMAPHORES 1,undef _SDT_HAS_SEMAPHORES,"
-  dtrace_hdr_gen = generator(dtrace,
+  dtrace_hdr_gen = generator(python,
     output : '@BASENAME@.h',
-    arguments : ['-h', '-s', '@INPUT@', '-o', '@OUTPUT@'])
+    arguments : ['-c', '''
+import subprocess, sys
+subprocess.run(sys.argv[1:], check=True)
+output = sys.argv[6]
+with open(output) as f:
+  contents = f.read()
+contents = contents.replace("define STAP_HAS_SEMAPHORES 1",
+  "undef STAP_HAS_SEMAPHORES")
+contents = contents.replace("define _SDT_HAS_SEMAPHORES 1",
+  "undef _SDT_HAS_SEMAPHORES")
+with open(output, "w") as f:
+  f.write(contents)
+''', dtrace.full_path(), '-h', '-s', '@INPUT@', '-o', '@OUTPUT@'])
   glib_conf.set('HAVE_DTRACE', 1)
   enable_dtrace = true
 endif
@@ -2388,18 +2383,15 @@ if want_systemtap and enable_dtrace
   enable_systemtap = true
 endif
 
-test_timeout = 60
-test_timeout_slow = 180
-
 pkg = import('pkgconfig')
 windows = import('windows')
+subdir('tools')
 subdir('glib')
 subdir('gobject')
 subdir('gthread')
 subdir('gmodule')
 subdir('gio')
 subdir('fuzzing')
-subdir('tools')
 
 # xgettext is optional (on Windows for instance)
 if find_program('xgettext', required : get_option('nls')).found()
@@ -2412,10 +2404,24 @@ install_data('m4macros/glib-2.0.m4', 'm4macros/glib-gettext.m4', 'm4macros/gsett
   install_tag : 'devel',
 )
 
+# Check whether we support overriding the invalid parameter handler on Windows for _get_osfhandle(),
+# g_fsync() (i.e. _commit()), etc
+if host_system == 'windows'
+  if cc.has_function('_set_thread_local_invalid_parameter_handler', prefix: '#include <stdlib.h>')
+    glib_conf.set('HAVE__SET_THREAD_LOCAL_INVALID_PARAMETER_HANDLER', 1)
+  endif
+  if cc.has_function('_set_invalid_parameter_handler', prefix: '#include <stdlib.h>')
+    glib_conf.set('HAVE__SET_INVALID_PARAMETER_HANDLER', 1)
+  endif
+  if cc.has_header_symbol('crtdbg.h', '_CrtSetReportMode')
+    glib_conf.set('HAVE__CRT_SET_REPORT_MODE', 1)
+  endif
+endif
+
 configure_file(output : 'config.h', configuration : glib_conf)
 
 if host_system == 'windows'
-  install_headers([ 'msvc_recommended_pragmas.h' ], subdir : 'glib-2.0')
+  install_headers([ 'msvc_recommended_pragmas.h' ], install_dir : glib_includedir)
 endif
 
 if get_option('man')
@@ -2437,3 +2443,71 @@ endif
 
 gnome = import('gnome')
 subdir('docs/reference')
+
+summary({
+  'host cpu' : host_machine.cpu_family(),
+  'host endian' : host_machine.endian(),
+  'host system' : host_system,
+  'C Compiler' : cc.get_id(),
+  'C++ Compiler' : have_cxx ? cxx.get_id() : 'none',
+  'shared build' : glib_build_shared,
+  'static build' : glib_build_static,
+}, section: 'Build environment')
+
+if build_machine.system() != host_system
+  summary({
+    'build cpu' : build_machine.cpu_family(),
+    'build endian' : build_machine.endian(),
+    'build system' : build_machine.system(),
+  }, section: 'Build environment')
+endif
+
+summary({
+  'prefix' : glib_prefix,
+  'bindir' : glib_bindir,
+  'libexecdir' : glib_libexecdir,
+  'pkgdatadir' : glib_pkgdatadir,
+  'datadir' : glib_datadir,
+  'includedir' : glib_includedir,
+  'giomodulesdir' : glib_giomodulesdir,
+  'localstatedir' : glib_localstatedir,
+  'runstatedir' : glib_runstatedir,
+}, section: 'Directories')
+
+if get_option('multiarch')
+  summary({
+    'multiarch bindir' : glib_bindir,
+    'multiarch libexecdir' : glib_libexecdir,
+  }, section: 'Directories')
+endif
+
+if enable_systemtap
+  summary('tapset dir', get_option('tapset_install_dir'), section: 'Directories')
+endif
+
+if host_system == 'linux'
+  summary({
+    'selinux' : selinux_dep.found(),
+    'libmount' : libmount_dep.found(),
+  }, section: 'Options')
+endif
+
+summary({
+  'xattr' : xattr_dep.length() > 0,
+  'man' : get_option('man'),
+  'dtrace' : get_option('dtrace'),
+  'systemtap' : enable_systemtap,
+  'sysprof' : libsysprof_capture_dep.found(),
+  'gtk_doc' : get_option('gtk_doc'),
+  'bsymbolic_functions' : get_option('bsymbolic_functions'),
+  'force_posix_threads' : get_option('force_posix_threads'),
+  'tests' : get_option('tests'),
+  'installed_tests' : get_option('installed_tests'),
+  'nls' : get_option('nls'),
+  'oss_fuzz' : get_option('oss_fuzz'),
+  'glib_debug' : get_option('glib_debug'),
+  'glib_assert' : get_option('glib_assert'),
+  'glib_checks' : get_option('glib_checks'),
+  'libelf' : get_option('libelf'),
+  'multiarch' : get_option('multiarch'),
+}, section: 'Options')

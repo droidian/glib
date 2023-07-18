@@ -3,12 +3,9 @@ gobject_tests = {
   'performance-threaded' : { 'args' : [ '--seconds', '0' ] },
 }
 
-# FIXME: put common bits of test environment() in one location
 test_env = environment()
 test_env.set('G_TEST_SRCDIR', meson.current_source_dir())
 test_env.set('G_TEST_BUILDDIR', meson.current_build_dir())
-test_env.set('G_DEBUG', 'gc-friendly')
-test_env.set('MALLOC_CHECK_', '2')
 
 test_deps = [libm, thread_dep, libglib_dep, libgobject_dep]
 test_cargs = ['-DG_LOG_DOMAIN="GLib-GObject"', '-UG_DISABLE_ASSERT']
@@ -39,9 +36,13 @@ foreach test_name, extra_args : gobject_tests
     install: install,
   )
 
-  suite = ['gobject', 'performance'] + extra_args.get('suite', [])
+  suite = ['gobject', 'performance', 'no-valgrind'] + extra_args.get('suite', [])
   timeout = suite.contains('slow') ? test_timeout_slow : test_timeout
   args = extra_args.get('args', [])
+
+  if extra_args.get('can_fail', false)
+    suite += 'failing'
+  endif
 
   test(test_name, exe,
     env : test_env,

@@ -64,6 +64,10 @@
  * #GTask was constructed to be running at least until the task has completed
  * and its data has been freed.
  *
+ * If a #GTask has been constructed and its callback set, it is an error to
+ * not call `g_task_return_*()` on it. GLib will warn at runtime if this happens
+ * (since 2.76).
+ *
  * Here is an example for using GTask as a GAsyncResult:
  * |[<!-- language="C" -->
  *     typedef struct {
@@ -538,6 +542,24 @@
  *   having come from the `_async()` wrapper
  *   function (for "short-circuit" results, such as when passing
  *   0 to g_input_stream_read_async()).
+ *
+ * ## Thread-safety considerations
+ *
+ * Due to some infelicities in the API design, there is a
+ * thread-safety concern that users of GTask have to be aware of:
+ *
+ * If the `main` thread drops its last reference to the source object
+ * or the task data before the task is finalized, then the finalizers
+ * of these objects may be called on the worker thread.
+ *
+ * This is a problem if the finalizers use non-threadsafe API, and
+ * can lead to hard-to-debug crashes. Possible workarounds include:
+ *
+ * - Clear task data in a signal handler for `notify::completed`
+ *
+ * - Keep iterating a main context in the main thread and defer
+ *   dropping the reference to the source object to that main
+ *   context when the task is finalized
  */
 
 /**
@@ -573,21 +595,22 @@ struct _GTask {
   gboolean thread_cancelled;
 
   /* Protected by the lock when task is threaded: */
-  gboolean thread_complete : 1;
-  gboolean return_on_cancel : 1;
-  gboolean : 0;
+  guint thread_complete : 1;
+  guint return_on_cancel : 1;
+  guint : 0;
 
   /* Unprotected, but written to when task runs in thread: */
-  gboolean completed : 1;
-  gboolean had_error : 1;
-  gboolean result_set : 1;
-  gboolean ever_returned : 1;
-  gboolean : 0;
+  guint completed : 1;
+  guint had_error : 1;
+  guint result_set : 1;
+  guint ever_returned : 1;
+  guint : 0;
 
   /* Read-only once task runs in thread: */
-  gboolean check_cancellable : 1;
-  gboolean synchronous : 1;
-  gboolean blocking_other_task : 1;
+  guint check_cancellable : 1;
+  guint synchronous : 1;
+  guint blocking_other_task : 1;
+  guint name_is_static : 1;
 
   GError *error;
   union {
@@ -658,9 +681,38 @@ g_task_finalize (GObject *object)
 {
   GTask *task = G_TASK (object);
 
+  /* Warn if a #GTask is finalised without g_task_return() ever having been
+   * called on it.
+   *
+   * Tasks without a callback or which are run in g_task_run_in_thread{,_sync}()
+   * only trigger a debug message as that’s sometimes used as a pattern for
+   * running work in a worker thread without caring about the result. */
+  if (!task->ever_returned)
+    {
+      gchar *owned_task_name = NULL;
+      const gchar *task_name = g_task_get_name (task);
+
+      if (task_name == NULL)
+        task_name = owned_task_name = g_strdup_printf ("%p", task);
+
+      if (task->callback != NULL && !G_TASK_IS_THREADED (task))
+        g_critical ("GTask %s (source object: %p, source tag: %p) finalized without "
+                    "ever returning (using g_task_return_*()). This potentially "
+                    "indicates a bug in the program.",
+                    task_name, task->source_object, task->source_tag);
+      else
+        g_debug ("GTask %s (source object: %p, source tag: %p) finalized without "
+                 "ever returning (using g_task_return_*()). This potentially "
+                 "indicates a bug in the program.",
+                 task_name, task->source_object, task->source_tag);
+
+      g_free (owned_task_name);
+    }
+
   g_clear_object (&task->source_object);
   g_clear_object (&task->cancellable);
-  g_free (task->name);
+  if (!task->name_is_static)
+    g_free (task->name);
 
   if (task->context)
     g_main_context_unref (task->context);
@@ -769,7 +821,7 @@ g_task_report_error (gpointer             source_object,
 
   task = g_task_new (source_object, NULL, callback, callback_data);
   g_task_set_source_tag (task, source_tag);
-  g_task_set_name (task, G_STRFUNC);
+  g_task_set_static_name (task, G_STRFUNC);
   g_task_return_error (task, error);
   g_object_unref (task);
 }
@@ -1028,16 +1080,41 @@ void
  * Since: 2.60
  */
 void
-g_task_set_name (GTask       *task,
-                 const gchar *name)
+(g_task_set_name) (GTask      *task,
+                   const char *name)
 {
-  gchar *new_name;
+  char *new_name;
 
   g_return_if_fail (G_IS_TASK (task));
 
   new_name = g_strdup (name);
-  g_free (task->name);
+  if (!task->name_is_static)
+    g_free (task->name);
   task->name = g_steal_pointer (&new_name);
+  task->name_is_static = FALSE;
+}
+
+/**
+ * g_task_set_static_name:
+ * @task: a #GTask
+ * @name: (nullable): a human readable name for the task. Must be a string literal
+ *
+ * Sets @task’s name, used in debugging and profiling.
+ *
+ * This is a variant of g_task_set_name() that avoids copying @name.
+ *
+ * Since: 2.76
+ */
+void
+g_task_set_static_name (GTask      *task,
+                        const char *name)
+{
+  g_return_if_fail (G_IS_TASK (task));
+
+  if (!task->name_is_static)
+    g_free (task->name);
+  task->name = (char *) name;
+  task->name_is_static = TRUE;
 }
 
 /**
@@ -1645,7 +1722,8 @@ g_task_run_in_thread_sync (GTask           *task,
  * callback to @callback, with @task as the callback's `user_data`.
  *
  * It will set the @source’s name to the task’s name (as set with
- * g_task_set_name()), if one has been set.
+ * g_task_set_name()), if one has been set on the task and the source doesn’t
+ * yet have a name.
  *
  * This takes a reference on @task until @source is destroyed.
  *
@@ -1661,7 +1739,7 @@ g_task_attach_source (GTask       *task,
   g_source_set_callback (source, callback,
                          g_object_ref (task), g_object_unref);
   g_source_set_priority (source, task->priority);
-  if (task->name != NULL)
+  if (task->name != NULL && g_source_get_name (source) == NULL)
     g_source_set_name (source, task->name);
 
   g_source_attach (source, task->context);

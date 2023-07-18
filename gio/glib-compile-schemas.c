@@ -22,6 +22,7 @@
 /* Prologue {{{1 */
 #include "config.h"
 
+#include <glib.h>
 #include <gstdio.h>
 #include <gi18n.h>
 
@@ -709,8 +710,8 @@ key_state_serialise (KeyState *state)
               gsize size;
               gsize i;
 
-              data = state->strinfo->str;
               size = state->strinfo->len;
+              data = g_string_free_and_steal (g_steal_pointer (&state->strinfo));
 
               words = data;
               for (i = 0; i < size / sizeof (guint32); i++)
@@ -719,9 +720,6 @@ key_state_serialise (KeyState *state)
               array = g_variant_new_from_data (G_VARIANT_TYPE ("au"),
                                                data, size, TRUE,
                                                g_free, data);
-
-              g_string_free (state->strinfo, FALSE);
-              state->strinfo = NULL;
 
               g_variant_builder_add (&builder, "(y@au)",
                                      state->is_flags ? 'f' :
@@ -1869,8 +1867,8 @@ static gint
 compare_strings (gconstpointer a,
                  gconstpointer b)
 {
-  gchar *one = *(gchar **) a;
-  gchar *two = *(gchar **) b;
+  const gchar *one = a;
+  const gchar *two = b;
   gint cmp;
 
   cmp = g_str_has_suffix (two, ".enums.xml") -
@@ -2185,6 +2183,7 @@ main (int argc, char **argv)
 
 #ifdef G_OS_WIN32
   gchar *tmp = NULL;
+  gchar **command_line = NULL;
 #endif
 
   setlocale (LC_ALL, GLIB_DEFAULT_LOCALE);
@@ -2209,12 +2208,23 @@ main (int argc, char **argv)
        "and the cache file is called gschemas.compiled."));
   g_option_context_add_main_entries (context, entries, GETTEXT_PACKAGE);
 
+#ifdef G_OS_WIN32
+  command_line = g_win32_get_command_line ();
+  if (!g_option_context_parse_strv (context, &command_line, &error))
+    {
+      fprintf (stderr, "%s\n", error->message);
+      retval = 1;
+      goto done;
+    }
+  argc = g_strv_length (command_line);
+#else
   if (!g_option_context_parse (context, &argc, &argv, &error))
     {
       fprintf (stderr, "%s\n", error->message);
       retval = 1;
       goto done;
     }
+#endif
 
   if (show_version_and_exit)
     {
@@ -2230,7 +2240,11 @@ main (int argc, char **argv)
       goto done;
     }
 
+#ifdef G_OS_WIN32
+  srcdir = command_line[1];
+#else
   srcdir = argv[1];
+#endif
 
   target = g_build_filename (targetdir ? targetdir : srcdir, "gschemas.compiled", NULL);
 
@@ -2278,10 +2292,10 @@ main (int argc, char **argv)
           retval = 0;
           goto done;
         }
-      g_ptr_array_sort (files, compare_strings);
+      g_ptr_array_sort_values (files, compare_strings);
       g_ptr_array_add (files, NULL);
 
-      g_ptr_array_sort (overrides, compare_strings);
+      g_ptr_array_sort_values (overrides, compare_strings);
       g_ptr_array_add (overrides, NULL);
 
       schema_files = (char **) g_ptr_array_free (files, FALSE);
@@ -2323,6 +2337,7 @@ done:
 
 #ifdef G_OS_WIN32
   g_free (tmp);
+  g_strfreev (command_line);  
 #endif
 
   return retval;

@@ -1,3 +1,5 @@
+gobject_includedir = glib_includedir / 'gobject'
+
 gobject_install_headers = files(
   'gobject-autocleanups.h',
   'glib-types.h',
@@ -22,9 +24,22 @@ gobject_install_headers = files(
   'gvaluetypes.h',
   'gobjectnotifyqueue.c', # sic
 )
-install_headers(gobject_install_headers, subdir : 'glib-2.0/gobject')
 
-gobject_sources = files(
+gobject_sources = []
+
+gobject_visibility_h = custom_target(
+  output: 'gobject-visibility.h',
+  command: [gen_visibility_macros, meson.project_version(), 'visibility-macros', 'GOBJECT', '@OUTPUT@'],
+  install: true,
+  install_dir: gobject_includedir,
+  # FIXME: Not needed with Meson >= 0.64.0
+  install_tag: 'devel',
+)
+gobject_sources += gobject_visibility_h
+
+install_headers(gobject_install_headers, install_dir : gobject_includedir)
+
+gobject_sources += files(
   'gatomicarray.c',
   'gbinding.c',
   'gbindinggroup.c',
@@ -47,7 +62,7 @@ gobject_sources = files(
   'gvaluetypes.c',
 )
 
-if host_system == 'windows' and get_option('default_library') == 'shared'
+if host_system == 'windows' and glib_build_shared
   gobject_win_rc = configure_file(
     input: 'gobject.rc.in',
     output: 'gobject.rc',
@@ -107,6 +122,7 @@ glib_enumtypes_h = custom_target('glib_enumtypes_h',
   input : glib_enumtypes_input_headers,
   install : true,
   install_dir : join_paths(get_option('includedir'), 'glib-2.0/gobject'),
+  install_tag: 'devel',
   command : [python, glib_mkenums,
              '--template', files('glib-enumtypes.h.template'),
              '@INPUT@'])
@@ -119,8 +135,6 @@ glib_enumtypes_c = custom_target('glib_enumtypes_c',
   command : [python, glib_mkenums,
              '--template', files('glib-enumtypes.c.template'),
              '@INPUT@'])
-
-glib_enumtypes_dep = declare_dependency(sources : [glib_enumtypes_h])
 
 # Expose as variable to be used by gobject-introspection
 # when it includes GLib as a subproject
@@ -135,7 +149,8 @@ libgobject = library('gobject-2.0',
   install : true,
   include_directories : [configinc],
   dependencies : [libffi_dep, libglib_dep],
-  c_args : ['-DG_LOG_DOMAIN="GLib-GObject"', '-DGOBJECT_COMPILATION'] + glib_hidden_visibility_args,
+  c_args : ['-DG_LOG_DOMAIN="GLib-GObject"', '-DGOBJECT_COMPILATION'],
+  gnu_symbol_visibility : 'hidden',
   link_args : glib_link_flags,
 )
 
@@ -150,10 +165,12 @@ pkg.generate(libgobject,
 
 libgobject_dep = declare_dependency(link_with : libgobject,
   include_directories : [gobjectinc],
-  dependencies : [libglib_dep, glib_enumtypes_dep])
+  sources : [gobject_visibility_h, glib_enumtypes_h],
+  dependencies : [libglib_dep],
+)
 meson.override_dependency('gobject-2.0', libgobject_dep)
 
-executable('gobject-query', 'gobject-query.c',
+gobject_query = executable('gobject-query', 'gobject-query.c',
   install : true,
   install_tag : 'bin-devel',
   dependencies : [libglib_dep, libgobject_dep])

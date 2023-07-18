@@ -41,12 +41,13 @@ gobject_tests = {
   'defaultiface' : {
     'source' : ['defaultiface.c', 'testmodule.c'],
   },
-  'deftype' : {},
+  'deftype' : { 'protocol': 'exitcode' },
   'deprecated-properties' : {},
   'dynamictype' : {
     'source' : ['dynamictype.c', 'testmodule.c'],
   },
   'enums' : {},
+  'max-version' : {'install': false},
   'override' : {},
   'param' : {},
   'references' : {},
@@ -75,7 +76,13 @@ gobject_tests = {
   'signalgroup' : {},
   'testing' : {},
   'type-flags' : {},
-  'objects-refcount1' : {},
+  'objects-refcount1' : {
+    'c_args': cc.get_supported_arguments([
+      '-DG_DISABLE_CAST_CHECKS',
+      '-Werror',
+      '-Wcast-align=strict',
+    ]),
+  },
   'objects-refcount2' : {'suite' : ['slow']},
   'properties-refcount1' : {},
   'properties-refcount2' : {'suite' : ['slow']},
@@ -102,6 +109,7 @@ gobject_tests = {
 if have_cxx
   gobject_tests += {
     'cxx' : {
+      'protocol': 'exitcode',
       'source' : ['cxx.cpp'],
       'suite' : ['cpp'],
     },
@@ -110,6 +118,7 @@ if have_cxx
   foreach std, arg: cxx_standards
     gobject_tests += {
       'cxx-@0@'.format(std) : {
+        'protocol': 'exitcode',
         'source' : ['cxx.cpp'],
         'suite' : ['cpp'],
         'cpp_args' : [arg],
@@ -122,18 +131,18 @@ if cc.get_id() != 'msvc'
   gobject_tests += {'autoptr' : {}}
 endif
 
-python_tests = [
-  'genmarshal.py',
-  'gobject-query.py',
-  'mkenums.py',
-]
+python_tests = {
+  'genmarshal.py' : {},
+  'gobject-query.py' : {
+    'depends' : gobject_query,
+    'can_fail' : host_system == 'windows',
+  },
+  'mkenums.py' : {},
+}
 
-# FIXME: put common bits of test environment() in one location
 test_env = environment()
 test_env.set('G_TEST_SRCDIR', meson.current_source_dir())
 test_env.set('G_TEST_BUILDDIR', meson.current_build_dir())
-test_env.set('G_DEBUG', 'gc-friendly')
-test_env.set('MALLOC_CHECK_', '2')
 
 test_deps = [libm, thread_dep, libglib_dep, libgobject_dep]
 test_cargs = ['-DG_LOG_DOMAIN="GLib-GObject"', '-UG_DISABLE_ASSERT']
@@ -169,22 +178,41 @@ foreach test_name, extra_args : gobject_tests
   suite = ['gobject'] + extra_args.get('suite', [])
   timeout = suite.contains('slow') ? test_timeout_slow : test_timeout
 
+  if extra_args.get('can_fail', false)
+    suite += 'failing'
+  endif
+
   # FIXME: https://gitlab.gnome.org/GNOME/glib/issues/1316
   # aka https://bugs.debian.org/880883
   if test_name == 'closure-refcount' and ['arm', 'aarch64'].contains(host_machine.cpu_family())
     timeout = timeout * 10
   endif
 
-  test(test_name, exe, env : test_env, timeout : timeout, suite : suite)
+  test(test_name,
+    exe,
+    protocol : extra_args.get('protocol', test_protocol),
+    env : test_env,
+    timeout : timeout,
+    suite : suite,
+  )
 endforeach
 
-foreach test_name : python_tests
+foreach test_name, extra_args : python_tests
+  depends = [extra_args.get('depends', [])]
+  suite = ['gobject', 'no-valgrind']
+
+  if extra_args.get('can_fail', false)
+    suite += 'failing'
+  endif
+
   test(
     test_name,
     python,
+    protocol : extra_args.get('protocol', test_protocol),
+    depends: depends,
     args: ['-B', files(test_name)],
     env: test_env,
-    suite: ['gobject', 'no-valgrind'],
+    suite: suite,
   )
 
   if installed_tests_enabled

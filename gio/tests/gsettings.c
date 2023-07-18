@@ -798,7 +798,9 @@ test_l10n (void)
       str = NULL;
     }
   else
-    g_printerr ("warning: translation is not working... skipping test. ");
+    {
+      g_test_skip ("translation is not working");
+    }
 
   g_setenv ("LC_MESSAGES", locale, TRUE);
   setlocale (LC_MESSAGES, locale);
@@ -843,7 +845,7 @@ test_l10n_context (void)
   if (g_str_equal (dgettext ("test", "\"Unnamed\""), "\"Unbenannt\""))
     settings_assert_cmpstr (settings, "backspace", ==, "Löschen");
   else
-    g_printerr ("warning: translation is not working... skipping test.  ");
+    g_test_skip ("translation is not working");
 
   g_setenv ("LC_MESSAGES", locale, TRUE);
   setlocale (LC_MESSAGES, locale);
@@ -2886,6 +2888,7 @@ static void
 test_per_desktop (void)
 {
   GSettings *settings;
+  GAction *action_string;
   TestObject *obj;
   gpointer p;
   gchar *str;
@@ -2918,6 +2921,10 @@ test_per_desktop (void)
   g_assert_cmpstr (str, ==, "GNOME");
   g_free (str);
 
+  action_string = g_settings_create_action (settings, "desktop");
+  check_and_free (g_action_get_state (action_string), "'GNOME'");
+
+  g_clear_object (&action_string);
   g_object_unref (settings);
   g_object_unref (obj);
 }
@@ -2929,6 +2936,7 @@ static void
 test_per_desktop_subprocess (void)
 {
   GSettings *settings;
+  GAction *action_string;
   TestObject *obj;
   gpointer p;
   gchar *str;
@@ -2956,6 +2964,10 @@ test_per_desktop_subprocess (void)
   g_assert_cmpstr (str, ==, "GNOME Classic");
   g_free (str);
 
+  action_string = g_settings_create_action (settings, "desktop");
+  check_and_free (g_action_get_state (action_string), "'GNOME Classic'");
+
+  g_clear_object (&action_string);
   g_object_unref (settings);
   g_object_unref (obj);
 }
@@ -3007,6 +3019,8 @@ main (int argc, char *argv[])
   if (!g_test_subprocess ())
     {
       GError *local_error = NULL;
+      char *subprocess_stdout = NULL;
+
       /* A GVDB header is 6 guint32s, and requires a magic number in the first
        * two guint32s. A set of zero bytes of a greater length is considered
        * corrupt. */
@@ -3046,14 +3060,20 @@ main (int argc, char *argv[])
                                                 "--schema-file=org.gtk.test.enums.xml "
                                                 "--schema-file=org.gtk.test.gschema.xml "
                                                 "--override-file=org.gtk.test.gschema.override",
-                                                NULL, NULL, &result, NULL));
+                                                &subprocess_stdout, NULL, &result, NULL));
+      if (subprocess_stdout && *g_strstrip (subprocess_stdout) != '\0')
+        g_test_message ("%s", subprocess_stdout);
+      g_clear_pointer (&subprocess_stdout, g_free);
       g_assert_cmpint (result, ==, 0);
 
       g_remove ("schema-source/gschemas.compiled");
       g_mkdir ("schema-source", 0777);
       g_assert_true (g_spawn_command_line_sync (GLIB_COMPILE_SCHEMAS " --targetdir=schema-source "
                                                 "--schema-file=" SRCDIR "/org.gtk.schemasourcecheck.gschema.xml",
-                                                NULL, NULL, &result, NULL));
+                                                &subprocess_stdout, NULL, &result, NULL));
+      if (subprocess_stdout && *g_strstrip (subprocess_stdout) != '\0')
+        g_test_message ("%s", subprocess_stdout);
+      g_clear_pointer (&subprocess_stdout, g_free);
       g_assert_cmpint (result, ==, 0);
 
       g_remove ("schema-source-corrupt/gschemas.compiled");

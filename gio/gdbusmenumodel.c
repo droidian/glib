@@ -23,10 +23,8 @@
 
 #include "gdbusmenumodel.h"
 
+#include "gmenuexporter.h"
 #include "gmenumodel.h"
-
-/* Copied from gmenuexporter.c for the glib-2-74 backport */
-#define G_MENU_EXPORTER_MAX_SECTION_SIZE 1000
 
 /* Prelude {{{1 */
 

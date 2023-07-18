@@ -51,6 +51,10 @@
 #define O_BINARY 0
 #endif
 
+#ifndef O_CLOEXEC
+#define O_CLOEXEC 0
+#endif
+
 #include "gfileattribute.h"
 #include "glocalfile.h"
 #include "glocalfileinfo.h"
@@ -787,6 +791,7 @@ get_mount_info (GFileInfo             *fs_info,
   dev_t *dev;
   GUnixMountEntry *mount;
   guint64 cache_time;
+  gboolean is_remote = FALSE;
 
   if (g_lstat (path, &buf) != 0)
     return;
@@ -823,6 +828,8 @@ get_mount_info (GFileInfo             *fs_info,
 	{
 	  if (g_unix_mount_is_readonly (mount))
 	    mount_info |= MOUNT_INFO_READONLY;
+          if (is_remote_fs_type (g_unix_mount_get_fs_type (mount)))
+            is_remote = TRUE;
 	  
 	  g_unix_mount_free (mount);
 	}
@@ -838,8 +845,14 @@ get_mount_info (GFileInfo             *fs_info,
       G_UNLOCK (mount_info_hash);
     }
 
-  if (mount_info & MOUNT_INFO_READONLY)
-    g_file_info_set_attribute_boolean (fs_info, G_FILE_ATTRIBUTE_FILESYSTEM_READONLY, TRUE);
+  if (g_file_attribute_matcher_matches (matcher,
+                                        G_FILE_ATTRIBUTE_FILESYSTEM_READONLY))
+    g_file_info_set_attribute_boolean (fs_info, G_FILE_ATTRIBUTE_FILESYSTEM_READONLY,
+                                       (mount_info & MOUNT_INFO_READONLY));
+
+  if (g_file_attribute_matcher_matches (matcher,
+                                        G_FILE_ATTRIBUTE_FILESYSTEM_REMOTE))
+    g_file_info_set_attribute_boolean (fs_info, G_FILE_ATTRIBUTE_FILESYSTEM_REMOTE, is_remote);
 }
 
 #endif
@@ -1085,7 +1098,9 @@ g_local_file_query_filesystem_info (GFile         *file,
 #endif /* G_OS_WIN32 */
 
   if (g_file_attribute_matcher_matches (attribute_matcher,
-					G_FILE_ATTRIBUTE_FILESYSTEM_READONLY))
+                                        G_FILE_ATTRIBUTE_FILESYSTEM_READONLY) ||
+      g_file_attribute_matcher_matches (attribute_matcher,
+                                        G_FILE_ATTRIBUTE_FILESYSTEM_REMOTE))
     {
 #ifdef G_OS_WIN32
       get_filesystem_readonly (info, local->filename);
@@ -1093,13 +1108,6 @@ g_local_file_query_filesystem_info (GFile         *file,
       get_mount_info (info, local->filename, attribute_matcher);
 #endif /* G_OS_WIN32 */
     }
-
-#ifndef G_OS_WIN32
-  if (g_file_attribute_matcher_matches (attribute_matcher,
-                                        G_FILE_ATTRIBUTE_FILESYSTEM_REMOTE))
-    g_file_info_set_attribute_boolean (info, G_FILE_ATTRIBUTE_FILESYSTEM_REMOTE,
-                                       is_remote_fs_type (fstype));
-#endif
 
   g_file_attribute_matcher_unref (attribute_matcher);
   
@@ -1348,7 +1356,7 @@ g_local_file_read (GFile         *file,
   int fd, ret;
   GLocalFileStat buf;
   
-  fd = g_open (local->filename, O_RDONLY|O_BINARY, 0);
+  fd = g_open (local->filename, O_RDONLY | O_BINARY | O_CLOEXEC, 0);
   if (fd == -1)
     {
       int errsv = errno;
@@ -1921,7 +1929,7 @@ _g_local_file_has_trash_dir (const char *dirname, dev_t dir_dev)
   return res;
 }
 
-#ifdef G_OS_UNIX
+#ifndef G_OS_WIN32
 gboolean
 _g_local_file_is_lost_found_dir (const char *path, dev_t path_dev)
 {
@@ -2223,7 +2231,7 @@ g_local_file_trash (GFile         *file,
     infofile = g_build_filename (infodir, infoname, NULL);
     g_free (infoname);
 
-    fd = g_open (infofile, O_CREAT | O_EXCL, 0666);
+    fd = g_open (infofile, O_CREAT | O_EXCL | O_CLOEXEC, 0666);
     errsv = errno;
   } while (fd == -1 && errsv == EEXIST);
 
@@ -2232,8 +2240,6 @@ g_local_file_trash (GFile         *file,
 
   if (fd == -1)
     {
-      errsv = errno;
-
       g_free (filesdir);
       g_free (topdir);
       g_free (trashname);
@@ -2274,9 +2280,18 @@ g_local_file_trash (GFile         *file,
 			  original_name_escaped, delete_time);
   g_free (delete_time);
 
-  g_file_set_contents_full (infofile, data, -1,
+  if (!g_file_set_contents_full (infofile, data, -1,
                             G_FILE_SET_CONTENTS_CONSISTENT | G_FILE_SET_CONTENTS_ONLY_EXISTING,
-                            0600, NULL);
+                            0600, error))
+    {
+      g_unlink (infofile);
+
+      g_free (filesdir);
+      g_free (trashname);
+      g_free (infofile);
+
+      return FALSE;
+    }
 
   /* TODO: Maybe we should verify that you can delete the file from the trash
    * before moving it? OTOH, that is hard, as it needs a recursive scan
@@ -2603,6 +2618,8 @@ is_remote_fs_type (const gchar *fsname)
         return TRUE;
       if (strcmp (fsname, "smb2") == 0)
         return TRUE;
+      if (strcmp (fsname, "fuse.sshfs") == 0)
+        return TRUE;
     }
 
   return FALSE;
@@ -2868,9 +2885,9 @@ g_local_file_measure_size_of_file (gint           parent_fd,
 
 #ifdef AT_FDCWD
 #ifdef HAVE_OPEN_O_DIRECTORY
-      dir_fd = openat (parent_fd, name->data, O_RDONLY|O_DIRECTORY);
+      dir_fd = openat (parent_fd, name->data, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
 #else
-      dir_fd = openat (parent_fd, name->data, O_RDONLY);
+      dir_fd = openat (parent_fd, name->data, O_RDONLY | O_CLOEXEC);
 #endif
       errsv = errno;
       if (dir_fd < 0)
