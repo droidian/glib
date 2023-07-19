@@ -35,6 +35,9 @@ else
 DEB_CONFIGURE_EXTRA_FLAGS += --cross-file=$(CURDIR)/debian/meson/stack-grows-down.ini
 endif
 
+ifeq ($(DEB_HOST_ARCH_OS),linux)
+DEB_CONFIGURE_EXTRA_FLAGS += --cross-file=$(CURDIR)/debian/meson/linux.ini
+endif
 endif # cross-compiling
 
 ifneq ($(filter kfreebsd,$(DEB_HOST_ARCH_OS)),)
