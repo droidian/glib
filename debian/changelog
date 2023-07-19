@@ -1,3 +1,15 @@
+glib2.0 (2.76.4-3) unstable; urgency=medium
+
+  * d/rules: When cross-compiling, expect /proc/self/cmdline works on Linux.
+    This is auto-detected in native builds, but not in cross-builds, because
+    the auto-detection involves running a host-architecture program.
+  * d/rules: Tell Meson that native builds can run host binaries.
+    This is normally true by definition, but the architecture detection
+    that is used for this regressed on mips64el in 1.2.0.
+    Mitigates: #1041499
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 19 Jul 2023 23:03:13 +0100
+
 glib2.0 (2.76.4-2) unstable; urgency=medium
 
   * Release to unstable
