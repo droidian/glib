@@ -1,0 +1,63 @@
+From 2b391227e6269942a6b630d7dc7beb246b2b0771 Mon Sep 17 00:00:00 2001
+From: Philip Withnall <pwithnall@endlessos.org>
+Date: Thu, 20 Jul 2023 13:05:48 +0100
+Subject: [PATCH] tests: Fix pkg-config test for multiarch binaries on
+ multiarch systems
+
+The test was passing fine when `bindir` was equal to `multiarch_bindir`,
+but not when they differ.
+
+For example, on a Debian system, `gio-querymodules` is installed to
+`/usr/lib/x86_64-linux-gnu/glib-2.0/gio-querymodules` rather than
+`/usr/bin/gio-querymodules` as it is on (say) Fedora.
+
+This was causing the pkg-config tests to fail on Debian.
+
+Signed-off-by: Philip Withnall <pwithnall@endlessos.org>
+
+Fixes: #3045
+---
+ gio/tests/meson.build | 14 ++++++++++++--
+ 1 file changed, 12 insertions(+), 2 deletions(-)
+
+diff --git a/gio/tests/meson.build b/gio/tests/meson.build
+index 8d9c87c20..42371cc80 100644
+--- a/gio/tests/meson.build
++++ b/gio/tests/meson.build
+@@ -1127,14 +1127,16 @@ if have_bash and have_pkg_config
+ 
+   gio_binaries = [
+     'gio',
+-    'gio-querymodules',
+-    'glib-compile-schemas',
+     'glib-compile-resources',
+     'gdbus',
+     'gdbus-codegen',
+     'gresource',
+     'gsettings',
+   ]
++  gio_multiarch_binaries = [
++    'gio-querymodules',
++    'glib-compile-schemas',
++  ]
+ 
+   foreach binary: gio_binaries
+     pkg_config_tests += [
+@@ -1144,6 +1146,14 @@ if have_bash and have_pkg_config
+     ]
+   endforeach
+ 
++  foreach binary: gio_multiarch_binaries
++    pkg_config_tests += [
++      'test "$(pkg-config --variable=@0@ gio-2.0)" = "@1@"'.format(
++        binary.underscorify(),
++        prefix / multiarch_bindir / binary)
++    ]
++  endforeach
++
+   test('gio-2.0-pkg-config',
+     bash,
+     args: [ '-xe', '-c', '\n'.join(pkg_config_tests) ],
+-- 
+2.39.2
+
