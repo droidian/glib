@@ -1,3 +1,10 @@
+glib2.0 (2.76.4-4) unstable; urgency=medium
+
+  * Cherry-pick patch from glib 2.77.0 to once again log missing GFileInfo
+    attributes as critical warnings instead of debug
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Sun, 23 Jul 2023 18:52:44 -0400
+
 glib2.0 (2.76.4-3) unstable; urgency=medium
 
   * d/rules: When cross-compiling, expect /proc/self/cmdline works on Linux.
