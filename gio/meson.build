@@ -276,10 +276,6 @@ settings_sources = files(
   'gsettings.c',
 )
 
-if host_system == 'windows'
-  settings_sources += files('gregistrysettingsbackend.c')
-endif
-
 application_headers = files(
   'gapplication.h',
   'gapplicationcommandline.h',
@@ -444,6 +440,7 @@ else
 
   win32_sources += files(
     'gmemorymonitorwin32.c',
+    'gregistrysettingsbackend.c',
     'gwin32registrykey.c',
     'gwin32mount.c',
     'gwin32volumemonitor.c',
@@ -467,6 +464,7 @@ else
   win32_sources += [gio_win_res]
 
   gio_win32_include_headers = files(
+    'gregistrysettingsbackend.h',
     'gwin32inputstream.h',
     'gwin32outputstream.h',
   )
@@ -877,18 +875,20 @@ libgio_dep = declare_dependency(link_with : libgio,
 
 pkg.generate(libgio,
   requires : ['glib-2.0', 'gobject-2.0'],
-  variables : ['datadir=' + join_paths('${prefix}', get_option('datadir')),
-               'schemasdir=' + join_paths('${datadir}', schemas_subdir),
-               'bindir=' + join_paths('${prefix}', get_option('bindir')),
-               'giomoduledir=' + pkgconfig_giomodulesdir,
-               'gio=' + join_paths('${bindir}', 'gio'),
-               'gio_querymodules=@0@'.format(pkgconfig_multiarch_bindir / 'gio-querymodules'),
-               'glib_compile_schemas=@0@'.format(pkgconfig_multiarch_bindir / 'glib-compile-schemas'),
-               'glib_compile_resources=' + join_paths('${bindir}', 'glib-compile-resources'),
-               'gdbus=' + join_paths('${bindir}', 'gdbus'),
-               'gdbus_codegen=' + join_paths('${bindir}', 'gdbus-codegen'),
-               'gresource=' + join_paths('${bindir}', 'gresource'),
-               'gsettings=' + join_paths('${bindir}', 'gsettings')],
+  variables : [
+    'datadir=' + '${prefix}' / get_option('datadir'),
+    'schemasdir=' + '${datadir}' / schemas_subdir,
+    'bindir=' + '${prefix}' / get_option('bindir'),
+    'giomoduledir=' + pkgconfig_giomodulesdir,
+    'gio=' + '${bindir}' / 'gio',
+    'gio_querymodules=' + pkgconfig_multiarch_bindir / 'gio-querymodules',
+    'glib_compile_schemas=' + pkgconfig_multiarch_bindir / 'glib-compile-schemas',
+    'glib_compile_resources=' + '${bindir}' / 'glib-compile-resources',
+    'gdbus=' + '${bindir}' /'gdbus',
+    'gdbus_codegen=' + '${bindir}' / 'gdbus-codegen',
+    'gresource=' + '${bindir}' / 'gresource',
+    'gsettings=' + '${bindir}' / 'gsettings',
+  ],
   version : glib_version,
   install_dir : glib_pkgconfigreldir,
   filebase : 'gio-2.0',
@@ -930,7 +930,7 @@ endif
 
 # Dependencies used by executables below
 have_libelf = false
-libelf = dependency('libelf', version : '>= 0.8.12', required : get_option ('libelf'))
+libelf = dependency('libelf', version : '>= 0.8.12', required : false)
 if libelf.found()
   have_libelf = true
 else

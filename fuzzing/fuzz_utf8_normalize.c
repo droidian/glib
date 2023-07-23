@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-10 Sam Thursfield
+ * Copyright 2023 Todd Carson
  *
  * SPDX-License-Identifier: LGPL-2.1-or-later
  *
@@ -15,18 +15,34 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
- *
- * Author: Sam Thursfield <ssssam@gmail.com>
  */
 
-#ifndef __G_REGISTRY_SETTINGS_BACKEND_H__
-#define __G_REGISTRY_SETTINGS_BACKEND_H__
+#include "fuzz.h"
 
-#include <glib-object.h>
+int
+LLVMFuzzerTestOneInput (const unsigned char *data, size_t size)
+{
+  char *bounded, *terminated, *buf;
 
-#include <gio/gsettingsbackend.h>
+  fuzz_set_logging_func ();
 
-GIO_AVAILABLE_IN_2_78
-GSettingsBackend *      g_registry_settings_backend_new     (const gchar     *registry_key);
+  buf = g_malloc (size + 1);
+  memcpy (buf, data, size);
+  buf[size] = '\0';
 
-#endif /* __G_REGISTRY_SETTINGS_BACKEND_H__ */
+  terminated = g_utf8_normalize (buf, -1, G_NORMALIZE_ALL);
+  g_free (buf);
+
+  bounded = g_utf8_normalize ((const char *) data, size, G_NORMALIZE_ALL);
+
+  if (terminated && bounded)
+    {
+      g_assert (strcmp (terminated, bounded) == 0);
+      g_free (terminated);
+      g_free (bounded);
+    }
+  else
+    g_assert (!(terminated || bounded));
+
+  return 0;
+}
