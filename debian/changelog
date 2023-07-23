@@ -1,3 +1,9 @@
+glib2.0 (2.77.0-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Sun, 23 Jul 2023 19:21:43 -0400
+
 glib2.0 (2.76.4-4) unstable; urgency=medium
 
   * Cherry-pick patch from glib 2.77.0 to once again log missing GFileInfo
