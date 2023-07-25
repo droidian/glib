@@ -1,8 +1,16 @@
-glib2.0 (2.77.0-1) UNRELEASED; urgency=medium
+glib2.0 (2.77.0-1) experimental; urgency=medium
 
+  [ Jeremy Bícha ]
   * New upstream release
+  * debian/libglib2.0-0.symbols: Add new symbols
+  * Drop cherry-picked critical warnings patch: applied in new release
+  * Cherry-pick 2 proposed patches to fix regressions detected by netplan
+    (LP: #2026826)
 
- -- Jeremy Bícha <jbicha@ubuntu.com>  Sun, 23 Jul 2023 19:21:43 -0400
+  [ Sebastien Bacher ]
+  * Cherry-pick 3 more upstream fixes
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Tue, 25 Jul 2023 09:34:47 -0400
 
 glib2.0 (2.76.4-4) unstable; urgency=medium
 
