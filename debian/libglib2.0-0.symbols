@@ -787,6 +787,7 @@ libgio-2.0.so.0 libglib2.0-0 #MINVER#
  g_file_info_get_attribute_boolean@Base 2.16.0
  g_file_info_get_attribute_byte_string@Base 2.16.0
  g_file_info_get_attribute_data@Base 2.16.0
+ g_file_info_get_attribute_file_path@Base 2.77.1
  g_file_info_get_attribute_int32@Base 2.16.0
  g_file_info_get_attribute_int64@Base 2.16.0
  g_file_info_get_attribute_object@Base 2.16.0
@@ -824,6 +825,7 @@ libgio-2.0.so.0 libglib2.0-0 #MINVER#
  g_file_info_set_attribute@Base 2.16.0
  g_file_info_set_attribute_boolean@Base 2.16.0
  g_file_info_set_attribute_byte_string@Base 2.16.0
+ g_file_info_set_attribute_file_path@Base 2.77.1
  g_file_info_set_attribute_int32@Base 2.16.0
  g_file_info_set_attribute_int64@Base 2.16.0
  g_file_info_set_attribute_mask@Base 2.16.0
@@ -3480,6 +3482,7 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_test_config_vars@Base 2.16.0
  g_test_create_case@Base 2.16.0
  g_test_create_suite@Base 2.16.0
+ g_test_disable_crash_reporting@Base 2.77.1
  g_test_expect_message@Base 2.34.0
  g_test_fail@Base 2.30.0
  g_test_fail_printf@Base 2.70.0
