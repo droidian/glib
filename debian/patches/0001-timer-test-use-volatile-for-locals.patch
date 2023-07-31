@@ -15,7 +15,7 @@ Forwarded: yes
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/glib/tests/timer.c b/glib/tests/timer.c
-index 3a2d101..b560fd3 100644
+index ae44dc8..5b1b43c 100644
 --- a/glib/tests/timer.c
 +++ b/glib/tests/timer.c
 @@ -32,7 +32,7 @@ static void
