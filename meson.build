@@ -1,5 +1,5 @@
 project('glib', 'c',
-  version : '2.77.0',
+  version : '2.77.1',
   # NOTE: See the policy in docs/meson-version.md before changing the Meson dependency
   meson_version : '>= 0.60.0',
   default_options : [
@@ -137,6 +137,12 @@ else
   # unprefixed system `/run` directory.
   glib_runstatedir = '/run'
 endif
+
+# When building glib and gobject-introspection with subprojects, gobject-introspection
+# requires to know the path of the sources and the build directory for the subproject.
+# We provide it here with a variable.
+glib_source_dir = meson.current_source_dir()
+glib_build_dir = meson.current_build_dir()
 
 installed_tests_metadir = join_paths(glib_datadir, 'installed-tests', meson.project_name())
 installed_tests_execdir = join_paths(glib_libexecdir, 'installed-tests', meson.project_name())
@@ -376,6 +382,7 @@ headers = [
   'sys/mnttab.h',
   'sys/mount.h',
   'sys/param.h',
+  'sys/prctl.h',
   'sys/resource.h',
   'sys/select.h',
   'sys/statfs.h',
@@ -689,6 +696,11 @@ if glib_conf.has('HAVE_SYS_STATFS_H') or glib_conf.has('HAVE_SYS_MOUNT_H')
   functions += ['statfs']
 else
   have_func_statfs = false
+endif
+if glib_conf.has('HAVE_SYS_PRCTL_H')
+  functions += ['prctl']
+else
+  have_func_prctl = false
 endif
 
 if host_system == 'windows'
@@ -2106,8 +2118,8 @@ libz_dep = dependency('zlib')
 # implementations. This could be extended if issues are found in some platforms.
 libintl_deps = []
 libintl_prefix = '#include <libintl.h>'
-libintl = dependency('intl', required: false, allow_fallback: false)
-if libintl.found()
+libintl = dependency('intl', required: false)
+if libintl.found() and libintl.type_name() != 'internal'
   # libintl supports different threading APIs, which may not
   # require additional flags, but it defaults to using pthreads if
   # found. Meson's "threads" dependency does not allow you to
@@ -2134,9 +2146,10 @@ if libintl.found()
   endif
 endif
 
-if libintl.found()
+if libintl.found() and libintl.type_name() != 'internal'
   have_bind_textdomain_codeset = cc.has_function('bind_textdomain_codeset', dependencies: libintl_deps, prefix: libintl_prefix)
 else
+  # using proxy-libintl fallback
   libintl = dependency('intl', allow_fallback: true)
   assert(libintl.type_name() == 'internal')
   libintl_deps = [libintl]
@@ -2328,15 +2341,15 @@ if host_system == 'windows'
   # Autotools explicitly removed --Wl,--export-all-symbols from windows builds,
   # with no explanation. Do the same here for now but this could be revisited if
   # if causes issues.
-  export_dynamic_cflags = []
+  export_dynamic_ldflags = []
 elif host_system == 'cygwin'
-  export_dynamic_cflags = ['-Wl,--export-all-symbols']
+  export_dynamic_ldflags = ['-Wl,--export-all-symbols']
 elif host_system in ['darwin', 'ios']
-  export_dynamic_cflags = []
+  export_dynamic_ldflags = []
 elif host_system == 'sunos'
-  export_dynamic_cflags = []
+  export_dynamic_ldflags = []
 else
-  export_dynamic_cflags = ['-Wl,--export-dynamic']
+  export_dynamic_ldflags = ['-Wl,--export-dynamic']
 endif
 
 win32_cflags = []
