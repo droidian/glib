@@ -107,16 +107,13 @@ handle_test_failure := true
 endif
 
 # Upstream test timeouts assume an otherwise unloaded system, but that
-# isn't necessarily the case for a porterbox or multiple parallel builds
+# isn't necessarily the case for a porterbox or multiple parallel builds.
+# Keep the timeout reasonably short for architectures where interactive
+# debugging is more likely, but extend it a lot on architectures that might
+# be very slow or using qemu for buildds.
+ifneq ($(filter amd64 i386,$(DEB_HOST_ARCH_CPU)),)
 test_timeout_multiplier = 3
-
-ifneq ($(filter arm hppa mips% sparc%,$(DEB_HOST_ARCH_CPU)),)
-$(info Slow architecture detected, increasing test timeout)
-test_timeout_multiplier = 5
-endif
-
-ifneq ($(filter m68k riscv64 sh4,$(DEB_HOST_ARCH_CPU)),)
-$(info Architecture with qemu buildds detected, increasing test timeout a lot)
+else
 test_timeout_multiplier = 20
 endif
 
