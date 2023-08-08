@@ -38,9 +38,7 @@ endif
 ifeq ($(DEB_HOST_ARCH_OS),linux)
 DEB_CONFIGURE_EXTRA_FLAGS += --cross-file=$(CURDIR)/debian/meson/linux.ini
 endif
-else # not cross-compiling
-DEB_CONFIGURE_EXTRA_FLAGS += --native-file=$(CURDIR)/debian/meson/no-exe-wrapper.ini
-endif # not cross-compiling
+endif # cross-compiling
 
 ifneq ($(filter kfreebsd,$(DEB_HOST_ARCH_OS)),)
 have_non_stub_xattr = false
