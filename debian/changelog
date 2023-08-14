@@ -1,4 +1,4 @@
-glib2.0 (2.77.2-1) UNRELEASED; urgency=medium
+glib2.0 (2.77.2-1) unstable; urgency=medium
 
   [ Jeremy Bícha ]
   * New upstream release
@@ -9,7 +9,7 @@ glib2.0 (2.77.2-1) UNRELEASED; urgency=medium
   * d/rules: Increate arbitrary test timeout on all architectures except x86.
     Thanks to Adrian Bunk
 
- -- Jeremy Bícha <jbicha@ubuntu.com>  Mon, 14 Aug 2023 09:10:07 -0400
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Mon, 14 Aug 2023 09:43:06 -0400
 
 glib2.0 (2.77.1-2) unstable; urgency=medium
 
