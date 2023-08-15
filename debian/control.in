@@ -40,6 +40,11 @@ Vcs-Git: https://salsa.debian.org/gnome-team/glib.git
 
 Package: libglib2.0-0
 Architecture: any
+Provides: libgio-2.0-0 (= ${binary:Version}),
+          libglib-2.0-0 (= ${binary:Version}),
+          libgmodule-2.0-0 (= ${binary:Version}),
+          libgobject-2.0-0 (= ${binary:Version}),
+          libgthread-2.0-0 (= ${binary:Version}),
 Depends: ${misc:Depends},
          ${shlibs:Depends}
 Recommends: libglib2.0-data,
