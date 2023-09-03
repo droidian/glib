@@ -1,5 +1,5 @@
 project('glib', 'c',
-  version : '2.77.2',
+  version : '2.77.3',
   # NOTE: See the policy in docs/meson-version.md before changing the Meson dependency
   meson_version : '>= 0.60.0',
   default_options : [
@@ -754,6 +754,24 @@ endif
 
 if cc.has_function('memalign', prefix: '#include <stdlib.h>\n#include <malloc.h>')
   glib_conf.set('HAVE_MEMALIGN', 1)
+endif
+
+# For example on Openbsd, getservbyname_r() has a different signature.
+# https://man.openbsd.org/getservbyname.3
+if cc.compiles('''#include <netdb.h>
+               int main (int argc, char ** argv) {
+                 int (*fcn)(const char *,
+                            const char *,
+                            struct servent *,
+                            char *,
+                            size_t,
+                            struct servent **) = getservbyname_r;
+                 (void) fcn;
+                 return 0;
+               }''',
+               name : 'getservbyname_r()',
+               args: '-Werror=incompatible-pointer-types')
+  glib_conf.set('HAVE_GETSERVBYNAME_R', 1)
 endif
 
 if cc.has_function('_aligned_malloc', prefix: '#include <malloc.h>')
@@ -2358,6 +2376,20 @@ if host_system == 'windows' and cc.get_id() != 'msvc' and cc.get_id() != 'clang-
   # Ensure MSVC-compatible struct packing convention is used when
   # compiling for Win32 with gcc. It is used for the whole project and exposed
   # in glib-2.0.pc.
+  if not cc.compiles('''
+struct _GTestMSBitfields
+{
+  int a : 1;
+  short b : 1;
+};
+
+typedef char _StaticCheck[sizeof(struct _GTestMSBitfields) != sizeof(int) ? 1 : -1];
+''')
+    warning('''
+Your compiler does not have ms-bitfields packing by default.
+Please use gcc >= 4.7 or clang >= 12: GLib will drop -mms-bitfields in the future.
+''')
+  endif
   win32_cflags = ['-mms-bitfields']
   add_project_arguments(win32_cflags, language : 'c')
 
