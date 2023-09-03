@@ -1,9 +1,20 @@
-glib2.0 (2.77.3-1) UNRELEASED; urgency=medium
+glib2.0 (2.77.3-1) unstable; urgency=medium
 
-  * Fix a typo in the previous changelog entry
   * New upstream release
+  * d/copyright: Update
+  * d/libglib2.0-0.symbols: Increase required version for
+    g_unix_open_pipe().
+    Software compiled against GLib >= 2.77.3 might be relying on the
+    ability to pass O_CLOEXEC to this function, which was not previously
+    allowed.
+  * d/libglib2.0-dev.install: Install new DTD for GResource XML
+  * d/control.in: libglib2.0-0 Provides the individual library names.
+    This binary package combines several distinct SONAMEs. Give it Provides
+    on the Policy-compliant names that they would have if they had been
+    packaged separately.
+  * Fix a typo in the previous changelog entry
 
- -- Simon McVittie <smcv@debian.org>  Sun, 03 Sep 2023 12:36:20 +0100
+ -- Simon McVittie <smcv@debian.org>  Sun, 03 Sep 2023 12:51:07 +0100
 
 glib2.0 (2.77.2-1) unstable; urgency=medium
 
