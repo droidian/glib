@@ -3683,7 +3683,7 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_unix_fd_source_funcs@Base 2.38.0
  g_unix_fd_source_new@Base 2.36.0
  g_unix_get_passwd_entry@Base 2.64.0
- g_unix_open_pipe@Base 2.30.0
+ g_unix_open_pipe@Base 2.77.3
  g_unix_set_fd_nonblocking@Base 2.30.0
  g_unix_signal_add@Base 2.30.0
  g_unix_signal_add_full@Base 2.30.0
