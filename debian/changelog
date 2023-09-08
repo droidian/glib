@@ -4,7 +4,15 @@ glib2.0 (2.78.0-1) UNRELEASED; urgency=medium
   * Change debian-branch from debian/master to debian/latest
 
   [ Simon McVittie ]
-  * New upstream release
+  * New upstream stable release
+    - Temporarily revert a change to error handling for GKeyFile containing
+      syntactically invalid string escape sequences (Closes: #1051373).
+      This change is likely to be reverted in 2.79.x.
+    - Improve ability to debug code using GQuark with gdb
+    - Add missing noreturn attribute to g_thread_exit()
+    - Make gutils-user-database unit test work as intended
+    - Minor build system change not relevant to Debian
+    - Translation updates
 
  -- Simon McVittie <smcv@debian.org>  Fri, 08 Sep 2023 16:18:57 +0100
 
