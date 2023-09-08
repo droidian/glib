@@ -1,7 +1,7 @@
-glib2.0 (2.78.0-1) UNRELEASED; urgency=medium
+glib2.0 (2.78.0-1) unstable; urgency=medium
 
   [ Amin Bandali ]
-  * Change debian-branch from debian/master to debian/latest
+  * Change packaging branch to debian/latest
 
   [ Simon McVittie ]
   * New upstream stable release
@@ -14,7 +14,7 @@ glib2.0 (2.78.0-1) UNRELEASED; urgency=medium
     - Minor build system change not relevant to Debian
     - Translation updates
 
- -- Simon McVittie <smcv@debian.org>  Fri, 08 Sep 2023 16:18:57 +0100
+ -- Simon McVittie <smcv@debian.org>  Fri, 08 Sep 2023 16:53:23 +0100
 
 glib2.0 (2.77.3-1) unstable; urgency=medium
 
