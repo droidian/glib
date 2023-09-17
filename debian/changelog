@@ -1,3 +1,13 @@
+glib2.0 (2.78.0-2) unstable; urgency=medium
+
+  * d/p/gthreadedresolver-Fix-race-between-source-callbacks-and-f.patch:
+    Add patch from upstream to fix a race condition that can crash GNOME
+    Shell (Closes: #1052023)
+  * d/patches: Update translations from upstream: ca, es, fr, it, ru, sl,
+    zh_CN
+
+ -- Simon McVittie <smcv@debian.org>  Sun, 17 Sep 2023 13:27:22 +0100
+
 glib2.0 (2.78.0-1) unstable; urgency=medium
 
   [ Amin Bandali ]
