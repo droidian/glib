@@ -1,8 +1,9 @@
-glib2.0 (2.78.1-1) UNRELEASED; urgency=medium
+glib2.0 (2.78.1-1) unstable; urgency=medium
 
   * New upstream release
+  * Drop patches applied in new release
 
- -- Jeremy Bícha <jbicha@ubuntu.com>  Wed, 25 Oct 2023 09:34:17 -0400
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Wed, 25 Oct 2023 10:51:14 -0400
 
 glib2.0 (2.78.0-2) unstable; urgency=medium
 
