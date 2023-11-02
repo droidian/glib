@@ -1,3 +1,25 @@
+glib2.0 (2.78.1-2) UNRELEASED; urgency=medium
+
+  * d/patches: Update to upstream glib-2-78 branch commit 2.78.1-9-gb8ef341a9
+    - In tests, don't assume that sh optimizes simple commands into exec,
+      hopefully fixing the intermittent gsubprocess test failures on buildds
+      (especially armhf)
+    - In tests, fix detection of PTRACE_O_EXITKILL
+    - Avoid calling a function with side-effects inside
+      g_return_val_if_fail()
+    - Tell LeakSanitizer to ignore an intentional one-per-process leak in
+      the GQuark infrastructure
+    - Translation update: uk
+  * d/control: Stop generating from a template.
+    We don't use any of the other dh-sequence-gnome features (there are no
+    libtool archives, and we don't use the gnome:Foo family of substvars)
+    so drop the build-dependency on dh-sequence-gnome.
+  * Remove version constraints unnecessary since bullseye (oldstable)
+  * debian/libglib2.0-doc.maintscript: Remove, unnecessary since bullseye
+  * Remove redundant Name from debian/upstream/metadata
+
+ -- Simon McVittie <smcv@debian.org>  Thu, 02 Nov 2023 10:01:32 +0000
+
 glib2.0 (2.78.1-1) unstable; urgency=medium
 
   * New upstream release
