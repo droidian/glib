@@ -1,4 +1,4 @@
-glib2.0 (2.78.1-2) UNRELEASED; urgency=medium
+glib2.0 (2.78.1-2) unstable; urgency=medium
 
   * d/patches: Update to upstream glib-2-78 branch commit 2.78.1-9-gb8ef341a9
     - In tests, don't assume that sh optimizes simple commands into exec,
@@ -18,7 +18,7 @@ glib2.0 (2.78.1-2) UNRELEASED; urgency=medium
   * debian/libglib2.0-doc.maintscript: Remove, unnecessary since bullseye
   * Remove redundant Name from debian/upstream/metadata
 
- -- Simon McVittie <smcv@debian.org>  Thu, 02 Nov 2023 10:01:32 +0000
+ -- Simon McVittie <smcv@debian.org>  Thu, 02 Nov 2023 11:07:06 +0000
 
 glib2.0 (2.78.1-1) unstable; urgency=medium
 
