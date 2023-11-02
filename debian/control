@@ -11,8 +11,8 @@ Build-Depends: dbus-daemon <!nocheck> <!noinsttest>,
                gettext,
                libdbus-1-dev <!nocheck> <!noinsttest>,
                libelf-dev,
-               libffi-dev (>= 3.3),
-               libmount-dev (>= 2.35.2-7~) [linux-any],
+               libffi-dev,
+               libmount-dev [linux-any],
                libpcre2-dev,
                libselinux1-dev [linux-any],
                libxml2-utils,
@@ -30,7 +30,7 @@ Build-Depends-Arch: desktop-file-utils <!nocheck>,
                     shared-mime-info <!nocheck>,
                     tzdata <!nocheck>,
                     xterm <!nocheck>
-Build-Depends-Indep: gtk-doc-tools (>= 1.32.1),
+Build-Depends-Indep: gtk-doc-tools,
 Rules-Requires-Root: no
 Standards-Version: 4.6.2
 Homepage: https://wiki.gnome.org/Projects/GLib
@@ -49,11 +49,9 @@ Depends: ${misc:Depends},
 Recommends: libglib2.0-data,
             shared-mime-info,
             xdg-user-dirs,
-Breaks: gimp (<< 2.10.14-3~),
-        glib-networking-tests (<< 2.70.0~),
+Breaks: glib-networking-tests (<< 2.70.0~),
         gnome-keyring (<< 40.0-3~),
         libedataserver-1.2-26 (<< 3.44.3-2~),
-        libgirepository-1.0-1 (<< 1.62.0-4~),
         libgladeui-2-6 (<< 3.22.2),
         libsoup2.4-tests (<< 2.72.0-3~),
 Suggests: low-memory-monitor
@@ -123,11 +121,11 @@ Package: libglib2.0-dev
 Section: libdevel
 Architecture: any
 Multi-Arch: same
-Depends: libffi-dev (>= 3.3),
+Depends: libffi-dev,
          libglib2.0-0 (= ${binary:Version}),
          libglib2.0-bin (= ${binary:Version}),
          libglib2.0-dev-bin (= ${binary:Version}),
-         libmount-dev (>= 2.35.2-7~) [linux-any],
+         libmount-dev [linux-any],
          libpcre2-dev,
          libselinux1-dev [linux-any],
          pkg-config,
@@ -137,7 +135,7 @@ Depends: libffi-dev (>= 3.3),
          ${shlibs:Depends}
 Breaks: libglib2.0-0-dbg (<< 2.51.4-1~)
 Replaces: libglib2.0-0-dbg (<< 2.51.4-1~)
-Suggests: libgirepository1.0-dev (>= 1.62),
+Suggests: libgirepository1.0-dev,
           libglib2.0-doc
 Description: Development files for the GLib library
  GLib is a library containing many useful C routines for things such
