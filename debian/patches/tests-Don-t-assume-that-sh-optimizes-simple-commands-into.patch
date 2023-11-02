@@ -1,0 +1,49 @@
+From: Simon McVittie <smcv@collabora.com>
+Date: Wed, 1 Nov 2023 17:56:40 +0000
+Subject: tests: Don't assume that sh optimizes simple commands into exec
+
+Depending on the operating system, /bin/sh might either be bash (for
+example on Fedora or Arch) or dash (for example on Debian or Ubuntu)
+or some other POSIX shell.
+
+When bash is asked to run a simple command with no shell keywords or
+metacharacters, like this one, it replaces itself with the program
+via execve(), but dash does not have that optimization and treats it
+like any other program invocation in a larger script: it will fork,
+exec the program in the child, and wait for the child in the parent.
+
+This seems like it conflicts with sleep_and_kill() assuming that it can
+use the subprocess's process ID as the sleep(1) process ID. Specifically,
+if it sends SIGKILL, it will go to the sh(1) process and not the sleep(1)
+child, which could result in the sh(1) process being terminated and
+its sleep(1) child being leaked.
+
+To get the bash-like behaviour portably, explicitly use the exec builtin
+to instruct the shell to replace itself with sleep(1), so that the
+process ID previously used for the shell becomes the process ID of the
+sleep process.
+
+This appears to resolve an intermittent hang and test timeout on Debian
+machines (especially slower ones), although I'm not 100% clear on the
+mechanics of how it happens.
+
+Resolves: https://gitlab.gnome.org/GNOME/glib/-/issues/3157
+Signed-off-by: Simon McVittie <smcv@collabora.com>
+Origin: upstream, 2.78.2, commit:82e4bfa134349264ec095fb6d35ab2beb4ea87f7
+---
+ gio/tests/gsubprocess-testprog.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/gio/tests/gsubprocess-testprog.c b/gio/tests/gsubprocess-testprog.c
+index 417c028..05fc526 100644
+--- a/gio/tests/gsubprocess-testprog.c
++++ b/gio/tests/gsubprocess-testprog.c
+@@ -275,7 +275,7 @@ sleep_and_kill (int argc, char **argv)
+   /* Run sleep "forever" in a shell; this will trigger PTRACE_EVENT_EXEC */
+   g_ptr_array_add (args, g_strdup ("sh"));
+   g_ptr_array_add (args, g_strdup ("-c"));
+-  g_ptr_array_add (args, g_strdup ("sleep infinity"));
++  g_ptr_array_add (args, g_strdup ("exec sleep infinity"));
+   g_ptr_array_add (args, NULL);
+   launcher = g_subprocess_launcher_new (G_SUBPROCESS_FLAGS_NONE);
+   proc = g_subprocess_launcher_spawnv (launcher, (const gchar **) args->pdata, &local_error);

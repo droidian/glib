@@ -1,3 +1,8 @@
+Update-Ukrainian-translation.patch
+Make-GQuark-register-intentional-leaks.patch
+gsignalgroup-Avoid-function-call-with-side-effect-in-g_re.patch
+meson-Improve-PTRACE_O_EXITKILL-presence-check.patch
+tests-Don-t-assume-that-sh-optimizes-simple-commands-into.patch
 01_gettext-desktopfiles.patch
 0001-timer-test-use-volatile-for-locals.patch
 gwakeuptest-Be-less-parallel-unless-invoked-with-m-slow.patch
