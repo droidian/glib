@@ -1,3 +1,11 @@
+glib2.0 (2.78.1-4) unstable; urgency=medium
+
+  * d/p/tests-Fix-a-race-in-thread-pool-slow.patch:
+    Add patch from upstream git fixing a race condition in
+    a test (hopefully Closes: #1055783)
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 13 Nov 2023 16:37:33 +0000
+
 glib2.0 (2.78.1-3) unstable; urgency=medium
 
   * Restore Build-Depends: dh-sequence-gnome since it is used by Ubuntu
