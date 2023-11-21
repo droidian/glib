@@ -45,41 +45,60 @@ Files-Excluded-unicode-data:
 
 Files: *
 Copyright:
+ 2019 Aaron Boxer
  2004-2005 Adam Weinberger
+ 2012-2020 Aleksander Morgado
+ 2018-2020 Alexander Kanavin
  2005-2006 Alexander Larsson
- 2022 Alexander Shopov
+ 2022-2023 Alexander Shopov
  2021 Alexandros Theodotou
+ 2010-2013 Allison Karlitskaya
  2004 Anders Carlsson
+ 2022 Andoni Morales Alastruey
  2001-2003 Andrew Lanoix
+ 2007 Andrew Walton
+ 2018 Arnaud Bonatti
  2018 Arthur Demchenkov
+ 2007-2008 A. Walton
  2001-2004 Behdad Esfahbod
  2006 Behdad Esfahbod
  2009 Benjamin Otte
- 2015 Canonical Limited
- 2005-2022 Canonical Ltd
+ 2005-2023 Canonical Ltd
+ 2011 Carlos Garcia Campos
+ 2018 Carlos Garnacho
+ 2018-2020 Centricular
  2009-2022 Christian Hergert
- 2010 Christian Kellner
- 2010 Christian Persch
- 2014-2015 Chun-wei Fan
+ 2008-2010 Christian Kellner
+ 2009-2010 Christian Persch
+ 2018-2020 Christoph Reiter
+ 2014-2020 Chun-wei Fan
+ 2021 Cimbali
  2008 Claus Tondering
  2008 Clemens N. Buss
  2008-2014 Codethink Ltd
- 2012-2013 Colin Walters
+ 2008-2013 Colin Walters
  2017-2018 Collabora Inc
- 2008-2022 Collabora Ltd
+ 2008-2023 Collabora Ltd
  1999-2000 Craig Setera
+ 2010-2012 Dan Winship
+ 2017 Danny Forghieri
+ 2012 David King
+ 2010 David Zeuthen
+ 2013 Dieter Verfaillie
  2000 Eazel, Inc
+ 2019-2022 Emmanuel Fleury
  2005-2023 Emmanuele Bassi
- 2022 Emmanuel Fleury
  2016-2020 Endless Mobile, Inc
  2017-2022 Endless OS Foundation, LLC
  2007 Francois Gouget
  2020-2021 Frederic Martinsons
- 1991-2022 Free Software Foundation, Inc
+ 1991-2023 Free Software Foundation, Inc
  2015 Garrett Regier
+ 2020 Gisle Vanem
  2001-2022 GLib contributors
  2016 GNOME i18n Project for Vietnamese
  2019 GNOME
+ 2023 GNOME Foundation Inc.
  2011 Google, Inc
  2023 Guido Günther
  2001-2008 Hans Breuer
@@ -93,23 +112,35 @@ Copyright:
  2018-2019 James Westman
  2014-2018 Jan-Michael Brummer
  2023 JCWasmx86
+ 2016 Jeremy Whiting
+ 2007-2010 Johan Dahlin
+ 2021 John Ericson
  2005-2007 John McCutchan
  1995-1998 Josh MacDonald
+ 2003-2006 Josh Parsons
+ 2019 Joshua Watt
  2007 Jürg Billeter
+ 2018 Kai Kang
  2010 Karo Mkrtchyan
  2013-2015 Lars Uebernickel
+ 2023 Luca Bacci
  2006 Lukas Novotny
  2002 Manish Singh
  2005-2007 Marco Barisione
  2022 Marco Trevisan
- 2001-2013 Matthias Clasen
+ 2018 Mathieu Duponchelle
+ 2001-2023 Matthias Clasen
  2010 Mikhail Zabaluev
  2004-2005 Miloslav Trmac
+ 2011 Murray Cumming
  2014 NICE s.r.l
+ 2018 Ninja-Koala
+ 2017 Nirbheek Chauhan
  2003 Noah Levitt
  2008-2011 Nokia Corporation
  2008-2010 Novell, Inc
  2021 Ole André Vadla Ravnås
+ 2012 Olivier Sessink
  2007 Openismus GmbH
  1998-2001 Owen Taylor
  2014-2019 Patrick Griffis
@@ -118,23 +149,30 @@ Copyright:
  2018 pdknsk
  1995-2011 Peter Mattis
  1995-2011 Peter Mattis, Spencer Kimball, Josh MacDonald, Sebastian Wilhelmi and others
+ 2020 Philip Chimento
+ 2008 Philip Van Hoof
+ 2022-2023 Philip Withnall
+ 2011 Ray Strode
  2000-2022 Red Hat, Inc
  1999-2003 Red Hat Software
  2001 Ron Steinke
  2020 Ruslan N. Marchenko
  2022 Ryan Hope
  2007-2015 Ryan Lortie
- 2009-2010 Sam Thursfield
+ 2009-2016 Sam Thursfield
  2008 Samuel Cormier-Iijima
  1999-2000 Scott Wimer
  2007-2020 Sebastian Dröge
  2001-2003 Sebastian Wilhelmi
  1998-2001 Sebastian Wilhelmi; University of Karlsruhe
+ 2018 Sébastien Wilmet
+ 2018 segfault
  2002-2006 Sharif FarsiWeb, Inc
- 2012 Simon McVittie
+ 2012-2023 Simon McVittie
  2011 Sjoerd Simons
  2002-2007 Soeren Sandmann
  1995-1998 Spencer Kimball
+ 2005 Stefan Kost
  2006 Stefan Westerfeld
  2011-2013 Stef Walter
  2007-2010 Sven Herzberg
@@ -144,7 +182,9 @@ Copyright:
  2006 The GNOME Foundation
  2007-2011 The GNOME Project
  2010 Thiago Santos
+ 2019 Thibault Saunier
  1997-2007 Tim Janik
+ 2023 Todd Carson
  2018 Tomasz Miąsko
  1999-2000 Tom Tromey
  1998-2004 Tor Lillqvist
@@ -153,22 +193,22 @@ Copyright:
  2011 William Hua
  2020 William Manley
  2018 Will Thompson
- 2020 Xavier Claessens
- 2021 Xavier Claessens
+ 2020 Wouter Bolsterlee
+ 2020-2021 Xavier Claessens
  2000-2004 Ximian Inc
  2014-2020 Руслан Ижбулатов
  Croatiann team
  Jesse van den Kieboom
  Matthew Waters
  Nelson Benítez León
-License: LGPL-2+ and LGPL-2.1+ and FSFULLR and CC0-1.0 and Janik-permissive and Iconv-PD and Mingw-PD and Old-GLib-Tests-permissive
+License: LGPL-2+ and LGPL-2.1+ and old-glib-tests
 
 Files: debian/*
 Copyright:
  2002-2022 Debian contributors as listed in debian/changelog
  2012-2019 Canonical Ltd
- 2017-2019 Collabora Ltd
- 2016-2021 Simon McVittie
+ 2017-2024 Collabora Ltd
+ 2016-2024 Simon McVittie
 License: LGPL-2.1+ and Expat
 
 Files:
@@ -178,6 +218,74 @@ Copyright:
  2004-2005 Matthias Clasen
  2003-2008 Red Hat, Inc
 License: AFL-2.0 or LGPL-2.1+
+
+Files:
+ glib/gbsearcharray.h
+Copyright:
+ 2000-2003 Tim Janik
+License: Janik-permissive
+
+Files:
+ glib/gnulib/gl_cv_cc_double_expbit0/meson.build
+ glib/gnulib/gl_cv_func_frexp_works/meson.build
+ glib/gnulib/gl_cv_func_frexpl_works/meson.build
+ glib/gnulib/gl_cv_func_ldexpl_works/meson.build
+ glib/gnulib/gl_cv_func_printf_directive_a/meson.build
+ glib/gnulib/gl_cv_func_printf_directive_f/meson.build
+ glib/gnulib/gl_cv_func_printf_directive_ls/meson.build
+ glib/gnulib/gl_cv_func_printf_enomem/meson.build
+ glib/gnulib/gl_cv_func_printf_flag_grouping/meson.build
+ glib/gnulib/gl_cv_func_printf_flag_leftadjust/meson.build
+ glib/gnulib/gl_cv_func_printf_flag_zero/meson.build
+ glib/gnulib/gl_cv_func_printf_infinite/meson.build
+ glib/gnulib/gl_cv_func_printf_infinite_long_double/meson.build
+ glib/gnulib/gl_cv_func_printf_long_double/meson.build
+ glib/gnulib/gl_cv_func_printf_precision/meson.build
+ glib/gnulib/gl_cv_long_double_equals_double/meson.build
+ glib/gnulib/gl_extern_inline/meson.build
+ glib/gnulib/gl_extern_inline/meson.build
+ glib/libcharset/codeset.m4
+ glib/libcharset/glibc21.m4
+Copyright:
+ 2000-2018 Free Software Foundation, Inc
+License: FSFULLR
+
+Files:
+ glib/win_iconv.c
+Copyright: none
+License: Iconv-PD
+
+Files:
+ fuzzing/*.corpus
+ fuzzing/*.dict
+ gio/tests/cert-tests/*.p12
+ gio/tests/cert-tests/*.pem
+ gio/tests/desktop-files/**.desktop
+ gio/tests/schema-tests/*.gschema.xml
+ gio/tests/thumbnails/*.png
+ glib/tests/bookmarks/*.xbel
+ glib/tests/markups/*.cdata-as-text
+ glib/tests/markups/*.expected
+ glib/tests/markups/*.gmarkup
+Copyright: none or unspecified
+License: CC0-1.0
+
+Files:
+ gio/gwin32api-application-activation-manager.h
+ gio/gwin32api-iterator.h
+ gio/gwin32api-misc.h
+ gio/gwin32api-package.h
+ gio/gwin32api-storage.h
+ glib/dirent/dirent.c
+ glib/dirent/dirent.h
+Copyright: none
+License: CC0-1.0 or Mingw-PD
+
+Files:
+ gobject/tests/closure-refcount.c
+Copyright:
+ 2005 Imendio AB
+License: Janik-permissive and old-glib-tests
 
 Files:
  glib/tests/NormalizationTest.txt
@@ -244,6 +352,35 @@ License: bzip2-1.0.6
 Files: docs/reference/gio/menu-model.png
 Copyright: unspecified
 License: CC-BY-SA-3.0
+
+Files: docs/reference/glib/gvariant-*.svg
+Copyright: 2022 Philip Withnall
+License: CC-BY-SA-3.0
+
+Files:
+ subprojects/*.wrap
+Copyright: Meson Wrap Database (wrapdb) contributors
+License: CC0-1.0
+
+Files: girepository/cmph/*
+Copyright:
+ CMPH contributors
+ Davi de Castro Reis
+ Fabiano Cupertino Botelho
+License: cmph
+ Code imported from cmph project, which describes it as "LGPL-2 and MPL 1.1".
+ .reuse/dep5 describes it as "LGPL-2.1-only or MPL-1.1".
+ It is not immediately clear which of these licenses are applicable, but
+ all are DFSG licenses.
+ .
+ On Debian systems, a copy of the LGPL version 2 can be found in
+ /usr/share/common-licenses/LGPL-2.
+ .
+ On Debian systems, a copy of the LGPL version 2.1 can be found in
+ /usr/share/common-licenses/LGPL-2.1.
+ .
+ On Debian systems, a copy of the MPL version 1.1 can be found in
+ /usr/share/common-licenses/MPL-1.1.
 
 # ----------------------------------------------------------------------
 
@@ -951,10 +1088,7 @@ License: LGPL-3+
  On Debian systems, a copy of the LGPL version 3 can be found in
  /usr/share/common-licenses/LGPL-3.
 
-License: Mingw-PD
- This file has no copyright assigned and is placed in the Public Domain.
-
-License: Old-GLib-Tests-permissive
+License: old-glib-tests
  This work is provided "as is"; redistribution and modification
  in whole or in part, in any medium, physical or electronic is
  permitted without restriction.
