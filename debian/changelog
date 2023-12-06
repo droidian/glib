@@ -1,3 +1,9 @@
+glib2.0 (2.78.2-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 06 Dec 2023 18:51:12 +0000
+
 glib2.0 (2.78.1-4) unstable; urgency=medium
 
   * d/p/tests-Fix-a-race-in-thread-pool-slow.patch:
