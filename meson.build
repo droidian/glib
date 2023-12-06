@@ -1,5 +1,5 @@
 project('glib', 'c',
-  version : '2.78.1',
+  version : '2.78.2',
   # NOTE: See the policy in docs/meson-version.md before changing the Meson dependency
   meson_version : '>= 0.60.0',
   default_options : [
@@ -2434,6 +2434,10 @@ with open(output, "w") as f:
 ''', dtrace.full_path(), '-h', '-s', '@INPUT@', '-o', '@OUTPUT@'])
   glib_conf.set('HAVE_DTRACE', 1)
   enable_dtrace = true
+endif
+
+if cc.has_header_symbol('sys/ptrace.h', 'PTRACE_O_EXITKILL')
+  glib_conf.set('HAVE_PTRACE_O_EXITKILL', 1)
 endif
 
 # systemtap
