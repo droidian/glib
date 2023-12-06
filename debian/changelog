@@ -6,6 +6,8 @@ glib2.0 (2.78.2-1) UNRELEASED; urgency=medium
       rather than crashing
     - All other changes were included as patches in 2.78.1-2 and -4
   * Drop patches that were included in the new upstream release
+  * Adjust 2.78.1-3 changelog entry to mention why dh-sequence-gnome
+    is still desirable
 
  -- Simon McVittie <smcv@debian.org>  Wed, 06 Dec 2023 18:51:12 +0000
 
@@ -19,7 +21,8 @@ glib2.0 (2.78.1-4) unstable; urgency=medium
 
 glib2.0 (2.78.1-3) unstable; urgency=medium
 
-  * Restore Build-Depends: dh-sequence-gnome since it is used by Ubuntu
+  * Restore Build-Depends: dh-sequence-gnome since it is used by Ubuntu,
+    to move translations into language packs
 
  -- Jeremy Bícha <jbicha@ubuntu.com>  Wed, 08 Nov 2023 14:09:59 +0200
 
