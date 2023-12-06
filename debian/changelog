@@ -1,4 +1,4 @@
-glib2.0 (2.78.2-1) UNRELEASED; urgency=medium
+glib2.0 (2.78.2-1) unstable; urgency=medium
 
   * New upstream stable release
     - Handle broken MIME type definitions with circular inheritance
@@ -10,8 +10,11 @@ glib2.0 (2.78.2-1) UNRELEASED; urgency=medium
     is still desirable
   * d/p/xdgmime-Update-to-upstream-commit-c2c814d4051f232.patch:
     Add a post-release bug fix from upstream to fix regressions in xdgmime
+  * d/copyright: Remove unused stanza for m4macros/attributes.m4.
+    This file is no longer shipped. This also means we can drop the license
+    stanza for "GPL-2+ with Autoconf exception".
 
- -- Simon McVittie <smcv@debian.org>  Wed, 06 Dec 2023 18:51:12 +0000
+ -- Simon McVittie <smcv@debian.org>  Wed, 06 Dec 2023 20:45:11 +0000
 
 glib2.0 (2.78.1-4) unstable; urgency=medium
 
