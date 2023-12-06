@@ -1,0 +1,888 @@
+From: Philip Withnall <pwithnall@gnome.org>
+Date: Mon, 4 Dec 2023 12:40:49 +0000
+Subject: xdgmime: Update to upstream commit c2c814d4051f232
+
+(Modulo the changes in
+https://gitlab.freedesktop.org/xdg/xdgmime/-/merge_requests/10 which are
+still under discussion. Plus the proposed warning fixes from
+https://gitlab.freedesktop.org/xdg/xdgmime/-/merge_requests/33.)
+
+Signed-off-by: Philip Withnall <pwithnall@gnome.org>
+Bug: https://gitlab.gnome.org/GNOME/glib/-/issues/3191
+Applied-upstream: 2.78.3, commit:facc4f06a3e69ec448d17d1d83f0f91b2ae0a96d
+---
+ gio/xdgmime/xdgmime.c       |  48 +++++++----------
+ gio/xdgmime/xdgmime.h       |  20 +-------
+ gio/xdgmime/xdgmimealias.c  |  18 +------
+ gio/xdgmime/xdgmimealias.h  |  18 +------
+ gio/xdgmime/xdgmimecache.c  | 122 ++++++++++++++++++++++++++++++++------------
+ gio/xdgmime/xdgmimecache.h  |  20 +-------
+ gio/xdgmime/xdgmimeglob.c   |  18 +------
+ gio/xdgmime/xdgmimeglob.h   |  18 +------
+ gio/xdgmime/xdgmimeicon.c   |  18 +------
+ gio/xdgmime/xdgmimeicon.h   |  18 +------
+ gio/xdgmime/xdgmimeint.c    |  20 +-------
+ gio/xdgmime/xdgmimeint.h    |  18 +------
+ gio/xdgmime/xdgmimemagic.c  |  23 +++------
+ gio/xdgmime/xdgmimemagic.h  |  18 +------
+ gio/xdgmime/xdgmimeparent.c |  18 +------
+ gio/xdgmime/xdgmimeparent.h |  18 +------
+ 16 files changed, 130 insertions(+), 303 deletions(-)
+
+diff --git a/gio/xdgmime/xdgmime.c b/gio/xdgmime/xdgmime.c
+index dce938a..0909581 100644
+--- a/gio/xdgmime/xdgmime.c
++++ b/gio/xdgmime/xdgmime.c
+@@ -6,23 +6,7 @@
+  * Copyright (C) 2003,2004  Red Hat, Inc.
+  * Copyright (C) 2003,2004  Jonathan Blandford <jrb@alum.mit.edu>
+  *
+- * Licensed under the Academic Free License version 2.0
+- * Or under the following terms:
+- * 
+- * This library is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU Lesser General Public
+- * License as published by the Free Software Foundation; either
+- * version 2.1 of the License, or (at your option) any later version.
+- *
+- * This library is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
+- * Lesser General Public License for more details.
+- *
+- * You should have received a copy of the GNU Lesser General Public
+- * License along with this library; if not, write to the
+- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+- * Boston, MA 02111-1307, USA.
++ * SPDX-License-Identifier: LGPL-2.1-or-later or AFL-2.0
+  */
+ 
+ #ifdef HAVE_CONFIG_H
+@@ -143,7 +127,7 @@ xdg_dir_time_list_free (XdgDirTimeList *list)
+ 
+ static int
+ xdg_mime_init_from_directory (const char *directory,
+-                              void       *user_data)
++                              void       *user_data __attribute__((__unused__)))
+ {
+   char *file_name;
+   struct stat st;
+@@ -836,12 +820,12 @@ xdg_mime_is_super_type (const char *mime)
+ int
+ _xdg_mime_mime_type_subclass (const char *mime,
+ 			      const char *base,
+-			      const char **seen)
++			      const char ***seen)
+ {
+   const char *umime, *ubase, *parent;
+-  const char **parents;
++  const char **parents, **first_seen = NULL, **new_seen;
+ 
+-  int first_seen = 0, i, ret = 0;
++  int i, ret = 0;
+ 
+   if (_caches)
+     return _xdg_mime_cache_mime_type_subclass (mime, base, NULL);
+@@ -870,8 +854,8 @@ _xdg_mime_mime_type_subclass (const char *mime,
+ 
+   if (!seen)
+     {
+-      seen = calloc (1, sizeof (char *));
+-      first_seen = 1;
++      first_seen = calloc (1, sizeof (char *));
++      seen = &first_seen;
+     }
+ 
+   parents = _xdg_mime_parent_list_lookup (parent_list, umime);
+@@ -880,12 +864,15 @@ _xdg_mime_mime_type_subclass (const char *mime,
+       parent = *parents;
+ 
+       /* Detect and avoid buggy circular relationships */
+-      for (i = 0; seen[i] != NULL; i++)
+-        if (parent == seen[i])
++      for (i = 0; (*seen)[i] != NULL; i++)
++        if (parent == (*seen)[i])
+           goto next_parent;
+-      seen = realloc (seen, (i + 2) * sizeof (char *));
+-      seen[i] = parent;
+-      seen[i + 1] = NULL;
++      new_seen = realloc (*seen, (i + 2) * sizeof (char *));
++      if (!new_seen)
++        goto done;
++      new_seen[i] = parent;
++      new_seen[i + 1] = NULL;
++      *seen = new_seen;
+ 
+       if (_xdg_mime_mime_type_subclass (parent, ubase, seen))
+         {
+@@ -898,8 +885,7 @@ _xdg_mime_mime_type_subclass (const char *mime,
+     }
+ 
+ done:
+-  if (first_seen)
+-    free (seen);
++  free (first_seen);
+   return ret;
+ }
+ 
+@@ -919,6 +905,8 @@ xdg_mime_list_mime_parents (const char *mime)
+   char **result;
+   int i, n;
+ 
++  xdg_mime_init ();
++
+   if (_caches)
+     return _xdg_mime_cache_list_mime_parents (mime);
+ 
+diff --git a/gio/xdgmime/xdgmime.h b/gio/xdgmime/xdgmime.h
+index bbae1be..093b12a 100644
+--- a/gio/xdgmime/xdgmime.h
++++ b/gio/xdgmime/xdgmime.h
+@@ -6,23 +6,7 @@
+  * Copyright (C) 2003  Red Hat, Inc.
+  * Copyright (C) 2003  Jonathan Blandford <jrb@alum.mit.edu>
+  *
+- * Licensed under the Academic Free License version 2.0
+- * Or under the following terms:
+- * 
+- * This library is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU Lesser General Public
+- * License as published by the Free Software Foundation; either
+- * version 2.1 of the License, or (at your option) any later version.
+- *
+- * This library is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
+- * Lesser General Public License for more details.
+- *
+- * You should have received a copy of the GNU Lesser General Public
+- * License along with this library; if not, write to the
+- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+- * Boston, MA 02111-1307, USA.
++ * SPDX-License-Identifier: LGPL-2.1-or-later or AFL-2.0
+  */
+ 
+ 
+@@ -126,7 +110,7 @@ int          _xdg_mime_mime_type_equal             (const char *mime_a,
+ 						    const char *mime_b);
+ int          _xdg_mime_mime_type_subclass          (const char *mime,
+ 						    const char *base,
+-						    const char **seen);
++						    const char ***seen);
+ const char  *_xdg_mime_unalias_mime_type           (const char *mime);
+ 
+ 
+diff --git a/gio/xdgmime/xdgmimealias.c b/gio/xdgmime/xdgmimealias.c
+index 0fc51f9..857d274 100644
+--- a/gio/xdgmime/xdgmimealias.c
++++ b/gio/xdgmime/xdgmimealias.c
+@@ -6,23 +6,7 @@
+  * Copyright (C) 2004  Red Hat, Inc.
+  * Copyright (C) 2004  Matthias Clasen <mclasen@redhat.com>
+  *
+- * Licensed under the Academic Free License version 2.0
+- * Or under the following terms:
+- *
+- * This library is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU Lesser General Public
+- * License as published by the Free Software Foundation; either
+- * version 2.1 of the License, or (at your option) any later version.
+- *
+- * This library is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
+- * Lesser General Public License for more details.
+- *
+- * You should have received a copy of the GNU Lesser General Public
+- * License along with this library; if not, write to the
+- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+- * Boston, MA 02111-1307, USA.
++ * SPDX-License-Identifier: LGPL-2.1-or-later or AFL-2.0
+  */
+ 
+ #ifdef HAVE_CONFIG_H
+diff --git a/gio/xdgmime/xdgmimealias.h b/gio/xdgmime/xdgmimealias.h
+index 6e0cfff..05df009 100644
+--- a/gio/xdgmime/xdgmimealias.h
++++ b/gio/xdgmime/xdgmimealias.h
+@@ -6,23 +6,7 @@
+  * Copyright (C) 2004  Red Hat, Inc.
+  * Copyright (C) 200  Matthias Clasen <mclasen@redhat.com>
+  *
+- * Licensed under the Academic Free License version 2.0
+- * Or under the following terms:
+- *
+- * This library is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU Lesser General Public
+- * License as published by the Free Software Foundation; either
+- * version 2.1 of the License, or (at your option) any later version.
+- *
+- * This library is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
+- * Lesser General Public License for more details.
+- *
+- * You should have received a copy of the GNU Lesser General Public
+- * License along with this library; if not, write to the
+- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+- * Boston, MA 02111-1307, USA.
++ * SPDX-License-Identifier: LGPL-2.1-or-later or AFL-2.0
+  */
+ 
+ #ifndef __XDG_MIME_ALIAS_H__
+diff --git a/gio/xdgmime/xdgmimecache.c b/gio/xdgmime/xdgmimecache.c
+index 9ea10f9..f7eddcb 100644
+--- a/gio/xdgmime/xdgmimecache.c
++++ b/gio/xdgmime/xdgmimecache.c
+@@ -5,23 +5,7 @@
+  *
+  * Copyright (C) 2005  Matthias Clasen <mclasen@redhat.com>
+  *
+- * Licensed under the Academic Free License version 2.0
+- * Or under the following terms:
+- *
+- * This library is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU Lesser General Public
+- * License as published by the Free Software Foundation; either
+- * version 2.1 of the License, or (at your option) any later version.
+- *
+- * This library is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
+- * Lesser General Public License for more details.
+- *
+- * You should have received a copy of the GNU Lesser General Public
+- * License along with this library; if not, write to the
+- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+- * Boston, MA 02111-1307, USA.
++ * SPDX-License-Identifier: LGPL-2.1-or-later or AFL-2.0
+  */
+ 
+ #ifdef HAVE_CONFIG_H
+@@ -92,6 +76,13 @@ struct _XdgMimeCache
+ #define GET_UINT16(cache,offset) (ntohs(*(xdg_uint16_t*)((cache) + (offset))))
+ #define GET_UINT32(cache,offset) (ntohl(*(xdg_uint32_t*)((cache) + (offset))))
+ 
++// Validates that it is safe to call GET_UINT32() at
++// cache->buffer[offset + (n * record_size)]. Ensures that offset is aligned to
++// a 4-byte boundary, and that offset+(n*record_size) does not overflow.
++// `record_size` values are known constants and never 0.
++#define OUT_OF_BOUNDS(offset,n,record_size,max) \
++  (((offset) & 0x3) || (offset) > (max) || (n) > ((max) - (offset)) / (record_size))
++
+ XdgMimeCache *
+ _xdg_mime_cache_ref (XdgMimeCache *cache)
+ {
+@@ -132,7 +123,8 @@ _xdg_mime_cache_new_from_file (const char *file_name)
+   if (fd < 0)
+     return NULL;
+   
+-  if (fstat (fd, &st) < 0 || st.st_size < 4)
++  // A valid cache must be at least 40 bytes for the header.
++  if (fstat (fd, &st) < 0 || st.st_size < 40)
+     goto done;
+ 
+   buffer = (char *) mmap (NULL, st.st_size, PROT_READ, MAP_SHARED, fd, 0);
+@@ -225,6 +217,8 @@ cache_magic_matchlet_compare (XdgMimeCache *cache,
+ {
+   xdg_uint32_t n_children = GET_UINT32 (cache->buffer, offset + 24);
+   xdg_uint32_t child_offset = GET_UINT32 (cache->buffer, offset + 28);
++  if (OUT_OF_BOUNDS (child_offset, n_children, 32, cache->size))
++    return FALSE;
+ 
+   xdg_uint32_t i;
+   
+@@ -255,6 +249,8 @@ cache_magic_compare_to_data (XdgMimeCache *cache,
+   xdg_uint32_t mimetype_offset = GET_UINT32 (cache->buffer, offset + 4);
+   xdg_uint32_t n_matchlets = GET_UINT32 (cache->buffer, offset + 8);
+   xdg_uint32_t matchlet_offset = GET_UINT32 (cache->buffer, offset + 12);
++  if (OUT_OF_BOUNDS (matchlet_offset, n_matchlets, 32, cache->size))
++    return NULL;
+ 
+   xdg_uint32_t i;
+ 
+@@ -287,8 +283,13 @@ cache_magic_lookup_data (XdgMimeCache *cache,
+   *prio = 0;
+ 
+   list_offset = GET_UINT32 (cache->buffer, 24);
++  if (OUT_OF_BOUNDS (list_offset, 1, 12, cache->size))
++    return NULL;
++
+   n_entries = GET_UINT32 (cache->buffer, list_offset);
+   offset = GET_UINT32 (cache->buffer, list_offset + 8);
++  if (OUT_OF_BOUNDS (offset, n_entries, 16, cache->size))
++    return NULL;
+   
+   for (j = 0; j < n_entries; j++)
+     {
+@@ -320,7 +321,12 @@ cache_alias_lookup (const char *alias)
+         continue;
+ 
+       list_offset = GET_UINT32 (cache->buffer, 4);
++      if (OUT_OF_BOUNDS (list_offset, 1, 4, cache->size))
++        continue;
++
+       n_entries = GET_UINT32 (cache->buffer, list_offset);
++      if (OUT_OF_BOUNDS (list_offset + 4, n_entries, 8, cache->size))
++        continue;
+ 
+       min = 0; 
+       max = n_entries - 1;
+@@ -361,6 +367,8 @@ cache_glob_lookup_literal (const char *file_name,
+   const char *ptr;
+   int i, min, max, mid, cmp;
+ 
++  assert (n_mime_types > 0);
++
+   for (i = 0; _caches[i]; i++)
+     {
+       XdgMimeCache *cache = _caches[i];
+@@ -372,7 +380,12 @@ cache_glob_lookup_literal (const char *file_name,
+         continue;
+ 
+       list_offset = GET_UINT32 (cache->buffer, 12);
++      if (OUT_OF_BOUNDS (list_offset, 1, 4, cache->size))
++        continue;
++
+       n_entries = GET_UINT32 (cache->buffer, list_offset);
++      if (OUT_OF_BOUNDS (list_offset + 4, n_entries, 12, cache->size))
++        continue;
+ 
+       min = 0; 
+       max = n_entries - 1;
+@@ -433,7 +446,12 @@ cache_glob_lookup_fnmatch (const char *file_name,
+         continue;
+ 
+       list_offset = GET_UINT32 (cache->buffer, 20);
++      if (OUT_OF_BOUNDS (list_offset, 1, 4, cache->size))
++        continue;
++
+       n_entries = GET_UINT32 (cache->buffer, list_offset);
++      if (OUT_OF_BOUNDS (list_offset + 4, n_entries, 12, cache->size))
++        continue;
+ 
+       for (j = 0; j < n_entries && n < n_mime_types; j++)
+ 	{
+@@ -504,6 +522,8 @@ cache_glob_node_lookup_suffix (XdgMimeCache  *cache,
+           n = 0;
+           n_children = GET_UINT32 (cache->buffer, offset + 12 * mid + 4);
+           child_offset = GET_UINT32 (cache->buffer, offset + 12 * mid + 8);
++          if (OUT_OF_BOUNDS (child_offset, n_children, 12, cache->size))
++            continue;
+       
+           if (len > 0)
+             {
+@@ -565,8 +585,13 @@ cache_glob_lookup_suffix (const char *file_name,
+         continue;
+ 
+       list_offset = GET_UINT32 (cache->buffer, 16);
++      if (OUT_OF_BOUNDS (list_offset, 1, 8, cache->size))
++        continue;
++
+       n_entries = GET_UINT32 (cache->buffer, list_offset);
+       offset = GET_UINT32 (cache->buffer, list_offset + 4);
++      if (OUT_OF_BOUNDS (offset, n_entries, 12, cache->size))
++        continue;
+ 
+       n += cache_glob_node_lookup_suffix (cache,
+ 					  n_entries, offset,
+@@ -707,6 +732,9 @@ _xdg_mime_cache_get_max_buffer_extents (void)
+         continue;
+ 
+       offset = GET_UINT32 (cache->buffer, 24);
++      if (OUT_OF_BOUNDS (offset, 1, 8, cache->size))
++        continue;
++
+       max_extent = MAX (max_extent, GET_UINT32 (cache->buffer, offset + 4));
+     }
+ 
+@@ -902,12 +930,13 @@ is_super_type (const char *mime)
+ int
+ _xdg_mime_cache_mime_type_subclass (const char *mime,
+ 				    const char *base,
+-				    const char **seen)
++				    const char ***seen)
+ {
+   const char *umime, *ubase, *parent;
++  const char **first_seen = NULL, **new_seen;
+ 
+   xdg_uint32_t j;
+-  int i, k, min, max, med, cmp, first_seen = 0, ret = 0;
++  int i, k, min, max, med, cmp, ret = 0;
+ 
+   umime = _xdg_mime_cache_unalias_mime_type (mime);
+   ubase = _xdg_mime_cache_unalias_mime_type (base);
+@@ -936,8 +965,8 @@ _xdg_mime_cache_mime_type_subclass (const char *mime,
+ 
+   if (!seen)
+     {
+-      seen = calloc (1, sizeof (char *));
+-      first_seen = 1;
++      first_seen = calloc (1, sizeof (char *));
++      seen = &first_seen;
+     }
+ 
+   for (i = 0; _caches[i]; i++)
+@@ -951,7 +980,12 @@ _xdg_mime_cache_mime_type_subclass (const char *mime,
+         continue;
+ 
+       list_offset = GET_UINT32 (cache->buffer, 8);
++      if (OUT_OF_BOUNDS (list_offset, 1, 4, cache->size))
++        continue;
++
+       n_entries = GET_UINT32 (cache->buffer, list_offset);
++      if (OUT_OF_BOUNDS (list_offset + 4, n_entries, 8, cache->size))
++        continue;
+ 
+       min = 0; 
+       max = n_entries - 1;
+@@ -976,12 +1010,15 @@ _xdg_mime_cache_mime_type_subclass (const char *mime,
+ 		  parent = cache->buffer + parent_offset;
+ 
+ 		  /* Detect and avoid buggy circular relationships */
+-		  for (k = 0; seen[k] != NULL; k++)
+-		    if (parent == seen[k])
++		  for (k = 0; (*seen)[k] != NULL; k++)
++		    if (parent == (*seen)[k])
+ 		      goto next_parent;
+-		  seen = realloc (seen, (k + 2) * sizeof (char *));
+-		  seen[k] = parent;
+-		  seen[k + 1] = NULL;
++		  new_seen = realloc (*seen, (k + 2) * sizeof (char *));
++		  if (!new_seen)
++		    goto done;
++		  new_seen[k] = parent;
++		  new_seen[k + 1] = NULL;
++		  *seen = new_seen;
+ 
+ 		  if (_xdg_mime_cache_mime_type_subclass (parent, ubase, seen))
+ 		    {
+@@ -999,8 +1036,7 @@ _xdg_mime_cache_mime_type_subclass (const char *mime,
+     }
+ 
+ done:
+-  if (first_seen)
+-    free (seen);
++  free (first_seen);
+   return ret;
+ }
+ 
+@@ -1038,7 +1074,12 @@ _xdg_mime_cache_list_mime_parents (const char *mime)
+         continue;
+ 
+       list_offset = GET_UINT32 (cache->buffer, 8);
++      if (OUT_OF_BOUNDS (list_offset, 1, 4, cache->size))
++        continue;
++
+       n_entries = GET_UINT32 (cache->buffer, list_offset);
++      if (OUT_OF_BOUNDS (list_offset + 4, n_entries, 8, cache->size))
++        continue;
+ 
+       for (j = 0; j < n_entries; j++)
+ 	{
+@@ -1080,7 +1121,7 @@ _xdg_mime_cache_list_mime_parents (const char *mime)
+ }
+ 
+ static const char *
+-cache_lookup_icon (const char *mime, int header)
++cache_lookup_icon (const char *mime, size_t header)
+ {
+   const char *ptr;
+   int i, min, max, mid, cmp;
+@@ -1095,8 +1136,16 @@ cache_lookup_icon (const char *mime, int header)
+       if (cache->buffer == NULL)
+         continue;
+ 
++      if (OUT_OF_BOUNDS (header, 1, 4, cache->size))
++        continue;
++
+       list_offset = GET_UINT32 (cache->buffer, header);
++      if (OUT_OF_BOUNDS (list_offset, 1, 4, cache->size))
++        continue;
++
+       n_entries = GET_UINT32 (cache->buffer, list_offset);
++      if (OUT_OF_BOUNDS (list_offset + 4, n_entries, 8, cache->size))
++        continue;
+ 
+       min = 0; 
+       max = n_entries - 1;
+@@ -1151,6 +1200,9 @@ dump_glob_node (XdgMimeCache *cache,
+   mime_offset = GET_UINT32 (cache->buffer, offset + 4);
+   n_children = GET_UINT32 (cache->buffer, offset + 8);
+   child_offset = GET_UINT32 (cache->buffer, offset + 12);
++  if (OUT_OF_BOUNDS (child_offset, n_children, 20, cache->size))
++    return;
++
+   for (i = 0; i < depth; i++)
+     printf (" ");
+   printf ("%c", character);
+@@ -1175,12 +1227,18 @@ _xdg_mime_cache_glob_dump (void)
+     xdg_uint32_t n_entries;
+     xdg_uint32_t offset;
+ 
+-      if (cache->buffer == NULL)
+-        continue;
++    if (cache->buffer == NULL)
++      continue;
+ 
+     list_offset = GET_UINT32 (cache->buffer, 16);
++    if (OUT_OF_BOUNDS (list_offset, 1, 8, cache->size))
++      return;
++
+     n_entries = GET_UINT32 (cache->buffer, list_offset);
+     offset = GET_UINT32 (cache->buffer, list_offset + 4);
++    if (OUT_OF_BOUNDS (offset, n_entries, 20, cache->size))
++      return;
++
+     for (j = 0; j < n_entries; j++)
+ 	    dump_glob_node (cache, offset + 20 * j, 0);
+   }
+diff --git a/gio/xdgmime/xdgmimecache.h b/gio/xdgmime/xdgmimecache.h
+index 0ac0b05..de7e531 100644
+--- a/gio/xdgmime/xdgmimecache.h
++++ b/gio/xdgmime/xdgmimecache.h
+@@ -5,23 +5,7 @@
+  *
+  * Copyright (C) 2005  Matthias Clasen <mclasen@redhat.com>
+  *
+- * Licensed under the Academic Free License version 2.0
+- * Or under the following terms:
+- *
+- * This library is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU Lesser General Public
+- * License as published by the Free Software Foundation; either
+- * version 2.1 of the License, or (at your option) any later version.
+- *
+- * This library is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
+- * Lesser General Public License for more details.
+- *
+- * You should have received a copy of the GNU Lesser General Public
+- * License along with this library; if not, write to the
+- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+- * Boston, MA 02111-1307, USA.
++ * SPDX-License-Identifier: LGPL-2.1-or-later or AFL-2.0
+  */
+ 
+ #ifndef __XDG_MIME_CACHE_H__
+@@ -71,7 +55,7 @@ int          _xdg_mime_cache_media_type_equal             (const char *mime_a,
+ 							   const char *mime_b);
+ int          _xdg_mime_cache_mime_type_subclass           (const char *mime_a,
+ 							   const char *mime_b,
+-							   const char **seen);
++							   const char ***seen);
+ char       **_xdg_mime_cache_list_mime_parents		  (const char *mime);
+ const char  *_xdg_mime_cache_unalias_mime_type            (const char *mime);
+ int          _xdg_mime_cache_get_max_buffer_extents       (void);
+diff --git a/gio/xdgmime/xdgmimeglob.c b/gio/xdgmime/xdgmimeglob.c
+index d68435c..e845808 100644
+--- a/gio/xdgmime/xdgmimeglob.c
++++ b/gio/xdgmime/xdgmimeglob.c
+@@ -6,23 +6,7 @@
+  * Copyright (C) 2003  Red Hat, Inc.
+  * Copyright (C) 2003  Jonathan Blandford <jrb@alum.mit.edu>
+  *
+- * Licensed under the Academic Free License version 2.0
+- * Or under the following terms:
+- *
+- * This library is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU Lesser General Public
+- * License as published by the Free Software Foundation; either
+- * version 2.1 of the License, or (at your option) any later version.
+- *
+- * This library is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
+- * Lesser General Public License for more details.
+- *
+- * You should have received a copy of the GNU Lesser General Public
+- * License along with this library; if not, write to the
+- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+- * Boston, MA 02111-1307, USA.
++ * SPDX-License-Identifier: LGPL-2.1-or-later or AFL-2.0
+  */
+ 
+ #ifdef HAVE_CONFIG_H
+diff --git a/gio/xdgmime/xdgmimeglob.h b/gio/xdgmime/xdgmimeglob.h
+index 8b1fa3a..7ecee9a 100644
+--- a/gio/xdgmime/xdgmimeglob.h
++++ b/gio/xdgmime/xdgmimeglob.h
+@@ -6,23 +6,7 @@
+  * Copyright (C) 2003  Red Hat, Inc.
+  * Copyright (C) 2003  Jonathan Blandford <jrb@alum.mit.edu>
+  *
+- * Licensed under the Academic Free License version 2.0
+- * Or under the following terms:
+- *
+- * This library is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU Lesser General Public
+- * License as published by the Free Software Foundation; either
+- * version 2.1 of the License, or (at your option) any later version.
+- *
+- * This library is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
+- * Lesser General Public License for more details.
+- *
+- * You should have received a copy of the GNU Lesser General Public
+- * License along with this library; if not, write to the
+- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+- * Boston, MA 02111-1307, USA.
++ * SPDX-License-Identifier: LGPL-2.1-or-later or AFL-2.0
+  */
+ 
+ #ifndef __XDG_MIME_GLOB_H__
+diff --git a/gio/xdgmime/xdgmimeicon.c b/gio/xdgmime/xdgmimeicon.c
+index feb6c86..4aaa564 100644
+--- a/gio/xdgmime/xdgmimeicon.c
++++ b/gio/xdgmime/xdgmimeicon.c
+@@ -5,23 +5,7 @@
+  *
+  * Copyright (C) 2008  Red Hat, Inc.
+  *
+- * Licensed under the Academic Free License version 2.0
+- * Or under the following terms:
+- *
+- * This library is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU Lesser General Public
+- * License as published by the Free Software Foundation; either
+- * version 2.1 of the License, or (at your option) any later version.
+- *
+- * This library is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
+- * Lesser General Public License for more details.
+- *
+- * You should have received a copy of the GNU Lesser General Public
+- * License along with this library; if not, write to the
+- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+- * Boston, MA 02111-1307, USA.
++ * SPDX-License-Identifier: LGPL-2.1-or-later or AFL-2.0
+  */
+ 
+ #ifdef HAVE_CONFIG_H
+diff --git a/gio/xdgmime/xdgmimeicon.h b/gio/xdgmime/xdgmimeicon.h
+index c416b3c..f724430 100644
+--- a/gio/xdgmime/xdgmimeicon.h
++++ b/gio/xdgmime/xdgmimeicon.h
+@@ -5,23 +5,7 @@
+  *
+  * Copyright (C) 2008  Red Hat, Inc.
+  *
+- * Licensed under the Academic Free License version 2.0
+- * Or under the following terms:
+- *
+- * This library is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU Lesser General Public
+- * License as published by the Free Software Foundation; either
+- * version 2.1 of the License, or (at your option) any later version.
+- *
+- * This library is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
+- * Lesser General Public License for more details.
+- *
+- * You should have received a copy of the GNU Lesser General Public
+- * License along with this library; if not, write to the
+- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+- * Boston, MA 02111-1307, USA.
++ * SPDX-License-Identifier: LGPL-2.1-or-later or AFL-2.0
+  */
+ 
+ #ifndef __XDG_MIME_ICON_H__
+diff --git a/gio/xdgmime/xdgmimeint.c b/gio/xdgmime/xdgmimeint.c
+index 5e4513c..f7ab067 100644
+--- a/gio/xdgmime/xdgmimeint.c
++++ b/gio/xdgmime/xdgmimeint.c
+@@ -6,23 +6,7 @@
+  * Copyright (C) 2003  Red Hat, Inc.
+  * Copyright (C) 2003  Jonathan Blandford <jrb@alum.mit.edu>
+  *
+- * Licensed under the Academic Free License version 2.0
+- * Or under the following terms:
+- *
+- * This library is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU Lesser General Public
+- * License as published by the Free Software Foundation; either
+- * version 2.1 of the License, or (at your option) any later version.
+- *
+- * This library is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
+- * Lesser General Public License for more details.
+- *
+- * You should have received a copy of the GNU Lesser General Public
+- * License along with this library; if not, write to the
+- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+- * Boston, MA 02111-1307, USA.
++ * SPDX-License-Identifier: LGPL-2.1-or-later or AFL-2.0
+  */
+ 
+ #ifdef HAVE_CONFIG_H
+@@ -131,7 +115,7 @@ _xdg_ucs4_to_lower (xdg_unichar_t source)
+ }
+ 
+ int
+-_xdg_utf8_validate (const char *source)
++_xdg_utf8_validate (const char *source __attribute__((unused)))
+ {
+   /* FIXME: actually write */
+   return TRUE;
+diff --git a/gio/xdgmime/xdgmimeint.h b/gio/xdgmime/xdgmimeint.h
+index 9a8256d..041c4f4 100644
+--- a/gio/xdgmime/xdgmimeint.h
++++ b/gio/xdgmime/xdgmimeint.h
+@@ -6,23 +6,7 @@
+  * Copyright (C) 2003  Red Hat, Inc.
+  * Copyright (C) 2003  Jonathan Blandford <jrb@alum.mit.edu>
+  *
+- * Licensed under the Academic Free License version 2.0
+- * Or under the following terms:
+- *
+- * This library is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU Lesser General Public
+- * License as published by the Free Software Foundation; either
+- * version 2.1 of the License, or (at your option) any later version.
+- *
+- * This library is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
+- * Lesser General Public License for more details.
+- *
+- * You should have received a copy of the GNU Lesser General Public
+- * License along with this library; if not, write to the
+- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+- * Boston, MA 02111-1307, USA.
++ * SPDX-License-Identifier: LGPL-2.1-or-later or AFL-2.0
+  */
+ 
+ #ifndef __XDG_MIME_INT_H__
+diff --git a/gio/xdgmime/xdgmimemagic.c b/gio/xdgmime/xdgmimemagic.c
+index dcee0fd..98a1274 100644
+--- a/gio/xdgmime/xdgmimemagic.c
++++ b/gio/xdgmime/xdgmimemagic.c
+@@ -6,23 +6,7 @@
+  * Copyright (C) 2003  Red Hat, Inc.
+  * Copyright (C) 2003  Jonathan Blandford <jrb@alum.mit.edu>
+  *
+- * Licensed under the Academic Free License version 2.0
+- * Or under the following terms:
+- *
+- * This library is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU Lesser General Public
+- * License as published by the Free Software Foundation; either
+- * version 2.1 of the License, or (at your option) any later version.
+- *
+- * This library is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
+- * Lesser General Public License for more details.
+- *
+- * You should have received a copy of the GNU Lesser General Public
+- * License along with this library; if not, write to the
+- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+- * Boston, MA 02111-1307, USA.
++ * SPDX-License-Identifier: LGPL-2.1-or-later or AFL-2.0
+  */
+ 
+ #ifdef HAVE_CONFIG_H
+@@ -798,6 +782,11 @@ _xdg_mime_magic_read_magic_file (XdgMimeMagic *mime_magic,
+ 	  break;
+ 	case XDG_MIME_MAGIC_ERROR:
+ 	  state = _xdg_mime_magic_parse_error (magic_file);
++
++	  /* After a parse error we can only be at EOF or reset to starting a
++	   * new section. */
++	  assert (state == XDG_MIME_MAGIC_EOF || state == XDG_MIME_MAGIC_SECTION);
++
+ 	  break;
+ 	case XDG_MIME_MAGIC_EOF:
+ 	default:
+diff --git a/gio/xdgmime/xdgmimemagic.h b/gio/xdgmime/xdgmimemagic.h
+index eb06a81..81125c2 100644
+--- a/gio/xdgmime/xdgmimemagic.h
++++ b/gio/xdgmime/xdgmimemagic.h
+@@ -6,23 +6,7 @@
+  * Copyright (C) 2003  Red Hat, Inc.
+  * Copyright (C) 2003  Jonathan Blandford <jrb@alum.mit.edu>
+  *
+- * Licensed under the Academic Free License version 2.0
+- * Or under the following terms:
+- *
+- * This library is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU Lesser General Public
+- * License as published by the Free Software Foundation; either
+- * version 2.1 of the License, or (at your option) any later version.
+- *
+- * This library is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
+- * Lesser General Public License for more details.
+- *
+- * You should have received a copy of the GNU Lesser General Public
+- * License along with this library; if not, write to the
+- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+- * Boston, MA 02111-1307, USA.
++ * SPDX-License-Identifier: LGPL-2.1-or-later or AFL-2.0
+  */
+ 
+ #ifndef __XDG_MIME_MAGIC_H__
+diff --git a/gio/xdgmime/xdgmimeparent.c b/gio/xdgmime/xdgmimeparent.c
+index 89b48fc..e03a78f 100644
+--- a/gio/xdgmime/xdgmimeparent.c
++++ b/gio/xdgmime/xdgmimeparent.c
+@@ -6,23 +6,7 @@
+  * Copyright (C) 2004  Red Hat, Inc.
+  * Copyright (C) 2004  Matthias Clasen <mclasen@redhat.com>
+  *
+- * Licensed under the Academic Free License version 2.0
+- * Or under the following terms:
+- *
+- * This library is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU Lesser General Public
+- * License as published by the Free Software Foundation; either
+- * version 2.1 of the License, or (at your option) any later version.
+- *
+- * This library is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
+- * Lesser General Public License for more details.
+- *
+- * You should have received a copy of the GNU Lesser General Public
+- * License along with this library; if not, write to the
+- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+- * Boston, MA 02111-1307, USA.
++ * SPDX-License-Identifier: LGPL-2.1-or-later or AFL-2.0
+  */
+ 
+ #ifdef HAVE_CONFIG_H
+diff --git a/gio/xdgmime/xdgmimeparent.h b/gio/xdgmime/xdgmimeparent.h
+index 29f43bc..b656e38 100644
+--- a/gio/xdgmime/xdgmimeparent.h
++++ b/gio/xdgmime/xdgmimeparent.h
+@@ -6,23 +6,7 @@
+  * Copyright (C) 2004  Red Hat, Inc.
+  * Copyright (C) 200  Matthias Clasen <mclasen@redhat.com>
+  *
+- * Licensed under the Academic Free License version 2.0
+- * Or under the following terms:
+- *
+- * This library is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU Lesser General Public
+- * License as published by the Free Software Foundation; either
+- * version 2.1 of the License, or (at your option) any later version.
+- *
+- * This library is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
+- * Lesser General Public License for more details.
+- *
+- * You should have received a copy of the GNU Lesser General Public
+- * License along with this library; if not, write to the
+- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+- * Boston, MA 02111-1307, USA.
++ * SPDX-License-Identifier: LGPL-2.1-or-later or AFL-2.0
+  */
+ 
+ #ifndef __XDG_MIME_PARENT_H__
