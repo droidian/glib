@@ -1,6 +1,11 @@
 glib2.0 (2.78.2-1) UNRELEASED; urgency=medium
 
-  * New upstream release
+  * New upstream stable release
+    - Handle broken MIME type definitions with circular inheritance
+    - Diagnose invalid input to g_utf8_collate_key() as a programming error
+      rather than crashing
+    - All other changes were included as patches in 2.78.1-2 and -4
+  * Drop patches that were included in the new upstream release
 
  -- Simon McVittie <smcv@debian.org>  Wed, 06 Dec 2023 18:51:12 +0000
 
