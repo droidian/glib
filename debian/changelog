@@ -1,8 +1,11 @@
 glib2.0 (2.78.3-1) UNRELEASED; urgency=medium
 
-  * New upstream release
+  * New upstream stable release
+    - Functionally equivalent to 2.78.2-1
+  * d/p/xdgmime-Update-to-upstream-commit-c2c814d4051f232.patch:
+    Drop patch, included in the new upstream release
 
- -- Simon McVittie <smcv@debian.org>  Thu, 07 Dec 2023 01:18:03 +0000
+ -- Simon McVittie <smcv@debian.org>  Thu, 07 Dec 2023 01:20:24 +0000
 
 glib2.0 (2.78.2-1) unstable; urgency=medium
 
