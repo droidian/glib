@@ -1,4 +1,4 @@
-glib2.0 (2.78.3-1) UNRELEASED; urgency=medium
+glib2.0 (2.78.3-1) unstable; urgency=medium
 
   * New upstream stable release
     - Functionally equivalent to 2.78.2-1
@@ -10,7 +10,7 @@ glib2.0 (2.78.3-1) UNRELEASED; urgency=medium
     ARM, and run them as "flaky" tests during autopkgtest
     (Mitigates: #1023652, #1057797)
 
- -- Simon McVittie <smcv@debian.org>  Fri, 08 Dec 2023 15:54:01 +0000
+ -- Simon McVittie <smcv@debian.org>  Fri, 08 Dec 2023 16:16:19 +0000
 
 glib2.0 (2.78.2-1) unstable; urgency=medium
 
