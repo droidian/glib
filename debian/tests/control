@@ -6,6 +6,6 @@ Tests: installed-tests
 Depends: dbus-daemon (>= 1.8), dbus-x11, gnome-desktop-testing, libglib2.0-tests, locales | locales-all, xauth, xvfb
 Restrictions: allow-stderr
 
-Tests: closure-refcount debugcontroller gdbus-server-auth gdbus-threading gmenumodel mainloop memory-monitor-dbus socket testfilemonitor threadtests timeout timer
+Tests: closure-refcount debugcontroller gdbus-server-auth gdbus-threading gmenumodel mainloop memory-monitor-dbus socket testfilemonitor thread-pool-slow threadtests timeout timer
 Depends: dbus-daemon (>= 1.8), dbus-x11, gnome-desktop-testing, libglib2.0-tests, locales | locales-all, xauth, xvfb
 Restrictions: allow-stderr flaky
