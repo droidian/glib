@@ -4,8 +4,11 @@ glib2.0 (2.78.3-1) UNRELEASED; urgency=medium
     - Functionally equivalent to 2.78.2-1
   * d/p/xdgmime-Update-to-upstream-commit-c2c814d4051f232.patch:
     Drop patch, included in the new upstream release
-  * d/p/debian/Disable-some-tests-on-slow-architectures-which-keep-faili.patch:
-    Skip more threading-related tests which regularly time out on 32-bit ARM.
+  * d/p/debian/Disable-some-tests-on-slow-architectures-which-keep-faili.patch,
+    d/tests:
+    Skip more threading-related tests which regularly time out on 32-bit
+    ARM, and run them as "flaky" tests during autopkgtest
+    (Mitigates: #1023652, #1057797)
 
  -- Simon McVittie <smcv@debian.org>  Fri, 08 Dec 2023 15:54:01 +0000
 
