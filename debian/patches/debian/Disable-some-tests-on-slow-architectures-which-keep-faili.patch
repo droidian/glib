@@ -10,9 +10,11 @@ environment variable]
 Co-authored-by: Simon McVittie <smcv@debian.org>
 Forwarded: no
 ---
- glib/tests/mainloop.c | 16 ++++++++++++++++
- glib/tests/timeout.c  |  9 +++++++++
- 2 files changed, 25 insertions(+)
+ glib/tests/mainloop.c         | 16 ++++++++++++++++
+ glib/tests/thread-pool-slow.c |  8 ++++++++
+ glib/tests/timeout.c          |  9 +++++++++
+ gobject/tests/threadtests.c   |  8 ++++++++
+ 4 files changed, 41 insertions(+)
 
 diff --git a/glib/tests/mainloop.c b/glib/tests/mainloop.c
 index 152e74b..1aac153 100644
@@ -48,6 +50,25 @@ index 152e74b..1aac153 100644
    ctx = g_main_context_new ();
    loop = g_main_loop_new (ctx, FALSE);
  
+diff --git a/glib/tests/thread-pool-slow.c b/glib/tests/thread-pool-slow.c
+index 770bd91..1963b03 100644
+--- a/glib/tests/thread-pool-slow.c
++++ b/glib/tests/thread-pool-slow.c
+@@ -435,6 +435,14 @@ test_check_start_and_stop (gpointer user_data)
+ static void
+ test_threadpool_basics (void)
+ {
++#if defined(__arm__)
++  if (g_getenv ("DEB_ALLOW_FLAKY_TESTS") == NULL)
++    {
++      g_test_skip ("Not reliable on 32-bit ARM");
++      return;
++    }
++#endif
++
+   g_timeout_add (1000, test_check_start_and_stop, NULL);
+ 
+   main_loop = g_main_loop_new (NULL, FALSE);
 diff --git a/glib/tests/timeout.c b/glib/tests/timeout.c
 index 1ae3f3a..f838c9c 100644
 --- a/glib/tests/timeout.c
@@ -68,3 +89,22 @@ index 1ae3f3a..f838c9c 100644
    loop = g_main_loop_new (NULL, FALSE);
  
    last_time = g_get_monotonic_time ();
+diff --git a/gobject/tests/threadtests.c b/gobject/tests/threadtests.c
+index dee4d6e..0187c4c 100644
+--- a/gobject/tests/threadtests.c
++++ b/gobject/tests/threadtests.c
+@@ -481,6 +481,14 @@ test_threaded_toggle_notify (void)
+   GThread *threads[3];
+   gsize i;
+ 
++#if defined(__arm__)
++  if (g_getenv ("DEB_ALLOW_FLAKY_TESTS") == NULL)
++    {
++      g_test_skip ("Not reliable on 32-bit ARM");
++      return;
++    }
++#endif
++
+   g_test_bug ("https://gitlab.gnome.org/GNOME/glib/issues/2394");
+   g_test_summary ("Test that toggle reference notifications can be changed "
+                   "safely from another (the main) thread without causing the "
