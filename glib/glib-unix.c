@@ -1,5 +1,6 @@
 /* GLIB - Library of useful routines for C programming
  * Copyright (C) 2011 Red Hat, Inc.
+ * Copyright 2023 Collabora Ltd.
  *
  * glib-unix.c: UNIX specific API wrappers and convenience functions
  *
@@ -43,21 +44,6 @@ G_STATIC_ASSERT (G_ALIGNOF (GPid) == G_ALIGNOF (pid_t));
  * might not be true everywhere. */
 G_STATIC_ASSERT (O_NONBLOCK != FD_CLOEXEC);
 
-/**
- * SECTION:gunix
- * @title: UNIX-specific utilities and integration
- * @short_description: pipes, signal handling
- * @include: glib-unix.h
- *
- * Most of GLib is intended to be portable; in contrast, this set of
- * functions is designed for programs which explicitly target UNIX,
- * or are using it to build higher level abstractions which would be
- * conditionally compiled if the platform matches %G_OS_UNIX.
- *
- * To use these functions, you must explicitly include the
- * "glib-unix.h" header.
- */
-
 G_DEFINE_QUARK (g-unix-error-quark, g_unix_error)
 
 static gboolean
@@ -86,6 +72,9 @@ g_unix_set_error_from_errno (GError **error,
  * and `O_NONBLOCK`. Prior to GLib 2.78, only `FD_CLOEXEC` was supported — if
  * you wanted to configure `O_NONBLOCK` then that had to be done separately with
  * `fcntl()`.
+ *
+ * Since GLib 2.80, the constants %G_UNIX_PIPE_END_READ and
+ * %G_UNIX_PIPE_END_WRITE can be used as mnemonic indexes in @fds.
  *
  * It is a programmer error to call this function with unsupported flags, and a
  * critical warning will be raised.

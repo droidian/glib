@@ -1,7 +1,7 @@
 project('glib', 'c',
-  version : '2.78.3',
+  version : '2.79.0',
   # NOTE: See the policy in docs/meson-version.md before changing the Meson dependency
-  meson_version : '>= 0.60.0',
+  meson_version : '>= 1.2.0',
   default_options : [
     'buildtype=debugoptimized',
     'warning_level=3',
@@ -65,6 +65,17 @@ if host_system == 'darwin'
   endif
 endif
 
+linux_libc = ''
+if host_system == 'linux'
+  musl_test_code = '''#include <stdlib.h>
+  #if defined __GLIBC__ || defined __UCLIBC__
+  #error "Not in glibc or uclibc"
+  #endif'''
+  if cc.compiles(musl_test_code, name : 'building for musl libc')
+    linux_libc = 'musl'
+  endif
+endif
+
 glib_version = meson.project_version()
 glib_api_version = '2.0'
 version_arr = glib_version.split('.')
@@ -87,6 +98,7 @@ glibinc = include_directories('glib')
 gobjectinc = include_directories('gobject')
 gmoduleinc = include_directories('gmodule')
 gioinc = include_directories('gio')
+girepoinc = include_directories('girepository')
 
 glib_prefix = get_option('prefix')
 glib_bindir = join_paths(glib_prefix, get_option('bindir'))
@@ -211,6 +223,10 @@ add_project_arguments('-D_GNU_SOURCE', language: 'c')
 
 if host_system == 'qnx'
   add_project_arguments('-D_QNX_SOURCE', language: 'c')
+endif
+
+if host_system == 'windows'
+  add_project_arguments(['-DUNICODE', '-D_UNICODE'], language: 'c')
 endif
 
 # Disable strict aliasing;
@@ -359,6 +375,7 @@ headers = [
   'fstab.h',
   'grp.h',
   'inttypes.h',
+  'libproc.h',
   'limits.h',
   'locale.h',
   'mach/mach_time.h',
@@ -629,6 +646,7 @@ functions = [
   'free_aligned_sized',
   'free_sized',
   'fsync',
+  'ftruncate64',
   'getauxval',
   'getc_unlocked',
   'getfsstat',
@@ -1281,6 +1299,7 @@ if cc.links('''#include <langinfo.h>
 endif
 
 # Check for nl_langinfo and LC_TIME parts that are needed in gdatetime.c
+have_langinfo_time = false
 if cc.links('''#include <langinfo.h>
                int main (int argc, char ** argv) {
                  char *str;
@@ -1295,8 +1314,27 @@ if cc.links('''#include <langinfo.h>
                  str = nl_langinfo (ABDAY_7);
                  return 0;
                }''', name : 'nl_langinfo (PM_STR)')
+  have_langinfo_time = true
   glib_conf.set('HAVE_LANGINFO_TIME', 1)
 endif
+
+# Linux glibc supports ERA, but FreeBSD and macOS don’t
+if cc.links('''#include <langinfo.h>
+               int main (int argc, char **argv) {
+                 char *str;
+                 str = nl_langinfo (ERA);
+                 str = nl_langinfo (ERA_D_T_FMT);
+                 str = nl_langinfo (ERA_D_FMT);
+                 str = nl_langinfo (ERA_T_FMT);
+                 str = nl_langinfo (_NL_TIME_ERA_NUM_ENTRIES);
+                 return 0;
+               }''', name : 'nl_langinfo (ERA)')
+  glib_conf.set('HAVE_LANGINFO_ERA', 1)
+  if not have_langinfo_time
+    error('nl_langinfo(ERA) is supported but more basic nl_langinfo() functionality like PM_STR is not')
+  endif
+endif
+
 if cc.links('''#include <langinfo.h>
                int main (int argc, char ** argv) {
                  char *str;
@@ -1313,6 +1351,9 @@ if cc.links('''#include <langinfo.h>
                  return 0;
                }''', name : 'nl_langinfo (_NL_CTYPE_OUTDIGITn_MB)')
   glib_conf.set('HAVE_LANGINFO_OUTDIGIT', 1)
+  if not have_langinfo_time
+    error('nl_langinfo(_NL_CTYPE_OUTDIGITn_MB) is supported but more basic nl_langinfo() functionality like PM_STR is not')
+  endif
 endif
 
 # Check for nl_langinfo and alternative month names
@@ -1337,6 +1378,9 @@ if cc.links('''#ifndef _GNU_SOURCE
                  return 0;
                }''', name : 'nl_langinfo (ALTMON_n)')
   glib_conf.set('HAVE_LANGINFO_ALTMON', 1)
+  if not have_langinfo_time
+    error('nl_langinfo(ALTMON_n) is supported but more basic nl_langinfo() functionality like PM_STR is not')
+  endif
 endif
 
 # Check for nl_langinfo and abbreviated alternative month names
@@ -1361,6 +1405,9 @@ if cc.links('''#ifndef _GNU_SOURCE
                  return 0;
                }''', name : 'nl_langinfo (_NL_ABALTMON_n)')
   glib_conf.set('HAVE_LANGINFO_ABALTMON', 1)
+  if not have_langinfo_time
+    error('nl_langinfo(_NL_ABALTMON_n) is supported but more basic nl_langinfo() functionality like PM_STR is not')
+  endif
 endif
 
 # Check for nl_langinfo and _NL_TIME_CODESET
@@ -1370,6 +1417,9 @@ if cc.links('''#include <langinfo.h>
                  return 0;
                }''', name : 'nl_langinfo and _NL_TIME_CODESET')
   glib_conf.set('HAVE_LANGINFO_TIME_CODESET', 1)
+  if not have_langinfo_time
+    error('nl_langinfo(_NL_TIME_CODESET) is supported but more basic nl_langinfo() functionality like PM_STR is not')
+  endif
 endif
 
 # Check if C compiler supports the 'signed' keyword
@@ -1649,7 +1699,7 @@ if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
     g_sizet_compatibility += { type_name: size_compatibility and
       cc.compiles(
         '''#include <stddef.h>
-        size_t f (size_t *i) { return *i + 1; }
+        static size_t f (size_t *i) { return *i + 1; }
         int main (void) {
           unsigned ''' + type_name + ''' i = 0;
           f (&i);
@@ -2326,12 +2376,12 @@ endif
 
 glib_conf.set('HAVE_PROC_SELF_CMDLINE', have_proc_self_cmdline)
 
-python = import('python').find_installation()
+python = import('python').find_installation(modules: ['packaging'])
 # used for '#!/usr/bin/env <name>'
 python_name = 'python3'
 
 python_version = python.language_version()
-python_version_req = '>=3.5'
+python_version_req = '>=3.7'
 if not python_version.version_compare(python_version_req)
   error('Requires Python @0@, @1@ found.'.format(python_version_req, python_version))
 endif
@@ -2456,14 +2506,32 @@ if want_systemtap and enable_dtrace
   enable_systemtap = true
 endif
 
+# introspection
+gir_scanner = find_program('g-ir-scanner', required: get_option('introspection'))
+enable_gir = get_option('introspection').allowed() and gir_scanner.found() and meson.can_run_host_binaries()
+
+if get_option('introspection').enabled() and not meson.can_run_host_binaries()
+  error('Running binaries on the build host needs to be supported to build with -Dintrospection=enabled')
+endif
+
+gir_args = [
+  '--quiet',
+]
+
 pkg = import('pkgconfig')
 windows = import('windows')
+gnome = import('gnome')
+
 subdir('tools')
 subdir('glib')
 subdir('gobject')
 subdir('gthread')
 subdir('gmodule')
 subdir('gio')
+if enable_gir
+  subdir('introspection')
+endif
+subdir('girepository')
 subdir('fuzzing')
 
 # xgettext is optional (on Windows for instance)
@@ -2493,19 +2561,10 @@ endif
 
 configure_file(output : 'config.h', configuration : glib_conf)
 
-if get_option('man')
-  xsltproc = find_program('xsltproc', required : true)
-  xsltproc_command = [
-    xsltproc,
-    '--nonet',
-    '--stringparam', 'man.output.quietly', '1',
-    '--stringparam', 'funcsynopsis.style', 'ansi',
-    '--stringparam', 'man.th.extra1.suppress', '1',
-    '--stringparam', 'man.authors.section.enabled', '0',
-    '--stringparam', 'man.copyright.section.enabled', '0',
-    '-o', '@OUTPUT@',
-    'http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl',
-    '@INPUT@',
+rst2man = find_program('rst2man', 'rst2man.py', required: get_option('man-pages'))
+if rst2man.found()
+  rst2man_flags = [
+    '--syntax-highlight=none',
   ]
   man1_dir = join_paths(glib_prefix, get_option('mandir'), 'man1')
 endif
@@ -2528,6 +2587,12 @@ if build_machine.system() != host_system
     'build cpu' : build_machine.cpu_family(),
     'build endian' : build_machine.endian(),
     'build system' : build_machine.system(),
+  }, section: 'Build environment')
+endif
+
+if linux_libc != ''
+  summary({
+    'linux_libc' : linux_libc
   }, section: 'Build environment')
 endif
 
@@ -2563,11 +2628,11 @@ endif
 
 summary({
   'xattr' : xattr_dep.length() > 0,
-  'man' : get_option('man'),
+  'man-pages' : get_option('man-pages'),
   'dtrace' : get_option('dtrace'),
   'systemtap' : enable_systemtap,
   'sysprof' : libsysprof_capture_dep.found(),
-  'gtk_doc' : get_option('gtk_doc'),
+  'documentation' : get_option('documentation'),
   'bsymbolic_functions' : get_option('bsymbolic_functions'),
   'force_posix_threads' : get_option('force_posix_threads'),
   'tests' : get_option('tests'),
@@ -2579,4 +2644,5 @@ summary({
   'glib_checks' : get_option('glib_checks'),
   'libelf' : get_option('libelf'),
   'multiarch' : get_option('multiarch'),
+  'introspection' : enable_gir,
 }, section: 'Options')

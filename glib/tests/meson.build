@@ -12,14 +12,25 @@ glib_tests = {
   'cache' : {},
   'charset' : {},
   'checksum' : {},
-  'collate' : {},
+  'collate' : {
+    # musl: collate fail due to missing collation support in musl libc
+    # From https://wiki.musl-libc.org/roadmap#Open_future_goals
+    # "LC_COLLATE support for collation orders other than simple codepoint order"
+    'can_fail' : linux_libc == 'musl',
+  },
   'completion' : {},
   'cond' : {},
-  'convert' : {},
+  'convert' : {
+    # FIXME: musl: /conversion/illegal-sequence: https://gitlab.gnome.org/GNOME/glib/-/issues/3182
+    'can_fail' : linux_libc == 'musl',
+  },
   'dataset' : {},
   'date' : {
-    # FIXME: https://gitlab.gnome.org/GNOME/glib/-/issues/1392
-    'can_fail' : host_system == 'darwin',
+    # FIXME: darwin: https://gitlab.gnome.org/GNOME/glib/-/issues/1392
+    # musl: /date/month_substring should be skipped but it's not. The fix should
+    # be on musl side: https://www.openwall.com/lists/musl/2023/08/10/3
+    # FIXME: musl: /date/strftime: https://gitlab.gnome.org/GNOME/glib/-/issues/3171
+    'can_fail' : host_system == 'darwin' or linux_libc == 'musl',
   },
   'dir' : {},
   'environment' : {
@@ -29,8 +40,12 @@ glib_tests = {
   'error' : {},
   'fileutils' : {},
   'gdatetime' : {
+    'source' : ['gdatetime.c', '../gdatetime-private.c'],
     'suite' : ['slow'],
-    'can_fail' : host_system == 'windows',
+    # musl: GDateTime/format_mixed/non_utf8_time_non_utf8_messages should be
+    # skipped but it's not. The fix should be on musl side:
+    # https://www.openwall.com/lists/musl/2023/08/10/3
+    'can_fail' : host_system == 'windows' or linux_libc == 'musl',
   },
   'guuid' : {},
   'gvariant' : {
@@ -70,7 +85,11 @@ glib_tests = {
   'node' : {},
   'once' : {},
   'onceinit' : {},
-  'option-context' : {},
+  'option-context' : {
+    # musl: /option/arg/repetition/locale should be skipped but it's not. The
+    # fix should be on musl side: https://www.openwall.com/lists/musl/2023/08/10/3
+    'can_fail' : linux_libc == 'musl',
+  },
   'option-argv0' : {},
   'overflow' : {},
   'overflow-fallback' : {
@@ -127,23 +146,14 @@ glib_tests = {
     'extra_programs' : host_machine.system() == 'windows' ? ['spawn-test-win32-gui'] : [],
   },
   'strfuncs' : {},
-  'string' : {},
-  'string-macro' : {
-    'source' : 'string.c',
+  'string' : {
     'c_args' : cc.get_id() == 'gcc' ? ['-Werror=sign-conversion'] : [],
-    'install' : false,
   },
   'strvbuilder' : {},
   'testing' : {
     'args': [ '--verbose' ],
     'extra_programs' : ['testing-helper'],
-  },
-  'testing-macro' : {
-    'args': [ '--verbose' ],
-    'extra_programs' : ['testing-helper'],
-    'source' : 'testing.c',
     'c_args' : cc.get_id() == 'gcc' ? ['-Werror=sign-conversion'] : [],
-    'install' : false,
   },
   'test-printf' : {},
   'thread' : {},
@@ -318,6 +328,29 @@ if host_machine.system() == 'windows'
   }
 endif
 
+if host_machine.system() == 'windows' or have_dlopen_dlsym
+  constructor_helper = shared_library('constructor-helper',
+                                      'constructor-helper.c',
+                                      dependencies: [libglib_dep],
+                                      install : false)
+  constructor_lib = shared_library('constructor-lib',
+                                   'constructor.c',
+                                   c_args: ['-DPREFIX=lib'],
+                                   dependencies: [libglib_dep],
+                                   link_with: [constructor_helper],
+                                   install : false)
+  glib_tests += {
+    'constructor' : {
+      'install': false,
+      'c_args': ['-DLIB_NAME=' + fs.name(constructor_lib.full_path()),
+                 '-DBUILD_TEST_EXECUTABLE',
+                 '-DPREFIX=app'],
+      'dependencies' : libdl_dep,
+      'link_with': [constructor_helper]
+    }
+  }
+endif
+
 foreach test_name, extra_args : glib_tests
   foreach std: extra_args.get('c_standards', [])
     if c_standards.has_key(std)
@@ -398,6 +431,7 @@ foreach test_name, extra_args : glib_tests
     link_args : extra_args.get('link_args', []),
     override_options : extra_args.get('override_options', []),
     dependencies : test_deps + extra_args.get('dependencies', []),
+    link_with : extra_args.get('link_with', []),
     install_dir: installed_tests_execdir,
     install_tag: 'tests',
     install: install,
