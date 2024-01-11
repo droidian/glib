@@ -65,6 +65,7 @@ gmoduleconf_h = configure_file(input : 'gmoduleconf.h.in',
 # when it includes GLib as a subproject
 gmodule_h = files('gmodule.h')
 gmodule_c = files('gmodule.c')
+gmodule_deprecated_c = files('gmodule-deprecated.c')
 
 install_headers([gmodule_h], install_dir : glib_includedir)
 
@@ -77,7 +78,7 @@ gmodule_visibility_h = custom_target(
   install_tag: 'devel',
 )
 
-gmodule_sources = [gmodule_c, gmodule_visibility_h, 'gmodule-deprecated.c']
+gmodule_sources = [gmodule_c, gmodule_visibility_h, gmodule_deprecated_c]
 
 if host_system == 'windows'
   gmodule_win_rc = configure_file(

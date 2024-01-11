@@ -38,102 +38,30 @@
 #include "gconstructor.h"
 
 /**
- * SECTION:objects
- * @title: GObject
- * @short_description: The base object type
- * @see_also: #GParamSpecObject, g_param_spec_object()
+ * GObject:
  *
- * GObject is the fundamental type providing the common attributes and
+ * The base object type.
+ *
+ * `GObject` is the fundamental type providing the common attributes and
  * methods for all object types in GTK, Pango and other libraries
- * based on GObject.  The GObject class provides methods for object
+ * based on GObject. The `GObject` class provides methods for object
  * construction and destruction, property access methods, and signal
- * support.  Signals are described in detail [here][gobject-Signals].
+ * support. Signals are described in detail [here][gobject-Signals].
  *
- * For a tutorial on implementing a new GObject class, see [How to define and
- * implement a new GObject][howto-gobject]. For a list of naming conventions for
- * GObjects and their methods, see the [GType conventions][gtype-conventions].
- * For the high-level concepts behind GObject, read [Instantiatable classed types:
- * Objects][gtype-instantiatable-classed].
+ * For a tutorial on implementing a new `GObject` class, see [How to define and
+ * implement a new GObject](tutorial.html#how-to-define-and-implement-a-new-gobject).
+ * For a list of naming conventions for GObjects and their methods, see the
+ * [GType conventions](concepts.html#conventions). For the high-level concepts
+ * behind GObject, read
+ * [Instantiatable classed types: Objects](concepts.html#instantiatable-classed-types-objects).
  *
- * ## Floating references # {#floating-ref}
- *
- * **Note**: Floating references are a C convenience API and should not be
- * used in modern GObject code. Language bindings in particular find the
- * concept highly problematic, as floating references are not identifiable
- * through annotations, and neither are deviations from the floating reference
- * behavior, like types that inherit from #GInitiallyUnowned and still return
- * a full reference from g_object_new().
- *
- * GInitiallyUnowned is derived from GObject. The only difference between
- * the two is that the initial reference of a GInitiallyUnowned is flagged
- * as a "floating" reference. This means that it is not specifically
- * claimed to be "owned" by any code portion. The main motivation for
- * providing floating references is C convenience. In particular, it
- * allows code to be written as:
- * 
- * |[<!-- language="C" --> 
- * container = create_container ();
- * container_add_child (container, create_child());
- * ]|
- * 
- * If container_add_child() calls g_object_ref_sink() on the passed-in child,
- * no reference of the newly created child is leaked. Without floating
- * references, container_add_child() can only g_object_ref() the new child,
- * so to implement this code without reference leaks, it would have to be
- * written as:
- *
- * |[<!-- language="C" --> 
- * Child *child;
- * container = create_container ();
- * child = create_child ();
- * container_add_child (container, child);
- * g_object_unref (child);
- * ]|
- *
- * The floating reference can be converted into an ordinary reference by
- * calling g_object_ref_sink(). For already sunken objects (objects that
- * don't have a floating reference anymore), g_object_ref_sink() is equivalent
- * to g_object_ref() and returns a new reference.
- *
- * Since floating references are useful almost exclusively for C convenience,
- * language bindings that provide automated reference and memory ownership
- * maintenance (such as smart pointers or garbage collection) should not
- * expose floating references in their API. The best practice for handling
- * types that have initially floating references is to immediately sink those
- * references after g_object_new() returns, by checking if the #GType
- * inherits from #GInitiallyUnowned. For instance:
- *
- * |[<!-- language="C" -->
- * GObject *res = g_object_new_with_properties (gtype,
- *                                              n_props,
- *                                              prop_names,
- *                                              prop_values);
- *
- * // or: if (g_type_is_a (gtype, G_TYPE_INITIALLY_UNOWNED))
- * if (G_IS_INITIALLY_UNOWNED (res))
- *   g_object_ref_sink (res);
- *
- * return res;
- * ]|
- *
- * Some object implementations may need to save an objects floating state
- * across certain code portions (an example is #GtkMenu), to achieve this,
- * the following sequence can be used:
- *
- * |[<!-- language="C" --> 
- * // save floating state
- * gboolean was_floating = g_object_is_floating (object);
- * g_object_ref_sink (object);
- * // protected code portion
- *
- * ...
- *
- * // restore floating state
- * if (was_floating)
- *   g_object_force_floating (object);
- * else
- *   g_object_unref (object); // release previously acquired reference
- * ]|
+ * Since GLib 2.72, all `GObject`s are guaranteed to be aligned to at least the
+ * alignment of the largest basic GLib type (typically this is `guint64` or
+ * `gdouble`). If you need larger alignment for an element in a `GObject`, you
+ * should allocate it on the heap (aligned), or arrange for your `GObject` to be
+ * appropriately padded. This guarantee applies to the `GObject` (or derived)
+ * struct, the `GObjectClass` (or derived) struct, and any private data allocated
+ * by `G_ADD_PRIVATE()`.
  */
 
 /* --- macros --- */
@@ -260,6 +188,7 @@ G_LOCK_DEFINE_STATIC (weak_refs_mutex);
 G_LOCK_DEFINE_STATIC (toggle_refs_mutex);
 static GQuark	            quark_closure_array = 0;
 static GQuark	            quark_weak_refs = 0;
+static GQuark	            quark_weak_notifies = 0;
 static GQuark	            quark_toggle_refs = 0;
 static GQuark               quark_notify_queue;
 #ifndef HAVE_OPTIONAL_FLAGS
@@ -281,12 +210,28 @@ g_object_notify_queue_free (gpointer data)
   GObjectNotifyQueue *nqueue = data;
 
   g_slist_free (nqueue->pspecs);
-  g_slice_free (GObjectNotifyQueue, nqueue);
+  g_free_sized (nqueue, sizeof (GObjectNotifyQueue));
 }
 
-static GObjectNotifyQueue*
-g_object_notify_queue_freeze (GObject  *object,
-                              gboolean  conditional)
+static GObjectNotifyQueue *
+g_object_notify_queue_create_queue_frozen (GObject *object)
+{
+  GObjectNotifyQueue *nqueue;
+
+  nqueue = g_new0 (GObjectNotifyQueue, 1);
+
+  *nqueue = (GObjectNotifyQueue){
+    .freeze_count = 1,
+  };
+
+  g_datalist_id_set_data_full (&object->qdata, quark_notify_queue,
+                               nqueue, g_object_notify_queue_free);
+
+  return nqueue;
+}
+
+static GObjectNotifyQueue *
+g_object_notify_queue_freeze (GObject *object)
 {
   GObjectNotifyQueue *nqueue;
 
@@ -294,15 +239,8 @@ g_object_notify_queue_freeze (GObject  *object,
   nqueue = g_datalist_id_get_data (&object->qdata, quark_notify_queue);
   if (!nqueue)
     {
-      if (conditional)
-        {
-          G_UNLOCK(notify_lock);
-          return NULL;
-        }
-
-      nqueue = g_slice_new0 (GObjectNotifyQueue);
-      g_datalist_id_set_data_full (&object->qdata, quark_notify_queue,
-                                   nqueue, g_object_notify_queue_free);
+      nqueue = g_object_notify_queue_create_queue_frozen (object);
+      goto out;
     }
 
   if (nqueue->freeze_count >= 65535)
@@ -313,6 +251,7 @@ g_object_notify_queue_freeze (GObject  *object,
   else
     nqueue->freeze_count++;
 
+out:
   G_UNLOCK(notify_lock);
 
   return nqueue;
@@ -320,7 +259,8 @@ g_object_notify_queue_freeze (GObject  *object,
 
 static void
 g_object_notify_queue_thaw (GObject            *object,
-                            GObjectNotifyQueue *nqueue)
+                            GObjectNotifyQueue *nqueue,
+                            gboolean take_ref)
 {
   GParamSpec *pspecs_mem[16], **pspecs, **free_me = NULL;
   GSList *slist;
@@ -328,8 +268,14 @@ g_object_notify_queue_thaw (GObject            *object,
 
   G_LOCK(notify_lock);
 
+  if (!nqueue)
+    {
+      /* Caller didn't look up the queue yet. Do it now. */
+      nqueue = g_datalist_id_get_data (&object->qdata, quark_notify_queue);
+    }
+
   /* Just make sure we never get into some nasty race condition */
-  if (G_UNLIKELY (nqueue->freeze_count == 0))
+  if (G_UNLIKELY (!nqueue || nqueue->freeze_count == 0))
     {
       G_UNLOCK (notify_lock);
       g_critical ("%s: property-changed notification for %s(%p) is not frozen",
@@ -355,16 +301,52 @@ g_object_notify_queue_thaw (GObject            *object,
   G_UNLOCK(notify_lock);
 
   if (n_pspecs)
-    G_OBJECT_GET_CLASS (object)->dispatch_properties_changed (object, n_pspecs, pspecs);
+    {
+      if (take_ref)
+        g_object_ref (object);
+
+      G_OBJECT_GET_CLASS (object)->dispatch_properties_changed (object, n_pspecs, pspecs);
+
+      if (take_ref)
+        g_object_unref (object);
+    }
   g_free (free_me);
 }
 
-static void
+static gboolean
 g_object_notify_queue_add (GObject            *object,
                            GObjectNotifyQueue *nqueue,
-                           GParamSpec         *pspec)
+                           GParamSpec         *pspec,
+                           gboolean            in_init)
 {
   G_LOCK(notify_lock);
+
+  if (!nqueue)
+    {
+      /* We are called without an nqueue. Figure out whether a notification
+       * should be queued. */
+      nqueue = g_datalist_id_get_data (&object->qdata, quark_notify_queue);
+
+      if (!nqueue)
+        {
+          if (!in_init)
+            {
+              /* We don't have a notify queue and are not in_init. The event
+               * is not to be queued. The caller will dispatch directly. */
+              G_UNLOCK (notify_lock);
+              return FALSE;
+            }
+
+          /* We are "in_init", but did not freeze the queue in g_object_init
+           * yet. Instead, we gained a notify handler in instance init, so now
+           * we need to freeze just-in-time.
+           *
+           * Note that this freeze will be balanced at the end of object
+           * initialization.
+           */
+          nqueue = g_object_notify_queue_create_queue_frozen (object);
+        }
+    }
 
   g_assert (nqueue->n_pspecs < 65535);
 
@@ -375,6 +357,8 @@ g_object_notify_queue_add (GObject            *object,
     }
 
   G_UNLOCK(notify_lock);
+
+  return TRUE;
 }
 
 #ifdef	G_ENABLE_DEBUG
@@ -474,6 +458,26 @@ _g_object_type_init (void)
 #endif /* G_ENABLE_DEBUG */
 }
 
+/* Initialize the global GParamSpecPool; this function needs to be
+ * called whenever we access the GParamSpecPool and we cannot guarantee
+ * that g_object_do_class_init() has been called: for instance, by the
+ * interface property API.
+ *
+ * To avoid yet another global lock, we use atomic pointer checks: the
+ * first caller of this function will win the race. Any other access to
+ * the GParamSpecPool is done under its own mutex.
+ */
+static inline void
+g_object_init_pspec_pool (void)
+{
+  if (G_UNLIKELY (g_atomic_pointer_get (&pspec_pool) == NULL))
+    {
+      GParamSpecPool *pool = g_param_spec_pool_new (TRUE);
+      if (!g_atomic_pointer_compare_and_exchange (&pspec_pool, NULL, pool))
+        g_param_spec_pool_free (pool);
+    }
+}
+
 static void
 g_object_base_class_init (GObjectClass *class)
 {
@@ -523,13 +527,15 @@ g_object_do_class_init (GObjectClass *class)
   quark_closure_array = g_quark_from_static_string ("GObject-closure-array");
 
   quark_weak_refs = g_quark_from_static_string ("GObject-weak-references");
+  quark_weak_notifies = g_quark_from_static_string ("GObject-weak-notifies");
   quark_weak_locations = g_quark_from_static_string ("GObject-weak-locations");
   quark_toggle_refs = g_quark_from_static_string ("GObject-toggle-references");
   quark_notify_queue = g_quark_from_static_string ("GObject-notify-queue");
 #ifndef HAVE_OPTIONAL_FLAGS
   quark_in_construction = g_quark_from_static_string ("GObject-in-construction");
 #endif
-  pspec_pool = g_param_spec_pool_new (TRUE);
+
+  g_object_init_pspec_pool ();
 
   class->constructor = g_object_constructor;
   class->constructed = g_object_constructed;
@@ -595,11 +601,13 @@ install_property_internal (GType       g_type,
 {
   g_param_spec_ref_sink (pspec);
 
+  g_object_init_pspec_pool ();
+
   if (g_param_spec_pool_lookup (pspec_pool, pspec->name, g_type, FALSE))
     {
       g_critical ("When installing property: type '%s' already has a property named '%s'",
-		  g_type_name (g_type),
-		  pspec->name);
+                  g_type_name (g_type),
+                  pspec->name);
       g_param_spec_unref (pspec);
       return FALSE;
     }
@@ -819,13 +827,13 @@ find_pspec (GObjectClass *class,
  *   GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
  *
  *   obj_properties[PROP_FOO] =
- *     g_param_spec_int ("foo", "Foo", "Foo",
+ *     g_param_spec_int ("foo", NULL, NULL,
  *                       -1, G_MAXINT,
  *                       0,
  *                       G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
  *
  *   obj_properties[PROP_BAR] =
- *     g_param_spec_string ("bar", "Bar", "Bar",
+ *     g_param_spec_string ("bar", NULL, NULL,
  *                          NULL,
  *                          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
  *
@@ -1020,7 +1028,9 @@ g_object_interface_find_property (gpointer      g_iface,
 	
   g_return_val_if_fail (G_TYPE_IS_INTERFACE (iface_class->g_type), NULL);
   g_return_val_if_fail (property_name != NULL, NULL);
-  
+
+  g_object_init_pspec_pool ();
+
   return g_param_spec_pool_lookup (pspec_pool,
 				   property_name,
 				   iface_class->g_type,
@@ -1146,10 +1156,10 @@ g_object_class_list_properties (GObjectClass *class,
  * Since: 2.4
  *
  * Returns: (array length=n_properties_p) (transfer container): a
- *          pointer to an array of pointers to #GParamSpec
- *          structures. The paramspecs are owned by GLib, but the
- *          array should be freed with g_free() when you are done with
- *          it.
+ *   pointer to an array of pointers to #GParamSpec
+ *   structures. The paramspecs are owned by GLib, but the
+ *   array should be freed with g_free() when you are done with
+ *   it.
  */
 GParamSpec**
 g_object_interface_list_properties (gpointer      g_iface,
@@ -1160,6 +1170,8 @@ g_object_interface_list_properties (gpointer      g_iface,
   guint n;
 
   g_return_val_if_fail (G_TYPE_IS_INTERFACE (iface_class->g_type), NULL);
+
+  g_object_init_pspec_pool ();
 
   pspecs = g_param_spec_pool_list (pspec_pool,
 				   iface_class->g_type,
@@ -1312,7 +1324,7 @@ g_object_init (GObject		*object,
   if (CLASS_HAS_PROPS (class) && CLASS_NEEDS_NOTIFY (class))
     {
       /* freeze object's notification queue, g_object_new_internal() preserves pairedness */
-      g_object_notify_queue_freeze (object, FALSE);
+      g_object_notify_queue_freeze (object);
     }
 
   /* mark object in-construction for notify_queue_thaw() and to allow construct-only properties */
@@ -1359,9 +1371,16 @@ static void
 g_object_real_dispose (GObject *object)
 {
   g_signal_handlers_destroy (object);
-  g_datalist_id_set_data (&object->qdata, quark_closure_array, NULL);
+
+  /* GWeakRef and weak_pointer do not call into user code. Clear those first
+   * so that user code can rely on the state of their weak pointers.
+   */
   g_datalist_id_set_data (&object->qdata, quark_weak_refs, NULL);
   g_datalist_id_set_data (&object->qdata, quark_weak_locations, NULL);
+
+  /* GWeakNotify and GClosure can call into user code */
+  g_datalist_id_set_data (&object->qdata, quark_weak_notifies, NULL);
+  g_datalist_id_set_data (&object->qdata, quark_closure_array, NULL);
 }
 
 #ifdef G_ENABLE_DEBUG
@@ -1469,7 +1488,7 @@ g_object_freeze_notify (GObject *object)
   g_return_if_fail (G_IS_OBJECT (object));
 
 #ifndef G_DISABLE_CHECKS
-  if (G_UNLIKELY (g_atomic_int_get (&object->ref_count) == 0))
+  if (G_UNLIKELY (g_atomic_int_get (&object->ref_count) <= 0))
     {
       g_critical ("Attempting to freeze the notification queue for object %s[%p]; "
                   "Property notification does not work during instance finalization.",
@@ -1479,9 +1498,7 @@ g_object_freeze_notify (GObject *object)
     }
 #endif
 
-  g_object_ref (object);
-  g_object_notify_queue_freeze (object, FALSE);
-  g_object_unref (object);
+  g_object_notify_queue_freeze (object);
 }
 
 static inline void
@@ -1512,29 +1529,7 @@ g_object_notify_by_spec_internal (GObject    *object,
 
   if (pspec != NULL && needs_notify)
     {
-      GObjectNotifyQueue *nqueue;
-      gboolean need_thaw = TRUE;
-
-      /* conditional freeze: only increase freeze count if already frozen */
-      nqueue = g_object_notify_queue_freeze (object, TRUE);
-      if (in_init && !nqueue)
-        {
-          /* We did not freeze the queue in g_object_init, but
-           * we gained a notify handler in instance init, so
-           * now we need to freeze just-in-time
-           */
-          nqueue = g_object_notify_queue_freeze (object, FALSE);
-          need_thaw = FALSE;
-        }
-
-      if (nqueue != NULL)
-        {
-          /* we're frozen, so add to the queue and release our freeze */
-          g_object_notify_queue_add (object, nqueue, pspec);
-          if (need_thaw)
-            g_object_notify_queue_thaw (object, nqueue);
-        }
-      else
+      if (!g_object_notify_queue_add (object, NULL, pspec, in_init))
         {
           /*
            * Coverity doesn’t understand the paired ref/unref here and seems to
@@ -1628,7 +1623,7 @@ g_object_notify (GObject     *object,
  *   static void
  *   my_object_class_init (MyObjectClass *klass)
  *   {
- *     properties[PROP_FOO] = g_param_spec_int ("foo", "Foo", "The foo",
+ *     properties[PROP_FOO] = g_param_spec_int ("foo", NULL, NULL,
  *                                              0, 100,
  *                                              50,
  *                                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
@@ -1674,12 +1669,10 @@ g_object_notify_by_pspec (GObject    *object,
 void
 g_object_thaw_notify (GObject *object)
 {
-  GObjectNotifyQueue *nqueue;
-  
   g_return_if_fail (G_IS_OBJECT (object));
 
 #ifndef G_DISABLE_CHECKS
-  if (G_UNLIKELY (g_atomic_int_get (&object->ref_count) == 0))
+  if (G_UNLIKELY (g_atomic_int_get (&object->ref_count) <= 0))
     {
       g_critical ("Attempting to thaw the notification queue for object %s[%p]; "
                   "Property notification does not work during instance finalization.",
@@ -1689,17 +1682,7 @@ g_object_thaw_notify (GObject *object)
     }
 #endif
 
-
-  g_object_ref (object);
-
-  /* FIXME: Freezing is the only way to get at the notify queue.
-   * So we freeze once and then thaw twice.
-   */
-  nqueue = g_object_notify_queue_freeze (object, FALSE);
-  g_object_notify_queue_thaw (object, nqueue);
-  g_object_notify_queue_thaw (object, nqueue);
-
-  g_object_unref (object);
+  g_object_notify_queue_thaw (object, NULL, TRUE);
 }
 
 static void
@@ -1710,14 +1693,14 @@ maybe_issue_property_deprecation_warning (const GParamSpec *pspec)
   static GMutex already_warned_lock;
   gboolean already;
 
-  if (g_once_init_enter (&enable_diagnostic))
+  if (g_once_init_enter_pointer (&enable_diagnostic))
     {
       const gchar *value = g_getenv ("G_ENABLE_DIAGNOSTIC");
 
       if (!value)
         value = "0";
 
-      g_once_init_leave (&enable_diagnostic, value);
+      g_once_init_leave_pointer (&enable_diagnostic, value);
     }
 
   if (enable_diagnostic[0] == '0')
@@ -1843,7 +1826,7 @@ object_set_property (GObject             *object,
 
   if ((pspec->flags & (G_PARAM_EXPLICIT_NOTIFY | G_PARAM_READABLE)) == G_PARAM_READABLE &&
       nqueue != NULL)
-    g_object_notify_queue_add (object, nqueue, pspec);
+    g_object_notify_queue_add (object, nqueue, pspec, FALSE);
 }
 
 static void
@@ -2210,7 +2193,7 @@ g_object_new_with_custom_constructor (GObjectClass          *class,
            */
           nqueue = g_datalist_id_get_data (&object->qdata, quark_notify_queue);
           if (!nqueue)
-            nqueue = g_object_notify_queue_freeze (object, FALSE);
+            nqueue = g_object_notify_queue_freeze (object);
         }
     }
 
@@ -2225,7 +2208,7 @@ g_object_new_with_custom_constructor (GObjectClass          *class,
 
   /* If nqueue is non-NULL then we are frozen.  Thaw it. */
   if (nqueue)
-    g_object_notify_queue_thaw (object, nqueue);
+    g_object_notify_queue_thaw (object, nqueue, FALSE);
 
   return object;
 }
@@ -2259,7 +2242,7 @@ g_object_new_internal (GObjectClass          *class,
            */
           nqueue = g_datalist_id_get_data (&object->qdata, quark_notify_queue);
           if (!nqueue)
-            nqueue = g_object_notify_queue_freeze (object, FALSE);
+            nqueue = g_object_notify_queue_freeze (object);
         }
 
       /* We will set exactly n_construct_properties construct
@@ -2303,7 +2286,7 @@ g_object_new_internal (GObjectClass          *class,
       object_set_property (object, params[i].pspec, params[i].value, nqueue, TRUE);
 
   if (nqueue)
-    g_object_notify_queue_thaw (object, nqueue);
+    g_object_notify_queue_thaw (object, nqueue, FALSE);
 
   return object;
 }
@@ -2622,7 +2605,7 @@ g_object_constructor (GType                  type,
   /* set construction parameters */
   if (n_construct_properties)
     {
-      GObjectNotifyQueue *nqueue = g_object_notify_queue_freeze (object, FALSE);
+      GObjectNotifyQueue *nqueue = g_object_notify_queue_freeze (object);
       
       /* set construct properties */
       while (n_construct_properties--)
@@ -2633,7 +2616,7 @@ g_object_constructor (GType                  type,
 	  construct_params++;
 	  object_set_property (object, pspec, value, nqueue, TRUE);
 	}
-      g_object_notify_queue_thaw (object, nqueue);
+      g_object_notify_queue_thaw (object, nqueue, FALSE);
       /* the notification queue is still frozen from g_object_init(), so
        * we don't need to handle it here, g_object_newv() takes
        * care of that
@@ -2710,7 +2693,7 @@ g_object_setv (GObject       *object,
   class = G_OBJECT_GET_CLASS (object);
 
   if (_g_object_has_notify_handler (object))
-    nqueue = g_object_notify_queue_freeze (object, FALSE);
+    nqueue = g_object_notify_queue_freeze (object);
 
   for (i = 0; i < n_properties; i++)
     {
@@ -2723,7 +2706,7 @@ g_object_setv (GObject       *object,
     }
 
   if (nqueue)
-    g_object_notify_queue_thaw (object, nqueue);
+    g_object_notify_queue_thaw (object, nqueue, FALSE);
 
   g_object_unref (object);
 }
@@ -2751,7 +2734,7 @@ g_object_set_valist (GObject	 *object,
   g_object_ref (object);
 
   if (_g_object_has_notify_handler (object))
-    nqueue = g_object_notify_queue_freeze (object, FALSE);
+    nqueue = g_object_notify_queue_freeze (object);
 
   class = G_OBJECT_GET_CLASS (object);
 
@@ -2789,7 +2772,7 @@ g_object_set_valist (GObject	 *object,
     }
 
   if (nqueue)
-    g_object_notify_queue_thaw (object, nqueue);
+    g_object_notify_queue_thaw (object, nqueue, FALSE);
 
   g_object_unref (object);
 }
@@ -3316,7 +3299,7 @@ g_object_weak_ref (GObject    *object,
   g_return_if_fail (g_atomic_int_get (&object->ref_count) >= 1);
 
   G_LOCK (weak_refs_mutex);
-  wstack = g_datalist_id_remove_no_notify (&object->qdata, quark_weak_refs);
+  wstack = g_datalist_id_remove_no_notify (&object->qdata, quark_weak_notifies);
   if (wstack)
     {
       i = wstack->n_weak_refs++;
@@ -3331,7 +3314,7 @@ g_object_weak_ref (GObject    *object,
     }
   wstack->weak_refs[i].notify = notify;
   wstack->weak_refs[i].data = data;
-  g_datalist_id_set_data_full (&object->qdata, quark_weak_refs, wstack, weak_refs_notify);
+  g_datalist_id_set_data_full (&object->qdata, quark_weak_notifies, wstack, weak_refs_notify);
   G_UNLOCK (weak_refs_mutex);
 }
 
@@ -3355,7 +3338,7 @@ g_object_weak_unref (GObject    *object,
   g_return_if_fail (notify != NULL);
 
   G_LOCK (weak_refs_mutex);
-  wstack = g_datalist_id_get_data (&object->qdata, quark_weak_refs);
+  wstack = g_datalist_id_get_data (&object->qdata, quark_weak_notifies);
   if (wstack)
     {
       guint i;
@@ -3438,7 +3421,7 @@ object_floating_flag_handler (GObject        *object,
       oldvalue = g_atomic_pointer_get (&object->qdata);
       while (!g_atomic_pointer_compare_and_exchange_full (
         (void**) &object->qdata, oldvalue,
-        (void *) ((gsize) oldvalue | OBJECT_FLOATING_FLAG),
+        (void *) ((guintptr) oldvalue | OBJECT_FLOATING_FLAG),
         &oldvalue))
         ;
       return (gsize) oldvalue & OBJECT_FLOATING_FLAG;
@@ -3446,7 +3429,7 @@ object_floating_flag_handler (GObject        *object,
       oldvalue = g_atomic_pointer_get (&object->qdata);
       while (!g_atomic_pointer_compare_and_exchange_full (
         (void**) &object->qdata, oldvalue,
-        (void *) ((gsize) oldvalue & ~(gsize) OBJECT_FLOATING_FLAG),
+        (void *) ((guintptr) oldvalue & ~(gsize) OBJECT_FLOATING_FLAG),
         &oldvalue))
         ;
       return (gsize) oldvalue & OBJECT_FLOATING_FLAG;
@@ -3887,7 +3870,7 @@ g_object_unref (gpointer _object)
        * drained when g_object_finalize() is reached and
        * the qdata is cleared.
        */
-      nqueue = g_object_notify_queue_freeze (object, FALSE);
+      nqueue = g_object_notify_queue_freeze (object);
 
       /* we are about to remove the last reference */
       TRACE (GOBJECT_OBJECT_DISPOSE(object,G_TYPE_FROM_INSTANCE(object), 1));
@@ -3909,7 +3892,7 @@ g_object_unref (gpointer _object)
           TRACE (GOBJECT_OBJECT_UNREF (object, G_TYPE_FROM_INSTANCE (object), old_ref));
 
           /* emit all notifications that have been queued during dispose() */
-          g_object_notify_queue_thaw (object, nqueue);
+          g_object_notify_queue_thaw (object, nqueue, FALSE);
 
           /* if we went from 2->1 we need to notify toggle refs if any */
           if (old_ref == 2 && OBJECT_HAS_TOGGLE_REF (object) &&
@@ -3927,6 +3910,7 @@ g_object_unref (gpointer _object)
       g_signal_handlers_destroy (object);
       g_datalist_id_set_data (&object->qdata, quark_weak_refs, NULL);
       g_datalist_id_set_data (&object->qdata, quark_weak_locations, NULL);
+      g_datalist_id_set_data (&object->qdata, quark_weak_notifies, NULL);
 
       /* decrement the last reference */
       old_ref = g_atomic_int_add (&object->ref_count, -1);
@@ -3961,7 +3945,7 @@ g_object_unref (gpointer _object)
           /* The instance acquired a reference between dispose() and
            * finalize(), so we need to thaw the notification queue
            */
-          g_object_notify_queue_thaw (object, nqueue);
+          g_object_notify_queue_thaw (object, nqueue, FALSE);
         }
     }
 }

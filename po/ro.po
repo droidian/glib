@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: glib\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/glib/issues\n"
-"POT-Creation-Date: 2023-10-18 18:26+0000\n"
-"PO-Revision-Date: 2023-10-18 20:27+0200\n"
+"POT-Creation-Date: 2023-10-04 22:23+0000\n"
+"PO-Revision-Date: 2023-10-09 15:17+0300\n"
 "Last-Translator: Florentina Mușat <florentina [dot] musat [dot] 28 [at] "
 "gmail [dot] com>\n"
 "Language-Team: Gnome Romanian Translation Team <gnomero-list@lists."
@@ -22,7 +22,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
 "20)) ? 1 : 2);\n"
-"X-Generator: Poedit 3.3.2\n"
+"X-Generator: Poedit 3.4\n"
 "X-Project-Style: gnome\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 
@@ -306,7 +306,7 @@ msgstr "Flux deja închis"
 msgid "Truncate not supported on base stream"
 msgstr "Trunchierea fluxului de bază nu este suportată"
 
-#: gio/gcancellable.c:326 gio/gdbusconnection.c:1867 gio/gdbusprivate.c:1434
+#: gio/gcancellable.c:326 gio/gdbusconnection.c:1867 gio/gdbusprivate.c:1432
 #: gio/gsimpleasyncresult.c:873 gio/gsimpleasyncresult.c:899
 #, c-format
 msgid "Operation was cancelled"
@@ -612,8 +612,8 @@ msgstr "Eroare la crearea directorului „%s”: %s"
 #: gio/gfile.c:1913 gio/gfile.c:1970 gio/gfile.c:2034 gio/gfile.c:2089
 #: gio/gfile.c:3949 gio/gfile.c:4088 gio/gfile.c:4500 gio/gfile.c:4970
 #: gio/gfile.c:5382 gio/gfile.c:5467 gio/gfile.c:5557 gio/gfile.c:5654
-#: gio/gfile.c:5741 gio/gfile.c:5842 gio/gfile.c:8996 gio/gfile.c:9086
-#: gio/gfile.c:9170 gio/win32/gwinhttpfile.c:453
+#: gio/gfile.c:5741 gio/gfile.c:5842 gio/gfile.c:9000 gio/gfile.c:9090
+#: gio/gfile.c:9174 gio/win32/gwinhttpfile.c:453
 msgid "Operation not supported"
 msgstr "Operațiune neimplementată"
 
@@ -1000,23 +1000,23 @@ msgstr "Eroare la întoarcere cu corpul de tipul „%s”"
 msgid "Error return with empty body"
 msgstr "Rezultat de eroare cu corp vid"
 
-#: gio/gdbusprivate.c:2201
+#: gio/gdbusprivate.c:2199
 #, c-format
 msgid "(Type any character to close this window)\n"
 msgstr "(Tastați orice caracter pentru a închide această fereastră)\n"
 
-#: gio/gdbusprivate.c:2387
+#: gio/gdbusprivate.c:2385
 #, c-format
 msgid "Session dbus not running, and autolaunch failed"
 msgstr "Sesiunea dbus nu rulează, și lansarea automată a eșuat"
 
-#: gio/gdbusprivate.c:2410
+#: gio/gdbusprivate.c:2408
 #, c-format
 msgid "Unable to get Hardware profile: %s"
 msgstr "Nu se poate obține profilul hardware: %s"
 
 #. Translators: Both placeholders are file paths
-#: gio/gdbusprivate.c:2461
+#: gio/gdbusprivate.c:2459
 #, c-format
 msgid "Unable to load %s or %s: "
 msgstr "Nu s-a putut încărca %s sau %s: "
@@ -1361,45 +1361,45 @@ msgstr "Eroare: %s nu este un nume de magistrală popular valid.\n"
 msgid "Not authorized to change debug settings"
 msgstr "Neautorizat pentru a modifica configurările de depanare"
 
-#: gio/gdesktopappinfo.c:2242 gio/gdesktopappinfo.c:5226
+#: gio/gdesktopappinfo.c:2243 gio/gdesktopappinfo.c:5227
 msgid "Unnamed"
 msgstr "Nedenumit"
 
-#: gio/gdesktopappinfo.c:2652
+#: gio/gdesktopappinfo.c:2653
 msgid "Desktop file didn’t specify Exec field"
 msgstr "Fișierul desktop nu a specificat un câmp Exec"
 
-#: gio/gdesktopappinfo.c:2942
+#: gio/gdesktopappinfo.c:2943
 msgid "Unable to find terminal required for application"
 msgstr "Nu s-a găsit un terminal pentru pornirea aplicației"
 
-#: gio/gdesktopappinfo.c:3002
+#: gio/gdesktopappinfo.c:3003
 #, c-format
 msgid "Program ‘%s’ not found in $PATH"
 msgstr "Programul „%s” nu a fost găsit în $PATH"
 
-#: gio/gdesktopappinfo.c:3738
+#: gio/gdesktopappinfo.c:3739
 #, c-format
 msgid "Can’t create user application configuration folder %s: %s"
 msgstr ""
 "Nu se poate crea dosarul de configurare pentru aplicațiile utilizatorului "
 "%s: %s"
 
-#: gio/gdesktopappinfo.c:3742
+#: gio/gdesktopappinfo.c:3743
 #, c-format
 msgid "Can’t create user MIME configuration folder %s: %s"
 msgstr "Nu se poate crea dosarul de configurare MIME al utilizatorului %s: %s"
 
-#: gio/gdesktopappinfo.c:3984 gio/gdesktopappinfo.c:4008
+#: gio/gdesktopappinfo.c:3985 gio/gdesktopappinfo.c:4009
 msgid "Application information lacks an identifier"
 msgstr "Informațiile despre aplicație nu au un indentificator"
 
-#: gio/gdesktopappinfo.c:4244
+#: gio/gdesktopappinfo.c:4245
 #, c-format
 msgid "Can’t create user desktop file %s"
 msgstr "Nu se poate crea fișierul desktop al utilizatorului %s"
 
-#: gio/gdesktopappinfo.c:4380
+#: gio/gdesktopappinfo.c:4381
 #, c-format
 msgid "Custom definition for %s"
 msgstr "Definiție personalizată pentru %s"
@@ -1540,16 +1540,16 @@ msgstr "Nu există o implementare pentru coșul de gunoi"
 msgid "File names cannot contain “%c”"
 msgstr "Numele de fișiere nu pot conține „%c”"
 
-#: gio/gfile.c:7151 gio/gfile.c:7277
+#: gio/gfile.c:7155 gio/gfile.c:7281
 #, c-format
 msgid "Failed to create a temporary directory for template “%s”: %s"
 msgstr "Nu s-a putut crea un director temporar pentru șablonul „%s”: %s"
 
-#: gio/gfile.c:7595 gio/gvolume.c:366
+#: gio/gfile.c:7599 gio/gvolume.c:366
 msgid "volume doesn’t implement mount"
 msgstr "volumul nu implementează montarea"
 
-#: gio/gfile.c:7709 gio/gfile.c:7786
+#: gio/gfile.c:7713 gio/gfile.c:7790
 msgid "No application is registered as handling this file"
 msgstr "Nu există o aplicație înregistrată pentru deschiderea acestui fișier"
 
@@ -4293,13 +4293,13 @@ msgstr "Proxy-ul SOCKSv5 nu acceptă tipul de adresă furnizat."
 msgid "Unknown SOCKSv5 proxy error."
 msgstr "Eroare necunoscută a proxy-ului SOCKSv5."
 
-#: gio/gtestdbus.c:614 glib/gspawn-win32.c:433
+#: gio/gtestdbus.c:611 glib/gspawn-win32.c:433
 #, c-format
 msgid "Failed to create pipe for communicating with child process (%s)"
 msgstr ""
 "Nu s-a putut crea conectorul „pipe” pentru comunicarea cu procesul copil (%s)"
 
-#: gio/gtestdbus.c:621
+#: gio/gtestdbus.c:618
 #, c-format
 msgid "Pipes are not supported in this platform"
 msgstr "Conductele nu sunt suportate pe această platformă"
@@ -6399,11 +6399,6 @@ msgstr "%.1f PB"
 #, c-format
 msgid "%.1f EB"
 msgstr "%.1f EB"
-
-#, fuzzy
-#~| msgid "Use default permissions for the destination"
-#~ msgid "Use default file modification timestamps for the destination"
-#~ msgstr "Utilizează permisiunile implicite pentru destinație"
 
 #~ msgid "backtracking limit reached"
 #~ msgstr "s-a atins limita de backtracking"
