@@ -1,10 +1,10 @@
-glib2.0 (2.79.0-1) UNRELEASED; urgency=medium
+glib2.0 (2.79.0+git20240110~g38f5ba3c-1) UNRELEASED; urgency=medium
 
-  * New upstream development release
+  * New upstream development snapshot
   * d/watch: Update to Unicode v15.1.0, as included since 2.79.0
   * d/copyright: Update for GLib 2.79.x
 
- -- Simon McVittie <smcv@debian.org>  Thu, 11 Jan 2024 14:31:40 +0000
+ -- Simon McVittie <smcv@debian.org>  Thu, 11 Jan 2024 14:34:43 +0000
 
 glib2.0 (2.78.3-1) unstable; urgency=medium
 
