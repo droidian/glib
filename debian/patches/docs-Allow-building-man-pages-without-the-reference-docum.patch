@@ -1,0 +1,450 @@
+From: Simon McVittie <smcv@debian.org>
+Date: Thu, 11 Jan 2024 15:39:51 +0000
+Subject: docs: Allow building man pages without the reference documentation
+
+Now that the reference documentation uses gi-docgen, it's more
+troublesome to generate in less standard build scenarios like
+cross-compiling.
+
+In distributions like Debian, reference documentation is generally
+packaged separately, but man pages are generally packaged alongside
+the executables themselves (in the libglib2.0-bin and
+libglib2.0-dev-bin packages, in Debian's case). We can exclude the
+reference documentation when cross-compiling, but ideally we would like
+the man pages to still be built, so that a cross-compiled libglib2.0-bin
+or libglib2.0-dev-bin package has the same content as a native build.
+
+Signed-off-by: Simon McVittie <smcv@debian.org>
+---
+ docs/reference/gio/meson.build          |  80 ++++++++++----------
+ docs/reference/girepository/meson.build |  46 ++++++------
+ docs/reference/glib/meson.build         | 126 ++++++++++++++++----------------
+ docs/reference/gmodule/meson.build      |  46 ++++++------
+ docs/reference/gobject/meson.build      |  62 ++++++++--------
+ docs/reference/meson.build              |  12 +--
+ 6 files changed, 191 insertions(+), 181 deletions(-)
+
+diff --git a/docs/reference/gio/meson.build b/docs/reference/gio/meson.build
+index 0e6cbac..ecef666 100644
+--- a/docs/reference/gio/meson.build
++++ b/docs/reference/gio/meson.build
+@@ -19,44 +19,46 @@ if get_option('man-pages').enabled()
+   endforeach
+ endif
+ 
+-expand_content_files = [
+-  'dbus-error.md',
+-  'dbus-introspection.md',
+-  'dbus-name-owning.md',
+-  'dbus-name-watching.md',
+-  'dbus-utils.md',
+-  'error.md',
+-  'file-attributes.md',
+-  'io-scheduler.md',
+-  'menu-exporter.md',
+-  'migrating-gconf.md',
+-  'migrating-gdbus.md',
+-  'migrating-gnome-vfs.md',
+-  'migrating-posix.md',
+-  'networking.md',
+-  'overview.md',
+-  'pollable-utils.md',
+-  'tls-overview.md',
+-  'unix-mounts.md',
+-]
++if get_option('documentation') and enable_gir
++  expand_content_files = [
++    'dbus-error.md',
++    'dbus-introspection.md',
++    'dbus-name-owning.md',
++    'dbus-name-watching.md',
++    'dbus-utils.md',
++    'error.md',
++    'file-attributes.md',
++    'io-scheduler.md',
++    'menu-exporter.md',
++    'migrating-gconf.md',
++    'migrating-gdbus.md',
++    'migrating-gnome-vfs.md',
++    'migrating-posix.md',
++    'networking.md',
++    'overview.md',
++    'pollable-utils.md',
++    'tls-overview.md',
++    'unix-mounts.md',
++  ]
+ 
+-gio_toml = configure_file(input: 'gio.toml.in', output: 'gio.toml', configuration: toml_conf)
++  gio_toml = configure_file(input: 'gio.toml.in', output: 'gio.toml', configuration: toml_conf)
+ 
+-custom_target('gio-docs',
+-  input: [ gio_toml, gio_gir[0] ],
+-  output: 'gio',
+-  command: [
+-    gidocgen,
+-    'generate',
+-    gidocgen_common_args,
+-    '--config=@INPUT0@',
+-    '--output-dir=@OUTPUT@',
+-    '--content-dir=@0@'.format(meson.current_source_dir()),
+-    '@INPUT1@',
+-  ],
+-  build_by_default: true,
+-  depend_files: expand_content_files,
+-  install: true,
+-  install_dir: docs_dir,
+-  install_tag: 'doc',
+-)
++  custom_target('gio-docs',
++    input: [ gio_toml, gio_gir[0] ],
++    output: 'gio',
++    command: [
++      gidocgen,
++      'generate',
++      gidocgen_common_args,
++      '--config=@INPUT0@',
++      '--output-dir=@OUTPUT@',
++      '--content-dir=@0@'.format(meson.current_source_dir()),
++      '@INPUT1@',
++    ],
++    build_by_default: true,
++    depend_files: expand_content_files,
++    install: true,
++    install_dir: docs_dir,
++    install_tag: 'doc',
++  )
++endif
+diff --git a/docs/reference/girepository/meson.build b/docs/reference/girepository/meson.build
+index f5e8e6d..ea30b8f 100644
+--- a/docs/reference/girepository/meson.build
++++ b/docs/reference/girepository/meson.build
+@@ -1,23 +1,25 @@
+-girepository_toml = configure_file(
+-  input: 'girepository.toml.in',
+-  output: 'girepository.toml',
+-  configuration: toml_conf,
+-)
++if get_option('documentation') and enable_gir
++  girepository_toml = configure_file(
++    input: 'girepository.toml.in',
++    output: 'girepository.toml',
++    configuration: toml_conf,
++  )
+ 
+-custom_target('girepository-docs',
+-  input: [ girepository_toml, girepository_gir[0] ],
+-  output: 'girepository',
+-  command: [
+-    gidocgen,
+-    'generate',
+-    gidocgen_common_args,
+-    '--config=@INPUT0@',
+-    '--output-dir=@OUTPUT@',
+-    '--content-dir=@0@'.format(meson.current_source_dir()),
+-    '--add-include-path=@0@'.format(meson.current_build_dir() / '../../../gobject'),
+-    '--add-include-path=@0@'.format(meson.current_build_dir() / '../../../gmodule'),
+-    '--add-include-path=@0@'.format(meson.current_build_dir() / '../../../gio'),
+-    '@INPUT1@',
+-  ],
+-  build_by_default: true,
+-)
++  custom_target('girepository-docs',
++    input: [ girepository_toml, girepository_gir[0] ],
++    output: 'girepository',
++    command: [
++      gidocgen,
++      'generate',
++      gidocgen_common_args,
++      '--config=@INPUT0@',
++      '--output-dir=@OUTPUT@',
++      '--content-dir=@0@'.format(meson.current_source_dir()),
++      '--add-include-path=@0@'.format(meson.current_build_dir() / '../../../gobject'),
++      '--add-include-path=@0@'.format(meson.current_build_dir() / '../../../gmodule'),
++      '--add-include-path=@0@'.format(meson.current_build_dir() / '../../../gio'),
++      '@INPUT1@',
++    ],
++    build_by_default: true,
++  )
++endif
+diff --git a/docs/reference/glib/meson.build b/docs/reference/glib/meson.build
+index de4e97a..c958963 100644
+--- a/docs/reference/glib/meson.build
++++ b/docs/reference/glib/meson.build
+@@ -53,67 +53,69 @@ if get_option('documentation')
+   endif
+ endif
+ 
+-expand_content_files = [
+-  'atomic.md',
+-  'base64.md',
+-  'building.md',
+-  'character-set.md',
+-  'checked-math.md',
+-  'compiling.md',
+-  'cross-compiling.md',
+-  'datalist-and-dataset.md',
+-  'error-reporting.md',
+-  'file-utils.md',
+-  'gvariant-format-strings.md',
+-  'gvariant-text-format.md',
+-  'i18n.md',
+-  'logging.md',
+-  'main-loop.md',
+-  'memory.md',
+-  'memory-slices.md',
+-  'numerical.md',
+-  'random.md',
+-  'reference-counting.md',
+-  'running.md',
+-  'testing.md',
+-  'threads.md',
+-  'threads-deprecated.md',
+-  'markup.md',
+-  'misc-utils.md',
+-  'goption.md',
+-  'host-utils.md',
+-  'data-structures.md',
+-  'programming.md',
+-  'resources.md',
+-  'shell.md',
+-  'spawn.md',
+-  'string-utils.md',
+-  'types.md',
+-  'unicode.md',
+-  'unix.md',
+-  'uuid.md',
+-  'version.md',
+-  'warnings.md',
+-  'windows.md',
+-]
++if get_option('documentation') and enable_gir
++  expand_content_files = [
++    'atomic.md',
++    'base64.md',
++    'building.md',
++    'character-set.md',
++    'checked-math.md',
++    'compiling.md',
++    'cross-compiling.md',
++    'datalist-and-dataset.md',
++    'error-reporting.md',
++    'file-utils.md',
++    'gvariant-format-strings.md',
++    'gvariant-text-format.md',
++    'i18n.md',
++    'logging.md',
++    'main-loop.md',
++    'memory.md',
++    'memory-slices.md',
++    'numerical.md',
++    'random.md',
++    'reference-counting.md',
++    'running.md',
++    'testing.md',
++    'threads.md',
++    'threads-deprecated.md',
++    'markup.md',
++    'misc-utils.md',
++    'goption.md',
++    'host-utils.md',
++    'data-structures.md',
++    'programming.md',
++    'resources.md',
++    'shell.md',
++    'spawn.md',
++    'string-utils.md',
++    'types.md',
++    'unicode.md',
++    'unix.md',
++    'uuid.md',
++    'version.md',
++    'warnings.md',
++    'windows.md',
++  ]
+ 
+-glib_toml = configure_file(input: 'glib.toml.in', output: 'glib.toml', configuration: toml_conf)
++  glib_toml = configure_file(input: 'glib.toml.in', output: 'glib.toml', configuration: toml_conf)
+ 
+-custom_target('glib-docs',
+-  input: [ glib_toml, glib_gir[0] ],
+-  output: 'glib',
+-  command: [
+-    gidocgen,
+-    'generate',
+-    gidocgen_common_args,
+-    '--config=@INPUT0@',
+-    '--output-dir=@OUTPUT@',
+-    '--content-dir=@0@'.format(meson.current_source_dir()),
+-    '@INPUT1@',
+-  ],
+-  build_by_default: true,
+-  depend_files: expand_content_files,
+-  install: true,
+-  install_dir: docs_dir,
+-  install_tag: 'doc',
+-)
++  custom_target('glib-docs',
++    input: [ glib_toml, glib_gir[0] ],
++    output: 'glib',
++    command: [
++      gidocgen,
++      'generate',
++      gidocgen_common_args,
++      '--config=@INPUT0@',
++      '--output-dir=@OUTPUT@',
++      '--content-dir=@0@'.format(meson.current_source_dir()),
++      '@INPUT1@',
++    ],
++    build_by_default: true,
++    depend_files: expand_content_files,
++    install: true,
++    install_dir: docs_dir,
++    install_tag: 'doc',
++  )
++endif
+diff --git a/docs/reference/gmodule/meson.build b/docs/reference/gmodule/meson.build
+index 1bf2fd2..25a2e4e 100644
+--- a/docs/reference/gmodule/meson.build
++++ b/docs/reference/gmodule/meson.build
+@@ -1,24 +1,26 @@
+-expand_content_files = [
+-  'modules.md',
+-]
++if get_option('documentation') and enable_gir
++  expand_content_files = [
++    'modules.md',
++  ]
+ 
+-gmodule_toml = configure_file(input: 'gmodule.toml.in', output: 'gmodule.toml', configuration: toml_conf)
++  gmodule_toml = configure_file(input: 'gmodule.toml.in', output: 'gmodule.toml', configuration: toml_conf)
+ 
+-custom_target('gmodule-docs',
+-  input: [ gmodule_toml, gmodule_gir[0] ],
+-  output: 'gmodule',
+-  command: [
+-    gidocgen,
+-    'generate',
+-    gidocgen_common_args,
+-    '--config=@INPUT0@',
+-    '--output-dir=@OUTPUT@',
+-    '--content-dir=@0@'.format(meson.current_source_dir()),
+-    '@INPUT1@',
+-  ],
+-  build_by_default: true,
+-  depend_files: expand_content_files,
+-  install: true,
+-  install_dir: docs_dir,
+-  install_tag: 'doc',
+-)
++  custom_target('gmodule-docs',
++    input: [ gmodule_toml, gmodule_gir[0] ],
++    output: 'gmodule',
++    command: [
++      gidocgen,
++      'generate',
++      gidocgen_common_args,
++      '--config=@INPUT0@',
++      '--output-dir=@OUTPUT@',
++      '--content-dir=@0@'.format(meson.current_source_dir()),
++      '@INPUT1@',
++    ],
++    build_by_default: true,
++    depend_files: expand_content_files,
++    install: true,
++    install_dir: docs_dir,
++    install_tag: 'doc',
++  )
++endif
+diff --git a/docs/reference/gobject/meson.build b/docs/reference/gobject/meson.build
+index e96595b..221c54a 100644
+--- a/docs/reference/gobject/meson.build
++++ b/docs/reference/gobject/meson.build
+@@ -17,35 +17,37 @@ if get_option('man-pages').enabled()
+   endforeach
+ endif
+ 
+-expand_content_files = [
+-  'boxed.md',
+-  'concepts.md',
+-  'enum-types.md',
+-  'floating-refs.md',
+-  'gvalue.md',
+-  'tutorial.md',
+-  'types.md',
+-  'signals.md',
+-  'value-collection.md',
+-]
++if get_option('documentation') and enable_gir
++  expand_content_files = [
++    'boxed.md',
++    'concepts.md',
++    'enum-types.md',
++    'floating-refs.md',
++    'gvalue.md',
++    'tutorial.md',
++    'types.md',
++    'signals.md',
++    'value-collection.md',
++  ]
+ 
+-gobject_toml = configure_file(input: 'gobject.toml.in', output: 'gobject.toml', configuration: toml_conf)
++  gobject_toml = configure_file(input: 'gobject.toml.in', output: 'gobject.toml', configuration: toml_conf)
+ 
+-custom_target('gobject-docs',
+-  input: [ gobject_toml, gobject_gir[0] ],
+-  output: 'gobject',
+-  command: [
+-    gidocgen,
+-    'generate',
+-    gidocgen_common_args,
+-    '--config=@INPUT0@',
+-    '--output-dir=@OUTPUT@',
+-    '--content-dir=@0@'.format(meson.current_source_dir()),
+-    '@INPUT1@',
+-  ],
+-  build_by_default: true,
+-  depend_files: expand_content_files,
+-  install: true,
+-  install_dir: docs_dir,
+-  install_tag: 'doc',
+-)
++  custom_target('gobject-docs',
++    input: [ gobject_toml, gobject_gir[0] ],
++    output: 'gobject',
++    command: [
++      gidocgen,
++      'generate',
++      gidocgen_common_args,
++      '--config=@INPUT0@',
++      '--output-dir=@OUTPUT@',
++      '--content-dir=@0@'.format(meson.current_source_dir()),
++      '@INPUT1@',
++    ],
++    build_by_default: true,
++    depend_files: expand_content_files,
++    install: true,
++    install_dir: docs_dir,
++    install_tag: 'doc',
++  )
++endif
+diff --git a/docs/reference/meson.build b/docs/reference/meson.build
+index acdc708..6f9dd42 100644
+--- a/docs/reference/meson.build
++++ b/docs/reference/meson.build
+@@ -16,10 +16,10 @@ if get_option('documentation') and enable_gir
+   ]
+ 
+   docs_dir = glib_datadir / 'doc' / 'glib-2.0'
+-
+-  subdir('glib')
+-  subdir('gmodule')
+-  subdir('gobject')
+-  subdir('gio')
+-  subdir('girepository')
+ endif
++
++subdir('glib')
++subdir('gmodule')
++subdir('gobject')
++subdir('gio')
++subdir('girepository')
