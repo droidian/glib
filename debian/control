@@ -20,6 +20,7 @@ Build-Depends: dbus-daemon <!nocheck> <!noinsttest>,
                linux-libc-dev [linux-any],
                meson (>= 1.2.0),
                pkg-config,
+               python3-docutils <!nodoc>,
                python3-packaging,
                python3:any,
                xsltproc,
@@ -31,7 +32,9 @@ Build-Depends-Arch: desktop-file-utils <!nocheck>,
                     shared-mime-info <!nocheck>,
                     tzdata <!nocheck>,
                     xterm <!nocheck>
-Build-Depends-Indep: gtk-doc-tools,
+Build-Depends-Indep: gi-docgen <!nodoc>,
+                     gobject-introspection <!nodoc>,
+                     libgirepository1.0-dev <!nodoc> | gobject-introspection (>= 1.78.1-7~) <!nodoc>,
 Rules-Requires-Root: no
 Standards-Version: 4.6.2
 Homepage: https://wiki.gnome.org/Projects/GLib
@@ -182,6 +185,7 @@ Description: Common files for GLib library
  languages other than English.
 
 Package: libglib2.0-doc
+Build-Profiles: <!nodoc>
 Section: doc
 Architecture: all
 Depends: ${misc:Depends}

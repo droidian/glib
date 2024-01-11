@@ -1,0 +1,9 @@
+Document: girepository
+Title: GIRepository (GLib) Reference Manual
+Author: GLib Development Team
+Abstract: GIRepository is a library providing access to typelibs and introspection data which describe C APIs
+Section: Programming/C
+
+Format: HTML
+Index: /usr/share/doc/libglib2.0-dev/girepository/index.html
+Files: /usr/share/doc/libglib2.0-dev/girepository/*.html

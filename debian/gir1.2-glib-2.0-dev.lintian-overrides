@@ -1,0 +1,5 @@
+# The GIR XML in /usr/share is analogous to C headers in /usr/include,
+# and needs to depend on its corresponding architecture-dependent typelibs.
+# It also needs to be in an architecture-dependent package so that
+# dh_girepository can find it when not building Architecture: all.
+gir1.2-glib-2.0-dev: arch-dep-package-has-big-usr-share *

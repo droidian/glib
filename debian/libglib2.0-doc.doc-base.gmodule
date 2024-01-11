@@ -1,0 +1,9 @@
+Document: gmodule
+Title: GModule (GLib) Reference Manual
+Author: GLib Development Team
+Abstract: Portable API for dynamically loading modules
+Section: Programming/C
+
+Format: HTML
+Index: /usr/share/doc/libglib2.0-dev/gmodule/index.html
+Files: /usr/share/doc/libglib2.0-dev/gmodule/*.html

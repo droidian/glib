@@ -1,0 +1,14 @@
+Document: gvariant-specification
+Title: GVariant Specification 1.0
+Author: Allison Karlitskaya
+Abstract:
+ GVariant is a variant datatype with a data model similar to D-Bus,
+ heavily optimised for dealing with data in serialized form. It works
+ particularly well with data located in memory-mapped files. It can
+ perform nearly all deserialization operations in a small constant time,
+ usually touching only a single memory page. Serialized GVariant data
+ can also be sent over the network.
+Section: Programming
+
+Format: HTML
+Index: /usr/share/doc/libglib2.0-dev/gvariant-specification-1.0.html

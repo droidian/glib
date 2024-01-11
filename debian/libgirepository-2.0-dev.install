@@ -1,0 +1,3 @@
+usr/include/glib-2.0/girepository
+usr/lib/*/libgirepository-2.0.so
+usr/lib/*/pkgconfig/girepository-2.0.pc

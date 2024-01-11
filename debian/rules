@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 
-binaries := $(shell dh_listpackages)
+built_binaries := $(shell dh_listpackages)
 
 export DEB_BUILD_MAINT_OPTIONS=hardening=+bindnow
 
@@ -66,7 +66,7 @@ override_dh_auto_configure:
 		$(DEB_CONFIGURE_EXTRA_FLAGS) \
 		$(DEB_CONFIGURE_FLAGS_deb) \
 		$(NULL)
-ifneq ($(filter %-udeb,$(binaries)),)
+ifneq ($(filter %-udeb,$(built_binaries)),)
 	dh_auto_configure \
 		--builddirectory=debian/build/udeb \
 		-- \
@@ -188,18 +188,9 @@ ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 	|| true
 endif
 
-# Skip most build-time tests if all we are building is documentation;
-# running them once per architecture is plenty. As an exception, do run the
-# documentation completeness checks, which won't normally be run on
-# architecture-specific buildds (except in Ubuntu).
+# Skip build-time tests if all we are building is documentation;
+# running them once per architecture is plenty.
 override_dh_auto_test-indep:
-	meson test -C debian/build/deb \
-		--no-rebuild \
-		--num-processes 1 \
-		--timeout-multiplier $(test_timeout_multiplier) \
-		--verbose \
-		gio-doc-check glib-doc-check gobject-doc-check \
-	|| $(handle_test_failure)
 
 # Let's get failing tests' stdout and stderr so we have some information when
 # a build fails
@@ -218,24 +209,38 @@ DEB_CONFIGURE_FLAGS_deb := \
 	-Dinstalled_tests=true \
 	-Dlibelf=enabled \
 	-Dlibmount=$(enable_libmount) \
-	-Dman=true \
 	-Dmultiarch=true \
 	-Dselinux=$(enable_selinux) \
 	-Dsystemtap=true \
 	-Dxattr=$(have_non_stub_xattr) \
 	$(NULL)
 
-ifneq ($(filter libglib2.0-doc,$(binaries)),)
-DEB_CONFIGURE_FLAGS_deb += -Dgtk_doc=true
+ifeq ($(filter nodoc,$(DEB_BUILD_PROFILES)),)
+DEB_CONFIGURE_FLAGS_deb += -Dman-pages=enabled
 else
-DEB_CONFIGURE_FLAGS_deb += -Dgtk_doc=false
+DEB_CONFIGURE_FLAGS_deb += -Dman-pages=disabled
+endif
+
+ifneq ($(filter gir% %-doc,$(built_binaries)),)
+DEB_CONFIGURE_FLAGS_deb += -Dgir_dir_prefix=lib/${DEB_HOST_MULTIARCH}
+DEB_CONFIGURE_FLAGS_deb += -Dintrospection=enabled
+else
+DEB_CONFIGURE_FLAGS_deb += -Dintrospection=disabled
+endif
+
+ifneq ($(filter %-doc,$(built_binaries)),)
+DEB_CONFIGURE_FLAGS_deb += -Ddocumentation=true
+else
+DEB_CONFIGURE_FLAGS_deb += -Ddocumentation=false
 endif
 
 DEB_CONFIGURE_FLAGS_udeb := \
 	--default-library shared \
-	-Dgtk_doc=false \
+	-Ddocumentation=false \
 	-Dinstalled_tests=false \
+	-Dintrospection=disabled \
 	-Dlibmount=disabled \
+	-Dman-pages=disabled \
 	-Dselinux=disabled \
 	-Dxattr=$(have_non_stub_xattr) \
 	$(NULL)
@@ -243,7 +248,7 @@ DEB_CONFIGURE_FLAGS_udeb := \
 override_dh_auto_build:
 	mkdir -p debian/tmp-xdg-runtime-dir
 	dh_auto_build --builddirectory=debian/build/deb
-ifneq ($(filter %-udeb,$(binaries)),)
+ifneq ($(filter %-udeb,$(built_binaries)),)
 	dh_auto_build --builddirectory=debian/build/udeb
 endif
 
@@ -254,10 +259,13 @@ override_dh_auto_install:
 		    debian/libglib2.0-0.$$script.in \
 		    > debian/libglib2.0-0.$$script ; \
 	done
-ifneq ($(filter %-udeb,$(binaries)),)
+ifneq ($(filter %-udeb,$(built_binaries)),)
 	dh_auto_install -plibglib2.0-udeb --builddirectory=debian/build/udeb --destdir=debian/install/udeb
 endif
-	dh_auto_install --remaining-packages --builddirectory=debian/build/deb --destdir=debian/install/deb
+	dh_auto_install --remaining-packages --builddirectory=debian/build/deb
+	sed -i \
+		-e 's|^girdir=\(.*\)|girdir=$${datadir}/gir-1.0|' \
+		debian/tmp/usr/lib/*/pkgconfig/girepository-2.0.pc
 
 override_dh_python3:
 	# dh_python3 can't process both a private directory and /usr/bin
@@ -268,10 +276,15 @@ override_dh_python3:
 
 override_dh_install:
 	# Unwanted bits from the .deb build
-	rm -fr debian/install/deb/usr/share/glib-2.0/codegen/__pycache__
-ifneq ($(filter %-udeb,$(binaries)),)
+	rm -fr debian/tmp/usr/share/glib-2.0/codegen/__pycache__
+ifneq ($(filter %-udeb,$(built_binaries)),)
 	# Unwanted bits from the .udeb build
+	rm -fr debian/install/udeb/usr/include
 	rm -f debian/install/udeb/usr/lib/*/*.so
+	rm -fr debian/install/udeb/usr/lib/*/gir-1.0
+	rm -fr debian/install/udeb/usr/lib/*/girepository-1.0
+	rm -fr debian/install/udeb/usr/lib/*/pkgconfig
+	rm -fr debian/install/udeb/usr/share/gir-1.0
 	rm -fr debian/install/udeb/usr/libexec/gio-launch-desktop
 	rm -fr debian/install/udeb/usr/share/gdb
 	rm -fr debian/install/udeb/usr/share/gettext/its
@@ -281,10 +294,10 @@ ifneq ($(filter %-udeb,$(binaries)),)
 	rm -fr debian/install/udeb/usr/share/man
 	dh_install -plibglib2.0-udeb --sourcedir=debian/install/udeb
 endif
-ifneq ($(filter %-tests,$(binaries)),)
-	sed -i -e '/^#!.*/,1 d' debian/install/deb/usr/libexec/installed-tests/glib/taptestrunner.py
+ifneq ($(filter %-tests,$(built_binaries)),)
+	sed -i -e '/^#!.*/,1 d' debian/tmp/usr/libexec/installed-tests/glib/taptestrunner.py
 endif
-	dh_install --remaining-packages --sourcedir=debian/install/deb
+	dh_install --remaining-packages
 
 override_dh_dwz:
 	dh_dwz -Nlibglib2.0-udeb
@@ -293,14 +306,14 @@ override_dh_dwz:
 # quite right for installed-tests
 override_dh_fixperms:
 	dh_fixperms -Xusr/libexec/installed-tests
-ifneq ($(filter %-tests,$(binaries)),)
+ifneq ($(filter %-tests,$(built_binaries)),)
 	chmod --changes u=rw,og=r debian/libglib2.0-tests/usr/libexec/installed-tests/*/*.so
 	chmod --changes u=rw,og=r debian/libglib2.0-tests/usr/libexec/installed-tests/*/*/*.so
 	chmod --recursive --changes a+rX,u+w,og-w debian/libglib2.0-tests/usr/libexec/installed-tests
 endif
 
 override_dh_missing:
-	dh_missing --sourcedir=debian/install/deb
-ifneq ($(filter %-udeb,$(binaries)),)
+	dh_missing
+ifneq ($(filter %-udeb,$(built_binaries)),)
 	dh_missing --sourcedir=debian/install/udeb
 endif
