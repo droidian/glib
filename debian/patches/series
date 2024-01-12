@@ -1,3 +1,4 @@
+docs-Allow-building-man-pages-without-the-reference-docum.patch
 01_gettext-desktopfiles.patch
 0001-timer-test-use-volatile-for-locals.patch
 gwakeuptest-Be-less-parallel-unless-invoked-with-m-slow.patch
@@ -15,4 +16,3 @@ debian/Add-extra-debug-to-memory-monitor-dbus-test.patch
 debian/tests-Skip-debugcontroller-test.patch
 debian/testfilemonitor-Skip-if-we-are-avoiding-flaky-tests.patch
 debian/gdesktopappinfo-Try-using-x-terminal-emulator-for-Termina.patch
-docs-Allow-building-man-pages-without-the-reference-docum.patch
