@@ -16,6 +16,7 @@ or libglib2.0-dev-bin package has the same content as a native build.
 
 Signed-off-by: Simon McVittie <smcv@debian.org>
 Forwarded: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3817
+Applied-upstream: 2.79.1, commit:aa28326b87cac1835c0af83b2612f57a664782a8
 ---
  docs/reference/gio/meson.build          |  80 ++++++++++----------
  docs/reference/girepository/meson.build |  46 ++++++------
