@@ -1,4 +1,4 @@
-glib2.0 (2.79.0+git20240110~g38f5ba3c-1) UNRELEASED; urgency=medium
+glib2.0 (2.79.0+git20240110~g38f5ba3c-1) experimental; urgency=medium
 
   * New upstream development snapshot
   * d/watch: Update to Unicode v15.1.0, as included since 2.79.0
@@ -29,7 +29,7 @@ glib2.0 (2.79.0+git20240110~g38f5ba3c-1) UNRELEASED; urgency=medium
     avoiding a circular dependency on gobject-introspection on new
     architectures.
 
- -- Simon McVittie <smcv@debian.org>  Fri, 12 Jan 2024 09:24:15 +0000
+ -- Simon McVittie <smcv@debian.org>  Fri, 12 Jan 2024 15:46:42 +0000
 
 glib2.0 (2.78.3-1) unstable; urgency=medium
 
