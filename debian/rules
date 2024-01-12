@@ -270,6 +270,14 @@ endif
 	sed -i \
 		-e 's|^girdir=\(.*\)|girdir=$${datadir}/gir-1.0|' \
 		debian/tmp/usr/lib/*/pkgconfig/girepository-2.0.pc
+ifneq ($(filter %-doc,$(built_binaries)),)
+	sed -i \
+		-e 's|https\?://docs\.gtk\.org/gio/|../gio/|' \
+		-e 's|https\?://docs\.gtk\.org/glib/|../glib/|' \
+		-e 's|https\?://docs\.gtk\.org/gmodule/|../gmodule/|' \
+		-e 's|https\?://docs\.gtk\.org/gobject/|../gobject/|' \
+		debian/tmp/usr/share/doc/*/*/urlmap.js
+endif
 
 override_dh_python3:
 	# dh_python3 can't process both a private directory and /usr/bin
