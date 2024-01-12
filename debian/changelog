@@ -3,8 +3,33 @@ glib2.0 (2.79.0+git20240110~g38f5ba3c-1) UNRELEASED; urgency=medium
   * New upstream development snapshot
   * d/watch: Update to Unicode v15.1.0, as included since 2.79.0
   * d/copyright: Update for GLib 2.79.x
+  * d/libglib2.0-0.symbols: Update
+  * d/control: Bump Meson dependency as per meson.build
+  * d/control: Depend on python3-packaging instead of python3-distutils
+  * d/control: The installed-tests now require libglib2.0-bin, for a
+    new test for gio(1)
+  * d/patches: Refresh patch series.
+    The thread-pool-slow test has been extensively refactored, so stop
+    skipping that test on 32-bit ARM for now. We can reinstate the
+    workaround later if it's still necessary.
+  * d/rules: Don't strip non-determinism from test data.
+    This will fail for some malformed images used to test thumbnailers'
+    error handling.
+  * d/libglib2.0-dev.install: Be more specific about what we install.
+    The newly-included libgirepository-2.0 seems more likely to break
+    API/ABI than the rest of GLib, so it's safer if we give it its own
+    -dev package that will not necessarily bump SONAME in lockstep with
+    the rest of GLib.
+  * d/rules: Use GObject-Introspection and gi-docgen to build documentation.
+    We don't build libgirepository, GIR XML or typelibs into a binary
+    package yet, because that will require a trip through NEW.
+  * d/p/docs-Allow-building-man-pages-without-the-reference-docum.patch:
+    Add proposed patch to allow building man pages while disabling
+    gi-docgen, to keep the contents of packages reproducible while
+    avoiding a circular dependency on gobject-introspection on new
+    architectures.
 
- -- Simon McVittie <smcv@debian.org>  Thu, 11 Jan 2024 14:34:43 +0000
+ -- Simon McVittie <smcv@debian.org>  Fri, 12 Jan 2024 09:24:15 +0000
 
 glib2.0 (2.78.3-1) unstable; urgency=medium
 
