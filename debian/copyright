@@ -297,7 +297,7 @@ Copyright:
  2012-2019 Canonical Ltd
  2017-2024 Collabora Ltd
  2016-2024 Simon McVittie
-License: LGPL-2.1+ and Expat
+License: LGPL-2.1+
 
 Files:
  gio/xdgmime/xdgmime*
@@ -388,11 +388,14 @@ Copyright:
 License: Unicode-DFS-2016
 
 Files:
+ debian/tests/run-with-locales
  gio/kqueue/*.?
  */tests/taptestrunner.py
 Copyright:
  2011-2012 Dmitry Matveev
  2015 Remko Tronçon
+ 2016-2021 Simon McVittie
+ 2017-2018 Collabora Ltd
 License: Expat
 
 Files:
