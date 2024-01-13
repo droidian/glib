@@ -1,0 +1,59 @@
+From: Simon McVittie <smcv@debian.org>
+Date: Sat, 13 Jan 2024 20:54:18 +0000
+Subject: gdatetime: Ignore %E modifier on 64-bit big-endian for the moment
+
+This doesn't appear to work reliably on s390x and ppc64, returning
+the results that were expected without %E or intermittently crashing.
+
+Bug: https://gitlab.gnome.org/GNOME/glib/-/issues/3225
+Bug-Debian: https://bugs.debian.org/1060735
+Forwarded: not-needed, workaround
+---
+ glib/gdatetime.c       | 2 +-
+ glib/tests/gdatetime.c | 6 +++---
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/glib/gdatetime.c b/glib/gdatetime.c
+index 136bdb0..f0323bb 100644
+--- a/glib/gdatetime.c
++++ b/glib/gdatetime.c
+@@ -558,7 +558,7 @@ get_month_name_abbr_with_day (gint month)
+ 
+ #endif  /* HAVE_LANGINFO_ABALTMON */
+ 
+-#ifdef HAVE_LANGINFO_ERA
++#if defined(HAVE_LANGINFO_ERA) && (G_BYTE_ORDER == G_LITTLE_ENDIAN || GLIB_SIZEOF_VOID_P == 4)
+ 
+ #define PREFERRED_ERA_DATE_TIME_FMT nl_langinfo (ERA_D_T_FMT)
+ #define PREFERRED_ERA_DATE_FMT nl_langinfo (ERA_D_FMT)
+diff --git a/glib/tests/gdatetime.c b/glib/tests/gdatetime.c
+index f60368d..c6a6fed 100644
+--- a/glib/tests/gdatetime.c
++++ b/glib/tests/gdatetime.c
+@@ -1725,7 +1725,7 @@ test_non_utf8_printf (void)
+   TEST_PRINTF ("%%", "%");
+   TEST_PRINTF ("%", "");
+   TEST_PRINTF ("%9", NULL);
+-#ifdef HAVE_LANGINFO_ERA
++#if defined(HAVE_LANGINFO_ERA) && (G_BYTE_ORDER == G_LITTLE_ENDIAN || GLIB_SIZEOF_VOID_P == 4)
+   TEST_PRINTF ("%Ec", "平成21年10月24日 00時00分00秒");
+   TEST_PRINTF ("%EC", "平成");
+   TEST_PRINTF ("%Ex", "平成21年10月24日");
+@@ -2272,7 +2272,7 @@ test_all_dates (void)
+ static void
+ test_date_time_eras_japan (void)
+ {
+-#ifdef HAVE_LANGINFO_ERA
++#if defined(HAVE_LANGINFO_ERA) && (G_BYTE_ORDER == G_LITTLE_ENDIAN || GLIB_SIZEOF_VOID_P == 4)
+   gchar *oldlocale;
+ 
+   oldlocale = g_strdup (setlocale (LC_ALL, NULL));
+@@ -2319,7 +2319,7 @@ test_date_time_eras_japan (void)
+ static void
+ test_date_time_eras_thailand (void)
+ {
+-#ifdef HAVE_LANGINFO_ERA
++#if defined(HAVE_LANGINFO_ERA) && (G_BYTE_ORDER == G_LITTLE_ENDIAN || GLIB_SIZEOF_VOID_P == 4)
+   gchar *oldlocale;
+ 
+   oldlocale = g_strdup (setlocale (LC_ALL, NULL));
