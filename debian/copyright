@@ -99,7 +99,6 @@ Copyright:
  2016 GNOME i18n Project for Vietnamese
  2019 GNOME
  2023 GNOME Foundation Inc.
- 2011 Google, Inc
  2023 Guido Günther
  2001-2008 Hans Breuer
  2001 Hidetoshi Tajima
@@ -141,7 +140,6 @@ Copyright:
  2008-2010 Novell, Inc
  2021 Ole André Vadla Ravnås
  2012 Olivier Sessink
- 2007 Openismus GmbH
  1998-2001 Owen Taylor
  2014-2019 Patrick Griffis
  2007 Patrick Hulin
@@ -162,7 +160,7 @@ Copyright:
  2009-2016 Sam Thursfield
  2008 Samuel Cormier-Iijima
  1999-2000 Scott Wimer
- 2007-2020 Sebastian Dröge
+ 2007 Sebastian Dröge
  2001-2003 Sebastian Wilhelmi
  1998-2001 Sebastian Wilhelmi; University of Karlsruhe
  2018 Sébastien Wilmet
@@ -198,15 +196,100 @@ Copyright:
  2000-2004 Ximian Inc
  2014-2020 Руслан Ижбулатов
  Croatiann team
- Jesse van den Kieboom
  Matthew Waters
- Nelson Benítez León
-License: LGPL-2.1+ and old-glib-tests
+License: LGPL-2.1+
 Comment:
  Some files are described as being under version 2 of the Lesser General
  Public License or any later version, but the oldest version of the Lesser
  General Public License under that name is version 2.1. Or if the Library
  General Public License counts, then those files are LGPL-2+.
+
+Files:
+ gio/tests/async-close-output-stream.c
+ gio/tests/async-splice-output-stream.c
+ gio/tests/buffered-input-stream.c
+ gio/tests/converter-stream.c
+ gio/tests/credentials.c
+ gio/tests/data-input-stream.c
+ gio/tests/data-output-stream.c
+ gio/tests/g-file-info-filesystem-readonly.c
+ gio/tests/g-file-info.c
+ gio/tests/g-file.c
+ gio/tests/g-icon.c
+ gio/tests/giomodule.c
+ gio/tests/inet-address.c
+ gio/tests/io-stream.c
+ gio/tests/live-g-file.c
+ gio/tests/memory-input-stream.c
+ gio/tests/memory-output-stream.c
+ gio/tests/modules/test-module-a.c
+ gio/tests/modules/test-module-b.c
+ gio/tests/permission.c
+ gio/tests/srvtarget.c
+ gio/tests/thumbnail-verification.c
+ gio/tests/unix-streams.c
+ gio/tests/vfs.c
+ gio/tests/win32-appinfo.c
+ gio/tests/win32-streams.c
+ glib/tests/asyncqueue.c
+ glib/tests/cond.c
+ glib/tests/fileutils.c
+ glib/tests/hook.c
+ glib/tests/mainloop.c
+ glib/tests/markup.c
+ glib/tests/mem-overflow.c
+ glib/tests/mutex.c
+ glib/tests/once.c
+ glib/tests/onceinit.c
+ glib/tests/option-argv0.c
+ glib/tests/option-context.c
+ glib/tests/private.c
+ glib/tests/protocol.c
+ glib/tests/rand.c
+ glib/tests/rec-mutex.c
+ glib/tests/rwlock.c
+ glib/tests/spawn-multithreaded.c
+ glib/tests/spawn-singlethread.c
+ glib/tests/strfuncs.c
+ glib/tests/string.c
+ glib/tests/strvbuilder.c
+ glib/tests/test-printf.c
+ glib/tests/test-spawn-echo.c
+ glib/tests/test-spawn-sleep.c
+ glib/tests/testing.c
+ glib/tests/testutils.h
+ glib/tests/thread-pool.c
+ glib/tests/thread.c
+ glib/tests/timer.c
+ glib/tests/unicode.c
+ glib/tests/unix.c
+ glib/tests/utf8-misc.c
+ glib/tests/utils.c
+ glib/tests/win32.c
+ glib/tests/win32.c
+ gobject/tests/autoptr.c
+ gobject/tests/closure-refcount.c
+ gobject/tests/custom-dispatch.c
+ gobject/tests/dynamictests.c
+ gobject/tests/notify-init.c
+ gobject/tests/notify-init2.c
+ gobject/tests/threadtests.c
+Copyright:
+ 2021 Alexandros Theodotou
+ 2018-2020 Canonical Ltd
+ 2010-2023 Collabora Ltd
+ 2011 Google, Inc
+ 2005-2008 Imendio AB
+ 1995-1997 Josh MacDonald
+ 2007 Openismus GmbH
+ 1995-1997 Peter Mattis
+ 2008-2022 Red Hat, Inc.
+ 2020 Sebastian Dröge
+ 1995-1997 Spencer Kimball
+ 2019 Руслан Ижбулатов
+ Jesse van den Kieboom
+ Nelson Benítez León
+License: old-glib-tests
 
 Files: debian/*
 Copyright:
