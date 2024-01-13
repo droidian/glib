@@ -7,8 +7,12 @@ glib2.0 (2.79.0+git20240110~g38f5ba3c-2) UNRELEASED; urgency=medium
     gi-docgen makes this fairly straightforward by confining this
     information to a single file (the URL map).
   * d/libglib2.0-doc.doc-base.gvariant-specification: Add missing Files field
+  * d/rules: Don't try to install libgirepository tests yet.
+    This fixes FTBFS when using dpkg-buildpackage -b (-A or -B as used on
+    buildds already worked).
+  * d/copyright: Separate different licenses where possible
 
- -- Simon McVittie <smcv@debian.org>  Fri, 12 Jan 2024 17:59:12 +0000
+ -- Simon McVittie <smcv@debian.org>  Sat, 13 Jan 2024 01:02:39 +0000
 
 glib2.0 (2.79.0+git20240110~g38f5ba3c-1) experimental; urgency=medium
 
