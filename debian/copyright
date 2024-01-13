@@ -201,7 +201,12 @@ Copyright:
  Jesse van den Kieboom
  Matthew Waters
  Nelson Benítez León
-License: LGPL-2+ and LGPL-2.1+ and old-glib-tests
+License: LGPL-2.1+ and old-glib-tests
+Comment:
+ Some files are described as being under version 2 of the Lesser General
+ Public License or any later version, but the oldest version of the Lesser
+ General Public License under that name is version 2.1. Or if the Library
+ General Public License counts, then those files are LGPL-2+.
 
 Files: debian/*
 Copyright:
@@ -224,6 +229,12 @@ Files:
 Copyright:
  2000-2003 Tim Janik
 License: Janik-permissive
+
+Files:
+ glib/libcharset/*
+Copyright:
+ 2000-2006 Free Software Foundation, Inc.
+License: LGPL-2+
 
 Files:
  glib/gnulib/gl_cv_cc_double_expbit0/meson.build
