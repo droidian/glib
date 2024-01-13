@@ -11,8 +11,14 @@ glib2.0 (2.79.0+git20240110~g38f5ba3c-2) UNRELEASED; urgency=medium
     This fixes FTBFS when using dpkg-buildpackage -b (-A or -B as used on
     buildds already worked).
   * d/copyright: Separate different licenses where possible
+  * d/p/workarounds/gdatetime-Ignore-E-modifier-on-64-bit-big-endian-for-the-.patch:
+    Add patch to ignore %E GDateTime modifier on architectures where it fails
+    (mitigates: #1060735, glib#3225)
+  * d/p/tests-Don-t-test-external-data-with-toolchains-that-can-t.patch:
+    Add proposed patch to fix test regression on mips64el (glib#3226)
+  * d/patches: Separate workarounds from other Debian-specific patches
 
- -- Simon McVittie <smcv@debian.org>  Sat, 13 Jan 2024 01:02:39 +0000
+ -- Simon McVittie <smcv@debian.org>  Sat, 13 Jan 2024 21:02:15 +0000
 
 glib2.0 (2.79.0+git20240110~g38f5ba3c-1) experimental; urgency=medium
 
