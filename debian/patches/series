@@ -1,4 +1,5 @@
 docs-Allow-building-man-pages-without-the-reference-docum.patch
+tests-Don-t-test-external-data-with-toolchains-that-can-t.patch
 01_gettext-desktopfiles.patch
 0001-timer-test-use-volatile-for-locals.patch
 gwakeuptest-Be-less-parallel-unless-invoked-with-m-slow.patch
