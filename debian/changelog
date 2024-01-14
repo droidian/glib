@@ -1,9 +1,10 @@
-glib2.0 (2.79.0+git20240110~g38f5ba3c-2) UNRELEASED; urgency=medium
+glib2.0 (2.79.0+git20240110~g38f5ba3c-2) experimental; urgency=medium
 
   * d/p/docs-Allow-building-man-pages-without-the-reference-docum.patch:
     Mark as applied upstream.
     This effectively brings us up to 2.79.0-48-g4ba14ff28 (2024-01-12).
-  * d/rules: Use relative links to cross-reference between reference manuals.
+  * d/rules: Use relative links to cross-reference between reference
+    manuals.
     gi-docgen makes this fairly straightforward by confining this
     information to a single file (the URL map).
   * d/libglib2.0-doc.doc-base.gvariant-specification: Add missing Files field
@@ -17,8 +18,12 @@ glib2.0 (2.79.0+git20240110~g38f5ba3c-2) UNRELEASED; urgency=medium
   * d/p/tests-Don-t-test-external-data-with-toolchains-that-can-t.patch:
     Add proposed patch to fix test regression on mips64el (glib#3226)
   * d/patches: Separate workarounds from other Debian-specific patches
+  * d/libglib2.0-udeb.install: Never include libgirepository in the udeb.
+    Previously, it was included non-deterministically, depending whether
+    we were building with -b or -B. We don't expect that debian-installer
+    is going to use GObject-Introspection any time soon.
 
- -- Simon McVittie <smcv@debian.org>  Sat, 13 Jan 2024 21:02:15 +0000
+ -- Simon McVittie <smcv@debian.org>  Sun, 14 Jan 2024 12:24:39 +0000
 
 glib2.0 (2.79.0+git20240110~g38f5ba3c-1) experimental; urgency=medium
 
