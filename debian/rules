@@ -302,6 +302,7 @@ ifneq ($(filter %-udeb,$(built_binaries)),)
 	# Unwanted bits from the .udeb build
 	rm -fr debian/install/udeb/usr/include
 	rm -f debian/install/udeb/usr/lib/*/*.so
+	rm -f debian/install/udeb/usr/lib/*/libgirepository*.so.*
 	rm -fr debian/install/udeb/usr/lib/*/gir-1.0
 	rm -fr debian/install/udeb/usr/lib/*/girepository-1.0
 	rm -fr debian/install/udeb/usr/lib/*/pkgconfig
