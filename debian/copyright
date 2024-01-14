@@ -266,9 +266,7 @@ Files:
  glib/tests/utf8-misc.c
  glib/tests/utils.c
  glib/tests/win32.c
- glib/tests/win32.c
  gobject/tests/autoptr.c
- gobject/tests/closure-refcount.c
  gobject/tests/custom-dispatch.c
  gobject/tests/dynamictests.c
  gobject/tests/notify-init.c
