@@ -306,10 +306,10 @@ ifneq ($(filter %-udeb,$(built_binaries)),)
 	rm -fr debian/install/udeb/usr/lib/*/gir-1.0
 	rm -fr debian/install/udeb/usr/lib/*/girepository-1.0
 	rm -fr debian/install/udeb/usr/lib/*/pkgconfig
-	rm -fr debian/install/udeb/usr/share/gir-1.0
 	rm -fr debian/install/udeb/usr/libexec/gio-launch-desktop
 	rm -fr debian/install/udeb/usr/share/gdb
 	rm -fr debian/install/udeb/usr/share/gettext/its
+	rm -fr debian/install/udeb/usr/share/gir-1.0
 	rm -fr debian/install/udeb/usr/share/glib-2.0/codegen
 	rm -fr debian/install/udeb/usr/share/glib-2.0/gdb
 	rm -fr debian/install/udeb/usr/share/glib-2.0/valgrind
