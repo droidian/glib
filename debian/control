@@ -26,6 +26,7 @@ Build-Depends: dbus-daemon <!nocheck> <!noinsttest>,
                xsltproc,
                zlib1g-dev
 Build-Depends-Arch: desktop-file-utils <!nocheck>,
+                    gobject-introspection (>= 1.78.1-9~) <!nogir>,
                     locales <!nocheck> | locales-all <!nocheck>,
                     python3-dbus <!nocheck>,
                     python3-gi <!nocheck>,
@@ -199,3 +200,46 @@ Description: Documentation files for the GLib library
  .
  This package contains the HTML documentation for the GLib library
  in /usr/share/doc/libglib2.0-doc/ .
+
+Package: gir1.2-glib-2.0
+Build-Profiles: <!nogir>
+Architecture: any
+Multi-Arch: same
+Section: introspection
+Depends: ${gir:Depends},
+         ${misc:Depends},
+Provides: ${gir:Provides},
+Breaks: libgirepository-1.0-1 (<< 1.78.1-3~),
+Description: Introspection data for GLib, GObject, Gio and GModule
+ GObject Introspection is a project for providing machine readable
+ introspection data of the API of C libraries. This introspection
+ data can be used in several different use cases, for example
+ automatic code generation for bindings, API verification and documentation
+ generation.
+ .
+ This package contains the introspection data for the GLib, GObject,
+ GModule and Gio libraries, in the typelib format used to generate
+ bindings for dynamic languages like JavaScript and Python.
+
+Package: gir1.2-glib-2.0-dev
+Build-Profiles: <!nogir>
+Architecture: any
+Multi-Arch: same
+Section: libdevel
+Depends: gir1.2-glib-2.0 (= ${binary:Version}),
+         ${gir:Depends},
+         ${misc:Depends},
+Provides: ${gir:Provides},
+Breaks: libgirepository-1.0-1 (<< 1.78.1-3~),
+        libgirepository1.0-dev (<< 1.78.1-7~),
+Replaces: libgirepository1.0-dev (<< 1.78.1-7~),
+Description: GIR XML for GLib, GObject, Gio and GModule
+ GObject Introspection is a project for providing machine readable
+ introspection data of the API of C libraries. This introspection
+ data can be used in several different use cases, for example
+ automatic code generation for bindings, API verification and documentation
+ generation.
+ .
+ This package contains the introspection data for the GLib, GObject,
+ GModule and Gio libraries, in the GIR XML format used to generate
+ bindings for static languages like C++, D and Haskell.
