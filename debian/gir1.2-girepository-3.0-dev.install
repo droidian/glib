@@ -1,1 +1,1 @@
-usr/lib/*/gir-1.0/GIRepository-3.0.gir   usr/share/gir-${env:GIR_API_VERSION}
+usr/lib/*/gir-1.0/GIRepository-3.0.gir   usr/share/gir-1.0

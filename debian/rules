@@ -289,15 +289,6 @@ override_dh_python3:
 override_dh_install:
 	# Unwanted bits from the .deb build
 	rm -fr debian/tmp/usr/share/glib-2.0/codegen/__pycache__
-ifeq ($(filter libgirepository%,$(built_binaries)),)
-	# Until we ship libgirepository in a package (which will require NEW),
-	# we can't install its tests: even if we don't run them, dh_shlibdeps
-	# will fail to find libgirepository
-	rm -f debian/tmp/usr/libexec/installed-tests/glib/repository
-	rm -f debian/tmp/usr/libexec/installed-tests/glib/repository-search-paths
-	rm -f debian/tmp/usr/share/installed-tests/glib/repository.test
-	rm -f debian/tmp/usr/share/installed-tests/glib/repository-search-paths.test
-endif
 ifneq ($(filter %-udeb,$(built_binaries)),)
 	# Unwanted bits from the .udeb build
 	rm -fr debian/install/udeb/usr/include
