@@ -171,11 +171,12 @@ gi_type_info_get_ffi_type (GITypeInfo *info)
  */
 static ffi_type **
 gi_callable_info_get_ffi_arg_types (GICallableInfo *callable_info,
-                                    int            *n_args_p)
+                                    size_t         *n_args_p)
 {
     ffi_type **arg_types;
     gboolean is_method, throws;
-    gint n_args, n_invoke_args, i, offset;
+    size_t n_invoke_args;
+    guint n_args, i, offset;
 
     g_return_val_if_fail (callable_info != NULL, NULL);
 
@@ -321,7 +322,7 @@ gi_function_invoker_new_for_address (gpointer            addr,
                                      GError            **error)
 {
   ffi_type **atypes;
-  gint n_args;
+  size_t n_args;
 
   g_return_val_if_fail (info != NULL, FALSE);
   g_return_val_if_fail (invoker != NULL, FALSE);
@@ -379,7 +380,7 @@ gi_callable_info_create_closure (GICallableInfo       *callable_info,
                                  gpointer              user_data)
 {
   gpointer exec_ptr;
-  int n_args;
+  size_t n_args;
   ffi_type **atypes;
   GIClosureWrapper *closure;
   ffi_status status;
@@ -391,7 +392,7 @@ gi_callable_info_create_closure (GICallableInfo       *callable_info,
   closure = ffi_closure_alloc (sizeof (GIClosureWrapper), &exec_ptr);
   if (!closure)
     {
-      g_warning ("could not allocate closure\n");
+      g_warning ("could not allocate closure");
       return NULL;
     }
   closure->writable_self = closure;
@@ -404,7 +405,7 @@ gi_callable_info_create_closure (GICallableInfo       *callable_info,
                          atypes);
   if (status != FFI_OK)
     {
-      g_warning ("ffi_prep_cif failed: %d\n", status);
+      g_warning ("ffi_prep_cif failed: %d", status);
       ffi_closure_free (closure);
       return NULL;
     }
@@ -412,7 +413,7 @@ gi_callable_info_create_closure (GICallableInfo       *callable_info,
   status = ffi_prep_closure_loc (&closure->ffi_closure, cif, callback, user_data, exec_ptr);
   if (status != FFI_OK)
     {
-      g_warning ("ffi_prep_closure failed: %d\n", status);
+      g_warning ("ffi_prep_closure failed: %d", status);
       ffi_closure_free (closure);
       return NULL;
     }
