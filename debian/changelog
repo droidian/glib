@@ -1,3 +1,9 @@
+glib2.0 (2.79.0+git20240116~f70b3a91-1) UNRELEASED; urgency=medium
+
+  * New upstream development snapshot
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 16 Jan 2024 16:12:12 +0000
+
 glib2.0 (2.79.0+git20240110~g38f5ba3c-2) experimental; urgency=medium
 
   * d/p/docs-Allow-building-man-pages-without-the-reference-docum.patch:
