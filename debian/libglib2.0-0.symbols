@@ -2811,6 +2811,7 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_log_writer_journald@Base 2.50.0
  g_log_writer_standard_streams@Base 2.50.0
  g_log_writer_supports_color@Base 2.50.0
+ g_log_writer_syslog@Base 2.79.0+git20240116~
  g_logv@Base 2.12.0
  g_lstat@Base 2.12.0
  g_main_context_acquire@Base 2.12.0
@@ -3023,8 +3024,11 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  g_pattern_spec_match_string@Base 2.70.0
  g_pattern_spec_new@Base 2.12.0
  g_pointer_bit_lock@Base 2.30.0
+ g_pointer_bit_lock_and_get@Base 2.79.0+git20240116~
+ g_pointer_bit_lock_mask_ptr@Base 2.79.0+git20240116~
  g_pointer_bit_trylock@Base 2.30.0
  g_pointer_bit_unlock@Base 2.30.0
+ g_pointer_bit_unlock_and_set@Base 2.79.0+git20240116~
  g_poll@Base 2.20.0
  g_prefix_error@Base 2.16.0
  g_prefix_error_literal@Base 2.70.0
