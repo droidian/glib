@@ -29,8 +29,20 @@ glib2.0 (2.79.0+git20240116~f70b3a91-1) UNRELEASED; urgency=medium
     NEW processing.
     The API and ABI of this new library are not yet stable, and will
     not be stable until GLib 2.80.0 is released; please use with caution.
+  * d/control: Build-depend on libglib2.0-dev if introspection will
+    be enabled.
+    This works around a missing dependency in the gobject-introspection
+    package, for which a fix is pending. In practice other packages
+    that use gobject-introspection are highly likely to all depend on
+    GLib anyway, so the missing dependency likely only affects this one
+    source package.
+    We need this circular dependency for Meson to be able to discover
+    the gobject-introspection-1.0 pkg-config module successfully. As
+    with previous uses of GObject-Introspection, it can be bootstrapped
+    by cross-compiling or by using the nogir build profile (together
+    with nodoc, if building Architecture: all).
 
- -- Simon McVittie <smcv@debian.org>  Tue, 16 Jan 2024 17:11:33 +0000
+ -- Simon McVittie <smcv@debian.org>  Tue, 16 Jan 2024 19:10:20 +0000
 
 glib2.0 (2.79.0+git20240110~g38f5ba3c-2) experimental; urgency=medium
 
