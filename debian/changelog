@@ -1,6 +1,7 @@
 glib2.0 (2.79.0+git20240116~f70b3a91-1) UNRELEASED; urgency=medium
 
   * New upstream development snapshot
+  * d/libglib2.0-0.symbols: Update
   * Drop patches that were applied upstream
   * d/control: Take over gir1.2-glib-2.0{,-dev} from
     src:gobject-introspection.
@@ -33,7 +34,7 @@ glib2.0 (2.79.0+git20240116~f70b3a91-1) UNRELEASED; urgency=medium
     The API and ABI of this new library are not yet stable, and will
     not be stable until GLib 2.80.0 is released; please use with caution.
 
- -- Simon McVittie <smcv@debian.org>  Tue, 16 Jan 2024 16:34:33 +0000
+ -- Simon McVittie <smcv@debian.org>  Tue, 16 Jan 2024 17:11:33 +0000
 
 glib2.0 (2.79.0+git20240110~g38f5ba3c-2) experimental; urgency=medium
 
