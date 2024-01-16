@@ -34,8 +34,7 @@ Build-Depends-Arch: desktop-file-utils <!nocheck>,
                     tzdata <!nocheck>,
                     xterm <!nocheck>
 Build-Depends-Indep: gi-docgen <!nodoc>,
-                     gobject-introspection <!nodoc>,
-                     libgirepository1.0-dev <!nodoc> | gobject-introspection (>= 1.78.1-7~) <!nodoc>,
+                     gobject-introspection (>= 1.78.1-9~) <!nodoc>,
 Rules-Requires-Root: no
 Standards-Version: 4.6.2
 Homepage: https://wiki.gnome.org/Projects/GLib
