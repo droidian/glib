@@ -287,13 +287,19 @@ override_dh_python3:
 	dh_python3
 
 override_dh_install:
-	# Unwanted bits from the .deb build
-	rm -fr debian/tmp/usr/share/glib-2.0/codegen/__pycache__
-ifeq ($(filter gir%,$(built_binaries)),)
+ifneq ($(filter gir%,$(built_binaries)),)
+	# The build currently installs to /usr/share/gir-1.0 even though we
+	# specified lib/${DEB_HOST_MULTIARCH} as our gir_dir_prefix
+	if ! [ -d debian/tmp/usr/lib/${DEB_HOST_MULTIARCH}/gir-1.0 ]; then \
+		mv debian/tmp/usr/share/gir-1.0 debian/tmp/usr/lib/${DEB_HOST_MULTIARCH}/; \
+	fi
+else
 	rm -fr debian/tmp/usr/lib/*/gir-1.0
 	rm -fr debian/tmp/usr/lib/*/girepository-1.0
 	rm -fr debian/tmp/usr/share/gir-1.0
 endif
+	# Unwanted bits from the .deb build
+	rm -fr debian/tmp/usr/share/glib-2.0/codegen/__pycache__
 ifneq ($(filter %-udeb,$(built_binaries)),)
 	# Unwanted bits from the .udeb build
 	rm -fr debian/install/udeb/usr/include
