@@ -8,6 +8,8 @@ https://download.gnome.org/sources/glib/cache.json \
 
 # Update the version as needed to correspond to the version of Unicode
 # data used to generate glib/gunichartables.h etc.
+# Update and run the maintainer-update-unicode-data target in d/rules
+# to verify
 opts="component=unicode-data, compression=xz, downloadurlmangle=s#/?$#/UCD.zip#, filenamemangle=s#.*/([^/]+)/?$#UCD-$1.zip#" \
 https://www.unicode.org/Public/zipped/ \
 (15\.1\.0)/?

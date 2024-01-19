@@ -61,7 +61,7 @@ maintainer-update-unicode-data:
 	rm -f glib/gunidecomp.h
 	rm -f glib/tests/casefold.txt
 	rm -f glib/tests/casemap.txt
-	$(CURDIR)/tools/update-unicode-data.sh $(CURDIR)/unicode-data 15.0.0
+	$(CURDIR)/tools/update-unicode-data.sh $(CURDIR)/unicode-data 15.1.0
 
 override_dh_auto_configure:
 	sed -e 's|@DEB_HOST_ARCH@|$(DEB_HOST_ARCH)|g' \
