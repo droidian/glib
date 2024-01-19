@@ -32,71 +32,86 @@
 
 G_BEGIN_DECLS
 
+#define GI_TYPE_INTERFACE_INFO (gi_interface_info_get_type ())
+
+/**
+ * GI_INTERFACE_INFO:
+ * @info: Info object which is subject to casting.
+ *
+ * Casts a [type@GIRepository.InterfaceInfo] or derived pointer into a
+ * `(GIInterfaceInfo*)` pointer.
+ *
+ * Depending on the current debugging level, this function may invoke
+ * certain runtime checks to identify invalid casts.
+ *
+ * Since: 2.80
+ */
+#define GI_INTERFACE_INFO(info) (G_TYPE_CHECK_INSTANCE_CAST ((info), GI_TYPE_INTERFACE_INFO, GIInterfaceInfo))
+
 /**
  * GI_IS_INTERFACE_INFO:
  * @info: an info structure
  *
- * Checks if @info is a [class@GIRepository.InterfaceInfo].
+ * Checks if @info is a [class@GIRepository.InterfaceInfo] (or a derived type).
  *
  * Since: 2.80
  */
-#define GI_IS_INTERFACE_INFO(info) \
-    (gi_base_info_get_info_type ((GIBaseInfo*) info) ==  GI_INFO_TYPE_INTERFACE)
+#define GI_IS_INTERFACE_INFO(info) (G_TYPE_CHECK_INSTANCE_TYPE ((info), GI_TYPE_INTERFACE_INFO))
 
 
 GI_AVAILABLE_IN_ALL
-guint            gi_interface_info_get_n_prerequisites (GIInterfaceInfo *info);
+unsigned int     gi_interface_info_get_n_prerequisites (GIInterfaceInfo *info);
 
 GI_AVAILABLE_IN_ALL
 GIBaseInfo *     gi_interface_info_get_prerequisite    (GIInterfaceInfo *info,
-                                                        guint            n);
+                                                        unsigned int     n);
 
 GI_AVAILABLE_IN_ALL
-guint            gi_interface_info_get_n_properties    (GIInterfaceInfo *info);
+unsigned int     gi_interface_info_get_n_properties    (GIInterfaceInfo *info);
 
 GI_AVAILABLE_IN_ALL
 GIPropertyInfo * gi_interface_info_get_property        (GIInterfaceInfo *info,
-                                                        guint            n);
+                                                        unsigned int     n);
 
 GI_AVAILABLE_IN_ALL
-guint            gi_interface_info_get_n_methods       (GIInterfaceInfo *info);
+unsigned int     gi_interface_info_get_n_methods       (GIInterfaceInfo *info);
 
 GI_AVAILABLE_IN_ALL
 GIFunctionInfo * gi_interface_info_get_method          (GIInterfaceInfo *info,
-                                                        guint            n);
+                                                        unsigned int     n);
 
 GI_AVAILABLE_IN_ALL
 GIFunctionInfo * gi_interface_info_find_method         (GIInterfaceInfo *info,
-                                                        const gchar     *name);
+                                                        const char      *name);
 
 GI_AVAILABLE_IN_ALL
-guint            gi_interface_info_get_n_signals       (GIInterfaceInfo *info);
+unsigned int     gi_interface_info_get_n_signals       (GIInterfaceInfo *info);
 
 GI_AVAILABLE_IN_ALL
 GISignalInfo *   gi_interface_info_get_signal          (GIInterfaceInfo *info,
-                                                        guint            n);
+                                                        unsigned int     n);
 
 GI_AVAILABLE_IN_ALL
 GISignalInfo *   gi_interface_info_find_signal         (GIInterfaceInfo *info,
-                                                        const gchar     *name);
+                                                        const char      *name);
 
 GI_AVAILABLE_IN_ALL
-guint            gi_interface_info_get_n_vfuncs        (GIInterfaceInfo *info);
+unsigned int     gi_interface_info_get_n_vfuncs        (GIInterfaceInfo *info);
 
 GI_AVAILABLE_IN_ALL
 GIVFuncInfo *    gi_interface_info_get_vfunc           (GIInterfaceInfo *info,
-                                                        guint            n);
+                                                        unsigned int     n);
 
 GI_AVAILABLE_IN_ALL
 GIVFuncInfo *    gi_interface_info_find_vfunc          (GIInterfaceInfo *info,
-                                                        const gchar     *name);
+                                                        const char      *name);
 
 GI_AVAILABLE_IN_ALL
-guint            gi_interface_info_get_n_constants     (GIInterfaceInfo *info);
+unsigned int     gi_interface_info_get_n_constants     (GIInterfaceInfo *info);
 
 GI_AVAILABLE_IN_ALL
 GIConstantInfo * gi_interface_info_get_constant        (GIInterfaceInfo *info,
-                                                        guint            n);
+                                                        unsigned int     n);
 
 
 GI_AVAILABLE_IN_ALL

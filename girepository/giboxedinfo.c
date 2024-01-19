@@ -1,9 +1,7 @@
 /* -*- mode: C; c-file-style: "gnu"; indent-tabs-mode: nil; -*-
- * GObject introspection: typelib validation, auxiliary functions
- * related to the binary typelib format
+ * GObject introspection: Boxed type implementation
  *
- * Copyright (C) 2011 Colin Walters
- * Copyright (C) 2020 Gisle Vanem
+ * Copyright 2024 GNOME Foundation, Inc.
  *
  * SPDX-License-Identifier: LGPL-2.1-or-later
  *
@@ -23,31 +21,32 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#include "gdump.c"
+#include "config.h"
 
-int
-main (int    argc,
-      char **argv)
+#include <glib.h>
+
+#include <girepository/girepository.h>
+#include "gibaseinfo-private.h"
+#include "girepository-private.h"
+#include "gitypelib-internal.h"
+#include "giboxedinfo.h"
+
+/**
+ * GIBoxedInfo:
+ *
+ * A `GIBoxedInfo` represents a boxed type.
+ *
+ * There isn’t much you can do with a boxed type; `GIBoxedInfo` exists mainly to
+ * tag the type.
+ *
+ * Since: 2.80
+ */
+
+void
+gi_boxed_info_class_init (gpointer g_class,
+                          gpointer class_data)
 {
-  int i;
-  GModule *self;
+  GIBaseInfoClass *info_class = g_class;
 
-  self = g_module_open (NULL, 0);
-
-  for (i = 1; i < argc; i++)
-    {
-      GError *error = NULL;
-      GType type;
-
-      type = invoke_get_type (self, argv[i], &error);
-      if (!type)
-        {
-          g_printerr ("%s\n", error->message);
-          g_clear_error (&error);
-        }
-      else
-        dump_type (type, argv[i], stdout);
-    }
-
-  return 0;
+  info_class->info_type = GI_INFO_TYPE_BOXED;
 }

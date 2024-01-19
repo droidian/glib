@@ -32,22 +32,37 @@
 
 G_BEGIN_DECLS
 
+#define GI_TYPE_VFUNC_INFO (gi_vfunc_info_get_type ())
+
+/**
+ * GI_VFUNC_INFO:
+ * @info: Info object which is subject to casting.
+ *
+ * Casts a [type@GIRepository.VFuncInfo] or derived pointer into a
+ * `(GIVFuncInfo*)` pointer.
+ *
+ * Depending on the current debugging level, this function may invoke
+ * certain runtime checks to identify invalid casts.
+ *
+ * Since: 2.80
+ */
+#define GI_VFUNC_INFO(info) (G_TYPE_CHECK_INSTANCE_CAST ((info), GI_TYPE_VFUNC_INFO, GIVFuncInfo))
+
 /**
  * GI_IS_VFUNC_INFO:
  * @info: an info structure
  *
- * Checks if @info is a [struct@GIRepository.VFuncInfo].
+ * Checks if @info is a [struct@GIRepository.VFuncInfo] (or a derived type).
  *
  * Since: 2.80
  */
-#define GI_IS_VFUNC_INFO(info) \
-    (gi_base_info_get_info_type ((GIBaseInfo*) info) ==  GI_INFO_TYPE_VFUNC)
+#define GI_IS_VFUNC_INFO(info) (G_TYPE_CHECK_INSTANCE_TYPE ((info), GI_TYPE_VFUNC_INFO))
 
 GI_AVAILABLE_IN_ALL
 GIVFuncInfoFlags  gi_vfunc_info_get_flags   (GIVFuncInfo *info);
 
 GI_AVAILABLE_IN_ALL
-guint             gi_vfunc_info_get_offset  (GIVFuncInfo *info);
+size_t            gi_vfunc_info_get_offset  (GIVFuncInfo *info);
 
 GI_AVAILABLE_IN_ALL
 GISignalInfo *    gi_vfunc_info_get_signal  (GIVFuncInfo *info);
@@ -56,7 +71,7 @@ GI_AVAILABLE_IN_ALL
 GIFunctionInfo *  gi_vfunc_info_get_invoker (GIVFuncInfo *info);
 
 GI_AVAILABLE_IN_ALL
-gpointer          gi_vfunc_info_get_address (GIVFuncInfo *info,
+void *            gi_vfunc_info_get_address (GIVFuncInfo *info,
                                              GType        implementor_gtype,
                                              GError     **error);
 
@@ -64,9 +79,9 @@ GI_AVAILABLE_IN_ALL
 gboolean          gi_vfunc_info_invoke      (GIVFuncInfo      *info,
                                              GType             implementor,
                                              const GIArgument *in_args,
-                                             gsize             n_in_args,
+                                             size_t            n_in_args,
                                              GIArgument       *out_args,
-                                             gsize             n_out_args,
+                                             size_t            n_out_args,
                                              GIArgument       *return_value,
                                              GError          **error);
 

@@ -32,45 +32,60 @@
 
 G_BEGIN_DECLS
 
+#define GI_TYPE_STRUCT_INFO (gi_struct_info_get_type ())
+
+/**
+ * GI_STRUCT_INFO:
+ * @info: Info object which is subject to casting.
+ *
+ * Casts a [type@GIRepository.StructInfo] or derived pointer into a
+ * `(GIStructInfo*)` pointer.
+ *
+ * Depending on the current debugging level, this function may invoke
+ * certain runtime checks to identify invalid casts.
+ *
+ * Since: 2.80
+ */
+#define GI_STRUCT_INFO(info) (G_TYPE_CHECK_INSTANCE_CAST ((info), GI_TYPE_STRUCT_INFO, GIStructInfo))
+
 /**
  * GI_IS_STRUCT_INFO:
  * @info: an info structure
  *
- * Checks if @info is a [class@GIRepository.StructInfo].
+ * Checks if @info is a [class@GIRepository.StructInfo] (or a derived type).
  *
  * Since: 2.80
  */
-#define GI_IS_STRUCT_INFO(info) \
-    (gi_base_info_get_info_type ((GIBaseInfo*) info) ==  GI_INFO_TYPE_STRUCT)
+#define GI_IS_STRUCT_INFO(info) (G_TYPE_CHECK_INSTANCE_TYPE ((info), GI_TYPE_STRUCT_INFO))
 
 
 GI_AVAILABLE_IN_ALL
-guint            gi_struct_info_get_n_fields    (GIStructInfo *info);
+unsigned int     gi_struct_info_get_n_fields    (GIStructInfo *info);
 
 GI_AVAILABLE_IN_ALL
 GIFieldInfo *    gi_struct_info_get_field       (GIStructInfo *info,
-                                                 guint         n);
+                                                 unsigned int  n);
 
 GI_AVAILABLE_IN_ALL
 GIFieldInfo *    gi_struct_info_find_field      (GIStructInfo *info,
-                                                 const gchar  *name);
+                                                 const char   *name);
 
 GI_AVAILABLE_IN_ALL
-guint            gi_struct_info_get_n_methods   (GIStructInfo *info);
+unsigned int     gi_struct_info_get_n_methods   (GIStructInfo *info);
 
 GI_AVAILABLE_IN_ALL
 GIFunctionInfo * gi_struct_info_get_method      (GIStructInfo *info,
-                                                 guint         n);
+                                                 unsigned int  n);
 
 GI_AVAILABLE_IN_ALL
 GIFunctionInfo * gi_struct_info_find_method     (GIStructInfo *info,
-                                                 const gchar  *name);
+                                                 const char   *name);
 
 GI_AVAILABLE_IN_ALL
-gsize            gi_struct_info_get_size        (GIStructInfo *info);
+size_t           gi_struct_info_get_size        (GIStructInfo *info);
 
 GI_AVAILABLE_IN_ALL
-gsize            gi_struct_info_get_alignment   (GIStructInfo *info);
+size_t           gi_struct_info_get_alignment   (GIStructInfo *info);
 
 GI_AVAILABLE_IN_ALL
 gboolean         gi_struct_info_is_gtype_struct (GIStructInfo *info);

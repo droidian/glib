@@ -21,6 +21,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
+#include <stdint.h>
 #include <glib-object.h>
 #include "gitypelib-internal.h"
 
@@ -28,8 +29,8 @@ static void
 test_build_retrieve (void)
 {
   GITypelibHashBuilder *builder;
-  guint32 bufsize;
-  guint8* buf;
+  uint32_t bufsize;
+  uint8_t* buf;
 
   builder = gi_typelib_hash_builder_new ();
 
@@ -38,8 +39,7 @@ test_build_retrieve (void)
   gi_typelib_hash_builder_add_string (builder, "VolumeMonitor", 9);
   gi_typelib_hash_builder_add_string (builder, "FileMonitorFlags", 31);
 
-  if (!gi_typelib_hash_builder_prepare (builder))
-    g_assert_not_reached ();
+  g_assert_true (gi_typelib_hash_builder_prepare (builder));
 
   bufsize = gi_typelib_hash_builder_get_buffer_size (builder);
 
@@ -49,10 +49,10 @@ test_build_retrieve (void)
 
   gi_typelib_hash_builder_destroy (builder);
 
-  g_assert (gi_typelib_hash_search (buf, "Action", 4) == 0);
-  g_assert (gi_typelib_hash_search (buf, "ZLibDecompressor", 4) == 42);
-  g_assert (gi_typelib_hash_search (buf, "VolumeMonitor", 4) == 9);
-  g_assert (gi_typelib_hash_search (buf, "FileMonitorFlags", 4) == 31);
+  g_assert_cmpuint (gi_typelib_hash_search (buf, "Action", 4), ==, 0);
+  g_assert_cmpuint (gi_typelib_hash_search (buf, "ZLibDecompressor", 4), ==, 42);
+  g_assert_cmpuint (gi_typelib_hash_search (buf, "VolumeMonitor", 4), ==, 9);
+  g_assert_cmpuint (gi_typelib_hash_search (buf, "FileMonitorFlags", 4), ==, 31);
 
   g_free (buf);
 }

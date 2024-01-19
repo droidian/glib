@@ -135,8 +135,8 @@ gi_type_info_get_tag (GITypeInfo *info)
  * Since: 2.80
  */
 GITypeInfo *
-gi_type_info_get_param_type (GITypeInfo *info,
-                             guint       n)
+gi_type_info_get_param_type (GITypeInfo  *info,
+                             unsigned int n)
 {
   GIRealInfo *rinfo = (GIRealInfo *)info;
   SimpleTypeBlob *type;
@@ -232,23 +232,25 @@ gi_type_info_get_interface (GITypeInfo *info)
 /**
  * gi_type_info_get_array_length_index:
  * @info: a #GITypeInfo
+ * @out_length_index: (out) (optional): return location for the length argument
  *
  * Obtain the position of the argument which gives the array length of the type.
  *
- * The type tag must be a `GI_TYPE_TAG_ARRAY` or `-1` will be returned.
+ * The type tag must be a `GI_TYPE_TAG_ARRAY` with a length argument, or `FALSE`
+ * will be returned.
  *
- * Returns: the array length argument index, or `-1` if the type is not an array
- *   or it has no length argument
+ * Returns: `TRUE` if the type is an array and has a length argument
  * Since: 2.80
  */
-gint
-gi_type_info_get_array_length_index (GITypeInfo *info)
+gboolean
+gi_type_info_get_array_length_index (GITypeInfo   *info,
+                                     unsigned int *out_length_index)
 {
   GIRealInfo *rinfo = (GIRealInfo *)info;
   SimpleTypeBlob *type;
 
-  g_return_val_if_fail (info != NULL, -1);
-  g_return_val_if_fail (GI_IS_TYPE_INFO (info), -1);
+  g_return_val_if_fail (info != NULL, FALSE);
+  g_return_val_if_fail (GI_IS_TYPE_INFO (info), FALSE);
 
   type = (SimpleTypeBlob *)&rinfo->typelib->data[rinfo->offset];
 
@@ -257,34 +259,43 @@ gi_type_info_get_array_length_index (GITypeInfo *info)
       ArrayTypeBlob *blob = (ArrayTypeBlob *)&rinfo->typelib->data[rinfo->offset];
 
       if (blob->tag == GI_TYPE_TAG_ARRAY)
-	{
-	  if (blob->has_length)
-	    return blob->dimensions.length;
-	}
+        {
+          if (blob->has_length)
+            {
+              if (out_length_index != NULL)
+                *out_length_index = blob->dimensions.length;
+              return TRUE;
+            }
+        }
     }
 
-  return -1;
+  if (out_length_index != NULL)
+    *out_length_index = 0;
+  return FALSE;
 }
 
 /**
  * gi_type_info_get_array_fixed_size:
  * @info: a #GITypeInfo
+ * @out_size: (out) (optional): return location for the array size
  *
  * Obtain the fixed array size of the type, in number of elements (not bytes).
  *
- * The type tag must be a `GI_TYPE_TAG_ARRAY` or `-1` will be returned.
+ * The type tag must be a `GI_TYPE_TAG_ARRAY` with a fixed size, or `FALSE` will
+ * be returned.
  *
- * Returns: the size or `-1` if the type is not an array or it has no fixed size
+ * Returns: `TRUE` if the type is an array and has a fixed size
  * Since: 2.80
  */
-gssize
-gi_type_info_get_array_fixed_size (GITypeInfo *info)
+gboolean
+gi_type_info_get_array_fixed_size (GITypeInfo *info,
+                                   size_t     *out_size)
 {
   GIRealInfo *rinfo = (GIRealInfo *)info;
   SimpleTypeBlob *type;
 
-  g_return_val_if_fail (info != NULL, -1);
-  g_return_val_if_fail (GI_IS_TYPE_INFO (info), -1);
+  g_return_val_if_fail (info != NULL, FALSE);
+  g_return_val_if_fail (GI_IS_TYPE_INFO (info), FALSE);
 
   type = (SimpleTypeBlob *)&rinfo->typelib->data[rinfo->offset];
 
@@ -293,13 +304,19 @@ gi_type_info_get_array_fixed_size (GITypeInfo *info)
       ArrayTypeBlob *blob = (ArrayTypeBlob *)&rinfo->typelib->data[rinfo->offset];
 
       if (blob->tag == GI_TYPE_TAG_ARRAY)
-	{
-	  if (blob->has_size)
-	    return blob->dimensions.size;
-	}
+        {
+          if (blob->has_size)
+            {
+              if (out_size != NULL)
+                *out_size = blob->dimensions.size;
+              return TRUE;
+            }
+        }
     }
 
-  return -1;
+  if (out_size != NULL)
+    *out_size = 0;
+  return FALSE;
 }
 
 /**
@@ -329,7 +346,7 @@ gi_type_info_is_zero_terminated (GITypeInfo *info)
       ArrayTypeBlob *blob = (ArrayTypeBlob *)&rinfo->typelib->data[rinfo->offset];
 
       if (blob->tag == GI_TYPE_TAG_ARRAY)
-	return blob->zero_terminated;
+        return blob->zero_terminated;
     }
 
   return FALSE;
@@ -341,10 +358,12 @@ gi_type_info_is_zero_terminated (GITypeInfo *info)
  *
  * Obtain the array type for this type.
  *
- * See [enum@GIRepository.ArrayType] for a list of possible values. If the type
- * tag of this type is not array, `-1` will be returned.
+ * See [enum@GIRepository.ArrayType] for a list of possible values.
  *
- * Returns: the array type or `-1`
+ * It is an error to call this on an @info which is not an array type. Use
+ * [method@GIRepository.TypeInfo.get_tag] to check.
+ *
+ * Returns: the array type
  * Since: 2.80
  */
 GIArrayType
@@ -366,7 +385,8 @@ gi_type_info_get_array_type (GITypeInfo *info)
       return blob->array_type;
     }
 
-  return -1;
+  /* Not an array type */
+  g_assert_not_reached ();
 }
 
 /**
@@ -426,7 +446,7 @@ gi_type_info_get_storage_type (GITypeInfo *info)
  */
 void
 gi_type_tag_argument_from_hash_pointer (GITypeTag   storage_type,
-                                        gpointer    hash_pointer,
+                                        void       *hash_pointer,
                                         GIArgument *arg)
 {
   switch (storage_type)
@@ -435,23 +455,23 @@ gi_type_tag_argument_from_hash_pointer (GITypeTag   storage_type,
         arg->v_boolean = !!GPOINTER_TO_INT (hash_pointer);
         break;
       case GI_TYPE_TAG_INT8:
-        arg->v_int8 = (gint8)GPOINTER_TO_INT (hash_pointer);
+        arg->v_int8 = (int8_t) GPOINTER_TO_INT (hash_pointer);
         break;
       case GI_TYPE_TAG_UINT8:
-        arg->v_uint8 = (guint8)GPOINTER_TO_UINT (hash_pointer);
+        arg->v_uint8 = (uint8_t) GPOINTER_TO_UINT (hash_pointer);
         break;
       case GI_TYPE_TAG_INT16:
-        arg->v_int16 = (gint16)GPOINTER_TO_INT (hash_pointer);
+        arg->v_int16 = (int16_t) GPOINTER_TO_INT (hash_pointer);
         break;
       case GI_TYPE_TAG_UINT16:
-        arg->v_uint16 = (guint16)GPOINTER_TO_UINT (hash_pointer);
+        arg->v_uint16 = (uint16_t) GPOINTER_TO_UINT (hash_pointer);
         break;
       case GI_TYPE_TAG_INT32:
-        arg->v_int32 = (gint32)GPOINTER_TO_INT (hash_pointer);
+        arg->v_int32 = (int32_t) GPOINTER_TO_INT (hash_pointer);
         break;
       case GI_TYPE_TAG_UINT32:
       case GI_TYPE_TAG_UNICHAR:
-        arg->v_uint32 = (guint32)GPOINTER_TO_UINT (hash_pointer);
+        arg->v_uint32 = (uint32_t) GPOINTER_TO_UINT (hash_pointer);
         break;
       case GI_TYPE_TAG_GTYPE:
         arg->v_size = GPOINTER_TO_SIZE (hash_pointer);
@@ -503,7 +523,7 @@ gi_type_tag_argument_from_hash_pointer (GITypeTag   storage_type,
  */
 void
 gi_type_info_argument_from_hash_pointer (GITypeInfo *info,
-                                         gpointer    hash_pointer,
+                                         void       *hash_pointer,
                                          GIArgument *arg)
 {
     GITypeTag storage_type = gi_type_info_get_storage_type (info);
@@ -537,7 +557,7 @@ gi_type_info_argument_from_hash_pointer (GITypeInfo *info,
  *   for example
  * Since: 2.80
  */
-gpointer
+void *
 gi_type_tag_hash_pointer_from_argument (GITypeTag   storage_type,
                                         GIArgument *arg)
 {
@@ -605,7 +625,7 @@ gi_type_tag_hash_pointer_from_argument (GITypeTag   storage_type,
  *   for example
  * Since: 2.80
  */
-gpointer
+void *
 gi_type_info_hash_pointer_from_argument (GITypeInfo *info,
                                          GIArgument *arg)
 {

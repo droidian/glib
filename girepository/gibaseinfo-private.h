@@ -45,7 +45,9 @@ struct _GIBaseInfoClass
 void            gi_base_info_init_types              (void);
 
 GType           gi_base_info_type_register_static    (const char     *type_name,
-                                                      gsize           instance_size,
-                                                      GClassInitFunc  class_init);
+                                                      size_t          instance_size,
+                                                      GClassInitFunc  class_init,
+                                                      GType           parent_type,
+                                                      GTypeFlags      type_flags);
 
 G_END_DECLS
