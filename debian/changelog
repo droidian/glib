@@ -3,6 +3,7 @@ glib2.0 (2.79.0+git20240119~62ee8bf6-1) UNRELEASED; urgency=medium
   * New upstream development snapshot
   * d/libglib2.0-0.symbols: Update
   * d/libgirepository-2.0-0.symbols: Add
+  * d/copyright: Update
   * Drop patches that were applied upstream
   * d/control: Take over gir1.2-glib-2.0{,-dev} from
     src:gobject-introspection.
@@ -21,9 +22,10 @@ glib2.0 (2.79.0+git20240119~62ee8bf6-1) UNRELEASED; urgency=medium
   * d/rules: Use cross g-ir-scanner when cross-compiling introspection data
   * d/rules: Set qemu-user as an exe_wrapper when cross-compiling
     introspection data.
-    The upstream build system checks for an exe_wrapper when we do this,
-    although in Debian, we know that we have a cross g-ir-scanner which
-    uses qemu-user internally.
+    The upstream build system checks for ability to run host-architecture
+    executables when we do this, although in Debian, we know that we
+    have a cross g-ir-scanner (which as an implementation detail uses
+    qemu-user internally).
   * d/source/lintian-overrides: Silence warning for new nogir profile name
   * d/control, d/rules: Package libgirepository-2.0.
     This will eventually replace the libgirepository-1.0 from
@@ -39,7 +41,8 @@ glib2.0 (2.79.0+git20240119~62ee8bf6-1) UNRELEASED; urgency=medium
     not be stable until GLib 2.80.0 is released; please use with caution.
   * d/control: Exclude libglib2.0-tests under nogir build profile.
     It now includes some tests that are only built if
-    GObject-Introspection is enabled.
+    GObject-Introspection is enabled, so making it reproducible requires
+    turning it off during nogir builds.
   * d/control: Ensure build-dependencies are cross-satisfiable.
     python3-packaging is not (currently?) Multi-Arch: foreign. We only
     need this for gdbus-codegen, so a version suitable for the build
@@ -47,7 +50,7 @@ glib2.0 (2.79.0+git20240119~62ee8bf6-1) UNRELEASED; urgency=medium
   * d/rules: Update maintainer-update-unicode-data target for update of
     Unicode data to 15.1.0 in previous release
 
- -- Simon McVittie <smcv@debian.org>  Fri, 19 Jan 2024 13:05:08 +0000
+ -- Simon McVittie <smcv@debian.org>  Fri, 19 Jan 2024 13:15:47 +0000
 
 glib2.0 (2.79.0+git20240110~g38f5ba3c-2) experimental; urgency=medium
 
