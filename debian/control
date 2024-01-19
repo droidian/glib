@@ -71,8 +71,9 @@ Description: GLib library of C routines
  .
  This package contains the shared libraries.
 
+# Build if (!noinsttest) && (!nogir)
 Package: libglib2.0-tests
-Build-profiles: <!noinsttest>
+Build-Profiles: <!noinsttest !nogir>
 Architecture: any
 Depends: desktop-file-utils,
          gir1.2-glib-2.0,
