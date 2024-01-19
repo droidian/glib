@@ -26,7 +26,7 @@ Build-Depends: dbus-daemon <!nocheck> <!noinsttest>,
                xsltproc,
                zlib1g-dev
 Build-Depends-Arch: desktop-file-utils <!nocheck>,
-                    gobject-introspection (>= 1.78.1-11~) <!nogir>,
+                    gobject-introspection (>= 1.78.1-14~) <!nogir>,
                     locales <!nocheck> | locales-all <!nocheck>,
                     python3-dbus <!nocheck>,
                     python3-gi <!nocheck>,
@@ -35,7 +35,7 @@ Build-Depends-Arch: desktop-file-utils <!nocheck>,
                     tzdata <!nocheck>,
                     xterm <!nocheck>
 Build-Depends-Indep: gi-docgen <!nodoc>,
-                     gobject-introspection (>= 1.78.1-11~) <!nodoc>,
+                     gobject-introspection (>= 1.78.1-14~) <!nodoc>,
                      qemu-user <cross !nodoc>,
 Rules-Requires-Root: no
 Standards-Version: 4.6.2
