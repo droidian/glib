@@ -64,6 +64,9 @@ maintainer-update-unicode-data:
 	$(CURDIR)/tools/update-unicode-data.sh $(CURDIR)/unicode-data 15.0.0
 
 override_dh_auto_configure:
+	sed -e 's|@DEB_HOST_ARCH@|$(DEB_HOST_ARCH)|g' \
+		< debian/meson/exe-wrapper.ini.in \
+		> debian/meson/exe-wrapper.ini
 	dh_auto_configure \
 		--builddirectory=debian/build/deb \
 		-- \
@@ -228,6 +231,13 @@ endif
 ifneq ($(filter gir% %-doc,$(built_binaries)),)
 DEB_CONFIGURE_FLAGS_deb += -Dgir_dir_prefix=lib/${DEB_HOST_MULTIARCH}
 DEB_CONFIGURE_FLAGS_deb += -Dintrospection=enabled
+ifneq ($(DEB_HOST_ARCH),$(DEB_BUILD_ARCH))
+DEB_CONFIGURE_FLAGS_deb += --cross-file=$(DEB_HOST_GNU_TYPE)-gobject-introspection.ini
+# GLib insists on having an exe_wrapper when we enable introspection,
+# even though in Debian, we happen to know that our g-ir-scanner
+# automatically uses qemu
+DEB_CONFIGURE_FLAGS_deb += --cross-file=$(CURDIR)/debian/meson/exe-wrapper.ini
+endif
 else
 DEB_CONFIGURE_FLAGS_deb += -Dintrospection=disabled
 endif
