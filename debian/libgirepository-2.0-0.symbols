@@ -25,6 +25,7 @@ libgirepository-2.0.so.0 libgirepository-2.0-0 #MINVER#
  gi_base_info_iterate_attributes@Base 2.79.0+git20240119~
  gi_base_info_ref@Base 2.79.0+git20240119~
  gi_base_info_unref@Base 2.79.0+git20240119~
+ gi_boxed_info_get_type@Base 2.79.0+git20240119~
  gi_callable_info_can_throw_gerror@Base 2.79.0+git20240119~
  gi_callable_info_create_closure@Base 2.79.0+git20240119~
  gi_callable_info_destroy_closure@Base 2.79.0+git20240119~
@@ -63,6 +64,7 @@ libgirepository-2.0.so.0 libgirepository-2.0-0 #MINVER#
  gi_field_info_get_type@Base 2.79.0+git20240119~
  gi_field_info_get_type_info@Base 2.79.0+git20240119~
  gi_field_info_set_field@Base 2.79.0+git20240119~
+ gi_flags_info_get_type@Base 2.79.0+git20240119~
  gi_function_info_get_flags@Base 2.79.0+git20240119~
  gi_function_info_get_property@Base 2.79.0+git20240119~
  gi_function_info_get_symbol@Base 2.79.0+git20240119~
@@ -200,7 +202,6 @@ libgirepository-2.0.so.0 libgirepository-2.0-0 #MINVER#
  gi_type_tag_get_ffi_type@Base 2.79.0+git20240119~
  gi_type_tag_hash_pointer_from_argument@Base 2.79.0+git20240119~
  gi_type_tag_to_string@Base 2.79.0+git20240119~
- gi_typelib_check_format@Base 2.79.0+git20240119~
  gi_typelib_free@Base 2.79.0+git20240119~
  gi_typelib_get_namespace@Base 2.79.0+git20240119~
  gi_typelib_new_from_const_memory@Base 2.79.0+git20240119~
