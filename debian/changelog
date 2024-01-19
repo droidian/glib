@@ -40,18 +40,6 @@ glib2.0 (2.79.0+git20240116~f70b3a91-1) UNRELEASED; urgency=medium
   * d/control: Exclude libglib2.0-tests under nogir build profile.
     It now includes some tests that are only built if
     GObject-Introspection is enabled.
-  * d/control: Build-depend on libglib2.0-dev if introspection will
-    be enabled.
-    This works around a missing dependency in the gobject-introspection
-    package, for which a fix is pending. In practice other packages
-    that use gobject-introspection are highly likely to all depend on
-    GLib anyway, so the missing dependency likely only affects this one
-    source package.
-    We need this circular dependency for Meson to be able to discover
-    the gobject-introspection-1.0 pkg-config module successfully. As
-    with previous uses of GObject-Introspection, it can be bootstrapped
-    by cross-compiling or by using the nogir build profile (together
-    with nodoc, if building Architecture: all).
   * d/control: Ensure build-dependencies are cross-satisfiable.
     python3-packaging is not (currently?) Multi-Arch: foreign. We only
     need this for gdbus-codegen, so a version suitable for the build
