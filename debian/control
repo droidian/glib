@@ -26,6 +26,7 @@ Build-Depends: dbus-daemon <!nocheck> <!noinsttest>,
                xsltproc,
                zlib1g-dev
 Build-Depends-Arch: desktop-file-utils <!nocheck>,
+                    dh-sequence-gir <!nogir>,
                     gobject-introspection (>= 1.78.1-14~) <!nogir>,
                     locales <!nocheck> | locales-all <!nocheck>,
                     python3-dbus <!nocheck>,
