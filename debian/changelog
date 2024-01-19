@@ -2,6 +2,7 @@ glib2.0 (2.79.0+git20240116~f70b3a91-1) UNRELEASED; urgency=medium
 
   * New upstream development snapshot
   * d/libglib2.0-0.symbols: Update
+  * d/libgirepository-2.0-0.symbols: Add
   * Drop patches that were applied upstream
   * d/control: Take over gir1.2-glib-2.0{,-dev} from
     src:gobject-introspection.
@@ -10,13 +11,20 @@ glib2.0 (2.79.0+git20240116~f70b3a91-1) UNRELEASED; urgency=medium
     between glib2.0 and gobject-introspection, but they were always
     conceptually part of glib2.0.
     Now that build-profiles are well-understood, we can bootstrap
-    new architectures by initially building glib2.0 with the nogir
+    new architectures by initially building glib2.0 with the new nogir
     build-profile, then using that to build gobject-introspection,
     and then rebuilding glib2.0 without nogir.
     Alternatively, now that GObject-Introspection data can be
     cross-compiled, we can bootstrap new architectures by cross-compiling
     glib2.0 and gobject-introspection on an existing architecture (which
     must be of the same endianness as a result of internal details).
+  * d/rules: Use cross g-ir-scanner when cross-compiling introspection data
+  * d/rules: Set qemu-user as an exe_wrapper when cross-compiling
+    introspection data.
+    The upstream build system checks for an exe_wrapper when we do this,
+    although in Debian, we know that we have a cross g-ir-scanner which
+    uses qemu-user internally.
+  * d/source/lintian-overrides: Silence warning for new nogir profile name
   * d/control, d/rules: Package libgirepository-2.0.
     This will eventually replace the libgirepository-1.0 from
     src:gobject-introspection, in future versions of language bindings
@@ -29,6 +37,9 @@ glib2.0 (2.79.0+git20240116~f70b3a91-1) UNRELEASED; urgency=medium
     NEW processing.
     The API and ABI of this new library are not yet stable, and will
     not be stable until GLib 2.80.0 is released; please use with caution.
+  * d/control: Exclude libglib2.0-tests under nogir build profile.
+    It now includes some tests that are only built if
+    GObject-Introspection is enabled.
   * d/control: Build-depend on libglib2.0-dev if introspection will
     be enabled.
     This works around a missing dependency in the gobject-introspection
@@ -41,8 +52,14 @@ glib2.0 (2.79.0+git20240116~f70b3a91-1) UNRELEASED; urgency=medium
     with previous uses of GObject-Introspection, it can be bootstrapped
     by cross-compiling or by using the nogir build profile (together
     with nodoc, if building Architecture: all).
+  * d/control: Ensure build-dependencies are cross-satisfiable.
+    python3-packaging is not (currently?) Multi-Arch: foreign. We only
+    need this for gdbus-codegen, so a version suitable for the build
+    architecture is correct.
+  * d/rules: Update maintainer-update-unicode-data target for update of
+    Unicode data to 15.1.0 in previous release
 
- -- Simon McVittie <smcv@debian.org>  Tue, 16 Jan 2024 19:10:20 +0000
+ -- Simon McVittie <smcv@debian.org>  Fri, 19 Jan 2024 12:56:50 +0000
 
 glib2.0 (2.79.0+git20240110~g38f5ba3c-2) experimental; urgency=medium
 
