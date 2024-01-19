@@ -32,20 +32,35 @@
 
 G_BEGIN_DECLS
 
+#define GI_TYPE_FUNCTION_INFO (gi_function_info_get_type ())
+
+/**
+ * GI_FUNCTION_INFO:
+ * @info: Info object which is subject to casting.
+ *
+ * Casts a [type@GIRepository.FunctionInfo] or derived pointer into a
+ * `(GIFunctionInfo*)` pointer.
+ *
+ * Depending on the current debugging level, this function may invoke
+ * certain runtime checks to identify invalid casts.
+ *
+ * Since: 2.80
+ */
+#define GI_FUNCTION_INFO(info) (G_TYPE_CHECK_INSTANCE_CAST ((info), GI_TYPE_FUNCTION_INFO, GIFunctionInfo))
+
 /**
  * GI_IS_FUNCTION_INFO:
  * @info: an info structure
  *
- * Checks if @info is a [class@GIRepository.FunctionInfo].
+ * Checks if @info is a [class@GIRepository.FunctionInfo] (or a derived type).
  *
  * Since: 2.80
  */
-#define GI_IS_FUNCTION_INFO(info) \
-    (gi_base_info_get_info_type ((GIBaseInfo*) info) ==  GI_INFO_TYPE_FUNCTION)
+#define GI_IS_FUNCTION_INFO(info) (G_TYPE_CHECK_INSTANCE_TYPE ((info), GI_TYPE_FUNCTION_INFO))
 
 
 GI_AVAILABLE_IN_ALL
-const gchar *           gi_function_info_get_symbol     (GIFunctionInfo *info);
+const char *            gi_function_info_get_symbol     (GIFunctionInfo *info);
 
 GI_AVAILABLE_IN_ALL
 GIFunctionInfoFlags     gi_function_info_get_flags      (GIFunctionInfo *info);
@@ -92,9 +107,9 @@ typedef enum
 GI_AVAILABLE_IN_ALL
 gboolean              gi_function_info_invoke         (GIFunctionInfo    *info,
                                                        const GIArgument  *in_args,
-                                                       gsize              n_in_args,
+                                                       size_t             n_in_args,
                                                        GIArgument        *out_args,
-                                                       gsize              n_out_args,
+                                                       size_t             n_out_args,
                                                        GIArgument        *return_value,
                                                        GError           **error);
 

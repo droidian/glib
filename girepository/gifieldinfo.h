@@ -32,38 +32,53 @@
 
 G_BEGIN_DECLS
 
+#define GI_TYPE_FIELD_INFO (gi_field_info_get_type ())
+
+/**
+ * GI_FIELD_INFO:
+ * @info: Info object which is subject to casting.
+ *
+ * Casts a [type@GIRepository.FieldInfo] or derived pointer into a
+ * `(GIFieldInfo*)` pointer.
+ *
+ * Depending on the current debugging level, this function may invoke
+ * certain runtime checks to identify invalid casts.
+ *
+ * Since: 2.80
+ */
+#define GI_FIELD_INFO(info) (G_TYPE_CHECK_INSTANCE_CAST ((info), GI_TYPE_FIELD_INFO, GIFieldInfo))
+
 /**
  * GI_IS_FIELD_INFO:
  * @info: an info structure
  *
- * Checks if @info is a [class@GIRepository.FieldInfo].
+ * Checks if @info is a [class@GIRepository.FieldInfo] (or a derived type).
  *
  * Since: 2.80
  */
-#define GI_IS_FIELD_INFO(info) \
-    (gi_base_info_get_info_type ((GIBaseInfo*) info) ==  GI_INFO_TYPE_FIELD)
+#define GI_IS_FIELD_INFO(info) (G_TYPE_CHECK_INSTANCE_TYPE ((info), GI_TYPE_FIELD_INFO))
 
 
 GI_AVAILABLE_IN_ALL
 GIFieldInfoFlags       gi_field_info_get_flags      (GIFieldInfo *info);
 
 GI_AVAILABLE_IN_ALL
-gsize                  gi_field_info_get_size       (GIFieldInfo *info);
+size_t                 gi_field_info_get_size       (GIFieldInfo *info);
 
 GI_AVAILABLE_IN_ALL
-gsize                  gi_field_info_get_offset     (GIFieldInfo *info);
+size_t                 gi_field_info_get_offset     (GIFieldInfo *info);
 
 GI_AVAILABLE_IN_ALL
 GITypeInfo *           gi_field_info_get_type_info  (GIFieldInfo *info);
 
 GI_AVAILABLE_IN_ALL
 gboolean               gi_field_info_get_field      (GIFieldInfo *field_info,
-                                                     gpointer     mem,
+                                                     void        *mem,
                                                      GIArgument  *value);
 
 GI_AVAILABLE_IN_ALL
 gboolean               gi_field_info_set_field      (GIFieldInfo      *field_info,
-                                                     gpointer          mem,
+                                                     void             *mem,
                                                      const GIArgument *value);
 
 G_END_DECLS

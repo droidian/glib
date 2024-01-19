@@ -44,11 +44,13 @@ gi_visibility_h = custom_target(
 girepo_headers = files(
   'giarginfo.h',
   'gibaseinfo.h',
+  'giboxedinfo.h',
   'gicallableinfo.h',
   'gicallbackinfo.h',
   'giconstantinfo.h',
   'gienuminfo.h',
   'gifieldinfo.h',
+  'giflagsinfo.h',
   'gifunctioninfo.h',
   'giinterfaceinfo.h',
   'giobjectinfo.h',
@@ -62,6 +64,7 @@ girepo_headers = files(
   'gitypes.h',
   'giunioninfo.h',
   'giunresolvedinfo.h',
+  'givalueinfo.h',
   'givfuncinfo.h',
 )
 
@@ -103,6 +106,7 @@ girepo_gthash_lib = static_library('girepository-gthash',
     libgmodule_dep,
     libgobject_dep,
   ],
+  gnu_symbol_visibility : 'hidden',
 )
 
 girepo_gthash_dep = declare_dependency(
@@ -129,6 +133,7 @@ libgirepository_internals = static_library('girepository-internals',
     gi_visibility_h,
   ],
   c_args: gir_c_args + custom_c_args,
+  gnu_symbol_visibility : 'hidden',
   include_directories : [configinc, girepoinc],
   dependencies: [girepo_gthash_dep, libffi_dep],
 )
@@ -143,11 +148,13 @@ girepo_sources = files(
   'gdump.c',
   'giarginfo.c',
   'gibaseinfo.c',
+  'giboxedinfo.c',
   'gicallableinfo.c',
   'gicallbackinfo.c',
   'giconstantinfo.c',
   'gienuminfo.c',
   'gifieldinfo.c',
+  'giflagsinfo.c',
   'gifunctioninfo.c',
   'ginvoke.c',
   'giinterfaceinfo.c',
@@ -162,6 +169,7 @@ girepo_sources = files(
   'gitypelib.c',
   'giunioninfo.c',
   'giunresolvedinfo.c',
+  'givalueinfo.c',
   'givfuncinfo.c',
 )
 
