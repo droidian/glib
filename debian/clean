@@ -1,4 +1,5 @@
 debian/libglib2.0-0.postinst
 debian/libglib2.0-0.postrm
 debian/libglib2.0-0.triggers
+debian/meson/exe-wrapper.ini
 gio/gdbus-2.0/codegen/*.pyc
