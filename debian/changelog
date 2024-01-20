@@ -1,4 +1,4 @@
-glib2.0 (2.79.0+git20240119~62ee8bf6-1) UNRELEASED; urgency=medium
+glib2.0 (2.79.0+git20240119~62ee8bf6-1) experimental; urgency=medium
 
   * New upstream development snapshot
   * d/libglib2.0-0.symbols: Update
@@ -49,8 +49,9 @@ glib2.0 (2.79.0+git20240119~62ee8bf6-1) UNRELEASED; urgency=medium
     architecture is correct.
   * d/rules: Update maintainer-update-unicode-data target for update of
     Unicode data to 15.1.0 in previous release
+  * d/clean: Canonicalize order
 
- -- Simon McVittie <smcv@debian.org>  Fri, 19 Jan 2024 13:15:47 +0000
+ -- Simon McVittie <smcv@debian.org>  Sat, 20 Jan 2024 17:20:24 +0000
 
 glib2.0 (2.79.0+git20240110~g38f5ba3c-2) experimental; urgency=medium
 
