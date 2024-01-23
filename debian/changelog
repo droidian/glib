@@ -1,3 +1,14 @@
+glib2.0 (2.78.3-2) unstable; urgency=medium
+
+  [ Simon McVittie ]
+  * Branch packaging for 2.78.x
+  * Depend on python3-packaging instead of python3-distutils
+
+  [ Jeremy Bícha ]
+  * Cherry-pick patch to stop using distutils: no longer included in Python 3.12
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Tue, 23 Jan 2024 09:48:48 -0500
+
 glib2.0 (2.78.3-1) unstable; urgency=medium
 
   * New upstream stable release
