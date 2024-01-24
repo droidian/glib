@@ -1,8 +1,8 @@
-glib2.0 (2.79.1-1) UNRELEASED; urgency=medium
+glib2.0 (2.79.1-1) experimental; urgency=medium
 
-  * New upstream release
+  * New upstream development release
 
- -- Simon McVittie <smcv@debian.org>  Wed, 24 Jan 2024 15:26:39 +0000
+ -- Simon McVittie <smcv@debian.org>  Wed, 24 Jan 2024 20:11:26 +0000
 
 glib2.0 (2.79.0+git20240119~62ee8bf6-1) experimental; urgency=medium
 
