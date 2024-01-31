@@ -1,4 +1,4 @@
-libgio-2.0.so.0 libglib2.0-0 #MINVER#
+libgio-2.0.so.0 libglib2.0-0t64 #MINVER#
 * Build-Depends-Package: libglib2.0-dev
  g_action_activate@Base 2.28.0
  g_action_change_state@Base 2.30.0
@@ -2105,7 +2105,7 @@ libgio-2.0.so.0 libglib2.0-0 #MINVER#
  g_zlib_decompressor_get_file_info@Base 2.26.0
  g_zlib_decompressor_get_type@Base 2.24.0
  g_zlib_decompressor_new@Base 2.24.0
-libglib-2.0.so.0 libglib2.0-0 #MINVER#
+libglib-2.0.so.0 libglib2.0-0t64 #MINVER#
 * Build-Depends-Package: libglib2.0-dev
  __glib_assert_msg@Base 2.38.0
  g_access@Base 2.12.0
@@ -3977,7 +3977,7 @@ libglib-2.0.so.0 libglib2.0-0 #MINVER#
  glib_minor_version@Base 2.12.0
  glib_on_error_halt@Base 2.12.0
  glib_pgettext@Base 2.28.3
-libgmodule-2.0.so.0 libglib2.0-0 #MINVER#
+libgmodule-2.0.so.0 libglib2.0-0t64 #MINVER#
 * Build-Depends-Package: libglib2.0-dev
  g_module_build_path@Base 2.12.0
  g_module_close@Base 2.12.0
@@ -3989,7 +3989,7 @@ libgmodule-2.0.so.0 libglib2.0-0 #MINVER#
  g_module_open_full@Base 2.70.0
  g_module_supported@Base 2.12.0
  g_module_symbol@Base 2.12.0
-libgobject-2.0.so.0 libglib2.0-0 #MINVER#
+libgobject-2.0.so.0 libglib2.0-0t64 #MINVER#
 * Build-Depends-Package: libglib2.0-dev
  g_array_get_type@Base 2.22.0
  g_binding_dup_source@Base 2.68.0
@@ -4469,7 +4469,7 @@ libgobject-2.0.so.0 libglib2.0-0 #MINVER#
  g_weak_ref_get@Base 2.32.0
  g_weak_ref_init@Base 2.32.0
  g_weak_ref_set@Base 2.32.0
-libgthread-2.0.so.0 libglib2.0-0 #MINVER#
+libgthread-2.0.so.0 libglib2.0-0t64 #MINVER#
 * Build-Depends-Package: libglib2.0-dev
  g_thread_init@Base 2.12.0
  g_thread_init_with_errorcheck_mutexes@Base 2.12.0

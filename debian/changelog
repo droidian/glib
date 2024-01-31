@@ -1,3 +1,10 @@
+glib2.0 (2.79.1-1.1~exp1) experimental; urgency=medium
+
+  * Non-maintainer upload.
+  * Rename libraries for 64-bit time_t transition.
+
+ -- Lukas Märdian <slyon@debian.org>  Wed, 31 Jan 2024 14:24:36 +0000
+
 glib2.0 (2.79.1-1) experimental; urgency=medium
 
   * New upstream development release

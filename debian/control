@@ -44,9 +44,11 @@ Homepage: https://wiki.gnome.org/Projects/GLib
 Vcs-Browser: https://salsa.debian.org/gnome-team/glib
 Vcs-Git: https://salsa.debian.org/gnome-team/glib.git
 
-Package: libglib2.0-0
+Package: libglib2.0-0t64
+Replaces: libglib2.0-0
 Architecture: any
-Provides: libgio-2.0-0 (= ${binary:Version}),
+Provides: ${t64:Provides},
+          libgio-2.0-0 (= ${binary:Version}),
           libglib-2.0-0 (= ${binary:Version}),
           libgmodule-2.0-0 (= ${binary:Version}),
           libgobject-2.0-0 (= ${binary:Version}),
@@ -56,7 +58,7 @@ Depends: ${misc:Depends},
 Recommends: libglib2.0-data,
             shared-mime-info,
             xdg-user-dirs,
-Breaks: glib-networking-tests (<< 2.70.0~),
+Breaks: libglib2.0-0 (<< ${source:Version}), glib-networking-tests (<< 2.70.0~),
         gnome-keyring (<< 40.0-3~),
         libedataserver-1.2-26 (<< 3.44.3-2~),
         libgladeui-2-6 (<< 3.22.2),
@@ -131,7 +133,7 @@ Section: libdevel
 Architecture: any
 Multi-Arch: same
 Depends: libffi-dev,
-         libglib2.0-0 (= ${binary:Version}),
+         libglib2.0-0t64 (= ${binary:Version}),
          libglib2.0-bin (= ${binary:Version}),
          libglib2.0-dev-bin (= ${binary:Version}),
          libmount-dev [linux-any],
@@ -151,7 +153,7 @@ Description: Development files for the GLib library
  as trees, hashes, lists, and strings.  It is a useful general-purpose
  C library used by projects such as GTK+, GIMP, and GNOME.
  .
- This package is needed to compile programs against libglib2.0-0,
+ This package is needed to compile programs against libglib2.0-0t64,
  as only it includes the header files and static libraries (optionally)
  needed for compiling.
  .
