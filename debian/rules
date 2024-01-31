@@ -248,8 +248,8 @@ override_dh_auto_install:
 	set -e; for script in postinst postrm triggers; do \
 		sed -e"s/#MULTIARCH#/$(DEB_HOST_MULTIARCH)/g" \
 		    -e"s/#ARCH#/$(DEB_HOST_ARCH)/g" \
-		    debian/libglib2.0-0.$$script.in \
-		    > debian/libglib2.0-0.$$script ; \
+		    debian/libglib2.0-0t64.$$script.in \
+		    > debian/libglib2.0-0t64.$$script ; \
 	done
 ifneq ($(filter %-udeb,$(binaries)),)
 	dh_auto_install -plibglib2.0-udeb --builddirectory=debian/build/udeb --destdir=debian/install/udeb
