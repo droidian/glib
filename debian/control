@@ -136,6 +136,7 @@ Depends: libffi-dev,
          libglib2.0-0t64 (= ${binary:Version}),
          libglib2.0-bin (= ${binary:Version}),
          libglib2.0-dev-bin (= ${binary:Version}),
+         libglib2.0-dev-bin-${local:DEB-HOST-ARCH-ENDIAN}-endian (= ${binary:Version}),
          libmount-dev [linux-any],
          libpcre2-dev,
          libselinux1-dev [linux-any],
@@ -169,6 +170,7 @@ Depends: python3-packaging,
          ${shlibs:Depends}
 Suggests: libgdk-pixbuf2.0-bin,
           libxml2-utils
+Provides: libglib2.0-dev-bin-${local:DEB-HOST-ARCH-ENDIAN}-endian (= ${binary:Version}),
 Multi-Arch: foreign
 Description: Development utilities for the GLib library
  GLib is a library containing many useful C routines for things such

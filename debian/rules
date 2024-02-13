@@ -27,6 +27,10 @@ endif
 
 DEB_CONFIGURE_EXTRA_FLAGS =
 
+ifneq ($(DEB_HOST_ARCH_ENDIAN),$(DEB_BUILD_ARCH_ENDIAN))
+$(error Cross-compiling gobject-introspection requires host endianness = build endianness)
+endif
+
 ifneq ($(DEB_HOST_ARCH),$(DEB_BUILD_ARCH))
 # Properties of glibc. These are the same for all Debian architectures,
 # and are auto-detected when doing a native build.
@@ -351,3 +355,10 @@ override_dh_missing:
 ifneq ($(filter %-udeb,$(built_binaries)),)
 	dh_missing --sourcedir=debian/install/udeb
 endif
+
+override_dh_gencontrol:
+ifneq ($(filter libglib2.0-dev,$(built_binaries)),)
+	dh_gencontrol -plibglib2.0-dev -plibglib2.0-dev-bin -- \
+		-Vlocal:DEB-HOST-ARCH-ENDIAN=$(DEB_HOST_ARCH_ENDIAN)
+endif
+	dh_gencontrol --remaining-packages
