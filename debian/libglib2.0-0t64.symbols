@@ -119,6 +119,7 @@ libgio-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_application_get_is_remote@Base 2.28.0
  g_application_get_resource_base_path@Base 2.42.0
  g_application_get_type@Base 2.28.0
+ g_application_get_version@Base 2.79.2
  g_application_hold@Base 2.28.0
  g_application_id_is_valid@Base 2.28.0
  g_application_mark_busy@Base 2.38.0
@@ -138,6 +139,7 @@ libgio-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_application_set_option_context_parameter_string@Base 2.56.0
  g_application_set_option_context_summary@Base 2.56.0
  g_application_set_resource_base_path@Base 2.42.0
+ g_application_set_version@Base 2.79.2
  g_application_unbind_busy_property@Base 2.44.0
  g_application_unmark_busy@Base 2.38.0
  g_application_withdraw_notification@Base 2.40.0
@@ -2347,6 +2349,7 @@ libglib-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_clear_pointer@Base 2.34.0
  g_clear_slist@Base 2.64.0
  g_close@Base 2.36.0
+ g_closefrom@Base 2.79.2
  g_completion_add_items@Base 2.12.0
  g_completion_clear_items@Base 2.12.0
  g_completion_complete@Base 2.12.0
@@ -2522,6 +2525,7 @@ libglib-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_error_new@Base 2.12.0
  g_error_new_literal@Base 2.12.0
  g_error_new_valist@Base 2.22.0
+ g_fdwalk_set_cloexec@Base 2.79.2
  g_file_error_from_errno@Base 2.12.0
  g_file_error_quark@Base 2.12.0
  g_file_get_contents@Base 2.12.0
