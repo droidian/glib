@@ -17,9 +17,9 @@ glib2.0 (2.79.2-1) UNRELEASED; urgency=medium
   * d/*.symbols: Update
   * d/p/gdatetime-Fix-ja_JA.eucjp-expectations-when-eras-are-unsu.patch,
     d/p/gdatetime-Exercise-c-C-format-placeholders-in-ja_JP.eucjp.patch:
-    Add proposed patches to fix autopkgtest failure on s390x
+    Add patches to fix autopkgtest failure on s390x
   * d/p/girepository-test-Don-t-assume-doubles-are-naturally-alig.patch:
-    Add proposed patch to fix a test failure on i386
+    Add patch to fix a test failure on i386
   * d/libglib2.0-doc.doc-base.girepository, .gio-unix, .glib-unix: Add
   * d/libglib2.0-doc.links: Add symlinks for girepository, gio-unix, glib-unix
   * d/control: Depend on pkgconf in preference to pkg-config

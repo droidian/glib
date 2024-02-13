@@ -10,6 +10,7 @@ as desired.
 
 Signed-off-by: Simon McVittie <smcv@collabora.com>
 Forwarded: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3920
+Applied-upstream: 2.79.3, commit:342d6176e79a403dc8361fb0c732f8a575862109
 ---
  glib/tests/gdatetime.c | 2 ++
  1 file changed, 2 insertions(+)

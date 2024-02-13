@@ -19,6 +19,7 @@ platform where era-based dates are unsupported.
 Bug: https://gitlab.gnome.org/GNOME/glib/-/issues/3252
 Signed-off-by: Simon McVittie <smcv@collabora.com>
 Forwarded: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3920
+Applied-upstream: 2.79.3, commit:988f4204a1e3d4f5fe3b82c09f136258f5e65317
 ---
  glib/tests/gdatetime.c | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)
