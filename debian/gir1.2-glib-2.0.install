@@ -1,4 +1,6 @@
 usr/lib/${DEB_HOST_MULTIARCH}/girepository-1.0/GLib-2.0.typelib
+usr/lib/${DEB_HOST_MULTIARCH}/girepository-1.0/GLibUnix-2.0.typelib
 usr/lib/${DEB_HOST_MULTIARCH}/girepository-1.0/GModule-2.0.typelib
 usr/lib/${DEB_HOST_MULTIARCH}/girepository-1.0/GObject-2.0.typelib
 usr/lib/${DEB_HOST_MULTIARCH}/girepository-1.0/Gio-2.0.typelib
+usr/lib/${DEB_HOST_MULTIARCH}/girepository-1.0/GioUnix-2.0.typelib
