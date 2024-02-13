@@ -1,8 +1,18 @@
 glib2.0 (2.79.2-1) UNRELEASED; urgency=medium
 
   * New upstream release
+  * d/copyright: Update
+  * d/*.install: Add new GioUnix-2.0, GLibUnix-2.0 typelibs
+  * d/libglib2.0-dev-bin.install: Add new gi- tools
+  * d/patches: Refresh patch series.
+    Drop a patch that no longer applies cleanly, which only added debug
+    messages to an unreliable test.
+  * d/*.symbols: Update
+  * d/p/gdatetime-Fix-ja_JA.eucjp-expectations-when-eras-are-unsu.patch,
+    d/p/gdatetime-Exercise-c-C-format-placeholders-in-ja_JP.eucjp.patch:
+    Add proposed patches to fix autopkgtest failure on s390x
 
- -- Simon McVittie <smcv@debian.org>  Tue, 13 Feb 2024 09:16:46 +0000
+ -- Simon McVittie <smcv@debian.org>  Tue, 13 Feb 2024 10:46:57 +0000
 
 glib2.0 (2.79.1-1.1~exp1) experimental; urgency=medium
 
