@@ -315,7 +315,9 @@ endif
 ifneq ($(filter %-doc,$(built_binaries)),)
 	sed -i \
 		-e 's|https\?://docs\.gtk\.org/gio/|../gio/|' \
+		-e 's|https\?://docs\.gtk\.org/gio-unix/|../gio-unix/|' \
 		-e 's|https\?://docs\.gtk\.org/glib/|../glib/|' \
+		-e 's|https\?://docs\.gtk\.org/glib-unix/|../glib-unix/|' \
 		-e 's|https\?://docs\.gtk\.org/gmodule/|../gmodule/|' \
 		-e 's|https\?://docs\.gtk\.org/gobject/|../gobject/|' \
 		debian/tmp/usr/share/doc/*/*/urlmap.js

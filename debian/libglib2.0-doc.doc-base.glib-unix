@@ -1,0 +1,9 @@
+Document: glib-unix
+Title: GLibUnix Reference Manual
+Author: GLib Development Team
+Abstract: Unix-specific parts of GLib, a general-purpose, portable utility library
+Section: Programming/C
+
+Format: HTML
+Index: /usr/share/doc/libglib2.0-dev/glib-unix/index.html
+Files: /usr/share/doc/libglib2.0-dev/glib-unix/*.html

@@ -1,0 +1,9 @@
+Document: gio-unix
+Title: GioUnix (GLib) Reference Manual
+Author: GLib Development Team
+Abstract: Unix-specific parts of Gio, a library providing useful classes for general purpose I/O and other high level application functionality
+Section: Programming/C
+
+Format: HTML
+Index: /usr/share/doc/libglib2.0-dev/gio-unix/index.html
+Files: /usr/share/doc/libglib2.0-dev/gio-unix/*.html
