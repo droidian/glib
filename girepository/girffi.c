@@ -32,6 +32,7 @@
 #include <unistd.h>
 #endif
 #include "girffi.h"
+#include "gibaseinfo-private.h"
 #include "girepository.h"
 #include "girepository-private.h"
 
@@ -207,7 +208,7 @@ gi_callable_info_get_ffi_arg_types (GICallableInfo *callable_info,
         GITypeInfo arg_type;
 
         gi_callable_info_load_arg (callable_info, i, &arg_info);
-        gi_arg_info_load_type (&arg_info, &arg_type);
+        gi_arg_info_load_type_info (&arg_info, &arg_type);
         switch (gi_arg_info_get_direction (&arg_info))
           {
             case GI_DIRECTION_IN:
@@ -220,6 +221,9 @@ gi_callable_info_get_ffi_arg_types (GICallableInfo *callable_info,
             default:
               g_assert_not_reached ();
           }
+
+        gi_base_info_clear (&arg_type);
+        gi_base_info_clear (&arg_info);
       }
 
     arg_types[n_invoke_args] = NULL;
@@ -265,6 +269,9 @@ gi_callable_info_get_ffi_return_type (GICallableInfo *callable_info)
  * A primary intent of this function is that a dynamic structure allocated
  * by a language binding could contain a [type@GIRepository.FunctionInvoker]
  * structure inside the binding’s function mapping.
+ *
+ * @invoker must be freed using [method@GIRepository.FunctionInvoker.clear]
+ * when it’s finished with.
  *
  * Returns: `TRUE` on success, `FALSE` otherwise with @error set.
  * Since: 2.80
@@ -336,7 +343,7 @@ gi_function_invoker_new_for_address (void               *addr,
 }
 
 /**
- * gi_function_invoker_destroy:
+ * gi_function_invoker_clear:
  * @invoker: (transfer none): A #GIFunctionInvoker
  *
  * Release all resources allocated for the internals of @invoker.
@@ -347,7 +354,7 @@ gi_function_invoker_new_for_address (void               *addr,
  * Since: 2.80
  */
 void
-gi_function_invoker_destroy (GIFunctionInvoker *invoker)
+gi_function_invoker_clear (GIFunctionInvoker *invoker)
 {
   g_free (invoker->cif.arg_types);
 }

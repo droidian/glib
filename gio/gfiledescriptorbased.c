@@ -35,7 +35,7 @@
  *
  * Note that `<gio/gfiledescriptorbased.h>` belongs to the UNIX-specific
  * GIO interfaces, thus you have to use the `gio-unix-2.0.pc` pkg-config
- * file when using it.
+ * file or the `GioUnix-2.0` GIR namespace when using it.
  *
  * Since: 2.24
  **/
@@ -63,7 +63,7 @@ g_file_descriptor_based_get_fd (GFileDescriptorBased *fd_based)
 {
   GFileDescriptorBasedIface *iface;
 
-  g_return_val_if_fail (G_IS_FILE_DESCRIPTOR_BASED (fd_based), 0);
+  g_return_val_if_fail (G_IS_FILE_DESCRIPTOR_BASED (fd_based), -1);
 
   iface = G_FILE_DESCRIPTOR_BASED_GET_IFACE (fd_based);
 

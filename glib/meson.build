@@ -145,18 +145,18 @@ endif
 
 glib_headers = files(
   'glib.h',
-  'glib-unix.h',
   'glib-object.h',
 )
 install_headers(glib_headers, install_dir : glib_includedir)
 
+if host_system != 'windows'
+  glib_unix_headers = files('glib-unix.h')
+  install_headers(glib_unix_headers, install_dir : glib_includedir)
+endif
+
 if host_system == 'windows'
   install_headers([ 'msvc_recommended_pragmas.h' ], install_dir : glib_includedir)
 endif
-
-# Expose as variable to be used by gobject-introspection
-# when it includes GLib as a subproject
-glib_unix_h = files('glib-unix.h')
 
 glib_deprecated_headers = files(
   'deprecated/gallocator.h',
@@ -247,11 +247,15 @@ glib_sub_headers = files(
   'gvarianttype.h',
   'gvariant.h',
   'gversion.h',
-  'gwin32.h',
   'gprintf.h',
 )
 
 install_headers(glib_sub_headers, install_dir : glib_sub_includedir)
+
+if host_system == 'windows'
+  glib_win32_headers = files('gwin32.h')
+  install_headers(glib_win32_headers, install_dir : glib_sub_includedir)
+endif
 
 glib_deprecated_sources = files(
   'deprecated/gallocator.c',
@@ -327,7 +331,6 @@ glib_sources += files(
   'gtimer.c',
   'gtimezone.c',
   'gtrace.c',
-  'gtrace-private.h',
   'gtranslit.c',
   'gtrashstack.c',
   'gtree.c',
@@ -337,9 +340,7 @@ glib_sources += files(
   'gunicollate.c',
   'gunidecomp.c',
   'guri.c',
-  'guriprivate.h',
   'gutils.c',
-  'gutilsprivate.h',
   'guuid.c',
   'gvariant.c',
   'gvariant-core.c',
@@ -370,7 +371,7 @@ if host_system == 'windows'
     glib_sources += files('dirent/wdirent.c')
   endif
 else
-  glib_sources += files('glib-unix.c', 'glib-unixprivate.h', 'gspawn.c', 'giounix.c')
+  glib_sources += files('glib-unix.c', 'gspawn.c', 'giounix.c')
   platform_deps = []
 endif
 

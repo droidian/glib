@@ -30,6 +30,7 @@
 
 #include "glib/glib-private.h"
 #include "gthreadedresolver.h"
+#include "gthreadedresolver-private.h"
 #include "gnetworkingprivate.h"
 
 #include "gcancellable.h"
@@ -1592,6 +1593,7 @@ threaded_resolver_worker_cb (gpointer task_data,
         }
 
       g_clear_pointer (&addresses, g_resolver_free_addresses);
+      g_clear_error (&local_error);
     }
     break;
   case LOOKUP_BY_ADDRESS:
@@ -1613,6 +1615,7 @@ threaded_resolver_worker_cb (gpointer task_data,
         }
 
       g_clear_pointer (&name, g_free);
+      g_clear_error (&local_error);
     }
     break;
   case LOOKUP_RECORDS:
@@ -1635,6 +1638,7 @@ threaded_resolver_worker_cb (gpointer task_data,
         }
 
       g_clear_pointer (&records, free_records);
+      g_clear_error (&local_error);
     }
     break;
   default:

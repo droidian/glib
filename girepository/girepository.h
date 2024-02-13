@@ -33,7 +33,6 @@
 
 #include <girepository/giarginfo.h>
 #include <girepository/gibaseinfo.h>
-#include <girepository/giboxedinfo.h>
 #include <girepository/gicallableinfo.h>
 #include <girepository/gicallbackinfo.h>
 #include <girepository/giconstantinfo.h>
@@ -57,29 +56,9 @@
 
 G_BEGIN_DECLS
 
-#define GI_TYPE_REPOSITORY              (gi_repository_get_type ())
-#define GI_REPOSITORY(object)           (G_TYPE_CHECK_INSTANCE_CAST ((object), GI_TYPE_REPOSITORY, GIRepository))
-#define GI_REPOSITORY_CLASS(klass)      (G_TYPE_CHECK_CLASS_CAST ((klass), GI_TYPE_REPOSITORY, GIRepositoryClass))
-#define GI_IS_REPOSITORY(object)        (G_TYPE_CHECK_INSTANCE_TYPE ((object), GI_TYPE_REPOSITORY))
-#define GI_IS_REPOSITORY_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), GI_TYPE_REPOSITORY))
-#define GI_REPOSITORY_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), GI_TYPE_REPOSITORY, GIRepositoryClass))
-
-typedef struct _GIRepository         GIRepository;
-typedef struct _GIRepositoryClass    GIRepositoryClass;
-typedef struct _GIRepositoryPrivate  GIRepositoryPrivate;
-
-struct _GIRepository
-{
-  /*< private >*/
-  GObject parent;
-  GIRepositoryPrivate *priv;
-};
-
-struct _GIRepositoryClass
-{
-  /*< private >*/
-  GObjectClass parent;
-};
+#define GI_TYPE_REPOSITORY (gi_repository_get_type ())
+GI_AVAILABLE_IN_ALL
+G_DECLARE_FINAL_TYPE (GIRepository, gi_repository, GI, REPOSITORY, GObject)
 
 /**
  * GIRepositoryLoadFlags:
@@ -97,22 +76,23 @@ typedef enum
 /* Repository */
 
 GI_AVAILABLE_IN_ALL
-GType         gi_repository_get_type      (void) G_GNUC_CONST;
-
-GI_AVAILABLE_IN_ALL
-GIRepository *gi_repository_get_default   (void);
-
-GI_AVAILABLE_IN_ALL
 GIRepository *gi_repository_new (void);
 
 GI_AVAILABLE_IN_ALL
-void          gi_repository_prepend_search_path (const char *directory);
+void          gi_repository_prepend_search_path (GIRepository *repository,
+                                                 const char   *directory);
 
 GI_AVAILABLE_IN_ALL
-void          gi_repository_prepend_library_path (const char *directory);
+void          gi_repository_prepend_library_path (GIRepository *repository,
+                                                  const char   *directory);
 
 GI_AVAILABLE_IN_ALL
-const char * const * gi_repository_get_search_path (size_t *n_paths_out);
+const char * const * gi_repository_get_search_path (GIRepository *repository,
+                                                    size_t       *n_paths_out);
+
+GI_AVAILABLE_IN_ALL
+const char * const *gi_repository_get_library_path (GIRepository *repository,
+                                                    size_t       *n_paths_out);
 
 GI_AVAILABLE_IN_ALL
 const char *  gi_repository_load_typelib  (GIRepository           *repository,
@@ -152,14 +132,17 @@ GITypelib *    gi_repository_require_private (GIRepository           *repository
 
 GI_AVAILABLE_IN_ALL
 char       ** gi_repository_get_immediate_dependencies (GIRepository *repository,
-                                                        const char   *namespace_);
+                                                        const char   *namespace_,
+                                                        size_t       *n_dependencies_out);
 
 GI_AVAILABLE_IN_ALL
 char       ** gi_repository_get_dependencies (GIRepository *repository,
-                                              const char   *namespace_);
+                                              const char   *namespace_,
+                                              size_t       *n_dependencies_out);
 
 GI_AVAILABLE_IN_ALL
-char       ** gi_repository_get_loaded_namespaces (GIRepository *repository);
+char       ** gi_repository_get_loaded_namespaces (GIRepository *repository,
+                                                   size_t       *n_namespaces_out);
 
 GI_AVAILABLE_IN_ALL
 GIBaseInfo *  gi_repository_find_by_gtype (GIRepository *repository,

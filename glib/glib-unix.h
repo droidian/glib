@@ -173,7 +173,7 @@ G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 /**
  * g_unix_pipe_open:
  * @self: A pair of file descriptors
- * @flags: Flags to pass to g_unix_open_pipe(), typically `FD_CLOEXEC`
+ * @flags: Flags to pass to g_unix_open_pipe(), typically `O_CLOEXEC`
  * @error: Used to report an error on failure
  *
  * Open a pipe. This is the same as g_unix_open_pipe(), but uses the
@@ -325,6 +325,12 @@ g_unix_pipe_clear (GUnixPipe *self)
 }
 
 G_DEFINE_AUTO_CLEANUP_CLEAR_FUNC (GUnixPipe, g_unix_pipe_clear)
+
+GLIB_AVAILABLE_IN_2_80
+int g_closefrom (int lowfd);
+
+GLIB_AVAILABLE_IN_2_80
+int g_fdwalk_set_cloexec (int lowfd);
 
 G_GNUC_END_IGNORE_DEPRECATIONS
 

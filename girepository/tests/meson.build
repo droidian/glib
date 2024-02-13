@@ -1,19 +1,42 @@
-girepository_tests = {}
+# SPDX-License-Identifier: LGPL-2.1-or-later
+# SPDX-FileCopyrightText: 2024 GNOME Foundation
 
-# Some GIR files are needed to test against
+girepository_tests = {
+  'cmph-bdz': {
+    'dependencies': [cmph_dep],
+  },
+  'gthash' : {
+    'dependencies': [girepo_gthash_dep],
+  },
+}
+
+# Some tests require GIR files to have been generated
 if enable_gir
   girepository_tests += {
-    'cmph-bdz': {
-      'dependencies': [cmph_dep],
+    'function-info' : {
+      'dependencies': [libffi_dep],
+      'depends': [glib_gir],
     },
-    'gthash' : {
-      'dependencies': [girepo_gthash_dep],
+    'object-info' : {
+      'depends': [gio_gir],
+    },
+    'registered-type-info' : {
+      'depends': [gobject_gir],
     },
     'repository' : {
-      'depends': [glib_gir, gobject_gir],
+      'depends': [glib_gir, gio_gir, gobject_gir],
     },
     'repository-search-paths' : {
       'c_args': '-DGOBJECT_INTROSPECTION_LIBDIR="@0@"'.format(glib_libdir),
+      'depends': [glib_gir],
+    },
+    'struct-info' : {
+      'depends': [gobject_gir],
+    },
+    'throws' : {
+      'depends': [glib_gir, gio_gir],
+    },
+    'union-info' : {
       'depends': [glib_gir],
     },
   }
@@ -54,7 +77,7 @@ foreach test_name, extra_args : girepository_tests
     )
   endif
 
-  exe = executable(test_name, source,
+  exe = executable(test_name, source, 'test-common.c',
     c_args: test_cargs + extra_args.get('c_args', []),
     cpp_args: test_cpp_args + extra_args.get('cpp_args', []),
     link_args: extra_args.get('link_args', []),

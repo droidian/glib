@@ -1157,7 +1157,6 @@ test_interface_default_init (TestInterfaceInterface *iface)
             g_object_interface_install_property (iface, pspec);
             g_test_assert_expected_messages ();
 
-            g_param_spec_unref (pspec);
             continue;
           }
 
@@ -1398,6 +1397,13 @@ test_param_implement (void)
 {
   gchar *test_path;
 
+  /* This test is slow. */
+  if (!g_test_slow ())
+    {
+      g_test_skip ("Skipping slow /param/implement test");
+      return;
+    }
+
   for (change_this_flag = 0; change_this_flag < 16; change_this_flag++)
     for (change_this_type = 0; change_this_type < 3; change_this_type++)
       for (use_this_flag = 0; use_this_flag < 16; use_this_flag++)
@@ -1432,7 +1438,7 @@ test_param_implement (void)
 
               case 'i':
                 g_test_trap_assert_failed ();
-                g_test_trap_assert_stderr ("*g_object_class_install_property*");
+                g_test_trap_assert_stderr ("*pspec->flags*");
                 continue;
 
               case 'f':
@@ -1659,8 +1665,7 @@ main (int argc, char *argv[])
   g_test_add_func ("/param/validate", test_param_validate);
   g_test_add_func ("/param/convert", test_param_convert);
 
-  if (g_test_slow ())
-    g_test_add_func ("/param/implement", test_param_implement);
+  g_test_add_func ("/param/implement", test_param_implement);
 
   for (data.change_this_flag = 0; data.change_this_flag < 16; data.change_this_flag++)
     for (data.change_this_type = 0; data.change_this_type < 3; data.change_this_type++)
@@ -1671,8 +1676,7 @@ main (int argc, char *argv[])
                                          data.change_this_flag, data.change_this_type,
                                          data.use_this_flag, data.use_this_type);
             test_data = g_memdup2 (&data, sizeof (TestParamImplementData));
-            g_test_add_data_func_full (test_path, test_data, test_param_implement_child, g_free);
-            g_free (test_data);
+            g_test_add_data_func_full (test_path, g_steal_pointer (&test_data), test_param_implement_child, g_free);
             g_free (test_path);
           }
 

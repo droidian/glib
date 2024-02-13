@@ -41,6 +41,17 @@ G_BEGIN_DECLS
 typedef struct _GIBaseInfo GIBaseInfo;
 typedef struct _GIBaseInfoClass GIBaseInfoClass;
 
+typedef struct
+{
+  /*< private >*/
+  GTypeInstance parent_instance;
+
+  int dummy0;
+  void *dummy1[3];
+  uint32_t dummy2[2];
+  void *dummy3[6];
+} GIBaseInfoStack;
+
 /* Documented in gicallableinfo.c */
 typedef struct _GICallableInfo GICallableInfo;
 GI_AVAILABLE_IN_ALL GType gi_callable_info_get_type (void);
@@ -81,10 +92,6 @@ GI_AVAILABLE_IN_ALL GType gi_object_info_get_type (void);
 typedef struct _GIInterfaceInfo GIInterfaceInfo;
 GI_AVAILABLE_IN_ALL GType gi_interface_info_get_type (void);
 
-/* Documented in giboxedinfo.c */
-typedef struct _GIBoxedInfo GIBoxedInfo;
-GI_AVAILABLE_IN_ALL GType gi_boxed_info_get_type (void);
-
 /* Documented in giconstantinfo.c */
 typedef struct _GIConstantInfo GIConstantInfo;
 GI_AVAILABLE_IN_ALL GType gi_constant_info_get_type (void);
@@ -110,11 +117,23 @@ typedef struct _GIFieldInfo GIFieldInfo;
 GI_AVAILABLE_IN_ALL GType gi_field_info_get_type (void);
 
 /* Documented in giarginfo.c */
-typedef struct _GIArgInfo GIArgInfo;
+typedef struct
+{
+  /*< private >*/
+  GIBaseInfoStack parent;
+
+  void *padding[6];
+} GIArgInfo;
 GI_AVAILABLE_IN_ALL GType gi_arg_info_get_type (void);
 
 /* Documented in gitypeinfo.c */
-typedef struct _GITypeInfo GITypeInfo;
+typedef struct
+{
+  /*< private >*/
+  GIBaseInfoStack parent;
+
+  void *padding[6];
+} GITypeInfo;
 GI_AVAILABLE_IN_ALL GType gi_type_info_get_type (void);
 
 /* Documented in giunresolvedinfo.c */
@@ -175,81 +194,6 @@ union _GIArgument
  * Since: 2.80
  */
 typedef union _GIArgument GIArgument;
-
-/**
- * GIInfoType:
- * @GI_INFO_TYPE_INVALID: invalid type
- * @GI_INFO_TYPE_FUNCTION: function, see [class@GIRepository.FunctionInfo]
- * @GI_INFO_TYPE_CALLBACK: callback, see [class@GIRepository.FunctionInfo]
- * @GI_INFO_TYPE_STRUCT: struct, see [class@GIRepository.StructInfo]
- * @GI_INFO_TYPE_BOXED: boxed, see [class@GIRepository.StructInfo] or
- *   [class@GIRepository.UnionInfo]
- * @GI_INFO_TYPE_ENUM: enum, see [class@GIRepository.EnumInfo]
- * @GI_INFO_TYPE_FLAGS: flags, see [class@GIRepository.EnumInfo]
- * @GI_INFO_TYPE_OBJECT: object, see [class@GIRepository.ObjectInfo]
- * @GI_INFO_TYPE_INTERFACE: interface, see [class@GIRepository.InterfaceInfo]
- * @GI_INFO_TYPE_CONSTANT: constant, see [class@GIRepository.ConstantInfo]
- * @GI_INFO_TYPE_UNION: union, see [class@GIRepository.UnionInfo]
- * @GI_INFO_TYPE_VALUE: enum value, see [class@GIRepository.ValueInfo]
- * @GI_INFO_TYPE_SIGNAL: signal, see [class@GIRepository.SignalInfo]
- * @GI_INFO_TYPE_VFUNC: virtual function, see [class@GIRepository.VFuncInfo]
- * @GI_INFO_TYPE_PROPERTY: [class@GObject.Object] property, see
- *   [class@GIRepository.PropertyInfo]
- * @GI_INFO_TYPE_FIELD: struct or union field, see
- *   [class@GIRepository.FieldInfo]
- * @GI_INFO_TYPE_ARG: argument of a function or callback, see
- *   [class@GIRepository.ArgInfo]
- * @GI_INFO_TYPE_TYPE: type information, see [class@GIRepository.TypeInfo]
- * @GI_INFO_TYPE_UNRESOLVED: unresolved type, a type which is not present in
- *   the typelib, or any of its dependencies, see
- *   [class@GIRepository.UnresolvedInfo]
- * @GI_INFO_TYPE_CALLABLE: an abstract type representing any callable (function,
- *   callback, vfunc), see [class@GIRepository.CallableInfo]
- * @GI_INFO_TYPE_REGISTERED_TYPE: an abstract type representing any registered
- *   type (enum, interface, object, struct, union), see
- *   [class@GIRepository.RegisteredTypeInfo]
- *
- * The type of a [class@GIRepository.BaseInfo] struct.
- *
- * See [const@GIRepository.INFO_TYPE_N_TYPES] for the total number of elements
- * in this enum.
- *
- * Since: 2.80
- */
-typedef enum
-{
-  GI_INFO_TYPE_INVALID,
-  GI_INFO_TYPE_FUNCTION,
-  GI_INFO_TYPE_CALLBACK,
-  GI_INFO_TYPE_STRUCT,
-  GI_INFO_TYPE_BOXED,
-  GI_INFO_TYPE_ENUM,             /*  5 */
-  GI_INFO_TYPE_FLAGS,
-  GI_INFO_TYPE_OBJECT,
-  GI_INFO_TYPE_INTERFACE,
-  GI_INFO_TYPE_CONSTANT,
-  GI_INFO_TYPE_UNION,            /* 10 */
-  GI_INFO_TYPE_VALUE,
-  GI_INFO_TYPE_SIGNAL,
-  GI_INFO_TYPE_VFUNC,
-  GI_INFO_TYPE_PROPERTY,
-  GI_INFO_TYPE_FIELD,            /* 15 */
-  GI_INFO_TYPE_ARG,
-  GI_INFO_TYPE_TYPE,
-  GI_INFO_TYPE_UNRESOLVED,
-  GI_INFO_TYPE_CALLABLE,
-  GI_INFO_TYPE_REGISTERED_TYPE,  /* 20 */
-  /* keep GI_INFO_TYPE_N_TYPES in sync with this */
-} GIInfoType;
-
-/**
- * GI_INFO_TYPE_N_TYPES:
- *
- * Number of entries in [enum@GIRepository.InfoType].
- *
- * Since: 2.80
- */
-#define GI_INFO_TYPE_N_TYPES (GI_INFO_TYPE_REGISTERED_TYPE + 1)
 
 /**
  * GITransfer:
@@ -441,7 +385,6 @@ typedef enum
  * @GI_VFUNC_MUST_CHAIN_UP: chains up to the parent type
  * @GI_VFUNC_MUST_OVERRIDE: overrides
  * @GI_VFUNC_MUST_NOT_OVERRIDE: does not override
- * @GI_VFUNC_THROWS: includes a [type@GLib.Error]
  *
  * Flags of a [class@GIRepository.VFuncInfo] struct.
  *
@@ -452,7 +395,6 @@ typedef enum
   GI_VFUNC_MUST_CHAIN_UP     = 1 << 0,
   GI_VFUNC_MUST_OVERRIDE     = 1 << 1,
   GI_VFUNC_MUST_NOT_OVERRIDE = 1 << 2,
-  GI_VFUNC_THROWS =            1 << 3
 } GIVFuncInfoFlags;
 
 /**
@@ -462,7 +404,6 @@ typedef enum
  * @GI_FUNCTION_IS_GETTER: is a getter of a [class@GIRepository.PropertyInfo].
  * @GI_FUNCTION_IS_SETTER: is a setter of a [class@GIRepository.PropertyInfo].
  * @GI_FUNCTION_WRAPS_VFUNC: represents a virtual function.
- * @GI_FUNCTION_THROWS: the function may throw an error.
  *
  * Flags for a [class@GIRepository.FunctionInfo] struct.
  *
@@ -475,7 +416,6 @@ typedef enum
   GI_FUNCTION_IS_GETTER      = 1 << 2,
   GI_FUNCTION_IS_SETTER      = 1 << 3,
   GI_FUNCTION_WRAPS_VFUNC    = 1 << 4,
-  GI_FUNCTION_THROWS         = 1 << 5
 } GIFunctionInfoFlags;
 
 G_END_DECLS

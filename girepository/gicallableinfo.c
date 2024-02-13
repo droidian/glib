@@ -172,6 +172,9 @@ gi_callable_info_is_method (GICallableInfo *info)
  *
  * Obtain the return type of a callable item as a [class@GIRepository.TypeInfo].
  *
+ * If the callable doesn’t return anything, a [class@GIRepository.TypeInfo] of
+ * type [enum@GIRepository.TypeTag.VOID] will be returned.
+ *
  * Returns: (transfer full): the [class@GIRepository.TypeInfo]. Free the struct
  *   by calling [method@GIRepository.BaseInfo.unref] when done.
  * Since: 2.80
@@ -201,6 +204,9 @@ gi_callable_info_get_return_type (GICallableInfo *info)
  *
  * The initialized @type must not be referenced after @info is deallocated.
  *
+ * Once you are done with @type, it must be cleared using
+ * [method@GIRepository.BaseInfo.clear].
+ *
  * Since: 2.80
  */
 void
@@ -215,7 +221,7 @@ gi_callable_info_load_return_type (GICallableInfo *info,
 
   offset = signature_offset (info);
 
-  gi_type_info_init ((GIBaseInfo *) type, (GIBaseInfo*)info, rinfo->typelib, offset);
+  gi_type_info_init (type, (GIBaseInfo*)info, rinfo->typelib, offset);
 }
 
 /**
@@ -373,8 +379,8 @@ gi_callable_info_get_arg (GICallableInfo *info,
   offset = signature_offset (info);
   header = (Header *)rinfo->typelib->data;
 
-  return (GIArgInfo *) gi_info_new (GI_INFO_TYPE_ARG, (GIBaseInfo*)info, rinfo->typelib,
-                                    offset + header->signature_blob_size + n * header->arg_blob_size);
+  return (GIArgInfo *) gi_base_info_new (GI_INFO_TYPE_ARG, (GIBaseInfo*)info, rinfo->typelib,
+                                         offset + header->signature_blob_size + n * header->arg_blob_size);
 }
 
 /**
@@ -388,6 +394,9 @@ gi_callable_info_get_arg (GICallableInfo *info,
  * for stack allocation.
  *
  * The initialized @arg must not be referenced after @info is deallocated.
+ *
+ * Once you are done with @arg, it must be cleared using
+ * [method@GIRepository.BaseInfo.clear].
  *
  * Since: 2.80
  */
@@ -407,7 +416,7 @@ gi_callable_info_load_arg (GICallableInfo *info,
   offset = signature_offset (info);
   header = (Header *)rinfo->typelib->data;
 
-  gi_info_init ((GIRealInfo*)arg, GI_INFO_TYPE_ARG, rinfo->repository, (GIBaseInfo*)info, rinfo->typelib,
+  gi_info_init ((GIRealInfo*)arg, GI_TYPE_ARG_INFO, rinfo->repository, (GIBaseInfo*)info, rinfo->typelib,
                 offset + header->signature_blob_size + n * header->arg_blob_size);
 }
 
@@ -493,7 +502,7 @@ gi_callable_info_iterate_return_attributes (GICallableInfo   *info,
 /**
  * gi_type_tag_extract_ffi_return_value:
  * @return_tag: [type@GIRepository.TypeTag] of the return value
- * @interface_type: [type@GIRepository.InfoType] of the underlying interface type
+ * @interface_type: [type@GObject.Type] of the underlying interface type
  * @ffi_value: pointer to [type@GIRepository.FFIReturnValue] union containing
  *   the return value from `ffi_call()`
  * @arg: (out caller-allocates): pointer to an allocated
@@ -514,7 +523,7 @@ gi_callable_info_iterate_return_attributes (GICallableInfo   *info,
  */
 void
 gi_type_tag_extract_ffi_return_value (GITypeTag         return_tag,
-                                      GIInfoType        interface_type,
+                                      GType             interface_type,
                                       GIFFIReturnValue *ffi_value,
                                       GIArgument       *arg)
 {
@@ -552,15 +561,11 @@ gi_type_tag_extract_ffi_return_value (GITypeTag         return_tag,
         arg->v_double = ffi_value->v_double;
         break;
     case GI_TYPE_TAG_INTERFACE:
-        switch(interface_type) {
-        case GI_INFO_TYPE_ENUM:
-        case GI_INFO_TYPE_FLAGS:
-            arg->v_int32 = (int32_t) ffi_value->v_long;
-            break;
-        default:
-            arg->v_pointer = (void *) ffi_value->v_pointer;
-            break;
-        }
+        if (interface_type == GI_TYPE_ENUM_INFO ||
+            interface_type == GI_TYPE_FLAGS_INFO)
+          arg->v_int32 = (int32_t) ffi_value->v_long;
+        else
+          arg->v_pointer = (void *) ffi_value->v_pointer;
         break;
     default:
         arg->v_pointer = (void *) ffi_value->v_pointer;
@@ -592,12 +597,12 @@ gi_type_info_extract_ffi_return_value (GITypeInfo       *return_info,
                                        GIArgument       *arg)
 {
   GITypeTag return_tag = gi_type_info_get_tag (return_info);
-  GIInfoType interface_type = GI_INFO_TYPE_INVALID;
+  GType interface_type = G_TYPE_INVALID;
 
   if (return_tag == GI_TYPE_TAG_INTERFACE)
     {
       GIBaseInfo *interface_info = gi_type_info_get_interface (return_info);
-      interface_type = gi_base_info_get_info_type (interface_info);
+      interface_type = G_TYPE_FROM_INSTANCE (interface_info);
       gi_base_info_unref (interface_info);
     }
 

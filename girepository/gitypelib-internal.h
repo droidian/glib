@@ -27,6 +27,7 @@
 
 #include <gmodule.h>
 #include "girepository.h"
+#include "girepository-private.h"
 
 G_BEGIN_DECLS
 
@@ -179,6 +180,7 @@ Changes since 0.1:
  * Since: 2.80
  */
 typedef enum {
+  /* The values here must be kept in sync with GIInfoType */
   BLOB_TYPE_INVALID,
   BLOB_TYPE_FUNCTION,
   BLOB_TYPE_CALLBACK,
@@ -192,6 +194,8 @@ typedef enum {
   BLOB_TYPE_INVALID_0,
   BLOB_TYPE_UNION
 } GITypelibBlobType;
+
+GIInfoType gi_typelib_blob_type_to_info_type (GITypelibBlobType blob_type);
 
 
 #if defined (G_CAN_INLINE) && defined (G_ALWAYS_INLINE)
@@ -1313,12 +1317,13 @@ typedef struct {
 
 struct _GITypelib {
   /*< private >*/
-  uint8_t *data;
+  gatomicrefcount ref_count;
+  const uint8_t *data;  /* just a cached pointer to inside @bytes */
   size_t len;
-  gboolean owns_memory;
-  GMappedFile *mfile;
+  GBytes *bytes;  /* (owned) */
   GList *modules;
   gboolean open_attempted;
+  GPtrArray *library_paths;  /* (element-type filename) (owned) (nullable) */
 };
 
 DirEntry *gi_typelib_get_dir_entry (GITypelib *typelib,
