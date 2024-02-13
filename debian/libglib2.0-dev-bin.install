@@ -1,4 +1,7 @@
 usr/bin/gdbus-codegen
+usr/bin/gi-compile-repository
+usr/bin/gi-decompile-typelib
+usr/bin/gi-inspect-typelib
 usr/bin/glib-compile-resources
 usr/bin/glib-genmarshal
 usr/bin/glib-gettextize
