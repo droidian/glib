@@ -60,8 +60,8 @@ gi_base_info_find_vfunc (GIRealInfo  *rinfo,
       const char *fname = (const char *)&rinfo->typelib->data[fblob->name];
 
       if (strcmp (name, fname) == 0)
-        return (GIVFuncInfo *) gi_info_new (GI_INFO_TYPE_VFUNC, (GIBaseInfo*) rinfo,
-                                            rinfo->typelib, offset);
+        return (GIVFuncInfo *) gi_base_info_new (GI_INFO_TYPE_VFUNC, (GIBaseInfo*) rinfo,
+                                                 rinfo->typelib, offset);
 
       offset += header->vfunc_blob_size;
     }
@@ -103,9 +103,6 @@ gi_vfunc_info_get_flags (GIVFuncInfo *info)
 
   if (blob->must_not_be_implemented)
     flags = flags | GI_VFUNC_MUST_NOT_OVERRIDE;
-
-  if (blob->throws)
-    flags = flags | GI_VFUNC_THROWS;
 
   return flags;
 }

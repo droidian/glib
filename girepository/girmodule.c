@@ -37,6 +37,15 @@
 
 #define NUM_SECTIONS 2
 
+/*< private >
+ * gi_ir_module_new:
+ * @name:
+ * @version:
+ * @shared_library: (nullable):
+ * @c_prefix:
+ *
+ * Since: 2.80
+ */
 GIIrModule *
 gi_ir_module_new (const char *name,
                   const char *version,
@@ -49,10 +58,7 @@ gi_ir_module_new (const char *name,
 
   module->name = g_strdup (name);
   module->version = g_strdup (version);
-  if (shared_library)
-      module->shared_library = g_strdup (shared_library);
-  else
-      module->shared_library = NULL;
+  module->shared_library = g_strdup (shared_library);
   module->c_prefix = g_strdup (c_prefix);
   module->dependencies = NULL;
   module->entries = NULL;
@@ -318,6 +324,7 @@ GITypelib *
 gi_ir_module_build_typelib (GIIrModule *module)
 {
   GError *error = NULL;
+  GBytes *bytes = NULL;
   GITypelib *typelib;
   size_t length;
   size_t i;
@@ -568,7 +575,11 @@ gi_ir_module_build_typelib (GIIrModule *module)
   header = (Header *)data;
 
   length = header->size = offset2;
-  typelib = gi_typelib_new_from_memory (data, length, &error);
+
+  bytes = g_bytes_new_take (g_steal_pointer (&data), length);
+  typelib = gi_typelib_new_from_bytes (bytes, &error);
+  g_bytes_unref (bytes);
+
   if (!typelib)
     {
       g_error ("error building typelib: %s",

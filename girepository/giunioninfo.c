@@ -80,9 +80,9 @@ gi_union_info_get_field (GIUnionInfo *info,
   GIRealInfo *rinfo = (GIRealInfo *)info;
   Header *header = (Header *)rinfo->typelib->data;
 
-  return (GIFieldInfo *) gi_info_new (GI_INFO_TYPE_FIELD, (GIBaseInfo*)info, rinfo->typelib,
-                                      rinfo->offset + header->union_blob_size +
-                                      n * header->field_blob_size);
+  return (GIFieldInfo *) gi_base_info_new (GI_INFO_TYPE_FIELD, (GIBaseInfo*)info, rinfo->typelib,
+                                           rinfo->offset + header->union_blob_size +
+                                           n * header->field_blob_size);
 }
 
 /**
@@ -126,8 +126,8 @@ gi_union_info_get_method (GIUnionInfo *info,
   offset = rinfo->offset + header->union_blob_size
     + blob->n_fields * header->field_blob_size
     + n * header->function_blob_size;
-  return (GIFunctionInfo *) gi_info_new (GI_INFO_TYPE_FUNCTION, (GIBaseInfo*)info,
-                                         rinfo->typelib, offset);
+  return (GIFunctionInfo *) gi_base_info_new (GI_INFO_TYPE_FUNCTION, (GIBaseInfo*)info,
+                                              rinfo->typelib, offset);
 }
 
 /**
@@ -151,19 +151,30 @@ gi_union_info_is_discriminated (GIUnionInfo *info)
 /**
  * gi_union_info_get_discriminator_offset:
  * @info: a #GIUnionInfo
+ * @out_offset: (out) (optional): return location for the offset, in bytes, of
+ *   the discriminator
  *
- * Returns the offset of the discriminator field in the structure.
+ * Obtain the offset of the discriminator field within the structure.
  *
- * Returns: offset, in bytes, of the discriminator
+ * The union must be discriminated, or `FALSE` will be returned.
+ *
+ * Returns: `TRUE` if the union is discriminated
  * Since: 2.80
  */
-size_t
-gi_union_info_get_discriminator_offset (GIUnionInfo *info)
+gboolean
+gi_union_info_get_discriminator_offset (GIUnionInfo *info,
+                                        size_t      *out_offset)
 {
   GIRealInfo *rinfo = (GIRealInfo *)info;
   UnionBlob *blob = (UnionBlob *)&rinfo->typelib->data[rinfo->offset];
+  size_t discriminator_offset;
 
-  return blob->discriminator_offset;
+  discriminator_offset = (blob->discriminated) ? blob->discriminator_offset : 0;
+
+  if (out_offset != NULL)
+    *out_offset = discriminator_offset;
+
+  return blob->discriminated;
 }
 
 /**
@@ -172,7 +183,8 @@ gi_union_info_get_discriminator_offset (GIUnionInfo *info)
  *
  * Obtain the type information of the union discriminator.
  *
- * Returns: (transfer full): the [type@GIRepository.TypeInfo], free it with
+ * Returns: (transfer full) (nullable): the [type@GIRepository.TypeInfo], or
+ *   `NULL` if the union is not discriminated. Free it with
  *   [method@GIRepository.BaseInfo.unref] when done.
  * Since: 2.80
  */
@@ -180,6 +192,10 @@ GITypeInfo *
 gi_union_info_get_discriminator_type (GIUnionInfo *info)
 {
   GIRealInfo *rinfo = (GIRealInfo *)info;
+  UnionBlob *blob = (UnionBlob *)&rinfo->typelib->data[rinfo->offset];
+
+  if (!blob->discriminated)
+    return NULL;
 
   return gi_type_info_new ((GIBaseInfo*)info, rinfo->typelib, rinfo->offset + 24);
 }
@@ -217,8 +233,8 @@ gi_union_info_get_discriminator (GIUnionInfo *info,
         + blob->n_functions * header->function_blob_size
         + n * header->constant_blob_size;
 
-      return (GIConstantInfo *) gi_info_new (GI_INFO_TYPE_CONSTANT, (GIBaseInfo*)info,
-                                             rinfo->typelib, offset);
+      return (GIConstantInfo *) gi_base_info_new (GI_INFO_TYPE_CONSTANT, (GIBaseInfo*)info,
+                                                  rinfo->typelib, offset);
     }
 
   return NULL;

@@ -158,9 +158,9 @@ gi_field_info_get_type_info (GIFieldInfo *info)
 
   if (blob->has_embedded_type)
     {
-      type_info = (GIRealInfo *) gi_info_new (GI_INFO_TYPE_TYPE,
-                                              (GIBaseInfo*)info, rinfo->typelib,
-                                              rinfo->offset + header->field_blob_size);
+      type_info = (GIRealInfo *) gi_base_info_new (GI_INFO_TYPE_TYPE,
+                                                   (GIBaseInfo*)info, rinfo->typelib,
+                                                   rinfo->offset + header->field_blob_size);
       type_info->type_is_embedded = TRUE;
     }
   else
@@ -255,7 +255,7 @@ gi_field_info_get_field (GIFieldInfo *field_info,
           break;
         case GI_TYPE_TAG_ARRAY:
           /* We don't check the array type and that it is fixed-size,
-             we trust g-ir-compiler to do the right thing */
+             we trust gi-compile-repository to do the right thing */
           value->v_pointer = G_STRUCT_MEMBER_P (mem, offset);
           result = TRUE;
           break;
@@ -278,7 +278,6 @@ gi_field_info_get_field (GIFieldInfo *field_info,
               {
               case GI_INFO_TYPE_STRUCT:
               case GI_INFO_TYPE_UNION:
-              case GI_INFO_TYPE_BOXED:
                 /* Needs to be handled by the language binding directly */
                 break;
               case GI_INFO_TYPE_OBJECT:
@@ -464,7 +463,6 @@ gi_field_info_set_field (GIFieldInfo      *field_info,
               {
               case GI_INFO_TYPE_STRUCT:
               case GI_INFO_TYPE_UNION:
-              case GI_INFO_TYPE_BOXED:
                 /* Needs to be handled by the language binding directly */
                 break;
               case GI_INFO_TYPE_OBJECT:

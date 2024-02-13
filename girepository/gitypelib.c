@@ -41,6 +41,26 @@
  * Since: 2.80
  */
 
+G_DEFINE_BOXED_TYPE (GITypelib, gi_typelib, gi_typelib_ref, gi_typelib_unref)
+
+GIInfoType
+gi_typelib_blob_type_to_info_type (GITypelibBlobType blob_type)
+{
+  switch (blob_type)
+    {
+    case BLOB_TYPE_BOXED:
+      /* `BLOB_TYPE_BOXED` now always refers to a `StructBlob`, and
+       * `GIRegisteredTypeInfo` (the parent type of `GIStructInfo`) has a method
+       * for distinguishing whether the struct is a boxed type. So presenting
+       * `BLOB_TYPE_BOXED` as its own `GIBaseInfo` subclass is not helpful.
+       * See commit e28078c70cbf4a57c7dbd39626f43f9bd2674145 and
+       * https://gitlab.gnome.org/GNOME/glib/-/issues/3245. */
+      return GI_INFO_TYPE_STRUCT;
+    default:
+      return (GIInfoType) blob_type;
+    }
+}
+
 typedef struct {
   GITypelib *typelib;
   GSList *context_stack;
@@ -2213,36 +2233,6 @@ gi_typelib_error_quark (void)
   return quark;
 }
 
-static GSList *library_paths;
-
-/**
- * gi_repository_prepend_library_path:
- * @directory: (type filename): a single directory to scan for shared libraries
- *
- * Prepends @directory to the search path that is used to
- * search shared libraries referenced by imported namespaces.
- *
- * Multiple calls to this function all contribute to the final
- * list of paths.
- *
- * The list of paths is unique and shared for all
- * [class@GIRepository.Repository] instances across the process, but it doesn’t
- * affect namespaces imported before the call.
- *
- * If the library is not found in the directories configured
- * in this way, loading will fall back to the system library
- * path (i.e. `LD_LIBRARY_PATH` and `DT_RPATH` in ELF systems).
- * See the documentation of your dynamic linker for full details.
- *
- * Since: 2.80
- */
-void
-gi_repository_prepend_library_path (const char *directory)
-{
-  library_paths = g_slist_prepend (library_paths,
-                                   g_strdup (directory));
-}
-
 /* Note on the GModule flags used by this function:
 
  * Glade's autoconnect feature and OpenGL's extension mechanism
@@ -2254,9 +2244,9 @@ gi_repository_prepend_library_path (const char *directory)
  * load modules globally for now.
  */
 static GModule *
-load_one_shared_library (const char *shlib)
+load_one_shared_library (GITypelib  *typelib,
+                         const char *shlib)
 {
-  GSList *p;
   GModule *m;
 
 #ifdef __APPLE__
@@ -2272,9 +2262,9 @@ load_one_shared_library (const char *shlib)
 #endif
     {
       /* First try in configured library paths */
-      for (p = library_paths; p; p = p->next)
+      for (unsigned int i = 0; typelib->library_paths != NULL && i < typelib->library_paths->len; i++)
         {
-          char *path = g_build_filename (p->data, shlib, NULL);
+          char *path = g_build_filename (typelib->library_paths->pdata[i], shlib, NULL);
 
           m = g_module_open (path, G_MODULE_BIND_LAZY);
 
@@ -2319,7 +2309,7 @@ gi_typelib_do_dlopen (GITypelib *typelib)
         {
           GModule *module;
 
-          module = load_one_shared_library (shlibs[i]);
+          module = load_one_shared_library (typelib, shlibs[i]);
 
           if (module == NULL)
             {
@@ -2359,121 +2349,86 @@ gi_typelib_ensure_open (GITypelib *typelib)
 }
 
 /**
- * gi_typelib_new_from_memory: (skip)
- * @memory: (array length=len): address of memory chunk containing the typelib
- * @len: length of memory chunk containing the typelib, in bytes
+ * gi_typelib_new_from_bytes:
+ * @bytes: memory chunk containing the typelib
  * @error: a [type@GLib.Error]
  *
- * Creates a new [type@GIRepository.Typelib] from a memory location.
+ * Creates a new [type@GIRepository.Typelib] from a [type@GLib.Bytes].
  *
- * The memory block pointed to by @typelib will be automatically freed when the
- * repository is destroyed.
- *
- * Returns: (transfer full): the new [type@GIRepository.Typelib]
- * Since: 2.80
- */
-GITypelib *
-gi_typelib_new_from_memory (uint8_t *memory,
-                            size_t   len,
-                            GError **error)
-{
-  GITypelib *meta;
-
-  if (!validate_header_basic (memory, len, error))
-    return NULL;
-
-  meta = g_slice_new0 (GITypelib);
-  meta->data = memory;
-  meta->len = len;
-  meta->owns_memory = TRUE;
-  meta->modules = NULL;
-
-  return meta;
-}
-
-/**
- * gi_typelib_new_from_const_memory: (skip)
- * @memory: (array length=len): address of memory chunk containing the typelib
- * @len: length of memory chunk containing the typelib
- * @error: a [type@GLib.Error]
- *
- * Creates a new [type@GIRepository.Typelib] from a memory location.
+ * The [type@GLib.Bytes] can point to a memory location or a mapped file, and
+ * the typelib will hold a reference to it until the repository is destroyed.
  *
  * Returns: (transfer full): the new [type@GIRepository.Typelib]
  * Since: 2.80
  */
 GITypelib *
-gi_typelib_new_from_const_memory (const uint8_t  *memory,
-                                  size_t          len,
-                                  GError        **error)
+gi_typelib_new_from_bytes (GBytes *bytes,
+                           GError **error)
 {
   GITypelib *meta;
-
-  if (!validate_header_basic (memory, len, error))
-    return NULL;
-
-  meta = g_slice_new0 (GITypelib);
-  meta->data = (uint8_t *) memory;
-  meta->len = len;
-  meta->owns_memory = FALSE;
-  meta->modules = NULL;
-
-  return meta;
-}
-
-/**
- * gi_typelib_new_from_mapped_file: (skip)
- * @mfile: (transfer full): a [type@GLib.MappedFile], that will be freed when
- *   the repository is destroyed
- * @error: a #GError
- *
- * Creates a new [type@GIRepository.Typelib] from a [type@GLib.MappedFile].
- *
- * Returns: (transfer full): the new [type@GIRepository.Typelib]
- * Since: 2.80
- */
-GITypelib *
-gi_typelib_new_from_mapped_file (GMappedFile  *mfile,
-                                 GError      **error)
-{
-  GITypelib *meta;
-  uint8_t *data = (uint8_t *) g_mapped_file_get_contents (mfile);
-  size_t len = g_mapped_file_get_length (mfile);
+  size_t len;
+  const uint8_t *data = g_bytes_get_data (bytes, &len);
 
   if (!validate_header_basic (data, len, error))
     return NULL;
 
   meta = g_slice_new0 (GITypelib);
-  meta->mfile = mfile;
-  meta->owns_memory = FALSE;
-  meta->data = data; 
+  g_atomic_ref_count_init (&meta->ref_count);
+  meta->bytes = g_bytes_ref (bytes);
+  meta->data = data;
   meta->len = len;
+  meta->modules = NULL;
 
   return meta;
 }
 
 /**
- * gi_typelib_free:
+ * gi_typelib_ref:
+ * @typelib: (transfer none): a #GITypelib
+ *
+ * Increment the reference count of a [type@GIRepository.Typelib].
+ *
+ * Returns: (transfer full): the same @typelib pointer
+ * Since: 2.80
+ */
+GITypelib *
+gi_typelib_ref (GITypelib *typelib)
+{
+  g_return_val_if_fail (typelib != NULL, NULL);
+
+  g_atomic_ref_count_inc (&typelib->ref_count);
+
+  return typelib;
+}
+
+/**
+ * gi_typelib_unref:
  * @typelib: (transfer full): a #GITypelib
  *
- * Free a [type@GIRepository.Typelib].
+ * Decrement the reference count of a [type@GIRepository.Typelib].
+ *
+ * Once the reference count reaches zero, the typelib is freed.
  *
  * Since: 2.80
  */
 void
-gi_typelib_free (GITypelib *typelib)
+gi_typelib_unref (GITypelib *typelib)
 {
-  if (typelib->mfile)
-    g_mapped_file_unref (typelib->mfile);
-  else
-    if (typelib->owns_memory)
-      g_free (typelib->data);
-  if (typelib->modules)
+  g_return_if_fail (typelib != NULL);
+
+  if (g_atomic_ref_count_dec (&typelib->ref_count))
     {
-      g_list_foreach (typelib->modules, (GFunc) (void *) g_module_close, NULL);
-      g_list_free (typelib->modules);
+      g_clear_pointer (&typelib->bytes, g_bytes_unref);
+
+      g_clear_pointer (&typelib->library_paths, g_ptr_array_unref);
+
+      if (typelib->modules)
+        {
+          g_list_foreach (typelib->modules, (GFunc) (void *) g_module_close, NULL);
+          g_list_free (typelib->modules);
+        }
+      g_slice_free (GITypelib, typelib);
     }
-  g_slice_free (GITypelib, typelib);
 }
 
 /**

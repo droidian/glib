@@ -1,5 +1,5 @@
 project('glib', 'c',
-  version : '2.79.1',
+  version : '2.79.2',
   # NOTE: See the policy in docs/meson-version.md before changing the Meson dependency
   meson_version : '>= 1.2.0',
   default_options : [
@@ -171,6 +171,10 @@ common_test_env = [
   'MALLOC_CHECK_=2',
 ]
 
+if get_option('werror')
+  common_test_env += 'LINT_WARNINGS_ARE_ERRORS=1'
+endif
+
 # Note: this may cause the tests output not to be printed when running in
 # verbose mode, see https://github.com/mesonbuild/meson/issues/11185
 # Can be changed it to 'exitcode' if required during development.
@@ -191,6 +195,13 @@ add_test_setup('unstable_tests',
   # Empty test setup, used for having different results set for flaky tests
   # Sadly we can't use (https://github.com/mesonbuild/meson/issues/10934):
   #suites: ['flaky', 'unstable']
+)
+
+add_test_setup('thorough',
+  exclude_suites: ['flaky', 'failing', 'performance'],
+  env: common_test_env,
+  timeout_multiplier: 20,
+  exe_wrapper: [find_program('./.gitlab-ci/thorough-test-wrapper.sh', required: true)],
 )
 
 # Allow the tests to be easily run under valgrind using --setup=valgrind
@@ -500,6 +511,7 @@ struct_members = [
                            #include <dirent.h>''' ],
   [ 'statvfs', 'f_basetype', '#include <sys/statvfs.h>' ],
   [ 'statvfs', 'f_fstypename', '#include <sys/statvfs.h>' ],
+  [ 'statvfs', 'f_type', '#include <sys/statvfs.h>' ],
   [ 'tm', 'tm_gmtoff', '#include <time.h>' ],
   [ 'tm', '__tm_gmtoff', '#include <time.h>' ],
 ]
@@ -511,7 +523,16 @@ foreach m : struct_members
   else
     header_check_prefix = header_check_prefix + '#include <sys/stat.h>'
   endif
-  if cc.has_member('struct ' + m[0], m[1], prefix : header_check_prefix)
+  # Reimplement cc.has_member() to workaround compiler warning
+  # FIXME: https://github.com/mesonbuild/meson/pull/12818
+  code = header_check_prefix + '''
+    void bar(void) {
+        struct ''' + m[0] + ''' foo;
+        (void) ( foo.''' + m[1] + ''' );
+        (void) foo;
+    }
+    '''
+  if cc.compiles(code, name : 'type "struct ' + m[0] + '" has member "' + m[1] + '"')
     define = 'HAVE_STRUCT_@0@_@1@'.format(m[0].to_upper(), m[1].underscorify().to_upper())
     glib_conf.set(define, 1)
     glib_conf_prefix = glib_conf_prefix + '#define @0@ 1\n'.format(define)
@@ -1006,6 +1027,7 @@ static __uint128_t v1 = 100;
 static __uint128_t v2 = 10;
 static __uint128_t u;
 u = v1 / v2;
+(void) u;
 }'''
 if cc.compiles(uint128_t_src, name : '__uint128_t available')
   glib_conf.set('HAVE_UINT128_T', 1)
@@ -1101,7 +1123,7 @@ if cc.compiles('''#include <fcntl.h>
                   #include <sys/types.h>
                   #include <sys/stat.h>
                   void some_func (void) {
-                    open(0, O_DIRECTORY, 0);
+                    open(".", O_DIRECTORY, 0);
                   }''', name : 'open() option O_DIRECTORY')
   glib_conf.set('HAVE_OPEN_O_DIRECTORY', 1)
 endif
@@ -1206,7 +1228,6 @@ int
 doit()
 {
   char buffer[32];
-  va_list args;
   int r;
 
   r = snprintf(buffer, 5, "1234567");
@@ -1293,6 +1314,7 @@ endif
 if cc.links('''#include <langinfo.h>
                int main (int argc, char ** argv) {
                  char *codeset = nl_langinfo (CODESET);
+                 (void) codeset;
                  return 0;
                }''', name : 'nl_langinfo and CODESET')
   glib_conf.set('HAVE_LANGINFO_CODESET', 1)
@@ -1313,6 +1335,7 @@ if cc.links('''#include <langinfo.h>
                  str = nl_langinfo (ABMON_12);
                  str = nl_langinfo (DAY_1);
                  str = nl_langinfo (ABDAY_7);
+                 (void) str;
                  return 0;
                }''', name : 'nl_langinfo (PM_STR)')
   have_langinfo_time = true
@@ -1328,6 +1351,7 @@ if cc.links('''#include <langinfo.h>
                  str = nl_langinfo (ERA_D_FMT);
                  str = nl_langinfo (ERA_T_FMT);
                  str = nl_langinfo (_NL_TIME_ERA_NUM_ENTRIES);
+                 (void) str;
                  return 0;
                }''', name : 'nl_langinfo (ERA)')
   glib_conf.set('HAVE_LANGINFO_ERA', 1)
@@ -1349,6 +1373,7 @@ if cc.links('''#include <langinfo.h>
                  str = nl_langinfo (_NL_CTYPE_OUTDIGIT7_MB);
                  str = nl_langinfo (_NL_CTYPE_OUTDIGIT8_MB);
                  str = nl_langinfo (_NL_CTYPE_OUTDIGIT9_MB);
+                 (void) str;
                  return 0;
                }''', name : 'nl_langinfo (_NL_CTYPE_OUTDIGITn_MB)')
   glib_conf.set('HAVE_LANGINFO_OUTDIGIT', 1)
@@ -1376,6 +1401,7 @@ if cc.links('''#ifndef _GNU_SOURCE
                  str = nl_langinfo (ALTMON_10);
                  str = nl_langinfo (ALTMON_11);
                  str = nl_langinfo (ALTMON_12);
+                 (void) str;
                  return 0;
                }''', name : 'nl_langinfo (ALTMON_n)')
   glib_conf.set('HAVE_LANGINFO_ALTMON', 1)
@@ -1403,6 +1429,7 @@ if cc.links('''#ifndef _GNU_SOURCE
                  str = nl_langinfo (_NL_ABALTMON_10);
                  str = nl_langinfo (_NL_ABALTMON_11);
                  str = nl_langinfo (_NL_ABALTMON_12);
+                 (void) str;
                  return 0;
                }''', name : 'nl_langinfo (_NL_ABALTMON_n)')
   glib_conf.set('HAVE_LANGINFO_ABALTMON', 1)
@@ -1415,6 +1442,7 @@ endif
 if cc.links('''#include <langinfo.h>
                int main (int argc, char ** argv) {
                  char *codeset = nl_langinfo (_NL_TIME_CODESET);
+                 (void) codeset;
                  return 0;
                }''', name : 'nl_langinfo and _NL_TIME_CODESET')
   glib_conf.set('HAVE_LANGINFO_TIME_CODESET', 1)
@@ -1485,6 +1513,7 @@ if cc.compiles('''#include <sys/types.h>
                   #include <inttypes.h>
                   void some_func (void) {
                     uintmax_t i = (uintmax_t) -1;
+                    (void) i;
                   }''', name : 'uintmax_t in inttypes.h')
   glib_conf.set('HAVE_INTTYPES_H_WITH_UINTMAX', 1)
   found_uintmax_t = true
@@ -1497,6 +1526,7 @@ if cc.compiles('''#include <sys/types.h>
                   #include <stdint.h>
                   void some_func (void) {
                     uintmax_t i = (uintmax_t) -1;
+                    (void) i;
                   }''', name : 'uintmax_t in stdint.h')
   glib_conf.set('HAVE_STDINT_H_WITH_UINTMAX', 1)
   found_uintmax_t = true
@@ -1546,6 +1576,7 @@ if long_long_size == long_size
                     int main () {
                       int64_t i1 = 1;
                       long *i2 = &i1;
+                      (void) i2;
                       return 1;
                     }''', name : 'int64_t is long')
     int64_t_typedef = 'long'
@@ -1558,9 +1589,12 @@ if long_long_size == long_size
                       int main () {
                         int64_t i1 = 1;
                         long long *i2 = &i1;
+                        (void) i2;
                         return 1;
                       }''', name : 'int64_t is long long')
     int64_t_typedef = 'long long'
+  else
+    error('Cannot detect int64_t typedef')
   endif
 endif
 
@@ -2245,6 +2279,10 @@ libmount_dep = []
 if host_system == 'linux'
   libmount_dep = dependency('mount', version : '>=2.23', required : get_option('libmount'))
   glib_conf.set('HAVE_LIBMOUNT', libmount_dep.found())
+
+  if libmount_dep.found() and cc.has_function('mnt_monitor_veil_kernel', dependencies: libmount_dep)
+    glib_conf.set('HAVE_MNT_MONITOR_VEIL_KERNEL', 1)
+  endif
 endif
 
 if host_system == 'windows'
@@ -2532,11 +2570,9 @@ subdir('gobject')
 subdir('gthread')
 subdir('gmodule')
 subdir('gio')
-if enable_gir
-  subdir('introspection')
-endif
 subdir('girepository')
 subdir('fuzzing')
+subdir('tests')
 
 # xgettext is optional (on Windows for instance)
 if find_program('xgettext', required : get_option('nls')).found()

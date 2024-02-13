@@ -64,8 +64,8 @@ gi_base_info_find_method (GIBaseInfo  *base,
       const char *fname = (const char *)&rinfo->typelib->data[fblob->name];
 
       if (strcmp (name, fname) == 0)
-        return (GIFunctionInfo *) gi_info_new (GI_INFO_TYPE_FUNCTION, base,
-                                               rinfo->typelib, offset);
+        return (GIFunctionInfo *) gi_base_info_new (GI_INFO_TYPE_FUNCTION, base,
+                                                    rinfo->typelib, offset);
 
       offset += header->function_blob_size;
     }
@@ -139,9 +139,6 @@ gi_function_info_get_flags (GIFunctionInfo *info)
 
   if (blob->wraps_vfunc)
     flags = flags | GI_FUNCTION_WRAPS_VFUNC;
-
-  if (blob->throws)
-    flags = flags | GI_FUNCTION_THROWS;
 
   return flags;
 }

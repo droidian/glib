@@ -344,7 +344,7 @@ gi_arg_info_get_type_info (GIArgInfo *info)
 }
 
 /**
- * gi_arg_info_load_type:
+ * gi_arg_info_load_type_info:
  * @info: a #GIArgInfo
  * @type: (out caller-allocates): Initialized with information about type of @info
  *
@@ -354,18 +354,21 @@ gi_arg_info_get_type_info (GIArgInfo *info)
  *
  * The initialized @type must not be referenced after @info is deallocated.
  *
+ * Once you are done with @type, it must be cleared using
+ * [method@GIRepository.BaseInfo.clear].
+ *
  * Since: 2.80
  */
 void
-gi_arg_info_load_type (GIArgInfo  *info,
-                       GITypeInfo *type)
+gi_arg_info_load_type_info (GIArgInfo  *info,
+                            GITypeInfo *type)
 {
   GIRealInfo *rinfo = (GIRealInfo*) info;
 
   g_return_if_fail (info != NULL);
   g_return_if_fail (GI_IS_ARG_INFO (info));
 
-  gi_type_info_init ((GIBaseInfo *) type, (GIBaseInfo*)info, rinfo->typelib, rinfo->offset + G_STRUCT_OFFSET (ArgBlob, arg_type));
+  gi_type_info_init (type, (GIBaseInfo*)info, rinfo->typelib, rinfo->offset + G_STRUCT_OFFSET (ArgBlob, arg_type));
 }
 
 void

@@ -26,7 +26,9 @@
 
 #include "girwriter-private.h"
 
+#include "gibaseinfo-private.h"
 #include "girepository.h"
+#include "girepository-private.h"
 #include "gitypelib-internal.h"
 
 #include <errno.h>
@@ -165,7 +167,7 @@ xml_free (Xml *xml)
 static void
 check_unresolved (GIBaseInfo *info)
 {
-  if (gi_base_info_get_info_type (info) != GI_INFO_TYPE_UNRESOLVED)
+  if (!GI_IS_UNRESOLVED_INFO (info))
     return;
 
   g_critical ("Found unresolved type '%s' '%s'",
@@ -440,7 +442,7 @@ write_field_info (const char *ns,
     }
 
   interface = gi_type_info_get_interface (type);
-  if (interface && gi_base_info_get_info_type (interface) == GI_INFO_TYPE_CALLBACK)
+  if (interface != NULL && GI_IS_CALLBACK_INFO (interface))
     write_callback_info (ns, (GICallbackInfo *)interface, file);
   else
     write_type_info (ns, type, file);
@@ -658,7 +660,7 @@ write_struct_info (const char   *ns,
   type_name = gi_registered_type_info_get_type_name ((GIRegisteredTypeInfo*)info);
   type_init = gi_registered_type_info_get_type_init_function_name ((GIRegisteredTypeInfo*)info);
 
-  if (gi_base_info_get_info_type ((GIBaseInfo *) info) == GI_INFO_TYPE_BOXED)
+  if (gi_registered_type_info_is_boxed (GI_REGISTERED_TYPE_INFO (info)))
     {
       xml_start_element (file, "glib:boxed");
       xml_printf (file, " glib:name=\"%s\"", name);
@@ -845,7 +847,7 @@ write_enum_info (const char *ns,
   type_init = gi_registered_type_info_get_type_init_function_name ((GIRegisteredTypeInfo*)info);
   error_domain = gi_enum_info_get_error_domain (info);
 
-  if (gi_base_info_get_info_type ((GIBaseInfo *) info) == GI_INFO_TYPE_ENUM)
+  if (GI_IS_ENUM_INFO (info))
     xml_start_element (file, "enumeration");
   else
     xml_start_element (file, "bitfield");
@@ -1255,6 +1257,7 @@ write_union_info (const char *ns,
   type_name = gi_registered_type_info_get_type_name ((GIRegisteredTypeInfo*)info);
   type_init = gi_registered_type_info_get_type_init_function_name ((GIRegisteredTypeInfo*)info);
 
+  /* FIXME: Add support for boxed unions */
   xml_start_element (file, "union");
   xml_printf (file, " name=\"%s\"", name);
 
@@ -1283,7 +1286,7 @@ write_union_info (const char *ns,
       size_t offset;
       GITypeInfo *type;
 
-      offset = gi_union_info_get_discriminator_offset (info);
+      gi_union_info_get_discriminator_offset (info, &offset);
       type = gi_union_info_get_discriminator_type (info);
 
       xml_start_element (file, "discriminator");
@@ -1335,10 +1338,10 @@ gi_ir_writer_write (const char *filename,
   FILE *ofile;
   size_t i, j;
   char **dependencies;
-  GIRepository *repository;
+  GIRepository *repository = NULL;
   Xml *xml;
 
-  repository = gi_repository_get_default ();
+  repository = gi_repository_new ();
 
   if (filename == NULL)
     ofile = stdout;
@@ -1373,7 +1376,7 @@ gi_ir_writer_write (const char *filename,
               "            xmlns:c=\"http://www.gtk.org/introspection/c/1.0\"\n"
               "            xmlns:glib=\"http://www.gtk.org/introspection/glib/1.0\"");
 
-  dependencies = gi_repository_get_immediate_dependencies (repository, ns);
+  dependencies = gi_repository_get_immediate_dependencies (repository, ns, NULL);
   if (dependencies != NULL)
     {
       for (i = 0; dependencies[i]; i++)
@@ -1413,45 +1416,26 @@ gi_ir_writer_write (const char *filename,
       for (j = 0; j < n_infos; j++)
         {
           GIBaseInfo *info = gi_repository_get_info (repository, cur_ns, j);
-          switch (gi_base_info_get_info_type (info))
-            {
-            case GI_INFO_TYPE_FUNCTION:
-              write_function_info (ns, (GIFunctionInfo *)info, xml);
-              break;
 
-            case GI_INFO_TYPE_CALLBACK:
-              write_callback_info (ns, (GICallbackInfo *)info, xml);
-              break;
-
-            case GI_INFO_TYPE_STRUCT:
-            case GI_INFO_TYPE_BOXED:
-              write_struct_info (ns, (GIStructInfo *)info, xml);
-              break;
-
-            case GI_INFO_TYPE_UNION:
-              write_union_info (ns, (GIUnionInfo *)info, xml);
-              break;
-
-            case GI_INFO_TYPE_ENUM:
-            case GI_INFO_TYPE_FLAGS:
-              write_enum_info (ns, (GIEnumInfo *)info, xml);
-              break;
-
-            case GI_INFO_TYPE_CONSTANT:
-              write_constant_info (ns, (GIConstantInfo *)info, xml);
-              break;
-
-            case GI_INFO_TYPE_OBJECT:
-              write_object_info (ns, (GIObjectInfo *)info, xml);
-              break;
-
-            case GI_INFO_TYPE_INTERFACE:
-              write_interface_info (ns, (GIInterfaceInfo *)info, xml);
-              break;
-
-            default:
-              g_error ("unknown info type %d", gi_base_info_get_info_type (info));
-            }
+          if (GI_IS_FUNCTION_INFO (info))
+            write_function_info (ns, (GIFunctionInfo *)info, xml);
+          else if (GI_IS_CALLBACK_INFO (info))
+            write_callback_info (ns, (GICallbackInfo *)info, xml);
+          else if (GI_IS_STRUCT_INFO (info))
+            write_struct_info (ns, (GIStructInfo *)info, xml);
+          else if (GI_IS_UNION_INFO (info))
+            write_union_info (ns, (GIUnionInfo *)info, xml);
+          else if (GI_IS_ENUM_INFO (info) ||
+                   GI_IS_FLAGS_INFO (info))
+            write_enum_info (ns, (GIEnumInfo *)info, xml);
+          else if (GI_IS_CONSTANT_INFO (info))
+            write_constant_info (ns, (GIConstantInfo *)info, xml);
+          else if (GI_IS_OBJECT_INFO (info))
+            write_object_info (ns, (GIObjectInfo *)info, xml);
+          else if (GI_IS_INTERFACE_INFO (info))
+            write_interface_info (ns, (GIInterfaceInfo *)info, xml);
+          else
+            g_error ("unknown info type %s", g_type_name (G_TYPE_FROM_INSTANCE (info)));
 
           gi_base_info_unref (info);
         }
@@ -1462,4 +1446,6 @@ gi_ir_writer_write (const char *filename,
   xml_end_element (xml, "repository");
 
   xml_free (xml);
+
+  g_clear_object (&repository);
 }
