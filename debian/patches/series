@@ -1,5 +1,6 @@
 gdatetime-Fix-ja_JA.eucjp-expectations-when-eras-are-unsu.patch
 gdatetime-Exercise-c-C-format-placeholders-in-ja_JP.eucjp.patch
+girepository-test-Don-t-assume-doubles-are-naturally-alig.patch
 01_gettext-desktopfiles.patch
 debian/02_gettext-desktopfiles-ubuntu.patch
 debian/03_disble_glib_compile_schemas_warning.patch
