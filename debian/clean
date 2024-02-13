@@ -1,3 +1,4 @@
+debian/cross-tools/
 debian/libglib2.0-0.postinst
 debian/libglib2.0-0.postrm
 debian/libglib2.0-0.triggers

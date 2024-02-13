@@ -1,3 +1,4 @@
+debian/cross-tools/${DEB_HOST_GNU_TYPE}-gi-* usr/bin
 usr/include/gio-unix-2.0
 usr/include/glib-2.0/gio
 usr/include/glib-2.0/glib

@@ -67,6 +67,34 @@ maintainer-update-unicode-data:
 	rm -f glib/tests/casemap.txt
 	$(CURDIR)/tools/update-unicode-data.sh $(CURDIR)/unicode-data 15.1.0
 
+execute_before_dh_auto_configure: cross-tools
+
+cross_tools = \
+	gi-compile-repository \
+	gi-decompile-typelib \
+	gi-inspect-typelib \
+	$(NULL)
+cross-tools: debian/cross-g-ir-tool.in debian/rules
+	mkdir -p debian/cross-tools/for-build
+	set -e; for tool in $(cross_tools); do \
+		sed \
+			-e 's|@DEB_HOST_MULTIARCH@|$(DEB_HOST_MULTIARCH)|' \
+			-e 's|@TOOL_PATH@|/usr/bin/'"$$tool"'|' \
+			< $< > debian/cross-tool.tmp; \
+		chmod 0755 debian/cross-tool.tmp; \
+		mv debian/cross-tool.tmp debian/cross-tools/$(DEB_HOST_GNU_TYPE)-$$tool; \
+	done
+ifneq ($(DEB_HOST_ARCH),$(DEB_BUILD_ARCH))
+	set -e; for tool in $(cross_tools); do \
+		sed \
+			-e 's|@DEB_HOST_MULTIARCH@|$(DEB_HOST_MULTIARCH)|' \
+			-e 's|@TOOL_PATH@|/usr/bin/'"$$tool"'|' \
+			< $< > debian/cross-tool.tmp; \
+		chmod 0755 debian/cross-tool.tmp; \
+		mv debian/cross-tool.tmp debian/cross-tools/for-build/$(DEB_HOST_GNU_TYPE)-$$tool; \
+	done
+endif
+
 override_dh_auto_configure:
 	sed -e 's|@DEB_HOST_ARCH@|$(DEB_HOST_ARCH)|g' \
 		< debian/meson/exe-wrapper.ini.in \
