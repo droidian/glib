@@ -4,6 +4,13 @@ glib2.0 (2.79.2-1) UNRELEASED; urgency=medium
   * d/copyright: Update
   * d/*.install: Add new GioUnix-2.0, GLibUnix-2.0 typelibs
   * d/libglib2.0-dev-bin.install: Add new gi- tools
+  * d/control, d/rules: Account for required endianness of gi-* tools.
+    They don't currently support reading or writing typelibs of opposite
+    endianness.
+  * Generate architecture-prefixed gi-* tools.
+    This is the same setup as in gobject-introspection: for example, the
+    equivalent of x86_64-linux-gnu-g-ir-compiler is
+    x86_64-linux-gnu-gi-compile-repository.
   * d/patches: Refresh patch series.
     Drop a patch that no longer applies cleanly, which only added debug
     messages to an unreliable test.
@@ -11,8 +18,12 @@ glib2.0 (2.79.2-1) UNRELEASED; urgency=medium
   * d/p/gdatetime-Fix-ja_JA.eucjp-expectations-when-eras-are-unsu.patch,
     d/p/gdatetime-Exercise-c-C-format-placeholders-in-ja_JP.eucjp.patch:
     Add proposed patches to fix autopkgtest failure on s390x
+  * d/p/girepository-test-Don-t-assume-doubles-are-naturally-alig.patch:
+    Add proposed patch to fix a test failure on i386
+  * d/libglib2.0-doc.doc-base.girepository: Add
+  * d/not-installed: Remove empty file
 
- -- Simon McVittie <smcv@debian.org>  Tue, 13 Feb 2024 10:46:57 +0000
+ -- Simon McVittie <smcv@debian.org>  Tue, 13 Feb 2024 12:13:15 +0000
 
 glib2.0 (2.79.1-1.1~exp1) experimental; urgency=medium
 
