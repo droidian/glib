@@ -20,10 +20,13 @@ glib2.0 (2.79.2-1) UNRELEASED; urgency=medium
     Add proposed patches to fix autopkgtest failure on s390x
   * d/p/girepository-test-Don-t-assume-doubles-are-naturally-alig.patch:
     Add proposed patch to fix a test failure on i386
-  * d/libglib2.0-doc.doc-base.girepository: Add
+  * d/libglib2.0-doc.doc-base.girepository, .gio-unix, .glib-unix: Add
+  * d/libglib2.0-doc.links: Add symlinks for girepository, gio-unix, glib-unix
+  * d/control: Depend on pkgconf in preference to pkg-config
+  * d/libglib2.0-0t64.lintian-overrides: Drop an incorrect override
   * d/not-installed: Remove empty file
 
- -- Simon McVittie <smcv@debian.org>  Tue, 13 Feb 2024 12:13:15 +0000
+ -- Simon McVittie <smcv@debian.org>  Tue, 13 Feb 2024 12:27:58 +0000
 
 glib2.0 (2.79.1-1.1~exp1) experimental; urgency=medium
 
