@@ -2,6 +2,8 @@ usr/share/doc/libglib2.0-dev/gio        usr/share/devhelp/books/gio
 usr/share/doc/libglib2.0-dev/gio        usr/share/doc/libglib2.0-doc/gio
 usr/share/doc/libglib2.0-dev/gio-unix   usr/share/devhelp/books/gio-unix
 usr/share/doc/libglib2.0-dev/gio-unix   usr/share/doc/libglib2.0-doc/gio-unix
+usr/share/doc/libglib2.0-dev/girepository usr/share/devhelp/books/girepository
+usr/share/doc/libglib2.0-dev/girepository usr/share/doc/libglib2.0-doc/girepository
 usr/share/doc/libglib2.0-dev/glib       usr/share/devhelp/books/glib
 usr/share/doc/libglib2.0-dev/glib       usr/share/doc/libglib2.0-doc/glib
 usr/share/doc/libglib2.0-dev/glib-unix  usr/share/devhelp/books/glib-unix
