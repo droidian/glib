@@ -11,10 +11,10 @@ Forwarded: no
  1 file changed, 2 insertions(+)
 
 diff --git a/gio/tests/memory-monitor-dbus.py.in b/gio/tests/memory-monitor-dbus.py.in
-index bf32918..17862e3 100755
+index 7aae01e..1ee2a05 100755
 --- a/gio/tests/memory-monitor-dbus.py.in
 +++ b/gio/tests/memory-monitor-dbus.py.in
-@@ -39,6 +39,8 @@ try:
+@@ -38,6 +38,8 @@ try:
              klass.start_system_bus()
              klass.dbus_con = klass.get_dbus(True)
  

@@ -12,6 +12,5 @@ workarounds/gmenumodel-test-Mark-as-flaky.patch
 workarounds/gvariant-test-Don-t-run-at-build-time-on-mips.patch
 workarounds/gdbus-server-auth-Normally-skip-flaky-DBUS_COOKIE_SHA1-te.patch
 workarounds/Skip-memory-monitor-dbus-test-if-not-specifically-request.patch
-workarounds/Add-extra-debug-to-memory-monitor-dbus-test.patch
 workarounds/tests-Skip-debugcontroller-test.patch
 workarounds/testfilemonitor-Skip-if-we-are-avoiding-flaky-tests.patch
