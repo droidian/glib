@@ -50,6 +50,7 @@ Copyright:
  2012-2020 Aleksander Morgado
  2018-2020 Alexander Kanavin
  2005-2006 Alexander Larsson
+ 2022 Alexander Richardson
  2022-2023 Alexander Shopov
  2021 Alexandros Theodotou
  2010-2013 Allison Karlitskaya
@@ -63,9 +64,11 @@ Copyright:
  2007-2008 A. Walton
  2001-2006 Behdad Esfahbod
  2009 Benjamin Otte
+ 2023 CaiJingLong
  2005-2023 Canonical Ltd
  2011 Carlos Garcia Campos
  2018 Carlos Garnacho
+ 2021 Casper Dik
  2018-2020 Centricular
  2009-2022 Christian Hergert
  2008-2010 Christian Kellner
@@ -78,7 +81,7 @@ Copyright:
  2008-2014 Codethink Ltd
  2008-2013 Colin Walters
  2017-2018 Collabora Inc
- 2008-2023 Collabora Ltd
+ 2008-2024 Collabora Ltd
  1999-2000 Craig Setera
  2010-2012 Dan Winship
  2023 Daniel Carpenter
@@ -95,6 +98,7 @@ Copyright:
  2020-2021 Frederic Martinsons
  1991-2023 Free Software Foundation, Inc
  2015 Garrett Regier
+ 2014 Giovanni Campagna
  2020 Gisle Vanem
  2001-2022 GLib contributors
  2016 GNOME i18n Project for Vietnamese
@@ -123,12 +127,17 @@ Copyright:
  2018 Kai Kang
  2010 Karo Mkrtchyan
  2013-2015 Lars Uebernickel
+ 2011 Laszlo Pandy
+ 2007 Lennart Poettering
+ 2008 litl, LLC
  2023 Luca Bacci
  2006 Lukas Novotny
  2002 Manish Singh
  2005-2007 Marco Barisione
  2022 Marco Trevisan
+ 2013 Martin Pitt
  2018 Mathieu Duponchelle
+ 2020 Matt Rose
  2001-2023 Matthias Clasen
  2010 Mikhail Zabaluev
  2004-2005 Miloslav Trmac
@@ -142,17 +151,20 @@ Copyright:
  2021 Ole André Vadla Ravnås
  2012 Olivier Sessink
  1998-2001 Owen Taylor
+ 2006 Padraig O'Briain
  2014-2019 Patrick Griffis
  2007 Patrick Hulin
+ 2011-2012 Pavel Holejsovsky
  2012 Pavel Vasin
  2018 Pavlo Solntsev
  2018 pdknsk
  1995-2011 Peter Mattis
  1995-2011 Peter Mattis, Spencer Kimball, Josh MacDonald, Sebastian Wilhelmi and others
- 2020 Philip Chimento
+ 2018 Peter Wu
+ 2019-2024 Philip Chimento
  2008 Philip Van Hoof
  2022-2023 Philip Withnall
- 2011 Ray Strode
+ 2011-2022 Ray Strode
  2000-2022 Red Hat, Inc
  1999-2003 Red Hat Software
  2001 Ron Steinke
@@ -163,11 +175,13 @@ Copyright:
  2008 Samuel Cormier-Iijima
  1999-2000 Scott Wimer
  2007 Sebastian Dröge
- 2001-2003 Sebastian Wilhelmi
+ 2019 Sebastian Schwarz
+ 2001-2023 Sebastian Wilhelmi
  1998-2001 Sebastian Wilhelmi; University of Karlsruhe
  2018 Sébastien Wilmet
  2018 segfault
  2002-2006 Sharif FarsiWeb, Inc
+ 2014 Simon Feltman
  2012-2023 Simon McVittie
  2011 Sjoerd Simons
  2002-2007 Soeren Sandmann
@@ -183,11 +197,14 @@ Copyright:
  2007-2011 The GNOME Project
  2010 Thiago Santos
  2019 Thibault Saunier
+ 2022 Thomas Haller
  1997-2007 Tim Janik
+ 2019 Ting-Wei Lan
  2023 Todd Carson
  2018 Tomasz Miąsko
  1999-2000 Tom Tromey
  1998-2004 Tor Lillqvist
+ 2011 Torsten Schönfeld
  1995-1997 Ulrich Drepper
  2021 Unicode®, Inc
  2011 William Hua
@@ -314,9 +331,26 @@ Copyright:
 License: Janik-permissive
 
 Files:
+ glib/gnulib/*
+Copyright:
+ 1999-2019 Free Software Foundation, Inc.
+ gnulib contributors
+License: LGPL-2.1+
+
+Files:
+ glib/gnulib/g-gnulib.h
+ glib/gnulib/printf.c
+ glib/gnulib/printf.h
+Copyright:
+ 2003 Matthias Clasen
+ gnulib contributors
+License: LGPL-2+
+
+Files:
  glib/libcharset/*
 Copyright:
  2000-2006 Free Software Foundation, Inc.
+ libcharset contributors
 License: LGPL-2+
 
 Files:
@@ -341,6 +375,8 @@ Files:
  glib/libcharset/glibc21.m4
 Copyright:
  2000-2018 Free Software Foundation, Inc
+ gnulib contributors
+ libcharset contributors
 License: FSFULLR
 
 Files:
