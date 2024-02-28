@@ -367,6 +367,14 @@ ifneq ($(filter %-tests,$(built_binaries)),)
 endif
 	dh_install --remaining-packages
 
+ifeq ($(filter nodoc,$(DEB_BUILD_PROFILES)),)
+execute_after_dh_installman-arch:
+	install -d debian/libglib2.0-dev/usr/share/man/man1
+	set -e; for tool in $(cross_tools); do \
+		ln -s "$$tool.1.gz" "debian/libglib2.0-dev/usr/share/man/man1/$(DEB_HOST_GNU_TYPE)-$$tool.1.gz"; \
+	done
+endif
+
 override_dh_dwz:
 	dh_dwz -Nlibglib2.0-udeb
 
