@@ -70,12 +70,12 @@ index 1ae3f3a..f838c9c 100644
  
    last_time = g_get_monotonic_time ();
 diff --git a/gobject/tests/threadtests.c b/gobject/tests/threadtests.c
-index ea5d6e3..e8cdd08 100644
+index 9b923f3..c048f6b 100644
 --- a/gobject/tests/threadtests.c
 +++ b/gobject/tests/threadtests.c
-@@ -481,6 +481,14 @@ test_threaded_toggle_notify (void)
-   GThread *threads[3];
+@@ -482,6 +482,14 @@ test_threaded_toggle_notify (void)
    gsize i;
+   const int n_iterations = g_test_thorough () ? 1000000 : 100000;
  
 +#if defined(__arm__)
 +  if (g_getenv ("DEB_ALLOW_FLAKY_TESTS") == NULL)
