@@ -1,16 +1,35 @@
-glib2.0 (2.79.3-1) UNRELEASED; urgency=medium
+glib2.0 (2.79.3-1) experimental; urgency=medium
 
   * New upstream development release
   * d/copyright: Update
   * d/patches: Drop patches that were included in the upstream release
   * d/patches/workarounds: Unfuzz a patch whose context changed slightly
+  * d/libgirepository-2.0-dev.install: libgirepository-2.0.a is now provided
+  * d/libglib2.0-dev-bin.install: Install new man pages for gi- tools
+  * Use d/*.manpages to install upstream man pages.
+    This ensures that they're skipped if building with nodoc.
+  * d/rules: Create cross-prefixed symlinks to gi- tools' man pages
+  * d/patches: Mention the cross-prefixed gi- tool names in their man pages
+  * d/libglib2.0-0t64.post*: Stop generating from a template.
+    dh_installdeb will substitute #DEB_HOST_MULTIARCH# for us since
+    debhelper 12.2 (2019).
+  * d/rules: Generate libglib2.0-0t64.triggers just before the command
+    that uses it
+  * d/libglib2.0-0t64.postinst: Remove workarounds that are no longer needed.
+    As noted in their comments, now that Debian 12 and Ubuntu 22.04 were
+    both released with these workarounds included, the workarounds can
+    safely be removed from newer distro branches.
   * Merge packaging from unstable (Closes: #1062134)
   * Build-depend on dpkg-dev (>= 1.22.5), as a safety catch against
     backports to suites that had the 32-bit time_t ABI.
     If this version gets backported, then the whole t64 package rename
     (including this change) will need to be reverted in the backport.
+  * d/clean: Update for the time64 transition
+  * Fix filename of README.Debian for libglib2.0-0t64.
+    This regressed during the t64 transition, presumably renamed with the
+    help of a script that didn't take multiple extensions into account.
 
- -- Simon McVittie <smcv@debian.org>  Wed, 28 Feb 2024 11:04:22 +0000
+ -- Simon McVittie <smcv@debian.org>  Wed, 28 Feb 2024 13:15:47 +0000
 
 glib2.0 (2.78.4-2) unstable; urgency=medium
 
