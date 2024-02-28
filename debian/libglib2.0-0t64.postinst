@@ -14,14 +14,14 @@ handle_triggers () {
           /usr/share/glib-2.0/schemas)
             # This is triggered everytime an application installs a
             # GSettings schema
-            "/usr/lib/#MULTIARCH#/glib-2.0/glib-compile-schemas" /usr/share/glib-2.0/schemas || true
+            "/usr/lib/#DEB_HOST_MULTIARCH#/glib-2.0/glib-compile-schemas" /usr/share/glib-2.0/schemas || true
             ;;
 
-          "/usr/lib/#MULTIARCH#/gio/modules")
+          "/usr/lib/#DEB_HOST_MULTIARCH#/gio/modules")
             # This is triggered everytime an application installs a GIO
-            # module into /usr/lib/#MULTIARCH#/gio/modules
+            # module into /usr/lib/#DEB_HOST_MULTIARCH#/gio/modules
 
-            "/usr/lib/#MULTIARCH#/glib-2.0/gio-querymodules" "/usr/lib/#MULTIARCH#/gio/modules" || true
+            "/usr/lib/#DEB_HOST_MULTIARCH#/glib-2.0/gio-querymodules" "/usr/lib/#DEB_HOST_MULTIARCH#/gio/modules" || true
             ;;
         esac
     done
@@ -37,10 +37,10 @@ fi
 # This is shipped in the .deb (see debian/libglib2.0-0.dirs) but would
 # be removed if empty during upgrade by old versions of the postrm (#987913).
 # This workaround can be removed after Debian 12 and Ubuntu 22.04 are released.
-install -d "/usr/lib/#MULTIARCH#/gio/modules"
+install -d "/usr/lib/#DEB_HOST_MULTIARCH#/gio/modules"
 
-"/usr/lib/#MULTIARCH#/glib-2.0/glib-compile-schemas" /usr/share/glib-2.0/schemas || true
-"/usr/lib/#MULTIARCH#/glib-2.0/gio-querymodules" "/usr/lib/#MULTIARCH#/gio/modules" || true
+"/usr/lib/#DEB_HOST_MULTIARCH#/glib-2.0/glib-compile-schemas" /usr/share/glib-2.0/schemas || true
+"/usr/lib/#DEB_HOST_MULTIARCH#/glib-2.0/gio-querymodules" "/usr/lib/#DEB_HOST_MULTIARCH#/gio/modules" || true
 
 # Clean up pre-multiarch giomodule.cache.
 # This workaround can be removed after Debian 12 and Ubuntu 22.04 are released.

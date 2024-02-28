@@ -299,7 +299,7 @@ ifneq ($(filter %-udeb,$(built_binaries)),)
 endif
 
 override_dh_auto_install:
-	set -e; for script in postinst postrm triggers; do \
+	set -e; for script in triggers; do \
 		sed -e"s/#MULTIARCH#/$(DEB_HOST_MULTIARCH)/g" \
 		    -e"s/#ARCH#/$(DEB_HOST_ARCH)/g" \
 		    debian/libglib2.0-0t64.$$script.in \
