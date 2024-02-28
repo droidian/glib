@@ -1,3 +1,13 @@
+glib2.0 (2.78.4-2) unstable; urgency=medium
+
+  [ Lukas Märdian ]
+  * Rename libraries for 64-bit time_t transition (Closes: #1062134)
+
+  [ Simon McVittie ]
+  * d/libglib2.0-0t64.lintian-overrides: Drop incorrect override
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Tue, 27 Feb 2024 21:23:12 -0500
+
 glib2.0 (2.78.4-1) unstable; urgency=medium
 
   * New upstream release
