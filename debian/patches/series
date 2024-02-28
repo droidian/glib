@@ -14,3 +14,4 @@ workarounds/gdbus-server-auth-Normally-skip-flaky-DBUS_COOKIE_SHA1-te.patch
 workarounds/Skip-memory-monitor-dbus-test-if-not-specifically-request.patch
 workarounds/tests-Skip-debugcontroller-test.patch
 workarounds/testfilemonitor-Skip-if-we-are-avoiding-flaky-tests.patch
+debian/girepository-Describe-the-Debian-specific-cross-prefixed-.patch
