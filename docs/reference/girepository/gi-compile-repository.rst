@@ -45,6 +45,15 @@ gi-compile-repository converts one or more GIR files into one or more typelibs.
 The output will be written to standard output unless the ``--output`` is
 specified.
 
+On Debian-derived systems, each architecture provides a version of
+**gi-compile-repository** prefixed with the *DEB_HOST_GNU_TYPE* from
+**dpkg-architecture**\ (1), for example
+**arm-linux-gnueabihf-gi-compile-repository**.
+These architecture-prefixed names use appropriate search paths for the
+given architecture, and should be used when cross-compiling.
+Please see file:///usr/share/doc/gobject-introspection/README.Debian.gz
+for more details.
+
 
 OPTIONS
 =======

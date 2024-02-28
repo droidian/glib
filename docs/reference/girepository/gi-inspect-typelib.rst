@@ -27,6 +27,15 @@ DESCRIPTION
 **gi-inspect-typelib** displays information about GObject-Introspection
 binary typelib files.
 
+On Debian-derived systems, each architecture provides a version of
+**gi-inspect-typelib** prefixed with the *DEB_HOST_GNU_TYPE* from
+**dpkg-architecture**\ (1), for example
+**arm-linux-gnueabihf-gi-inspect-typelib**.
+These architecture-prefixed names use appropriate search paths for the
+given architecture, and should be used when cross-compiling.
+Please see file:///usr/share/doc/gobject-introspection/README.Debian.gz
+for more details.
+
 OPTIONS
 -------
 

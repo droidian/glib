@@ -52,6 +52,15 @@ Normally, GIR XML should be generated from source code, headers and
 shared libraries using `g-ir-scanner(1) <man:g-ir-scanner(1)>`_
 instead of using this tool.
 
+On Debian-derived systems, each architecture provides a version of
+**gi-decompile-typelib** prefixed with the *DEB_HOST_GNU_TYPE* from
+**dpkg-architecture**\ (1), for example
+**arm-linux-gnueabihf-gi-decompile-typelib**.
+These architecture-prefixed names use appropriate search paths for the
+given architecture, and should be used when cross-compiling.
+Please see file:///usr/share/doc/gobject-introspection/README.Debian.gz
+for more details.
+
 
 OPTIONS
 =======
