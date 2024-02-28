@@ -299,12 +299,6 @@ ifneq ($(filter %-udeb,$(built_binaries)),)
 endif
 
 override_dh_auto_install:
-	set -e; for script in triggers; do \
-		sed -e"s/#MULTIARCH#/$(DEB_HOST_MULTIARCH)/g" \
-		    -e"s/#ARCH#/$(DEB_HOST_ARCH)/g" \
-		    debian/libglib2.0-0t64.$$script.in \
-		    > debian/libglib2.0-0t64.$$script ; \
-	done
 ifneq ($(filter %-udeb,$(built_binaries)),)
 	dh_auto_install -plibglib2.0-udeb --builddirectory=debian/build/udeb --destdir=debian/install/udeb
 endif
@@ -393,6 +387,13 @@ override_dh_missing:
 ifneq ($(filter %-udeb,$(built_binaries)),)
 	dh_missing --sourcedir=debian/install/udeb
 endif
+
+execute_before_dh_installdeb-arch:
+	set -e; for script in triggers; do \
+		sed -e"s/#DEB_HOST_MULTIARCH#/$(DEB_HOST_MULTIARCH)/g" \
+		    debian/libglib2.0-0t64.$$script.in \
+		    > debian/libglib2.0-0t64.$$script ; \
+	done
 
 override_dh_gencontrol:
 ifneq ($(filter libglib2.0-dev,$(built_binaries)),)
