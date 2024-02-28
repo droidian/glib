@@ -1,3 +1,10 @@
+glib2.0 (2.79.3-2) experimental; urgency=medium
+
+  [ Gianfranco Costamagna ]
+  * Fix shlibs to fix installability on armhf
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Wed, 28 Feb 2024 18:11:32 -0500
+
 glib2.0 (2.79.3-1) experimental; urgency=medium
 
   * New upstream development release
