@@ -1,12 +1,3 @@
-glib2.0 (2.78.4-3) UNRELEASED; urgency=medium
-
-  * Build-depend on dpkg-dev (>= 1.22.5), as a safety catch against
-    backports to suites that had the 32-bit time_t ABI.
-    If this version gets backported, then the whole t64 package rename
-    (including this change) will need to be reverted in the backport.
-
- -- Simon McVittie <smcv@debian.org>  Wed, 28 Feb 2024 10:39:41 +0000
-
 glib2.0 (2.78.4-2) unstable; urgency=medium
 
   [ Lukas Märdian ]
