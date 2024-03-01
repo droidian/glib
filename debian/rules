@@ -122,7 +122,9 @@ override_dh_clean:
 override_dh_gnome_clean:
 
 override_dh_makeshlibs:
+ifneq ($(filter libglib2.0-tests,$(built_binaries)),)
 	dh_makeshlibs -plibglib2.0-tests -n
+endif
 	dh_makeshlibs --remaining-packages --add-udeb=libglib2.0-udeb -- -c4
 
 override_dh_strip_nondeterminism:
