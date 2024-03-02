@@ -1,0 +1,126 @@
+#!/bin/sh
+# Copyright 2024 Simon McVittie
+# SPDX-License-Identifier: LGPL-2.1-or-later
+
+# Ensure that if the content of libglib2.0-0t64 is taken over by some
+# other package libglib2.0-0xyz, then that other package will not trigger
+# a bug equivalent to #1065022.
+
+set -eux
+
+export DEBIAN_FRONTEND=noninteractive
+n=0
+failed=0
+binary_package="libglib2.0-0t64"
+future_binary_package="libglib2.0-0xyz"
+srcdir="$(pwd)"
+tmpdir="$(mktemp -d)"
+cd "$tmpdir"
+
+assert () {
+    n=$(( n + 1 ))
+
+    if "$@"; then
+        echo "ok $n - $*"
+    else
+        echo "not ok $n - $* exit status $?"
+        failed=1
+    fi
+}
+
+assert_not () {
+    n=$(( n + 1 ))
+
+    if ! "$@"; then
+        echo "ok $n - unsuccessful as expected: $*"
+    else
+        echo "not ok $n - should not have succeeded: $*"
+        failed=1
+    fi
+}
+
+# Add a deb822-formatted apt source at this location if you are testing a
+# locally-built glib2.0 before upload
+if [ -e "$srcdir/debian/tests/manual/local-1065022.sources" ]; then
+    install -m644 -t /etc/apt/sources.list.d/ -D \
+        "$srcdir/debian/tests/manual/local-1065022.sources"
+fi
+
+# For more convenient manual testing
+if ! dpkg-query -W dpkg-repack; then
+    apt-get -y update
+    apt-get -y install "$binary_package"
+    apt-get -y install dconf-gsettings-backend dpkg-repack gsettings-desktop-schemas
+fi
+
+# This assumes that libglib2.0-0t64 has at least one each of Breaks, Provides
+# and Replaces, and will need to be adjusted if that assumption is broken in
+# the future for whatever reason.
+dpkg-repack --generate "$binary_package"
+grep -q '^Breaks:' dpkg-repack.*/DEBIAN/control
+grep -q '^Provides:' dpkg-repack.*/DEBIAN/control
+grep -q '^Replaces:' dpkg-repack.*/DEBIAN/control
+# The $ substitutions in the Perl expressions are to be expanded by Perl,
+# not by the shell, so:
+# shellcheck disable=SC2016
+env \
+    binary_package="$binary_package" \
+    future_binary_package="$future_binary_package" \
+    perl -p -i \
+        -e 's/^Package:.*$/Package: $ENV{future_binary_package}/;' \
+        -e 's/^(Breaks:.*)$/$1, $ENV{binary_package}/;' \
+        -e 's/^(Provides:.*)$/$1, $ENV{binary_package}/;' \
+        -e 's/^(Replaces:.*)$/$1, $ENV{binary_package}/;' \
+        dpkg-repack.*/DEBIAN/control
+dpkg-deb --build dpkg-repack.* "$future_binary_package.deb"
+apt-get -y install ./"$future_binary_package.deb"
+
+assert test -e /usr/share/glib-2.0/schemas/org.gnome.desktop.interface.gschema.xml
+assert test -s /usr/share/glib-2.0/schemas/gschemas.compiled
+
+for f in /usr/lib/*/gio/modules/libdconfsettings.so; do
+    assert test -e "$f"
+    assert test -s "$f"
+done
+
+for f in /usr/lib/*/gio/modules/giomodule.cache; do
+    assert test -e "$f"
+    assert test -s "$f"
+done
+
+# Purging the "old" (pre-transition) binary package does not destroy the
+# GIO modules and GSettings schema summaries
+apt-get -y purge "$binary_package"
+
+assert test -e /usr/share/glib-2.0/schemas/org.gnome.desktop.interface.gschema.xml
+assert test -s /usr/share/glib-2.0/schemas/gschemas.compiled
+
+for f in /usr/lib/*/gio/modules/libdconfsettings.so; do
+    assert test -e "$f"
+    assert test -s "$f"
+done
+
+for f in /usr/lib/*/gio/modules/giomodule.cache; do
+    assert test -e "$f"
+    assert test -s "$f"
+done
+
+# Purging the "new" (post-transition) binary package still *does* destroy the
+# GIO modules and GSettings schema summaries
+apt-get -y purge "$future_binary_package"
+
+assert_not test -e /usr/share/glib-2.0/schemas/org.gnome.desktop.interface.gschema.xml
+assert_not test -e /usr/share/glib-2.0/schemas/gschemas.compiled
+
+for f in /usr/lib/*/gio/modules/libdconfsettings.so; do
+    assert_not test -e "$f"
+done
+
+for f in /usr/lib/*/gio/modules/giomodule.cache; do
+    assert_not test -e "$f"
+done
+
+echo "1..$n"
+exit "$failed"
+
+# vim:set sw=4 sts=4 et:
