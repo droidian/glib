@@ -1,3 +1,10 @@
+glib2.0 (2.79.3-3) UNRELEASED; urgency=medium
+
+  * Merge pending packaging from unstable
+    - Mention #1065280 in 2.79.3-1 changelog entry
+
+ -- Simon McVittie <smcv@debian.org>  Sat, 02 Mar 2024 14:35:24 +0000
+
 glib2.0 (2.79.3-2) experimental; urgency=medium
 
   [ Gianfranco Costamagna ]
@@ -27,8 +34,8 @@ glib2.0 (2.79.3-1) experimental; urgency=medium
     both released with these workarounds included, the workarounds can
     safely be removed from newer distro branches.
   * Merge packaging from unstable (Closes: #1062134)
-  * Build-depend on dpkg-dev (>= 1.22.5), as a safety catch against
-    backports to suites that had the 32-bit time_t ABI.
+  * Build-depend on dpkg-dev (>= 1.22.5), to ensure that we are on the
+    64-bit time_t side of the transition (Closes: #1065280).
     If this version gets backported, then the whole t64 package rename
     (including this change) will need to be reverted in the backport.
   * d/clean: Update for the time64 transition
