@@ -1,4 +1,4 @@
-glib2.0 (2.79.3-3) UNRELEASED; urgency=medium
+glib2.0 (2.79.3-3) experimental; urgency=medium
 
   * Merge pending packaging from unstable
     - Mention #1065280 in 2.79.3-1 changelog entry
@@ -21,7 +21,7 @@ glib2.0 (2.79.3-3) UNRELEASED; urgency=medium
     might cause it to regress for reasons that are not genuinely
     release-critical, so it is marked as flaky.
 
- -- Simon McVittie <smcv@debian.org>  Sat, 02 Mar 2024 17:43:56 +0000
+ -- Simon McVittie <smcv@debian.org>  Sat, 02 Mar 2024 23:07:12 +0000
 
 glib2.0 (2.79.3-2) experimental; urgency=medium
 
