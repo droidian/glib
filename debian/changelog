@@ -2,8 +2,26 @@ glib2.0 (2.79.3-3) UNRELEASED; urgency=medium
 
   * Merge pending packaging from unstable
     - Mention #1065280 in 2.79.3-1 changelog entry
+  * d/libglib2.0-0t64.preinst: Remove libglib2.0-0 postrm to avoid file loss
+    during the time64 transition (Closes: #1065022)
+  * d/tests/manual/1065022.sh: Add a manual reproducer for #1065022
+  * d/libglib2.0-0t64.postrm: Only clean up giomodule.cache during purge.
+    This matches the behaviour that we have had for gschemas.compiled
+    since 2012, with similar reasoning: if we remove this file during
+    remove, then during upgrades there is a window between old-postrm
+    and new-postinst during which giomodule.cache is missing.
+  * d/libglib2.0-0t64.postrm: Avoid recurrence of #1065022 in the future.
+    If at some point in the future we have another transition as extensive
+    as time64, then libglib2.0-0t64 could conceivably be replaced by
+    some other package, for example libglib2.0-0xyz. If that happens,
+    we need to avoid deletion of gschemas.compiled and giomodule.cache,
+    otherwise we will have another bug similar to #1065022.
+  * d/tests/1065022-futureproofing: Add a test for recurrence of #1065022.
+    This test-case depends on several implementation details which
+    might cause it to regress for reasons that are not genuinely
+    release-critical, so it is marked as flaky.
 
- -- Simon McVittie <smcv@debian.org>  Sat, 02 Mar 2024 14:35:24 +0000
+ -- Simon McVittie <smcv@debian.org>  Sat, 02 Mar 2024 17:43:56 +0000
 
 glib2.0 (2.79.3-2) experimental; urgency=medium
 
