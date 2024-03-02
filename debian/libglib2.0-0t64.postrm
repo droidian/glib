@@ -4,7 +4,7 @@ set -e
 #DEBHELPER#
 
 case "$1" in
-    (remove|purge)
+    (purge)
         if [ -d /usr/lib/#DEB_HOST_MULTIARCH#/gio/modules ]; then
             # Purge the cache
             rm -f /usr/lib/#DEB_HOST_MULTIARCH#/gio/modules/giomodule.cache
