@@ -1,3 +1,11 @@
+glib2.0 (2.79.3-4) UNRELEASED; urgency=medium
+
+  * Merge packaging from unstable
+    - d/control: libglib2.0-dev Suggests gir1.2-glib-2.0-dev in preference
+      to libgirepository1.0-dev, for multi-arch co-installability.
+
+ -- Simon McVittie <smcv@debian.org>  Sun, 03 Mar 2024 13:30:12 +0000
+
 glib2.0 (2.79.3-3) experimental; urgency=medium
 
   * Merge pending packaging from unstable
@@ -62,6 +70,36 @@ glib2.0 (2.79.3-1) experimental; urgency=medium
     help of a script that didn't take multiple extensions into account.
 
  -- Simon McVittie <smcv@debian.org>  Wed, 28 Feb 2024 13:15:47 +0000
+
+glib2.0 (2.78.4-3) unstable; urgency=medium
+
+  * d/libglib2.0-0t64.preinst: Remove libglib2.0-0 postrm to avoid file loss
+    (Closes: #1065022)
+  * d/tests: Add a manual reproducer for #1065022
+  * d/libglib2.0-0t64.post*: Stop generating from a template.
+    dh_installdeb will substitute #DEB_HOST_MULTIARCH# for us since
+    debhelper 12.2 (2019).
+  * d/libglib2.0-0t64.postrm: Only clean up giomodule.cache during purge.
+    This matches the behaviour that we have had for gschemas.compiled
+    since 2012.
+  * d/libglib2.0-0t64.postrm: Avoid recurrence of #1065022 in the future.
+    If at some point in the future we have another transition as extensive
+    as time64, then libglib2.0-0t64 could conceivably be replaced by some
+    other package, for example libglib2.0-0xyz. If that happens,
+    we need to avoid deletion of gschemas.compiled and giomodule.cache,
+    otherwise we will have another bug similar to #1065022.
+  * d/tests/1065022-futureproofing: Add a test for recurrence of #1065022.
+    This test-case depends on several implementation details which
+    might cause it to regress for reasons that are not genuinely
+    release-critical, so it is marked as flaky.
+  * d/libglib2.0-0t64.postinst: Remove workarounds that are no longer needed.
+    As noted in their comments, now that Debian 12 and Ubuntu 22.04 were
+    both released with these workarounds included, the workarounds can safely
+    be removed from newer distro branches.
+  * d/control: libglib2.0-dev Suggests gir1.2-glib-2.0-dev in preference
+    to libgirepository1.0-dev, for multi-arch co-installability.
+
+ -- Simon McVittie <smcv@debian.org>  Sun, 03 Mar 2024 13:30:12 +0000
 
 glib2.0 (2.78.4-2.1) unstable; urgency=medium
 
