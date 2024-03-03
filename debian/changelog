@@ -1,4 +1,4 @@
-glib2.0 (2.78.4-3) UNRELEASED; urgency=medium
+glib2.0 (2.78.4-3) unstable; urgency=medium
 
   * Build-depend on dpkg-dev (>= 1.22.5), to ensure that we are on the
     64-bit time_t side of the transition (Closes: #1065280).
@@ -33,7 +33,7 @@ glib2.0 (2.78.4-3) UNRELEASED; urgency=medium
     This regressed during the t64 transition, presumably renamed with the
     help of a script that didn't take multiple extensions into account.
 
- -- Simon McVittie <smcv@debian.org>  Sun, 03 Mar 2024 13:09:32 +0000
+ -- Simon McVittie <smcv@debian.org>  Sun, 03 Mar 2024 13:30:12 +0000
 
 glib2.0 (2.78.4-2.1) unstable; urgency=medium
 
