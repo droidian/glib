@@ -1,6 +1,7 @@
-glib2.0 (2.80.0-1) UNRELEASED; urgency=medium
+glib2.0 (2.80.0-1) experimental; urgency=medium
 
   [ Jeremy Bícha ]
+  * New upstream release
   * Don't build installed tests when we're not building installed tests
 
   [ Steve Langasek ]
@@ -11,10 +12,7 @@ glib2.0 (2.80.0-1) UNRELEASED; urgency=medium
     - d/control: libglib2.0-dev Suggests gir1.2-glib-2.0-dev in preference
       to libgirepository1.0-dev, for multi-arch co-installability.
 
-  [ Jeremy Bícha ]
-  * New upstream release
-
- -- Jeremy Bícha <jbicha@ubuntu.com>  Thu, 07 Mar 2024 18:14:12 -0500
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Thu, 07 Mar 2024 18:31:35 -0500
 
 glib2.0 (2.79.3-3) experimental; urgency=medium
 
