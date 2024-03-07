@@ -1,10 +1,17 @@
 glib2.0 (2.79.3-4) UNRELEASED; urgency=medium
 
+  [ Jeremy Bícha ]
+  * Don't build installed tests when we're not building installed tests
+
+  [ Steve Langasek ]
+  * Don't call makeshlibs for a package that isn't built
+
+  [ Simon McVittie ]
   * Merge packaging from unstable
     - d/control: libglib2.0-dev Suggests gir1.2-glib-2.0-dev in preference
       to libgirepository1.0-dev, for multi-arch co-installability.
 
- -- Simon McVittie <smcv@debian.org>  Sun, 03 Mar 2024 13:30:12 +0000
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Thu, 07 Mar 2024 18:11:51 -0500
 
 glib2.0 (2.79.3-3) experimental; urgency=medium
 
