@@ -247,7 +247,6 @@ endif
 
 DEB_CONFIGURE_FLAGS_deb := \
 	--default-library both \
-	-Dinstalled_tests=true \
 	-Dlibelf=enabled \
 	-Dlibmount=$(enable_libmount) \
 	-Dmultiarch=true \
@@ -274,6 +273,12 @@ DEB_CONFIGURE_FLAGS_deb += --cross-file=$(CURDIR)/debian/meson/exe-wrapper.ini
 endif
 else
 DEB_CONFIGURE_FLAGS_deb += -Dintrospection=disabled
+endif
+
+ifneq ($(filter libglib2.0-tests,$(built_binaries)),)
+DEB_CONFIGURE_FLAGS_deb += -Dinstalled_tests=true
+else
+DEB_CONFIGURE_FLAGS_deb += -Dinstalled_tests=false
 endif
 
 ifneq ($(filter %-doc,$(built_binaries)),)
