@@ -25,11 +25,11 @@ Build-Depends: dbus-daemon <!nocheck> <!noinsttest>,
                python3:native,
                xsltproc,
                zlib1g-dev
-Build-Depends-Arch: desktop-file-utils <!nocheck>,
+Build-Depends-Arch: desktop-file-utils [!armel !armhf !hppa !m68k !powerpc !sh4] <!nocheck>,
                     locales <!nocheck> | locales-all <!nocheck>,
                     python3-dbus <!nocheck>,
                     python3-gi <!nocheck>,
-                    shared-mime-info <!nocheck>,
+                    shared-mime-info [!armel !armhf !hppa !m68k !powerpc !sh4] <!nocheck>,
                     tzdata <!nocheck>,
                     xterm <!nocheck>
 Build-Depends-Indep: gtk-doc-tools,

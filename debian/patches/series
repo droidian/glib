@@ -17,3 +17,4 @@ debian/tests-Skip-debugcontroller-test.patch
 debian/testfilemonitor-Skip-if-we-are-avoiding-flaky-tests.patch
 debian/gdesktopappinfo-Try-using-x-terminal-emulator-for-Termina.patch
 Switch-from-the-deprecated-distutils-module-to-the-packag.patch
+debian/tests-Skip-some-tests-without-desktop-file-utils-shared-m.patch
