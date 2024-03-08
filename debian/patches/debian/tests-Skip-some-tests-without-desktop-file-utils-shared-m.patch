@@ -1,0 +1,60 @@
+From: Simon McVittie <smcv@debian.org>
+Date: Fri, 8 Mar 2024 10:16:18 +0000
+Subject: tests: Skip some tests without desktop-file-utils, shared-mime-info
+
+For bootstrapping with a partial version of nocheck.
+
+Forwarded: not-needed
+---
+ gio/tests/meson.build | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/gio/tests/meson.build b/gio/tests/meson.build
+index 232ecca..a3e07e7 100644
+--- a/gio/tests/meson.build
++++ b/gio/tests/meson.build
+@@ -63,6 +63,7 @@ gio_tests = {
+   'contenttype' : {
+     # FIXME: https://gitlab.gnome.org/GNOME/glib/-/issues/1392 / https://gitlab.gnome.org/GNOME/glib/-/issues/1251
+     'can_fail' : host_system == 'darwin',
++    'needs_external_program': 'update-mime-database',
+   },
+   'converter-stream' : {
+     # musl: charset tests fail due to missing collation support in musl libc
+@@ -249,6 +250,7 @@ if host_machine.system() != 'windows'
+     'file' : {
+       # FIXME: https://gitlab.gnome.org/GNOME/glib/-/issues/3148
+       'can_fail' : host_system == 'gnu',
++      'needs_external_program': 'update-desktop-database',
+     },
+     'gdbus-peer-object-manager' : {},
+     'gdbus-sasl' : {},
+@@ -339,6 +341,7 @@ if host_machine.system() != 'windows'
+       'appinfo' : {
+         'install' : false,
+         'extra_programs' : ['appinfo-test'],
++        'needs_external_program': 'update-desktop-database',
+       },
+       'desktop-app-info' : {
+         'install' : false,
+@@ -346,6 +349,7 @@ if host_machine.system() != 'windows'
+         'extra_programs' : ['apps', 'appinfo-test'],
+         # FIXME: https://gitlab.gnome.org/GNOME/glib/-/issues/3148
+         'can_fail' : host_system == 'gnu',
++        'needs_external_program': 'update-desktop-database',
+       },
+     }
+   endif
+@@ -1044,6 +1048,12 @@ foreach test_name, extra_args : gio_tests
+   install = installed_tests_enabled and extra_args.get('install', true)
+   installed_tests_env = extra_args.get('installed_tests_env', {})
+ 
++  needs_external_program = extra_args.get('needs_external_program', '')
++
++  if needs_external_program != '' and not find_program(needs_external_program, required: false).found()
++    continue
++  endif
++
+   if install
+     test_conf = configuration_data()
+     test_conf.set('installed_tests_dir', installed_tests_execdir)
