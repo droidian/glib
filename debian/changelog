@@ -1,3 +1,15 @@
+glib2.0 (2.78.4-4) unstable; urgency=medium
+
+  * Temporarily disable some tests on 32-bit non-x86 architectures.
+    This removes the cyclic build-dependency between glib2.0 and
+    desktop-file-utils/shared-mime-info from the blockers for the 64-bit
+    time_t transition. The 32-bit non-x86 architectures are the ones
+    affected by this transition, and continuing to run these tests on
+    i386 gives us some level of confidence that they have not suffered
+    from a 32-bit-specific regression.
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 08 Mar 2024 10:55:26 +0000
+
 glib2.0 (2.78.4-3) unstable; urgency=medium
 
   * Build-depend on dpkg-dev (>= 1.22.5), to ensure that we are on the
