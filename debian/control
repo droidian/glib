@@ -40,7 +40,7 @@ Vcs-Browser: https://salsa.debian.org/gnome-team/glib
 Vcs-Git: https://salsa.debian.org/gnome-team/glib.git -b debian/trixie
 
 Package: libglib2.0-0t64
-Replaces: libglib2.0-0
+Replaces: libglib2.0-0 (<< 2.78.4-2~)
 Architecture: any
 Provides: ${t64:Provides},
           libgio-2.0-0 (= ${binary:Version}),
@@ -53,10 +53,11 @@ Depends: ${misc:Depends},
 Recommends: libglib2.0-data,
             shared-mime-info,
             xdg-user-dirs,
-Breaks: libglib2.0-0 (<< ${source:Version}), glib-networking-tests (<< 2.70.0~),
+Breaks: glib-networking-tests (<< 2.70.0~),
         gnome-keyring (<< 40.0-3~),
         libedataserver-1.2-26 (<< 3.44.3-2~),
         libgladeui-2-6 (<< 3.22.2),
+        libglib2.0-0 (<< 2.78.4-2~),
         libsoup2.4-tests (<< 2.72.0-3~),
 Suggests: low-memory-monitor
 Multi-Arch: same
