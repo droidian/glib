@@ -118,6 +118,9 @@ endif
 
 override_dh_auto_test-arch:
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+ifeq ($(DEB_HOST_ARCH_BITS)$(filter i386,$(DEB_HOST_ARCH_CPU)),32)
+	: TODO Tests skipped on 32-bit non-i386 for 64-bit time_t rebootstrap
+else
 	# Remove LD_PRELOAD so we don't run with fakeroot, which makes dbus-related tests fail
 	# Remove LANGUAGE to avoid mismatches between expected and actual
 	# messages in non-English locales (mainly on reproducible-builds)
@@ -183,6 +186,7 @@ ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 		--suite flaky \
 		--verbose \
 	|| true
+endif
 endif
 
 # Skip most build-time tests if all we are building is documentation;
