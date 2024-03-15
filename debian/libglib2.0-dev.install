@@ -1,4 +1,8 @@
 debian/cross-tools/${DEB_HOST_GNU_TYPE}-gi-* usr/bin
+debian/cross-tools/deb-can-run usr/lib/${DEB_HOST_MULTIARCH}/glib-2.0
+usr/bin/gi-compile-repository usr/lib/${DEB_HOST_MULTIARCH}/glib-2.0
+usr/bin/gi-decompile-typelib usr/lib/${DEB_HOST_MULTIARCH}/glib-2.0
+usr/bin/gi-inspect-typelib usr/lib/${DEB_HOST_MULTIARCH}/glib-2.0
 usr/include/gio-unix-2.0
 usr/include/glib-2.0/gio
 usr/include/glib-2.0/glib
