@@ -103,6 +103,26 @@ glib2.0 (2.79.3-1) experimental; urgency=medium
 
  -- Simon McVittie <smcv@debian.org>  Wed, 28 Feb 2024 13:15:47 +0000
 
+glib2.0 (2.78.4-5) unstable; urgency=medium
+
+  * Temporarily skip all tests on 32-bit non-i386.
+    Some test-dependencies other than desktop-file-utils and
+    shared-mime-info are still uninstallable, notably xterm.
+  * d/control: libglib2.0-0t64 Breaks/Replaces a constant version of
+    libglib2.0-0.
+    Now that the transition already happened, we don't need to choose
+    the version at which it happened dynamically.
+  * d/control: Bring back libglib2.0-0 as a transitional package.
+    On architectures that were unaffected by the 64-bit time_t transition,
+    there was no ABI break, so we can upgrade smoothly from the old
+    to new name. This might help to hint apt into doing the upgrade,
+    in preference to removing packages we wanted to keep.
+    On architectures that were affected by the transition (mainly armel
+    and armhf), it would be incorrect for this package to exist, so it
+    is not built.
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 15 Mar 2024 17:40:31 +0000
+
 glib2.0 (2.78.4-4) unstable; urgency=medium
 
   * Temporarily disable some tests on 32-bit non-x86 architectures.
