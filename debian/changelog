@@ -1,10 +1,26 @@
-glib2.0 (2.80.0-2) UNRELEASED; urgency=medium
+glib2.0 (2.80.0-2) experimental; urgency=medium
 
-  * Merge packaging from unstable
-    - Temporarily disable some tests on 32-bit non-x86 architectures,
-      to avoid circular dependencies during the t64 transition
+  * Use host-architecture gi-compile-repository, etc. when cross-compiling.
+    When setting up the cross wrappers for gi-compile-repository, etc. I had
+    assumed that gi-compile-repository was a simple transformation from
+    GIR XML into binary, which varied only by its endianness. Unfortunately,
+    it is not: it also transforms abstract types such as size_t into
+    equivalent fixed-size types such as guint64, which requires knowledge
+    of the size of each type.
+    Instead of running the build architecture gi-compile-repository and
+    telling it to use the host architecture search path, install upstream's
+    gi-compile-repository etc. into ${pkglibdir}, and set up cross wrappers
+    that will automatically detect whether we can run them directly or
+    whether we must use qemu-user. This is not "pure" cross-compilation,
+    but it's the best we can do.
+    This means that the build and host OS must match, but it does have the
+    side benefit that we no longer require the build and host endianness to
+    be the same, because everything that interacts the typelib is now a
+    host binary (possibly running under qemu). (Closes: #1066904)
+  * Temporarily skip all tests on 32-bit non-x86 architectures, to avoid
+    circular dependencies during the t64 transition
 
- -- Simon McVittie <smcv@debian.org>  Fri, 08 Mar 2024 17:55:47 +0000
+ -- Simon McVittie <smcv@debian.org>  Fri, 15 Mar 2024 15:11:52 +0000
 
 glib2.0 (2.80.0-1) experimental; urgency=medium
 
