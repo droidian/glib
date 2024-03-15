@@ -1,3 +1,12 @@
+glib2.0 (2.80.0-3) UNRELEASED; urgency=medium
+
+  * Merge packaging from unstable
+    - d/control: libglib2.0-0t64 Breaks/Replaces a constant version of
+      libglib2.0-0
+    - d/control: Bring back libglib2.0-0 as a transitional package
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 15 Mar 2024 20:21:46 +0000
+
 glib2.0 (2.80.0-2) experimental; urgency=medium
 
   * Use host-architecture gi-compile-repository, etc. when cross-compiling.
