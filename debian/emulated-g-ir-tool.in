@@ -74,7 +74,7 @@ class CrossGirTool:
 
         argv = exe_wrapper + [TOOL_PATH] + sys.argv[1:]
         try:
-            os.execvp(TOOL_PATH, argv)
+            os.execvp(argv[0], argv)
         except OSError:
             print(f'{ME}: Unable to run: {argv}')
             raise
