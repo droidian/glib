@@ -28,7 +28,7 @@ Build-Depends: dbus-daemon <!nocheck> <!noinsttest>,
                zlib1g-dev
 Build-Depends-Arch: desktop-file-utils [!armel !armhf !hppa !m68k !powerpc !sh4] <!nocheck>,
                     dh-sequence-gir <!nogir>,
-                    gobject-introspection (>= 1.78.1-14~) <!nogir>,
+                    gobject-introspection (>= 1.78.1-18~) <!nogir>,
                     locales [!armel !armhf !hppa !m68k !powerpc !sh4] <!nocheck> | locales-all [!armel !armhf !hppa !m68k !powerpc !sh4] <!nocheck>,
                     python3-dbus [!armel !armhf !hppa !m68k !powerpc !sh4] <!nocheck>,
                     python3-gi [!armel !armhf !hppa !m68k !powerpc !sh4] <!nocheck>,
@@ -37,7 +37,7 @@ Build-Depends-Arch: desktop-file-utils [!armel !armhf !hppa !m68k !powerpc !sh4]
                     tzdata [!armel !armhf !hppa !m68k !powerpc !sh4] <!nocheck>,
                     xterm [!armel !armhf !hppa !m68k !powerpc !sh4] <!nocheck>
 Build-Depends-Indep: gi-docgen <!nodoc>,
-                     gobject-introspection (>= 1.78.1-14~) <!nodoc>,
+                     gobject-introspection (>= 1.78.1-18~) <!nodoc>,
                      qemu-user <cross !nodoc>,
 Rules-Requires-Root: no
 Standards-Version: 4.6.2
