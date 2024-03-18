@@ -74,7 +74,7 @@ cross_tools = \
 	gi-decompile-typelib \
 	gi-inspect-typelib \
 	$(NULL)
-cross-tools: debian/cross-g-ir-tool.in debian/rules
+cross-tools: debian/emulated-g-ir-tool.in debian/rules
 	mkdir -p debian/cross-tools
 	set -e; for tool in $(cross_tools); do \
 		sed \
