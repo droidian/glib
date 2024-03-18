@@ -1,4 +1,4 @@
-glib2.0 (2.80.0-3) UNRELEASED; urgency=medium
+glib2.0 (2.80.0-3) experimental; urgency=medium
 
   * Merge packaging from unstable
     - d/control: libglib2.0-0t64 Breaks/Replaces a constant version of
@@ -14,7 +14,7 @@ glib2.0 (2.80.0-3) UNRELEASED; urgency=medium
   * Bump build-dependency on gobject-introspection to ensure that our
     typelibs are generated with #1066032 fixed
 
- -- Simon McVittie <smcv@debian.org>  Mon, 18 Mar 2024 12:31:31 +0000
+ -- Simon McVittie <smcv@debian.org>  Mon, 18 Mar 2024 13:51:03 +0000
 
 glib2.0 (2.80.0-2) experimental; urgency=medium
 
