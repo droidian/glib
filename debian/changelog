@@ -1,3 +1,15 @@
+glib2.0 (2.80.0-4) experimental; urgency=medium
+
+  * d/emulated-g-ir-tool.in: Rename from cross-g-ir-tool.in.
+    This makes it consistent with the template of the same name in
+    gobject-introspection.
+  * d/emulated-g-ir-tool.in: Fix qemu-user invocation.
+    Previously, the gi- tools generated from this template only worked on
+    systems that could run the tool directly via binfmt_misc. Now they invoke
+    qemu-user explicitly, as intended.
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 18 Mar 2024 18:56:39 +0000
+
 glib2.0 (2.80.0-3) experimental; urgency=medium
 
   * Merge packaging from unstable
