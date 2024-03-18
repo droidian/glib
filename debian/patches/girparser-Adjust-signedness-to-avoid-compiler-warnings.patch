@@ -1,0 +1,47 @@
+From: Simon McVittie <smcv@collabora.com>
+Date: Mon, 18 Mar 2024 10:45:28 +0000
+Subject: girparser: Adjust signedness() to avoid compiler warnings
+
+No functional change intended.
+
+Signed-off-by: Simon McVittie <smcv@collabora.com>
+Applied-upstream: 2.80.1, commit:c7e0f3e6b8711596b7533c8018acbd57beafa6fc
+---
+ girepository/girparser.c | 17 +----------------
+ 1 file changed, 1 insertion(+), 16 deletions(-)
+
+diff --git a/girepository/girparser.c b/girepository/girparser.c
+index e0cf424..ca736c8 100644
+--- a/girepository/girparser.c
++++ b/girepository/girparser.c
+@@ -454,16 +454,7 @@ typedef struct {
+   unsigned int is_signed : 1;
+ } IntegerAliasInfo;
+ 
+-/* Ignore warnings from use of signedness() */
+-#if G_GNUC_CHECK_VERSION(4, 6)
+-#pragma GCC diagnostic push
+-#pragma GCC diagnostic ignored "-Wtype-limits"
+-#elif defined(__clang__)
+-#pragma clang diagnostic push
+-#pragma clang diagnostic ignored "-Wtype-limits"
+-#endif
+-
+-#define signedness(T) (((T) -1) < 0)
++#define signedness(T) (((T) -1) <= 0)
+ G_STATIC_ASSERT (signedness (int) == 1);
+ G_STATIC_ASSERT (signedness (unsigned int) == 0);
+ 
+@@ -493,12 +484,6 @@ static IntegerAliasInfo integer_aliases[] = {
+ #undef INTEGER_ALIAS
+ };
+ 
+-#if G_GNUC_CHECK_VERSION(4, 6)
+-#pragma GCC diagnostic pop
+-#elif defined(__clang__)
+-#pragma clang diagnostic pop
+-#endif
+-
+ typedef struct {
+   const char *str;
+   int tag;

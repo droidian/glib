@@ -1,3 +1,8 @@
+girparser-Don-t-assume-sizeof-size_t-sizeof-void.patch
+girparser-Allow-time_t-off_t-etc.-to-appear-in-GIR-XML.patch
+girparser-Make-sizes-in-integer_aliases-more-obviously-co.patch
+girparser-Adjust-signedness-to-avoid-compiler-warnings.patch
+girparser-Add-a-pseudo-doc-comment-for-signedness.patch
 01_gettext-desktopfiles.patch
 debian/02_gettext-desktopfiles-ubuntu.patch
 debian/03_disble_glib_compile_schemas_warning.patch
