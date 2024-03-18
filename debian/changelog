@@ -11,6 +11,8 @@ glib2.0 (2.80.0-3) UNRELEASED; urgency=medium
     d/p/girparser-Add-a-pseudo-doc-comment-for-signedness.patch:
     Add patches to make gi-compile-repository compatible with versions of
     g-ir-scanner where #1066032 has been fixed
+  * Bump build-dependency on gobject-introspection to ensure that our
+    typelibs are generated with #1066032 fixed
 
  -- Simon McVittie <smcv@debian.org>  Mon, 18 Mar 2024 12:31:31 +0000
 
