@@ -25,13 +25,13 @@ Build-Depends: dbus-daemon <!nocheck> <!noinsttest>,
                python3:native,
                xsltproc,
                zlib1g-dev
-Build-Depends-Arch: desktop-file-utils [!armel !armhf !hppa !m68k !powerpc !sh4] <!nocheck>,
-                    locales [!armel !armhf !hppa !m68k !powerpc !sh4] <!nocheck> | locales-all [!armel !armhf !hppa !m68k !powerpc !sh4] <!nocheck>,
-                    python3-dbus [!armel !armhf !hppa !m68k !powerpc !sh4] <!nocheck>,
-                    python3-gi [!armel !armhf !hppa !m68k !powerpc !sh4] <!nocheck>,
-                    shared-mime-info [!armel !armhf !hppa !m68k !powerpc !sh4] <!nocheck>,
-                    tzdata [!armel !armhf !hppa !m68k !powerpc !sh4] <!nocheck>,
-                    xterm [!armel !armhf !hppa !m68k !powerpc !sh4] <!nocheck>
+Build-Depends-Arch: desktop-file-utils <!nocheck>,
+                    locales <!nocheck> | locales-all <!nocheck>,
+                    python3-dbus <!nocheck>,
+                    python3-gi <!nocheck>,
+                    shared-mime-info <!nocheck>,
+                    tzdata <!nocheck>,
+                    xterm <!nocheck>
 Build-Depends-Indep: gtk-doc-tools,
 Rules-Requires-Root: no
 Standards-Version: 4.6.2
