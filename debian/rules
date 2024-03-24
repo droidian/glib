@@ -282,6 +282,12 @@ else
 DEB_CONFIGURE_FLAGS_deb += -Ddocumentation=false
 endif
 
+ifeq ($(filter pkg.glib2.0.nosysprof,$(DEB_BUILD_PROFILES)),)
+ifneq ($(filter amd64 arm64 armel armhf i386 mips64el ppc64el riscv64 s390x powerpc ppc64,$(DEB_HOST_ARCH)),)
+DEB_CONFIGURE_FLAGS_deb += -Dsysprof=enabled
+endif
+endif
+
 DEB_CONFIGURE_FLAGS_udeb := \
 	--default-library shared \
 	-Ddocumentation=false \
