@@ -1,10 +1,14 @@
-glib2.0 (2.80.0-5) UNRELEASED; urgency=medium
+glib2.0 (2.80.0-5) experimental; urgency=medium
 
   * Merge packaging from unstable
     - Reinstate tests on 32-bit non-x86.
       The required packages have become available now.
+  * Build with sysprof instrumentation on architectures that have it.
+    This currently means release architectures, plus the powerpc and ppc64
+    ports. Make it possible to disable this with a (non-reproducible)
+    build profile, to facilitate re-bootstrapping.
 
- -- Simon McVittie <smcv@debian.org>  Sun, 24 Mar 2024 18:12:51 +0000
+ -- Simon McVittie <smcv@debian.org>  Sun, 24 Mar 2024 18:21:29 +0000
 
 glib2.0 (2.80.0-4) experimental; urgency=medium
 
