@@ -1,3 +1,11 @@
+glib2.0 (2.80.0-5) UNRELEASED; urgency=medium
+
+  * Merge packaging from unstable
+    - Reinstate tests on 32-bit non-x86.
+      The required packages have become available now.
+
+ -- Simon McVittie <smcv@debian.org>  Sun, 24 Mar 2024 18:12:51 +0000
+
 glib2.0 (2.80.0-4) experimental; urgency=medium
 
   * d/emulated-g-ir-tool.in: Rename from cross-g-ir-tool.in.
