@@ -63,7 +63,7 @@ Description: GLib library of C routines - transitional package
  longer any packages that depend on it.
 
 Package: libglib2.0-0t64
-Replaces: libglib2.0-0 (<< 2.78.4-2~)
+Replaces: libglib2.0-0 (<< 2.79.4)
 Architecture: any
 Provides: ${t64:Provides},
           libgio-2.0-0 (= ${binary:Version}),
@@ -80,7 +80,7 @@ Breaks: glib-networking-tests (<< 2.70.0~),
         gnome-keyring (<< 40.0-3~),
         libedataserver-1.2-26 (<< 3.44.3-2~),
         libgladeui-2-6 (<< 3.22.2),
-        libglib2.0-0 (<< 2.78.4-2~),
+        libglib2.0-0 (<< 2.79.4),
         libsoup2.4-tests (<< 2.72.0-3~),
 Suggests: low-memory-monitor
 Multi-Arch: same
