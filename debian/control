@@ -39,22 +39,6 @@ Homepage: https://wiki.gnome.org/Projects/GLib
 Vcs-Browser: https://salsa.debian.org/gnome-team/glib
 Vcs-Git: https://salsa.debian.org/gnome-team/glib.git -b debian/trixie
 
-# Built on 64-bit architectures with buildds, plus i386
-Package: libglib2.0-0
-Section: oldlibs
-Architecture: alpha amd64 arm64 hurd-amd64 i386 ia64 loong64 mips64el ppc64 ppc64el riscv64 s390x sparc64
-Multi-Arch: same
-Depends: libglib2.0-0t64 (>= ${binary:Version}),
-         ${misc:Depends},
-Description: GLib library of C routines - transitional package
- GLib is a library containing many useful C routines for things such
- as trees, hashes, lists, and strings.  It is a useful general-purpose
- C library used by projects such as GTK+, GIMP, and GNOME.
- .
- This transitional package helps to upgrade systems that did not break ABI
- during the 64-bit time_t transition. It can be removed when there are no
- longer any packages that depend on it.
-
 Package: libglib2.0-0t64
 Replaces: libglib2.0-0 (<< 2.78.4-2~)
 Architecture: any
