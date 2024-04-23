@@ -1,11 +1,12 @@
-glib2.0 (2.78.4-7) UNRELEASED; urgency=medium
+glib2.0 (2.78.4-7) unstable; urgency=medium
 
-  * Revert addition of libglib2.0-0 transitional package.
+  [ Simon McVittie ]
+  * Revert addition of libglib2.0-0 transitional package. (LP: #2063221)
     Because it didn't have a Pre-Depends on the replacement, it resulted
     in GLib libraries being absent for an extended period, which is
     problematic. Thanks to Julian Andres Klode.
 
- -- Simon McVittie <smcv@debian.org>  Tue, 23 Apr 2024 16:26:12 +0100
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Tue, 23 Apr 2024 12:00:34 -0400
 
 glib2.0 (2.78.4-6) unstable; urgency=medium
 
