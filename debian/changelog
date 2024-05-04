@@ -1,3 +1,9 @@
+glib2.0 (2.80.0-8) unstable; urgency=medium
+
+  * Upload to unstable
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Sat, 04 May 2024 12:19:49 -0400
+
 glib2.0 (2.80.0-7) experimental; urgency=medium
 
   [ Simon McVittie ]
