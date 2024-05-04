@@ -18,10 +18,6 @@ DEB_LDFLAGS_MAINT_APPEND += -Wl,-O1
 
 include /usr/share/dpkg/default.mk
 
-ifeq (unstable,$(DEB_DISTRIBUTION))
-$(error This version of GLib is not yet suitable for testing/unstable)
-endif
-
 %:
 	dh $@
 
