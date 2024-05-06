@@ -1,5 +1,6 @@
-glib2.0 (2.80.0-10) UNRELEASED; urgency=high
+glib2.0 (2.80.0-10) unstable; urgency=high
 
+  * Team upload
   * d/patches: Add GDBus security fixes intended to be in 2.80.1
     - If local users send signals on the D-Bus system bus that spoof a
       trusted sender, do not deliver them to signal subscriptions for the
@@ -10,9 +11,12 @@ glib2.0 (2.80.0-10) UNRELEASED; urgency=high
     - Add a local backport of g_set_str(), required by the above
     - Add proposed fix for a race condition that can cause a unit test
       to regress after the above
+  * d/control: Add Breaks on gnome-shell (<< 44.9-2~).
+    The security fix breaks screen recording and screencasting in older
+    versions, so we should make sure both changes migrate together.
   * Set high urgency for security fix
 
- -- Simon McVittie <smcv@debian.org>  Mon, 06 May 2024 23:03:15 +0100
+ -- Simon McVittie <smcv@debian.org>  Mon, 06 May 2024 23:06:18 +0100
 
 glib2.0 (2.80.0-9) unstable; urgency=medium
 
