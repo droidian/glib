@@ -1,3 +1,19 @@
+glib2.0 (2.80.0-10) UNRELEASED; urgency=high
+
+  * d/patches: Add GDBus security fixes intended to be in 2.80.1
+    - If local users send signals on the D-Bus system bus that spoof a
+      trusted sender, do not deliver them to signal subscriptions for the
+      trusted sender's well-known bus name (CVE-2024-34397)
+    - Fix a use-after-free when subscribing to signals with an arg0
+      match rule, originally from 2.79.0 and necessary to make the test
+      for CVE-2024-34397 pass reliably
+    - Add a local backport of g_set_str(), required by the above
+    - Add proposed fix for a race condition that can cause a unit test
+      to regress after the above
+  * Set high urgency for security fix
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 06 May 2024 23:03:15 +0100
+
 glib2.0 (2.80.0-9) unstable; urgency=medium
 
   * Really upload to unstable
