@@ -1,8 +1,11 @@
 glib2.0 (2.80.1-1) UNRELEASED; urgency=medium
 
   * New upstream release
+  * Drop patches that were applied upstream
+  * Update symlinks and doc-base files for new naming scheme.
+    Each documentation module now gets installed with a -2.0 suffix.
 
- -- Simon McVittie <smcv@debian.org>  Tue, 07 May 2024 16:39:01 +0100
+ -- Simon McVittie <smcv@debian.org>  Tue, 07 May 2024 16:53:33 +0100
 
 glib2.0 (2.80.0-10) unstable; urgency=high
 
