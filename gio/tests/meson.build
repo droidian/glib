@@ -457,6 +457,8 @@ if host_machine.system() != 'windows'
       'gdbus-connection-slow' : {
         'extra_sources' : extra_sources,
         'extra_programs': extra_programs + ['gdbus-connection-flush-helper'],
+        # FIXME: https://gitlab.gnome.org/GNOME/glib/-/issues/3148
+        'can_fail' : host_system == 'gnu',
       },
       'gdbus-error' : {'extra_sources' : extra_sources},
       'gdbus-exit-on-close' : {'extra_sources' : extra_sources},
@@ -488,6 +490,10 @@ if host_machine.system() != 'windows'
         'extra_programs': extra_programs,
       },
       'gdbus-proxy-well-known-name' : {
+        'extra_sources' : extra_sources,
+        'extra_programs': extra_programs,
+      },
+      'gdbus-subscribe' : {
         'extra_sources' : extra_sources,
         'extra_programs': extra_programs,
       },
