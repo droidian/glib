@@ -32,6 +32,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <time.h>       /* For time_t */
+#include <sys/types.h>  /* For off_t on both Unix and Windows */
+
+#ifdef G_OS_UNIX
+#include <sys/socket.h> /* For socklen_t */
+#endif
 
 /* This is a "major" version in the sense that it's only bumped
  * for incompatible changes.
@@ -448,19 +454,40 @@ typedef struct {
   unsigned int is_signed : 1;
 } IntegerAliasInfo;
 
+/*
+ * signedness:
+ * @T: a numeric type
+ *
+ * Returns: 1 if @T is signed, 0 if it is unsigned
+ */
+#define signedness(T) (((T) -1) <= 0)
+G_STATIC_ASSERT (signedness (int) == 1);
+G_STATIC_ASSERT (signedness (unsigned int) == 0);
+
 static IntegerAliasInfo integer_aliases[] = {
-  { "gchar",    SIZEOF_CHAR,      1 },
-  { "guchar",   SIZEOF_CHAR,      0 },
-  { "gshort",   SIZEOF_SHORT,     1 },
-  { "gushort",  SIZEOF_SHORT,     0 },
-  { "gint",     SIZEOF_INT,       1 },
-  { "guint",    SIZEOF_INT,       0 },
-  { "glong",    SIZEOF_LONG,      1 },
-  { "gulong",   SIZEOF_LONG,      0 },
-  { "gssize",   GLIB_SIZEOF_SIZE_T,    1 },
-  { "gsize",    GLIB_SIZEOF_SIZE_T,    0 },
-  { "gintptr",  GLIB_SIZEOF_SIZE_T,    1 },
-  { "guintptr", GLIB_SIZEOF_SIZE_T,    0 },
+  { "gchar",    sizeof (gchar),   1 },
+  { "guchar",   sizeof (guchar),  0 },
+  { "gshort",   sizeof (gshort),  1 },
+  { "gushort",  sizeof (gushort), 0 },
+  { "gint",     sizeof (gint),    1 },
+  { "guint",    sizeof (guint),   0 },
+  { "glong",    sizeof (glong),   1 },
+  { "gulong",   sizeof (gulong),  0 },
+  { "gssize",   sizeof (gssize),  1 },
+  { "gsize",    sizeof (gsize),   0 },
+  { "gintptr",  sizeof (gintptr),      1 },
+  { "guintptr", sizeof (guintptr),     0 },
+#define INTEGER_ALIAS(T) { #T, sizeof (T), signedness (T) }
+  INTEGER_ALIAS (off_t),
+  INTEGER_ALIAS (time_t),
+#ifdef G_OS_UNIX
+  INTEGER_ALIAS (dev_t),
+  INTEGER_ALIAS (gid_t),
+  INTEGER_ALIAS (pid_t),
+  INTEGER_ALIAS (socklen_t),
+  INTEGER_ALIAS (uid_t),
+#endif
+#undef INTEGER_ALIAS
 };
 
 typedef struct {
