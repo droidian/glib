@@ -319,6 +319,9 @@ ifneq ($(filter %-doc,$(built_binaries)),)
 		-e 's|https\?://docs\.gtk\.org/gmodule/|../gmodule-2.0/|' \
 		-e 's|https\?://docs\.gtk\.org/gobject/|../gobject-2.0/|' \
 		debian/tmp/usr/share/doc/*-2.0/urlmap.js
+	sed -i \
+		-e 's|src="\.\./urlmap.js"|src="urlmap.js"|' \
+		debian/tmp/usr/share/doc/*-2.0/*.html
 endif
 
 override_dh_python3:
