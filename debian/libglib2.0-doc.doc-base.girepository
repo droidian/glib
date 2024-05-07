@@ -5,5 +5,5 @@ Abstract: GIRepository is a library providing access to typelibs and introspecti
 Section: Programming/C
 
 Format: HTML
-Index: /usr/share/doc/libglib2.0-dev/girepository/index.html
-Files: /usr/share/doc/libglib2.0-dev/girepository/*.html
+Index: /usr/share/doc/libglib2.0-dev/girepository-2.0/index.html
+Files: /usr/share/doc/libglib2.0-dev/girepository-2.0/*.html

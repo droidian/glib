@@ -5,5 +5,5 @@ Abstract: Unix-specific parts of Gio, a library providing useful classes for gen
 Section: Programming/C
 
 Format: HTML
-Index: /usr/share/doc/libglib2.0-dev/gio-unix/index.html
-Files: /usr/share/doc/libglib2.0-dev/gio-unix/*.html
+Index: /usr/share/doc/libglib2.0-dev/gio-unix-2.0/index.html
+Files: /usr/share/doc/libglib2.0-dev/gio-unix-2.0/*.html

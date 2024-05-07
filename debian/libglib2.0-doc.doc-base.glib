@@ -5,5 +5,5 @@ Abstract: GLib is a general-purpose, portable utility library, which provides ma
 Section: Programming/C
 
 Format: HTML
-Index: /usr/share/doc/libglib2.0-dev/glib/index.html
-Files: /usr/share/doc/libglib2.0-dev/glib/*.html
+Index: /usr/share/doc/libglib2.0-dev/glib-2.0/index.html
+Files: /usr/share/doc/libglib2.0-dev/glib-2.0/*.html

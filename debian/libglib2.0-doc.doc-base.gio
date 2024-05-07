@@ -5,5 +5,5 @@ Abstract: Gio is a library providing useful classes for general purpose I/O, net
 Section: Programming/C
 
 Format: HTML
-Index: /usr/share/doc/libglib2.0-dev/gio/index.html
-Files: /usr/share/doc/libglib2.0-dev/gio/*.html
+Index: /usr/share/doc/libglib2.0-dev/gio-2.0/index.html
+Files: /usr/share/doc/libglib2.0-dev/gio-2.0/*.html

@@ -312,13 +312,13 @@ endif
 		debian/tmp/usr/lib/*/pkgconfig/girepository-2.0.pc
 ifneq ($(filter %-doc,$(built_binaries)),)
 	sed -i \
-		-e 's|https\?://docs\.gtk\.org/gio/|../gio/|' \
-		-e 's|https\?://docs\.gtk\.org/gio-unix/|../gio-unix/|' \
-		-e 's|https\?://docs\.gtk\.org/glib/|../glib/|' \
-		-e 's|https\?://docs\.gtk\.org/glib-unix/|../glib-unix/|' \
-		-e 's|https\?://docs\.gtk\.org/gmodule/|../gmodule/|' \
-		-e 's|https\?://docs\.gtk\.org/gobject/|../gobject/|' \
-		debian/tmp/usr/share/doc/*/*/urlmap.js
+		-e 's|https\?://docs\.gtk\.org/gio/|../gio-2.0/|' \
+		-e 's|https\?://docs\.gtk\.org/gio-unix/|../gio-unix-2.0/|' \
+		-e 's|https\?://docs\.gtk\.org/glib/|../glib-2.0/|' \
+		-e 's|https\?://docs\.gtk\.org/glib-unix/|../glib-unix-2.0/|' \
+		-e 's|https\?://docs\.gtk\.org/gmodule/|../gmodule-2.0/|' \
+		-e 's|https\?://docs\.gtk\.org/gobject/|../gobject-2.0/|' \
+		debian/tmp/usr/share/doc/*-2.0/urlmap.js
 endif
 
 override_dh_python3:

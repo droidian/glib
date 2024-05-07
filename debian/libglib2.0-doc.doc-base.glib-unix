@@ -5,5 +5,5 @@ Abstract: Unix-specific parts of GLib, a general-purpose, portable utility libra
 Section: Programming/C
 
 Format: HTML
-Index: /usr/share/doc/libglib2.0-dev/glib-unix/index.html
-Files: /usr/share/doc/libglib2.0-dev/glib-unix/*.html
+Index: /usr/share/doc/libglib2.0-dev/glib-unix-2.0/index.html
+Files: /usr/share/doc/libglib2.0-dev/glib-unix-2.0/*.html

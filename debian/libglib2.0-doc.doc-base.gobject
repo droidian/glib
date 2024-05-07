@@ -5,5 +5,5 @@ Abstract: The base type system and object class for GLib-based runtime environme
 Section: Programming/C
 
 Format: HTML
-Index: /usr/share/doc/libglib2.0-dev/gobject/index.html
-Files: /usr/share/doc/libglib2.0-dev/gobject/*.html
+Index: /usr/share/doc/libglib2.0-dev/gobject-2.0/index.html
+Files: /usr/share/doc/libglib2.0-dev/gobject-2.0/*.html
