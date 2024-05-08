@@ -1,3 +1,4 @@
+gdbusconnection-Fix-test-signal-subscription-ordering.patch
 gdbusconnection-Allow-name-owners-to-have-the-syntax-of-a.patch
 01_gettext-desktopfiles.patch
 debian/02_gettext-desktopfiles-ubuntu.patch
