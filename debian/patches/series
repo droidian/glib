@@ -1,3 +1,4 @@
+gdbusconnection-Allow-name-owners-to-have-the-syntax-of-a.patch
 01_gettext-desktopfiles.patch
 debian/02_gettext-desktopfiles-ubuntu.patch
 debian/03_disble_glib_compile_schemas_warning.patch
