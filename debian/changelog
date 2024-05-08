@@ -1,10 +1,15 @@
-glib2.0 (2.80.1-1) UNRELEASED; urgency=medium
+glib2.0 (2.80.1-1) UNRELEASED; urgency=high
 
-  * New upstream release
-  * Drop patches that were applied upstream
+  * New upstream stable release
+  * d/patches: Drop patches that were applied upstream
   * Update symlinks and doc-base files for new naming scheme.
     Each documentation module now gets installed with a -2.0 suffix.
   * d/rules: Fix urlmap.js references in gi-docgen-generated documentation
+  * d/p/gdbusconnection-Allow-name-owners-to-have-the-syntax-of-a.patch:
+    Relax name owner checks to avoid a regression in ibus.
+    Fixing CVE-2024-34397 caused a regression in ibus affecting text
+    entry with non-trivial input methods.
+    (Closes: #1070730, #1070736, #1070743, #1070745)
 
  -- Simon McVittie <smcv@debian.org>  Tue, 07 May 2024 22:05:57 +0100
 
