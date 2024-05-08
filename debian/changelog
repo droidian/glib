@@ -1,4 +1,4 @@
-glib2.0 (2.80.1-1) UNRELEASED; urgency=high
+glib2.0 (2.80.1-1) unstable; urgency=medium
 
   * New upstream stable release
   * d/patches: Drop patches that were applied upstream
@@ -14,7 +14,7 @@ glib2.0 (2.80.1-1) UNRELEASED; urgency=high
     entry with non-trivial input methods.
     (Closes: #1070730, #1070736, #1070743, #1070745, #1070749)
 
- -- Simon McVittie <smcv@debian.org>  Wed, 08 May 2024 13:59:51 +0100
+ -- Simon McVittie <smcv@debian.org>  Wed, 08 May 2024 14:00:23 +0100
 
 glib2.0 (2.80.0-10) unstable; urgency=high
 
