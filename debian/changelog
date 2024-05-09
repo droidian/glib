@@ -1,8 +1,13 @@
 glib2.0 (2.80.2-1) UNRELEASED; urgency=medium
 
-  * New upstream release
+  * New upstream stable release
+  * d/p/gdbusconnection-Fix-test-signal-subscription-ordering.patch,
+    d/p/gdbusconnection-Allow-name-owners-to-have-the-syntax-of-a.patch:
+    Drop patches that were included upstream
+  * d/libglib2.0-doc.*: Adjust for move of GVariant specification into
+    glib-2.0/
 
- -- Simon McVittie <smcv@debian.org>  Thu, 09 May 2024 12:21:59 +0100
+ -- Simon McVittie <smcv@debian.org>  Thu, 09 May 2024 12:25:08 +0100
 
 glib2.0 (2.80.1-1) unstable; urgency=medium
 
