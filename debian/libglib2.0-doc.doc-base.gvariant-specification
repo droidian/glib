@@ -11,5 +11,5 @@ Abstract:
 Section: Programming
 
 Format: HTML
-Index: /usr/share/doc/libglib2.0-dev/gvariant-specification-1.0.html
-Files: /usr/share/doc/libglib2.0-dev/gvariant-*.html /usr/share/doc/libglib2.0-dev/gvariant-*.svg
+Index: /usr/share/doc/libglib2.0-dev/glib-2.0/gvariant-specification-1.0.html
+Files: /usr/share/doc/libglib2.0-dev/glib-2.0/gvariant-specification-1.0.html /usr/share/doc/libglib2.0-dev/glib-2.0/gvariant-*.svg
