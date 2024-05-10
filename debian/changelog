@@ -1,12 +1,11 @@
-glib2.0 (2.80.2-1) UNRELEASED; urgency=medium
+glib2.0 (2.80.2-1) unstable; urgency=medium
 
   * New upstream stable release
   * d/p/gdbusconnection-Fix-test-signal-subscription-ordering.patch,
     d/p/gdbusconnection-Allow-name-owners-to-have-the-syntax-of-a.patch:
     Drop patches that were included upstream
   * d/p/gdbusmessage-Clean-the-cached-arg0-when-setting-the-messa.patch:
-    Add patch from upstream to fix a possible memory leak introduced
-    in 2.80.0
+    Add patch from upstream to fix a memory leak introduced in 2.80.0
   * d/libglib2.0-doc.*: Adjust for move of GVariant specification into
     glib-2.0/
   * d/changelog: Remove some inaccurate text from the 2.80.0-10 entry.
@@ -18,7 +17,7 @@ glib2.0 (2.80.2-1) UNRELEASED; urgency=medium
     Now that we ship the .gir files in their own packages,
     libgirepository1.0-dev is usually no longer necessary.
 
- -- Simon McVittie <smcv@debian.org>  Fri, 10 May 2024 10:56:16 +0100
+ -- Simon McVittie <smcv@debian.org>  Fri, 10 May 2024 11:07:44 +0100
 
 glib2.0 (2.80.1-1) unstable; urgency=medium
 
