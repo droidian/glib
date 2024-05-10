@@ -9,6 +9,10 @@ glib2.0 (2.80.2-1) UNRELEASED; urgency=medium
     in 2.80.0
   * d/libglib2.0-doc.*: Adjust for move of GVariant specification into
     glib-2.0/
+  * d/changelog: Remove some inaccurate text from the 2.80.0-10 entry.
+    Fixing CVE-2024-34397 in older branches required some backported
+    changes from 2.80.x, but in 2.80.x those changes were already present
+    upstream, so it was incorrect to list them as being new in 2.80.0-10.
 
  -- Simon McVittie <smcv@debian.org>  Fri, 10 May 2024 10:47:17 +0100
 
@@ -37,10 +41,6 @@ glib2.0 (2.80.0-10) unstable; urgency=high
     - If local users send signals on the D-Bus system bus that spoof a
       trusted sender, do not deliver them to signal subscriptions for the
       trusted sender's well-known bus name (CVE-2024-34397)
-    - Fix a use-after-free when subscribing to signals with an arg0
-      match rule, originally from 2.79.0 and necessary to make the test
-      for CVE-2024-34397 pass reliably
-    - Add a local backport of g_set_str(), required by the above
     - Add proposed fix for a race condition that can cause a unit test
       to regress after the above
   * d/control: Add Breaks on gnome-shell (<< 44.9-2~).
