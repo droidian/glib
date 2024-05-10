@@ -4,10 +4,13 @@ glib2.0 (2.80.2-1) UNRELEASED; urgency=medium
   * d/p/gdbusconnection-Fix-test-signal-subscription-ordering.patch,
     d/p/gdbusconnection-Allow-name-owners-to-have-the-syntax-of-a.patch:
     Drop patches that were included upstream
+  * d/p/gdbusmessage-Clean-the-cached-arg0-when-setting-the-messa.patch:
+    Add patch from upstream to fix a possible memory leak introduced
+    in 2.80.0
   * d/libglib2.0-doc.*: Adjust for move of GVariant specification into
     glib-2.0/
 
- -- Simon McVittie <smcv@debian.org>  Thu, 09 May 2024 12:25:08 +0100
+ -- Simon McVittie <smcv@debian.org>  Fri, 10 May 2024 10:47:17 +0100
 
 glib2.0 (2.80.1-1) unstable; urgency=medium
 
