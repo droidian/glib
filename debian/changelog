@@ -13,8 +13,12 @@ glib2.0 (2.80.2-1) UNRELEASED; urgency=medium
     Fixing CVE-2024-34397 in older branches required some backported
     changes from 2.80.x, but in 2.80.x those changes were already present
     upstream, so it was incorrect to list them as being new in 2.80.0-10.
+  * d/control: Fix cross-references from lib*-dev to gir1.2-*-dev
+    in package descriptions.
+    Now that we ship the .gir files in their own packages,
+    libgirepository1.0-dev is usually no longer necessary.
 
- -- Simon McVittie <smcv@debian.org>  Fri, 10 May 2024 10:47:17 +0100
+ -- Simon McVittie <smcv@debian.org>  Fri, 10 May 2024 10:56:16 +0100
 
 glib2.0 (2.80.1-1) unstable; urgency=medium
 
