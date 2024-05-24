@@ -231,7 +231,8 @@ Package: libgirepository-2.0-dev
 Section: libdevel
 Architecture: any
 Multi-Arch: same
-Depends: libglib2.0-dev (= ${binary:Version}),
+Depends: libgirepository-2.0-0 (= ${binary:Version}),
+         libglib2.0-dev (= ${binary:Version}),
          ${misc:Depends},
          ${shlibs:Depends}
 Description: Development files for the GObject introspection library
