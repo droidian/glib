@@ -1,0 +1,21 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Wed, 8 May 2024 23:03:03 +0200
+Subject: glib/tests/unicode: Cleanup allocated old locale if tests is skipped
+
+Origin: upstream, 2.80.3, commit:a2111bec6956d22b2113599c62c174e89c37685e
+---
+ glib/tests/unicode.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/glib/tests/unicode.c b/glib/tests/unicode.c
+index e91425a..cb74068 100644
+--- a/glib/tests/unicode.c
++++ b/glib/tests/unicode.c
+@@ -525,6 +525,7 @@ test_turkish_strupdown (void)
+   if (oldlocale == NULL)
+     {
+       g_test_skip ("locale tr_TR not available");
++      g_free (old_lang);
+       return;
+     }
+ 

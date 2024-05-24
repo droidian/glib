@@ -1,0 +1,41 @@
+From: Adam Sampson <ats@offog.org>
+Date: Fri, 10 May 2024 18:37:52 +0100
+Subject: girepository: Don't assume a bitfield has a fixed size
+
+The type used when declaring a bitfield member of a struct doesn't
+affect the amount of space allocated for it - only whether it's signed
+or unsigned. In standard C99 (6.2.7.1), only _Bool, signed int and
+unsigned int or typedefs to them are allowed as bitfield types, but GCC
+allows other integer types as an extension.
+
+In this case, the GIBaseInfo and GIBaseInfoStack structs are meant to
+have identical layout. However, type_is_embedded was declared as an
+unsigned bitfield in the former and a uint32_t in the latter. This was
+harmless on most platforms because the following member is an aligned
+pointer, but (for example) on m68k-linux-gnu pointers only need to be
+16-bit aligned, so GCC only allocates 16 bits for the bitfield.
+
+Change the type in the declaration to unsigned int, and add an padding
+bitfield following it to ensure there's space for 32 bits on all
+platforms in the future.
+
+Signed-off-by: Adam Sampson <ats@offog.org>
+Origin: upstream, 2.80.3, commit:62b11360daddc73ca1deb1a143f614c101858dce
+---
+ girepository/girepository-private.h | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/girepository/girepository-private.h b/girepository/girepository-private.h
+index 8ff3123..29156c5 100644
+--- a/girepository/girepository-private.h
++++ b/girepository/girepository-private.h
+@@ -57,7 +57,8 @@ struct _GIBaseInfo
+   GITypelib *typelib;
+   uint32_t offset;
+ 
+-  uint32_t type_is_embedded : 1; /* Used by GITypeInfo */
++  unsigned int type_is_embedded : 1;  /* Used by GITypeInfo */
++  unsigned int padding_bitfield : 31; /* For future expansion */
+ 
+   /* A copy of GIBaseInfo is exposed publicly for stack-allocated derivatives
+    * such as GITypeInfo, so its size is now ABI. */

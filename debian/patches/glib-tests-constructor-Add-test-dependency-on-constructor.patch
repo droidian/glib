@@ -1,0 +1,23 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Wed, 8 May 2024 23:10:19 +0200
+Subject: glib/tests/constructor: Add test dependency on constructor_lib
+
+Otherwise we may build the test but not its dependent library
+
+Origin: upstream, 2.80.3, commit:a5ec1dd612a25742f2a363f10d57fb03091cfdab
+---
+ glib/tests/meson.build | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/glib/tests/meson.build b/glib/tests/meson.build
+index 85f40d2..92486cf 100644
+--- a/glib/tests/meson.build
++++ b/glib/tests/meson.build
+@@ -350,6 +350,7 @@ if host_machine.system() == 'windows' or have_dlopen_dlsym
+                  '-DBUILD_TEST_EXECUTABLE',
+                  '-DPREFIX=app'],
+       'dependencies' : libdl_dep,
++      'depends': constructor_lib,
+       'link_with': [constructor_helper]
+     }
+   }

@@ -1,0 +1,33 @@
+From: Philip Withnall <pwithnall@gnome.org>
+Date: Thu, 16 May 2024 12:28:35 +0100
+Subject: tests: Fix clang compilation failure due to unrecognised option in
+ pragma
+
+Sigh.
+
+```
+../glib/tests/atomic.c:139:32: error: unknown warning group '-Wdiscarded-qualifiers', ignored [-Werror,-Wunknown-warning-option]
+\#pragma GCC diagnostic ignored "-Wdiscarded-qualifiers"
+                               ^
+1 error generated.
+```
+
+Signed-off-by: Philip Withnall <pwithnall@gnome.org>
+Origin: upstream, 2.80.3, commit:7548b4865f2c6c08a84fb59216a98af75bed7624
+---
+ glib/tests/atomic.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/glib/tests/atomic.c b/glib/tests/atomic.c
+index 82c5c9e..dff493d 100644
+--- a/glib/tests/atomic.c
++++ b/glib/tests/atomic.c
+@@ -136,6 +136,8 @@ test_types (void)
+    * to make sure that we don’t warn when built against older third party code. */
+ #pragma GCC diagnostic push
+ #pragma GCC diagnostic ignored "-Wincompatible-pointer-types"
++#pragma GCC diagnostic ignored "-Wpragmas"
++#pragma GCC diagnostic ignored "-Wunknown-warning-option"
+ #pragma GCC diagnostic ignored "-Wdiscarded-qualifiers"
+   g_atomic_pointer_set (&vp_str_vol, NULL);
+   g_atomic_pointer_set (&vp_str, str);
