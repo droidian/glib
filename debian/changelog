@@ -1,6 +1,7 @@
 glib2.0 (2.80.2-2) UNRELEASED; urgency=medium
 
-  * d/patches: Update to upstream glib-2-80 branch commit 2.80.2-25-g197e2690e
+  * d/patches: Update to upstream glib-2-80 branch commit
+    2.80.2-25-g197e2690e, excluding CI-only changes
     - Fix memory errors in GActionGroupExporter and GMenuExporter
       error-handling code paths since 2.80.1 (Closes: #1071690)
     - Fix memory leaks in early-return code paths when trashing a local file
@@ -9,7 +10,7 @@ glib2.0 (2.80.2-2) UNRELEASED; urgency=medium
     - Fix compiler warnings with gcc 14
     - Improve dependencies between build targets
 
- -- Simon McVittie <smcv@debian.org>  Fri, 24 May 2024 11:04:41 +0100
+ -- Simon McVittie <smcv@debian.org>  Fri, 24 May 2024 11:08:46 +0100
 
 glib2.0 (2.80.2-1) unstable; urgency=medium
 
