@@ -263,7 +263,7 @@ else
 
     glib_tests += {
       'gutils-user-database' : {
-        'depends' : [],
+        'depends' : getpwuid_preload,
         'env' : {
           var_preload: getpwuid_preload.full_path()
         },
@@ -350,6 +350,7 @@ if host_machine.system() == 'windows' or have_dlopen_dlsym
                  '-DBUILD_TEST_EXECUTABLE',
                  '-DPREFIX=app'],
       'dependencies' : libdl_dep,
+      'depends': constructor_lib,
       'link_with': [constructor_helper]
     }
   }
