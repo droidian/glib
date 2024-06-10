@@ -1,3 +1,9 @@
+glib2.0 (2.80.3-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Mon, 10 Jun 2024 10:15:19 -0400
+
 glib2.0 (2.80.2-2) unstable; urgency=medium
 
   * d/patches: Update to upstream glib-2-80 branch commit
