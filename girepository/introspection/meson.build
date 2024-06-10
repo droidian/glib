@@ -9,7 +9,7 @@ gi_gen_shared_sources = [
 
 gi_gen_env_variables = environment()
 
-if get_option('b_sanitize') != ''
+if get_option('b_sanitize') != 'none'
   gi_gen_env_variables.append(
     'ASAN_OPTIONS', 'verify_asan_link_order=0', separator: ',')
 endif
@@ -261,6 +261,7 @@ if host_system == 'windows'
       '--identifier-prefix=GWin32'
     ],
   )
+  gio_platform_gir = gio_win32_gir
 else
   gio_unix_gir_c_includes = []
   foreach h: gio_unix_include_headers
@@ -289,6 +290,7 @@ else
       '--identifier-prefix=GUnix'
     ],
   )
+  gio_platform_gir = gio_unix_gir
 endif
 
 # GIRepository
