@@ -1,4 +1,3 @@
-gdbusmessage-Clean-the-cached-arg0-when-setting-the-messa.patch
 01_gettext-desktopfiles.patch
 debian/02_gettext-desktopfiles-ubuntu.patch
 debian/03_disble_glib_compile_schemas_warning.patch
