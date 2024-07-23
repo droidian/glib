@@ -3104,7 +3104,7 @@ format_number (GString     *str,
     "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
   };
   const gchar * const *digits = ascii_digits;
-  const gchar *tmp[10];
+  const gchar *tmp[10] = { NULL, };
   gint i = 0;
 #ifdef HAVE_LANGINFO_OUTDIGIT
   static GMutex alt_digits_mutex;
@@ -3268,7 +3268,7 @@ g_date_time_format_utf8 (GDateTime   *datetime,
 			 GString     *outstr,
 			 gboolean     locale_is_utf8)
 {
-  guint     len;
+  size_t len;
   guint     colons;
   gunichar  c;
   gboolean  alt_digits = FALSE;

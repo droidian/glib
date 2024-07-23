@@ -46,11 +46,11 @@
 #include <gstdio.h>
 #include <dirent.h>
 
-#if defined(__BIONIC__) && (__ANDROID_API__ < 26)
+#if defined(__ANDROID__) && (__ANDROID_API__ < 26)
 #include <mntent.h>
 /* the shared object of recent bionic libc's have hasmntopt symbol, but
    some a possible common build environment for android, termux ends
-   up with inssuficient __ANDROID_API__ value for building.
+   up with insufficient __ANDROID_API__ value for building.
 */
 extern char* hasmntopt(const struct mntent* mnt, const char* opt);
 #endif
@@ -2079,7 +2079,7 @@ mount_monitor_start (void)
           if (proc_mounts_channel == NULL)
             proc_mounts_channel = g_io_channel_new_file (mtab_path, "r", &error);
 
-          if (proc_mounts_channel == NULL)
+          if (error != NULL)
             {
               g_warning ("Error creating IO channel for %s: %s (%s, %d)", mtab_path,
                          error->message, g_quark_to_string (error->domain), error->code);
