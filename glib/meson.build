@@ -419,6 +419,7 @@ libglib = library('glib-2.0',
   include_directories : configinc,
   link_with: [charset_lib, gnulib_lib],
   dependencies : [
+    atomic_dep,
     gnulib_libm_dependency,
     libiconv,
     libintl_deps,
@@ -501,7 +502,7 @@ endif
 
 report_conf = configuration_data()
 report_conf.set('GLIB_VERSION', glib_version)
-report_conf.set('PYTHON', python_name)
+report_conf.set('PYTHON', python.full_path())
 configure_file(
   input: 'gtester-report.in',
   output: 'gtester-report',

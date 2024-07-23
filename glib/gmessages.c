@@ -38,7 +38,7 @@
 #include <locale.h>
 #include <errno.h>
 
-#if defined(__linux__) && !defined(__BIONIC__)
+#if defined(__linux__) && !defined(__ANDROID__)
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -68,7 +68,7 @@
 #include <syslog.h>
 #endif
 
-#if defined(__linux__) && !defined(__BIONIC__)
+#if defined(__linux__) && !defined(__ANDROID__)
 #include "gjournal-private.h"
 #endif
 
@@ -1420,9 +1420,9 @@ win32_is_pipe_tty (int fd)
   gboolean result = FALSE;
   HANDLE h_fd;
   FILE_NAME_INFO *info = NULL;
-  gint info_size = sizeof (FILE_NAME_INFO) + sizeof (WCHAR) * MAX_PATH;
+  size_t info_size = sizeof (FILE_NAME_INFO) + sizeof (WCHAR) * MAX_PATH;
   wchar_t *name = NULL;
-  gint length;
+  size_t length;
 
   h_fd = (HANDLE) _get_osfhandle (fd);
 
@@ -2053,7 +2053,7 @@ G_LOCK_DEFINE_STATIC (syslog_opened);
 #endif
 #endif
 
-#if defined(__linux__) && !defined(__BIONIC__)
+#if defined(__linux__) && !defined(__ANDROID__)
 static int journal_fd = -1;
 
 #ifndef SOCK_CLOEXEC
@@ -2098,7 +2098,7 @@ open_journal (void)
 gboolean
 g_log_writer_is_journald (gint output_fd)
 {
-#if defined(__linux__) && !defined(__BIONIC__)
+#if defined(__linux__) && !defined(__ANDROID__)
   return _g_fd_is_journal (output_fd);
 #else
   return FALSE;
@@ -2350,7 +2350,7 @@ g_log_writer_syslog (GLogLevelFlags   log_level,
 }
 
 /* Enable support for the journal if we're on a recent enough Linux */
-#if defined(__linux__) && !defined(__BIONIC__) && defined(HAVE_MKOSTEMP) && defined(O_CLOEXEC)
+#if defined(__linux__) && !defined(__ANDROID__) && defined(HAVE_MKOSTEMP) && defined(O_CLOEXEC)
 #define ENABLE_JOURNAL_SENDV
 #endif
 

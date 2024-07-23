@@ -415,10 +415,8 @@ gi_ir_node_free (GIIrNode *node)
         g_free (union_->free_func);
 
         gi_ir_node_free ((GIIrNode *)union_->discriminator_type);
-        for (l = union_->members; l; l = l->next)
-          gi_ir_node_free ((GIIrNode *)l->data);
-        for (l = union_->discriminators; l; l = l->next)
-          gi_ir_node_free ((GIIrNode *)l->data);
+        g_clear_list (&union_->members, (GDestroyNotify) gi_ir_node_free);
+        g_clear_list (&union_->discriminators, (GDestroyNotify) gi_ir_node_free);
       }
       break;
 
@@ -571,7 +569,7 @@ gi_ir_node_get_size (GIIrNode *node)
 
   g_assert (size <= G_MAXUINT32);
 
-  return size;
+  return (guint32) size;
 }
 
 static void
@@ -594,8 +592,7 @@ gi_ir_node_get_full_size_internal (GIIrNode *parent,
   GList *l;
   size_t size, n;
 
-  if (node == NULL && parent != NULL)
-    g_error ("Caught NULL node, parent=%s", parent->name);
+  g_assert (node != NULL);
 
   g_debug ("node %p type '%s'", node,
            gi_ir_node_type_to_string (node->type));
@@ -1461,24 +1458,23 @@ gi_ir_node_build_typelib (GIIrNode         *node,
         else
           {
             GString *str;
-            char *s;
             gpointer value;
 
             str = g_string_new (0);
             serialize_type (build, type, str);
-            s = g_string_free (str, FALSE);
 
             types_count += 1;
-            value = g_hash_table_lookup (types, s);
+            value = g_hash_table_lookup (types, str->str);
             if (value)
               {
                 blob->offset = GPOINTER_TO_UINT (value);
-                g_free (s);
+                g_string_free (g_steal_pointer (&str), TRUE);
               }
             else
               {
                 unique_types_count += 1;
-                g_hash_table_insert (types, s, GUINT_TO_POINTER(*offset2));
+                g_hash_table_insert (types, g_string_free_and_steal (g_steal_pointer (&str)),
+                                     GUINT_TO_POINTER(*offset2));
 
                 blob->offset = *offset2;
                 switch (type->tag)

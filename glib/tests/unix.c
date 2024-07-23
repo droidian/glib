@@ -29,7 +29,9 @@
 #include "glib-private.h"
 #include "glib-unix.h"
 #include "gstdio.h"
+#include "gvalgrind.h"
 
+#include <signal.h>
 #include <string.h>
 #include <pwd.h>
 #include <unistd.h>
@@ -507,6 +509,7 @@ on_sig_received_2 (gpointer data)
 static void
 test_signal (int signum)
 {
+  struct sigaction action;
   GMainLoop *mainloop;
   int id;
 
@@ -515,6 +518,19 @@ test_signal (int signum)
   sig_received = FALSE;
   sig_counter = 0;
   g_unix_signal_add (signum, on_sig_received, mainloop);
+
+  g_assert_no_errno (sigaction (signum, NULL, &action));
+
+  if (signum == SIGCHLD)
+    g_assert_true (action.sa_flags & SA_NOCLDSTOP);
+
+#ifdef SA_RESTART
+  g_assert_true (action.sa_flags & SA_RESTART);
+#endif
+#ifdef SA_ONSTACK
+  g_assert_true (action.sa_flags & SA_ONSTACK);
+#endif
+
   kill (getpid (), signum);
   g_assert (!sig_received);
   id = g_timeout_add (5000, on_sig_timeout, mainloop);
@@ -552,6 +568,80 @@ static void
 test_sigterm (void)
 {
   test_signal (SIGTERM);
+}
+
+static void
+test_signal_alternate_stack (int signal)
+{
+#ifndef SA_ONSTACK
+  g_test_skip ("alternate stack is not supported");
+#else
+  guint8 stack_memory[MINSIGSTKSZ];
+  guint8 zero_mem[MINSIGSTKSZ];
+  stack_t stack = { .ss_sp = stack_memory, .ss_size = MINSIGSTKSZ };
+  stack_t old_stack = { 0 };
+
+  memset (stack_memory, 0, MINSIGSTKSZ);
+  memset (zero_mem, 0, MINSIGSTKSZ);
+  g_assert_cmpmem (stack_memory, MINSIGSTKSZ, zero_mem, MINSIGSTKSZ);
+
+  g_assert_no_errno (sigaltstack (&stack, &old_stack));
+
+  test_signal (signal);
+
+#if defined (ENABLE_VALGRIND)
+  if (RUNNING_ON_VALGRIND)
+    {
+      /* When running under valgrind, checking for memory differences does
+       * not work with a weird read error happening way before than the
+       * stack memory size, it's unclear why but it may be related to how
+       * valgrind internally implements it.
+       * However, the point of the test is to make sure that even using an
+       * alternative stack (that we blindly trust is used), the signals are
+       * properly delivered, and this can be still tested properly.
+       *
+       * See:
+       *  - https://gitlab.gnome.org/GNOME/glib/-/issues/3337
+       *  - https://bugs.kde.org/show_bug.cgi?id=486812
+       */
+      g_test_message ("Running a limited test version under valgrind");
+
+      stack.ss_flags = SS_DISABLE;
+      g_assert_no_errno (sigaltstack (&stack, &old_stack));
+      return;
+    }
+#endif
+
+  /* Very stupid check to ensure that the alternate stack is used instead of
+   * the default one. This test would fail if SA_ONSTACK wouldn't be set.
+   */
+  g_assert_cmpint (memcmp (stack_memory, zero_mem, MINSIGSTKSZ), !=, 0);
+
+  /* We need to memset again zero_mem since compiler may have optimized it out
+   * as we've seen in freebsd CI.
+   */
+  memset (zero_mem, 0, MINSIGSTKSZ);
+  memset (stack_memory, 0, MINSIGSTKSZ);
+  g_assert_cmpmem (stack_memory, MINSIGSTKSZ, zero_mem, MINSIGSTKSZ);
+
+  stack.ss_flags = SS_DISABLE;
+  g_assert_no_errno (sigaltstack (&stack, &old_stack));
+
+  test_signal (signal);
+  g_assert_cmpmem (stack_memory, MINSIGSTKSZ, zero_mem, MINSIGSTKSZ);
+#endif
+}
+
+static void
+test_sighup_alternate_stack (void)
+{
+  test_signal_alternate_stack (SIGHUP);
+}
+
+static void
+test_sigterm_alternate_stack (void)
+{
+  test_signal_alternate_stack (SIGTERM);
 }
 
 static void
@@ -807,6 +897,9 @@ main (int   argc,
   g_test_add_func ("/glib-unix/sighup", test_sighup);
   g_test_add_func ("/glib-unix/sigterm", test_sigterm);
   g_test_add_func ("/glib-unix/sighup_again", test_sighup);
+  g_test_add_func ("/glib-unix/sighup/alternate-stack", test_sighup_alternate_stack);
+  g_test_add_func ("/glib-unix/sigterm/alternate-stack", test_sigterm_alternate_stack);
+  g_test_add_func ("/glib-unix/sighup_again/alternate-stack", test_sighup_alternate_stack);
   g_test_add_func ("/glib-unix/sighup_add_remove", test_sighup_add_remove);
   g_test_add_func ("/glib-unix/sighup_nested", test_sighup_nested);
   g_test_add_func ("/glib-unix/callback_after_signal", test_callback_after_signal);

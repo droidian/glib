@@ -543,7 +543,7 @@ get_and_check_serialization (GVariant *value)
   /* First check that the serialization to the D-Bus wire format is correct - do this for both byte orders */
   for (n = 0; n < 2; n++)
     {
-      GDBusMessageByteOrder byte_order;
+      GDBusMessageByteOrder byte_order = G_DBUS_MESSAGE_BYTE_ORDER_BIG_ENDIAN;
       switch (n)
         {
         case 0:
@@ -1027,10 +1027,10 @@ test_message_serialize_header_checks (void)
   g_clear_error (&error);
   g_assert_null (blob);
   /* interface reserved value => error */
-  g_dbus_message_set_interface (message, "org.freedesktop.DBus.Local");
+  g_dbus_message_set_interface (message, DBUS_INTERFACE_LOCAL);
   blob = g_dbus_message_to_blob (message, &blob_size, G_DBUS_CAPABILITY_FLAGS_NONE, &error);
   g_assert_error (error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT);
-  g_assert_cmpstr (error->message, ==, "Cannot serialize message: SIGNAL message: INTERFACE header field is using the reserved value org.freedesktop.DBus.Local");
+  g_assert_cmpstr (error->message, ==, "Cannot serialize message: SIGNAL message: INTERFACE header field is using the reserved value " DBUS_INTERFACE_LOCAL);
   g_clear_error (&error);
   g_assert_null (blob);
   /* reset interface */
@@ -1044,10 +1044,10 @@ test_message_serialize_header_checks (void)
   g_clear_error (&error);
   g_assert_null (blob);
   /* path reserved value => error */
-  g_dbus_message_set_path (message, "/org/freedesktop/DBus/Local");
+  g_dbus_message_set_path (message, DBUS_PATH_LOCAL);
   blob = g_dbus_message_to_blob (message, &blob_size, G_DBUS_CAPABILITY_FLAGS_NONE, &error);
   g_assert_error (error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT);
-  g_assert_cmpstr (error->message, ==, "Cannot serialize message: SIGNAL message: PATH header field is using the reserved value /org/freedesktop/DBus/Local");
+  g_assert_cmpstr (error->message, ==, "Cannot serialize message: SIGNAL message: PATH header field is using the reserved value " DBUS_PATH_LOCAL);
   g_clear_error (&error);
   g_assert_null (blob);
   /* reset path */
