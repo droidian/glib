@@ -16,7 +16,7 @@ Forwarded: no
  1 file changed, 8 insertions(+)
 
 diff --git a/glib/tests/gvariant.c b/glib/tests/gvariant.c
-index c24cd2f..0584cca 100644
+index 27586be..e63d214 100644
 --- a/glib/tests/gvariant.c
 +++ b/glib/tests/gvariant.c
 @@ -2469,6 +2469,14 @@ test_fuzzes (gpointer data)

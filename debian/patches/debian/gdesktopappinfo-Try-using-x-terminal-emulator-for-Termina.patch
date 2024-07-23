@@ -29,7 +29,7 @@ Signed-off-by: Simon McVittie <smcv@debian.org>
  1 file changed, 1 insertion(+)
 
 diff --git a/gio/gdesktopappinfo.c b/gio/gdesktopappinfo.c
-index 87db7a9..e2177b8 100644
+index 526564a..8df5a6d 100644
 --- a/gio/gdesktopappinfo.c
 +++ b/gio/gdesktopappinfo.c
 @@ -2699,6 +2699,7 @@ prepend_terminal_to_vector (int          *argc,

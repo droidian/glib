@@ -10,10 +10,10 @@ Forwarded: not-needed
  1 file changed, 6 insertions(+)
 
 diff --git a/gio/tests/debugcontroller.c b/gio/tests/debugcontroller.c
-index 862e8f6..ebe90ef 100644
+index 3a6b12f..c47acc0 100644
 --- a/gio/tests/debugcontroller.c
 +++ b/gio/tests/debugcontroller.c
-@@ -191,6 +191,12 @@ test_dbus_properties (void)
+@@ -192,6 +192,12 @@ test_dbus_properties (void)
  
    g_test_summary ("Test getting and setting properties on a #GDebugControllerDBus.");
  
