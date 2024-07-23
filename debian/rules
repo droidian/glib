@@ -238,11 +238,12 @@ endif
 
 DEB_CONFIGURE_FLAGS_deb := \
 	--default-library both \
+	-Ddtrace=disabled \
 	-Dlibelf=enabled \
 	-Dlibmount=$(enable_libmount) \
 	-Dmultiarch=true \
 	-Dselinux=$(enable_selinux) \
-	-Dsystemtap=enabled \
+	-Dsystemtap=disabled \
 	-Dxattr=$(have_non_stub_xattr) \
 	$(NULL)
 
