@@ -242,7 +242,7 @@ DEB_CONFIGURE_FLAGS_deb := \
 	-Dlibmount=$(enable_libmount) \
 	-Dmultiarch=true \
 	-Dselinux=$(enable_selinux) \
-	-Dsystemtap=true \
+	-Dsystemtap=enabled \
 	-Dxattr=$(have_non_stub_xattr) \
 	$(NULL)
 
