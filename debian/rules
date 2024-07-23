@@ -288,11 +288,13 @@ endif
 DEB_CONFIGURE_FLAGS_udeb := \
 	--default-library shared \
 	-Ddocumentation=false \
+	-Ddtrace=disabled \
 	-Dinstalled_tests=false \
 	-Dintrospection=disabled \
 	-Dlibmount=disabled \
 	-Dman-pages=disabled \
 	-Dselinux=disabled \
+	-Dsystemtap=disabled \
 	-Dxattr=$(have_non_stub_xattr) \
 	$(NULL)
 
