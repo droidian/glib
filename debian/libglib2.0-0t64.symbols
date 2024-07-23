@@ -231,6 +231,7 @@ libgio-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_content_type_set_mime_dirs@Base 2.60.0
  g_content_types_get_registered@Base 2.16.0
  g_converter_convert@Base 2.24.0
+ g_converter_convert_bytes@Base 2.81.0
  g_converter_flags_get_type@Base 2.24.0
  g_converter_get_type@Base 2.24.0
  g_converter_input_stream_get_converter@Base 2.24.0
@@ -728,6 +729,7 @@ libgio-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_file_build_attribute_list_for_copy@Base 2.68.0
  g_file_copy@Base 2.16.0
  g_file_copy_async@Base 2.16.0
+ g_file_copy_async_with_closures@Base 2.81.0
  g_file_copy_attributes@Base 2.16.0
  g_file_copy_finish@Base 2.16.0
  g_file_copy_flags_get_type@Base 2.16.0
@@ -903,6 +905,7 @@ libgio-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_file_mount_mountable_finish@Base 2.16.0
  g_file_move@Base 2.16.0
  g_file_move_async@Base 2.72.0
+ g_file_move_async_with_closures@Base 2.81.0
  g_file_move_finish@Base 2.72.0
  g_file_new_build_filename@Base 2.56.0
  g_file_new_build_filenamev@Base 2.78.0
@@ -1459,6 +1462,7 @@ libgio-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_settings_bind@Base 2.26.0
  g_settings_bind_flags_get_type@Base 2.26.0
  g_settings_bind_with_mapping@Base 2.26.0
+ g_settings_bind_with_mapping_closures@Base 2.81.0
  g_settings_bind_writable@Base 2.26.0
  g_settings_create_action@Base 2.32.0
  g_settings_delay@Base 2.26.0
@@ -3492,6 +3496,7 @@ libglib-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_strv_builder_ref@Base 2.68.0
  g_strv_builder_take@Base 2.80.0
  g_strv_builder_unref@Base 2.68.0
+ g_strv_builder_unref_to_strv@Base 2.81.0
  g_strv_contains@Base 2.44.0
  g_strv_equal@Base 2.60.0
  g_strv_length@Base 2.12.0
