@@ -1,8 +1,15 @@
-glib2.0 (2.81.0-1) UNRELEASED; urgency=medium
+glib2.0 (2.81.0-1) experimental; urgency=medium
 
+  [ Simon McVittie ]
   * New upstream release
+  * d/copyright: Update & reorder stanzas for intended precedence
+  * d/libglib2.0-0t64.symbols: Add new ABI symbols
+  * d/libglib2.0-0t64.symbols: Reduce entropy
+  * d/rules: systemtap option is now a feature, not a boolean
+  * d/rules: Disable dtrace/systemtap for now: systemtap was apparently
+    never enabled before because it needed dtrace which was not enabled
 
- -- Simon McVittie <smcv@debian.org>  Tue, 23 Jul 2024 09:58:13 +0100
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Fri, 26 Jul 2024 13:43:57 -0400
 
 glib2.0 (2.80.4-1) unstable; urgency=medium
 
