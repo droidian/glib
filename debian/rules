@@ -242,6 +242,7 @@ endif
 DEB_CONFIGURE_FLAGS_deb := \
 	--default-library both \
 	-Ddtrace=disabled \
+	-Dglib_debug=disabled \
 	-Dlibmount=$(enable_libmount) \
 	-Dmultiarch=true \
 	-Dselinux=$(enable_selinux) \
