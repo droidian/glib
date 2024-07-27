@@ -23,6 +23,9 @@ include /usr/share/dpkg/default.mk
 
 DEB_CONFIGURE_EXTRA_FLAGS =
 
+# Can be dropped when we switch to dh compat 14
+DEB_CONFIGURE_EXTRA_FLAGS += -Dauto_features=enabled
+
 ifneq ($(DEB_HOST_ARCH_ENDIAN),$(DEB_BUILD_ARCH_ENDIAN))
 $(error Cross-compiling gobject-introspection requires host endianness = build endianness)
 endif
@@ -239,7 +242,6 @@ endif
 DEB_CONFIGURE_FLAGS_deb := \
 	--default-library both \
 	-Ddtrace=disabled \
-	-Dlibelf=enabled \
 	-Dlibmount=$(enable_libmount) \
 	-Dmultiarch=true \
 	-Dselinux=$(enable_selinux) \
@@ -247,15 +249,8 @@ DEB_CONFIGURE_FLAGS_deb := \
 	-Dxattr=$(have_non_stub_xattr) \
 	$(NULL)
 
-ifeq ($(filter nodoc,$(DEB_BUILD_PROFILES)),)
-DEB_CONFIGURE_FLAGS_deb += -Dman-pages=enabled
-else
-DEB_CONFIGURE_FLAGS_deb += -Dman-pages=disabled
-endif
-
 ifneq ($(filter gir% %-doc,$(built_binaries)),)
 DEB_CONFIGURE_FLAGS_deb += -Dgir_dir_prefix=lib/${DEB_HOST_MULTIARCH}
-DEB_CONFIGURE_FLAGS_deb += -Dintrospection=enabled
 ifneq ($(DEB_HOST_ARCH),$(DEB_BUILD_ARCH))
 DEB_CONFIGURE_FLAGS_deb += --cross-file=$(DEB_HOST_GNU_TYPE)-gobject-introspection.ini
 # GLib insists on having an exe_wrapper when we enable introspection,
@@ -277,11 +272,14 @@ ifneq ($(filter %-doc,$(built_binaries)),)
 DEB_CONFIGURE_FLAGS_deb += -Ddocumentation=true
 else
 DEB_CONFIGURE_FLAGS_deb += -Ddocumentation=false
+DEB_CONFIGURE_FLAGS_deb += -Dman-pages=disabled
 endif
 
-ifeq ($(filter pkg.glib2.0.nosysprof,$(DEB_BUILD_PROFILES)),)
-ifneq ($(filter amd64 arm64 armel armhf i386 mips64el ppc64el riscv64 s390x powerpc ppc64,$(DEB_HOST_ARCH)),)
-DEB_CONFIGURE_FLAGS_deb += -Dsysprof=enabled
+ifneq ($(filter pkg.glib2.0.nosysprof,$(DEB_BUILD_PROFILES)),)
+DEB_CONFIGURE_FLAGS_deb += -Dsysprof=disabled
+else
+ifeq ($(filter amd64 arm64 armel armhf i386 mips64el ppc64el riscv64 s390x powerpc ppc64,$(DEB_HOST_ARCH)),)
+DEB_CONFIGURE_FLAGS_deb += -Dsysprof=disabled
 endif
 endif
 
@@ -289,11 +287,14 @@ DEB_CONFIGURE_FLAGS_udeb := \
 	--default-library shared \
 	-Ddocumentation=false \
 	-Ddtrace=disabled \
+	-Dglib_debug=disabled \
 	-Dinstalled_tests=false \
 	-Dintrospection=disabled \
+	-Dlibelf=disabled \
 	-Dlibmount=disabled \
 	-Dman-pages=disabled \
 	-Dselinux=disabled \
+	-Dsysprof=disabled \
 	-Dsystemtap=disabled \
 	-Dxattr=$(have_non_stub_xattr) \
 	$(NULL)
