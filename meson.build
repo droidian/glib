@@ -1,5 +1,5 @@
 project('glib', 'c',
-  version : '2.81.0',
+  version : '2.81.1',
   # NOTE: See the policy in docs/meson-version.md before changing the Meson dependency
   meson_version : '>= 1.2.0',
   default_options : [
@@ -2457,7 +2457,7 @@ endif
 
 glib_conf.set('HAVE_PROC_SELF_CMDLINE', have_proc_self_cmdline)
 
-python = import('python').find_installation(modules: ['packaging'])
+python = import('python').find_installation()
 
 python_version = python.language_version()
 python_version_req = '>=3.7'
