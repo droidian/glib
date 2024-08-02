@@ -3331,6 +3331,7 @@ libglib-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_slist_sort@Base 2.12.0
  g_slist_sort_with_data@Base 2.12.0
  g_snprintf@Base 2.12.0
+ g_sort_array@Base 2.81.1
  g_source_add_child_source@Base 2.28.0
  g_source_add_poll@Base 2.12.0
  g_source_add_unix_fd@Base 2.36.0
