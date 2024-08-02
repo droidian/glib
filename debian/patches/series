@@ -8,7 +8,6 @@ workarounds/closures-test-Skip-on-arm-unless-flaky-tests-are-allowed.patch
 workarounds/Disable-some-tests-on-slow-architectures-which-keep-faili.patch
 workarounds/Skip-test-which-performs-some-unreliable-floating-point-c.patch
 workarounds/Skip-unreliable-gdbus-threading-tests--by-default.patch
-workarounds/gmenumodel-test-Mark-as-flaky.patch
 workarounds/gvariant-test-Don-t-run-at-build-time-on-mips.patch
 workarounds/gdbus-server-auth-Normally-skip-flaky-DBUS_COOKIE_SHA1-te.patch
 workarounds/Skip-memory-monitor-dbus-test-if-not-specifically-request.patch
