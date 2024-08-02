@@ -273,6 +273,11 @@ ifneq ($(filter %-doc,$(built_binaries)),)
 DEB_CONFIGURE_FLAGS_deb += -Ddocumentation=true
 else
 DEB_CONFIGURE_FLAGS_deb += -Ddocumentation=false
+endif
+
+ifeq ($(filter nodoc,$(DEB_BUILD_PROFILES)),)
+DEB_CONFIGURE_FLAGS_deb += -Dman-pages=enabled
+else
 DEB_CONFIGURE_FLAGS_deb += -Dman-pages=disabled
 endif
 
