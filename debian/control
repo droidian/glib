@@ -41,7 +41,7 @@ Build-Depends-Indep: gi-docgen <!nodoc>,
                      gobject-introspection (>= 1.78.1-18~) <!nodoc>,
                      qemu-user <cross !nodoc>,
 Rules-Requires-Root: no
-Standards-Version: 4.6.2
+Standards-Version: 4.7.0
 Homepage: https://wiki.gnome.org/Projects/GLib
 Vcs-Browser: https://salsa.debian.org/gnome-team/glib
 Vcs-Git: https://salsa.debian.org/gnome-team/glib.git
