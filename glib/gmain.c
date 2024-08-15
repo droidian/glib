@@ -5866,7 +5866,7 @@ g_child_watch_dispatch (GSource    *source,
                 return TRUE;
               }
           }
-        else
+        else if (errno != EINVAL) /* P_PIDFD support has been introduce in Linux 5.4 */
           {
             int errsv = errno;
 
