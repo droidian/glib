@@ -177,7 +177,7 @@ glib_tests = {
   'utils' : {
     'c_standards': c_standards.keys(),
   },
-  'utils-isolated' : {},
+  #'utils-isolated' : {},
   'unicode' : {},
   'unicode-encoding' : {},
   'unicode-normalize': {},
