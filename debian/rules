@@ -284,7 +284,7 @@ endif
 ifneq ($(filter pkg.glib2.0.nosysprof,$(DEB_BUILD_PROFILES)),)
 DEB_CONFIGURE_FLAGS_deb += -Dsysprof=disabled
 else
-ifeq ($(filter amd64 arm64 armel armhf i386 mips64el ppc64el riscv64 s390x powerpc ppc64,$(DEB_HOST_ARCH)),)
+ifeq ($(filter amd64 arm64 armel armhf i386 mips64el ppc64el riscv64 s390x hppa loong64 powerpc ppc64 sh4,$(DEB_HOST_ARCH)),)
 DEB_CONFIGURE_FLAGS_deb += -Dsysprof=disabled
 endif
 endif
