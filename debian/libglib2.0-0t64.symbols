@@ -2048,8 +2048,10 @@ libgio-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_unix_mount_point_is_user_mountable@Base 2.16.0
  g_unix_mount_points_changed_since@Base 2.16.0
  g_unix_mount_points_get@Base 2.16.0
+ g_unix_mount_points_get_from_file@Base 2.81.2
  g_unix_mounts_changed_since@Base 2.16.0
  g_unix_mounts_get@Base 2.16.0
+ g_unix_mounts_get_from_file@Base 2.81.2
  g_unix_output_stream_get_close_fd@Base 2.20.0
  g_unix_output_stream_get_fd@Base 2.20.0
  g_unix_output_stream_get_type@Base 2.16.0
