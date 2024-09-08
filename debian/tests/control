@@ -2,6 +2,10 @@ Tests: build build-static
 Depends: libgio-2.0-dev, build-essential
 Restrictions: allow-stderr superficial
 
+Tests: libgio-2.0-dev-bin
+Depends: libgio-2.0-dev-bin
+Restrictions: allow-stderr superficial
+
 Tests: libglib2.0-dev
 Depends: libglib2.0-dev, build-essential
 Restrictions: allow-stderr superficial

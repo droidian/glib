@@ -26,9 +26,11 @@ usr/lib/*/pkgconfig/gmodule-export-2.0.pc
 usr/lib/*/pkgconfig/gmodule-no-export-2.0.pc
 usr/lib/*/pkgconfig/gobject-2.0.pc
 usr/lib/*/pkgconfig/gthread-2.0.pc
+usr/share/aclocal
 usr/share/gdb
 usr/share/gettext/its
 usr/share/glib-2.0/dtds
 usr/share/glib-2.0/gdb
+usr/share/glib-2.0/gettext
 usr/share/glib-2.0/schemas
 usr/share/glib-2.0/valgrind

@@ -1,0 +1,8 @@
+usr/share/man/man1/gdbus-codegen.1*
+usr/share/man/man1/glib-compile-resources.1*
+usr/share/man/man1/glib-genmarshal.1*
+usr/share/man/man1/glib-gettextize.1*
+usr/share/man/man1/glib-mkenums.1*
+usr/share/man/man1/gobject-query.1*
+usr/share/man/man1/gtester-report.1*
+usr/share/man/man1/gtester.1*
