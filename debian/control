@@ -244,7 +244,6 @@ Depends: girepository-tools (= ${binary:Version}),
          ${shlibs:Depends}
 Suggests: libgdk-pixbuf2.0-bin,
           libxml2-utils
-Provides: libglib2.0-dev-bin-${local:DEB-HOST-ARCH-OS} (= ${binary:Version}),
 Multi-Arch: foreign
 Description: Development utilities for the GLib library
  GLib is a library containing many useful C routines for things such
@@ -289,8 +288,7 @@ Package: girepository-tools
 Section: libdevel
 Architecture: any
 Multi-Arch: same
-Depends: libglib2.0-dev-bin-${local:DEB-HOST-ARCH-OS} (= ${binary:Version}),
-         python3 | qemu-user [linux-any] | qemu-user-static [linux-any],
+Depends: python3 | qemu-user [linux-any] | qemu-user-static [linux-any],
          ${misc:Depends},
          ${python3:Depends},
          ${shlibs:Depends}

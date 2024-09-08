@@ -412,11 +412,8 @@ override_dh_gencontrol-arch:
 	# TODO: After the split has been uploaded, replace
 	# ${local:SplitGiRepositoryVersion} with a concrete version
 	dh_gencontrol -pgirepository-tools -- \
-		-Vlocal:DEB-HOST-ARCH-OS=$(DEB_HOST_ARCH_OS) \
 		-Vlocal:DEB-HOST-GNU-TYPE=$(DEB_HOST_GNU_TYPE) \
 		-Vlocal:SplitGiRepositoryVersion=$(DEB_VERSION)
-	dh_gencontrol -plibglib2.0-dev -plibglib2.0-dev-bin -- \
-		-Vlocal:DEB-HOST-ARCH-OS=$(DEB_HOST_ARCH_OS)
 	dh_gencontrol -plibgio-2.0-dev -plibgio-2.0-dev-bin -- \
 		-Vlocal:SplitGiRepositoryVersion=$(DEB_VERSION)
 	dh_gencontrol --remaining-packages
