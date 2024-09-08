@@ -1,3 +1,13 @@
+glib2.0 (2.82.0-2) UNRELEASED; urgency=medium
+
+  * d/rules: Don't require host and build endianness to match.
+    This was necessary with the approach we used before fixing #1066904,
+    but not any more.
+  * d/source/lintian-overrides: Remove obsolete overrides for nogir
+  * d/copyright: Update
+
+ -- Simon McVittie <smcv@debian.org>  Sun, 08 Sep 2024 23:49:31 +0100
+
 glib2.0 (2.82.0-1) unstable; urgency=medium
 
   * New upstream release
