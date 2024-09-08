@@ -97,6 +97,7 @@ Copyright:
  2016-2020 Endless Mobile, Inc
  2017-2022 Endless OS Foundation, LLC
  2007 Francois Gouget
+ 2024 Frank Dana
  2020-2021 Frederic Martinsons
  1991-2023 Free Software Foundation, Inc
  2015 Garrett Regier
@@ -480,10 +481,6 @@ Files:
 Copyright:
  2000-2017, Julian Seward
 License: bzip2-1.0.6
-
-Files: docs/reference/gio/menu-model.png
-Copyright: unspecified
-License: CC-BY-SA-3.0
 
 Files: docs/reference/glib/gvariant-*.svg
 Copyright: 2022 Philip Withnall
