@@ -1,0 +1,6 @@
+#!/bin/sh
+
+set -eux
+
+debian/tests/build
+debian/tests/build-static

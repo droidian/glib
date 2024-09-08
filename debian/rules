@@ -408,9 +408,11 @@ execute_before_dh_installdeb-arch:
 		    > debian/libglib2.0-0t64.$$script ; \
 	done
 
-override_dh_gencontrol:
-ifneq ($(filter libglib2.0-dev,$(built_binaries)),)
+override_dh_gencontrol-arch:
+	# TODO: After the split has been uploaded, replace
+	# ${local:SplitGiRepositoryVersion} with a concrete version
 	dh_gencontrol -plibglib2.0-dev -plibglib2.0-dev-bin -- \
 		-Vlocal:DEB-HOST-ARCH-OS=$(DEB_HOST_ARCH_OS)
-endif
+	dh_gencontrol -plibgio-2.0-dev -- \
+		-Vlocal:SplitGiRepositoryVersion=$(DEB_VERSION)
 	dh_gencontrol --remaining-packages
