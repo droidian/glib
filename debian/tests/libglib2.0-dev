@@ -4,4 +4,5 @@ set -eux
 
 debian/tests/build
 debian/tests/build-static
+debian/tests/girepository-tools
 debian/tests/libgio-2.0-dev-bin

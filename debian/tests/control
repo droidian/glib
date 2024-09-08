@@ -2,12 +2,16 @@ Tests: build build-static
 Depends: libgio-2.0-dev, build-essential
 Restrictions: allow-stderr superficial
 
+Tests: girepository-tools
+Depends: dpkg-dev, girepository-tools, gir1.2-glib-2.0-dev
+Restrictions: allow-stderr superficial
+
 Tests: libgio-2.0-dev-bin
 Depends: libgio-2.0-dev-bin
 Restrictions: allow-stderr superficial
 
 Tests: libglib2.0-dev
-Depends: libglib2.0-dev, build-essential
+Depends: gir1.2-glib-2.0-dev, libglib2.0-dev, build-essential
 Restrictions: allow-stderr superficial
 
 Tests: installed-tests
