@@ -26,10 +26,6 @@ DEB_CONFIGURE_EXTRA_FLAGS =
 # Can be dropped when we switch to dh compat 14
 DEB_CONFIGURE_EXTRA_FLAGS += -Dauto_features=enabled
 
-ifneq ($(DEB_HOST_ARCH_ENDIAN),$(DEB_BUILD_ARCH_ENDIAN))
-$(error Cross-compiling gobject-introspection requires host endianness = build endianness)
-endif
-
 ifneq ($(DEB_HOST_ARCH),$(DEB_BUILD_ARCH))
 # Properties of glibc. These are the same for all Debian architectures,
 # and are auto-detected when doing a native build.
