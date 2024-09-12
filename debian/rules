@@ -238,6 +238,7 @@ endif
 DEB_CONFIGURE_FLAGS_deb := \
 	--default-library both \
 	-Ddtrace=disabled \
+	-Dgir_dir_prefix=lib/${DEB_HOST_MULTIARCH} \
 	-Dglib_debug=disabled \
 	-Dlibmount=$(enable_libmount) \
 	-Dmultiarch=true \
@@ -247,7 +248,6 @@ DEB_CONFIGURE_FLAGS_deb := \
 	$(NULL)
 
 ifneq ($(filter gir% %-doc,$(built_binaries)),)
-DEB_CONFIGURE_FLAGS_deb += -Dgir_dir_prefix=lib/${DEB_HOST_MULTIARCH}
 ifneq ($(DEB_HOST_ARCH),$(DEB_BUILD_ARCH))
 DEB_CONFIGURE_FLAGS_deb += --cross-file=$(DEB_HOST_GNU_TYPE)-gobject-introspection.ini
 # GLib insists on having an exe_wrapper when we enable introspection,
