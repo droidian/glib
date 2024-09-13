@@ -33,13 +33,13 @@ Build-Depends-Arch: desktop-file-utils <!nocheck>,
                     locales <!nocheck> | locales-all <!nocheck>,
                     python3-dbus <!nocheck>,
                     python3-gi <!nocheck>,
-                    qemu-user <cross !nogir>,
+                    cross-exe-wrapper <cross !nogir>,
                     shared-mime-info <!nocheck>,
                     tzdata <!nocheck>,
                     xterm <!nocheck>
 Build-Depends-Indep: gi-docgen <!nodoc>,
                      gobject-introspection (>= 1.78.1-18~) <!nodoc>,
-                     qemu-user <cross !nodoc>,
+                     cross-exe-wrapper <cross !nodoc>,
 Rules-Requires-Root: no
 Standards-Version: 4.7.0
 Homepage: https://wiki.gnome.org/Projects/GLib

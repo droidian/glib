@@ -86,7 +86,7 @@ cross-tools: debian/emulated-g-ir-tool.in debian/rules
 	$(DEB_HOST_GNU_TYPE)-gcc $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -odebian/cross-tools/deb-can-run debian/can-run.c
 
 override_dh_auto_configure:
-	sed -e 's|@DEB_HOST_ARCH@|$(DEB_HOST_ARCH)|g' \
+	sed -e 's|@DEB_HOST_GNU_TYPE@|$(DEB_HOST_GNU_TYPE)|g' \
 		< debian/meson/exe-wrapper.ini.in \
 		> debian/meson/exe-wrapper.ini
 	dh_auto_configure \
