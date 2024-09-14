@@ -48,7 +48,12 @@ class CrossGirTool:
         else:
             return completed.stdout == b'ok\n' and completed.returncode == 0
 
-    def find_qemu(self) -> str:
+    def get_wrapper(self) -> str:
+        wrapper = shutil.which(f'{DEB_HOST_GNU_TYPE}-cross-exe-wrapper')
+
+        if wrapper is not None:
+            return wrapper
+
         qemu = shutil.which(f'qemu-{DEB_HOST_ARCH}')
 
         if qemu is not None:
@@ -67,10 +72,10 @@ class CrossGirTool:
         if not self.can_run():
             print(
                 (f'{ME}: Cannot run {DEB_HOST_ARCH} executables '
-                 + 'directly, using qemu'),
+                 + 'directly, using cross-exe-wrapper or qemu'),
                 file=sys.stderr,
             )
-            exe_wrapper = [self.find_qemu()]
+            exe_wrapper = [self.get_wrapper()]
 
         argv = exe_wrapper + [TOOL_PATH] + sys.argv[1:]
         try:
