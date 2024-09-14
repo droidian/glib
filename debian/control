@@ -290,7 +290,6 @@ Architecture: any
 Multi-Arch: same
 Depends: native-architecture | cross-exe-wrapper,
          ${misc:Depends},
-         ${python3:Depends},
          ${shlibs:Depends}
 Breaks: libglib2.0-dev (<< ${local:SplitGiRepositoryVersion}~),
         libglib2.0-dev-bin (<< ${local:SplitGiRepositoryVersion}~),
