@@ -1,4 +1,4 @@
-glib2.0 (2.82.0-2) UNRELEASED; urgency=medium
+glib2.0 (2.82.0-2) experimental; urgency=medium
 
   * Improve ability to bootstrap new architectures.
     The versions of libglib2.0-dev and -dev-bin in Debian testing/unstable
@@ -51,8 +51,9 @@ glib2.0 (2.82.0-2) UNRELEASED; urgency=medium
   * d/emulated-g-ir-tool.in: Simplify and rewrite from Python into shell
   * d/source/lintian-overrides: Remove obsolete overrides for nogir
   * d/copyright: Update
+  * Upload to experimental for NEW processing
 
- -- Simon McVittie <smcv@debian.org>  Sat, 14 Sep 2024 21:17:33 +0100
+ -- Simon McVittie <smcv@debian.org>  Sat, 14 Sep 2024 22:18:00 +0100
 
 glib2.0 (2.82.0-1) unstable; urgency=medium
 
