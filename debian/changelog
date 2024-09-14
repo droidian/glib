@@ -40,10 +40,19 @@ glib2.0 (2.82.0-2) UNRELEASED; urgency=medium
     but not any more.
   * d/rules: Set gir_dir_prefix even if we are building with nogir.
     It affects the contents of the gi-* tools.
+  * d/control, d/rules, d/emulated-g-ir-tool.in:
+    Use the new cross-exe-wrapper from src:architecture-properties to run
+    foreign-architecture executables, instead of using qemu directly.
+    This centralizes knowledge of how to run binaries of any given
+    architecture into the architecture-properties source package. It also
+    has the right special cases to avoid needing to install qemu in common
+    situations, for example when running i386 binaries on amd64.
+    (Closes: #1070773, #1071246)
+  * d/emulated-g-ir-tool.in: Simplify and rewrite from Python into shell
   * d/source/lintian-overrides: Remove obsolete overrides for nogir
   * d/copyright: Update
 
- -- Simon McVittie <smcv@debian.org>  Fri, 13 Sep 2024 00:17:39 +0100
+ -- Simon McVittie <smcv@debian.org>  Sat, 14 Sep 2024 21:17:33 +0100
 
 glib2.0 (2.82.0-1) unstable; urgency=medium
 
