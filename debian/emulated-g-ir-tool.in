@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: MIT
 
 import os
-import shutil
 import subprocess
 import sys
 import sysconfig
@@ -49,22 +48,7 @@ class CrossGirTool:
             return completed.stdout == b'ok\n' and completed.returncode == 0
 
     def get_wrapper(self) -> str:
-        wrapper = shutil.which(f'{DEB_HOST_GNU_TYPE}-cross-exe-wrapper')
-
-        if wrapper is not None:
-            return wrapper
-
-        qemu = shutil.which(f'qemu-{DEB_HOST_ARCH}')
-
-        if qemu is not None:
-            return qemu
-
-        qemu = shutil.which(f'qemu-{DEB_HOST_ARCH}-static')
-
-        if qemu is not None:
-            return qemu
-
-        raise SystemExit(f'{ME}: Cannot find qemu-{DEB_HOST_ARCH}(-static)')
+        return f'{DEB_HOST_GNU_TYPE}-cross-exe-wrapper'
 
     def exec(self) -> NoReturn:
         exe_wrapper = []
@@ -72,7 +56,7 @@ class CrossGirTool:
         if not self.can_run():
             print(
                 (f'{ME}: Cannot run {DEB_HOST_ARCH} executables '
-                 + 'directly, using cross-exe-wrapper or qemu'),
+                 + 'directly, using cross-exe-wrapper'),
                 file=sys.stderr,
             )
             exe_wrapper = [self.get_wrapper()]

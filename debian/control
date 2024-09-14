@@ -288,7 +288,7 @@ Package: girepository-tools
 Section: libdevel
 Architecture: any
 Multi-Arch: same
-Depends: native-architecture | cross-exe-wrapper | qemu-user [linux-any] | qemu-user-static [linux-any] | python3,
+Depends: native-architecture | cross-exe-wrapper,
          ${misc:Depends},
          ${python3:Depends},
          ${shlibs:Depends}
