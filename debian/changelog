@@ -1,8 +1,26 @@
 glib2.0 (2.82.1-1) UNRELEASED; urgency=medium
 
-  * New upstream release
+  * New upstream stable release
+  * d/copyright: Update
+  * Move gdb integration hooks (/usr/share/gdb) back to libglib2.0-dev.
+    This is not essential functionality of libgio-2.0-dev, and having
+    it in the larger package gives us more flexibility about which of
+    the dependency packages contain supporting Python libraries.
+  * Move supporting code for gdb integration hooks into libgio-2.0-dev-bin.
+    This lets us byte-compile the Python modules with the primary
+    architecture's Python interpreter, and ensures that the Python
+    packaging infrastructure will automatically clean up their associated
+    bytecode files on uninstallation. (Closes: #987802)
+  * d/libgio-2.0-dev.install: Be more specific about what is installed.
+    If files with a different purpose are added to one of these
+    directories, we will not necessarily want to install them in the
+    same binary package.
+  * Replace temporary substvar ${local:SplitGiRepositoryVersion} with a
+    hard-coded version
+  * d/control, d/tests/control, d/*.install: Normalize formatting
+    (wrap-and-sort -ast)
 
- -- Simon McVittie <smcv@debian.org>  Sat, 21 Sep 2024 12:53:41 +0100
+ -- Simon McVittie <smcv@debian.org>  Sat, 21 Sep 2024 14:08:47 +0100
 
 glib2.0 (2.82.0-2) experimental; urgency=medium
 
