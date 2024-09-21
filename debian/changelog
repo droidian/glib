@@ -1,4 +1,4 @@
-glib2.0 (2.82.1-1) UNRELEASED; urgency=medium
+glib2.0 (2.82.1-1) unstable; urgency=medium
 
   * New upstream stable release
   * d/copyright: Update
@@ -19,8 +19,10 @@ glib2.0 (2.82.1-1) UNRELEASED; urgency=medium
     hard-coded version
   * d/control, d/tests/control, d/*.install: Normalize formatting
     (wrap-and-sort -ast)
+  * Release to unstable, now that NEW processing has been done and
+    architecture-properties is ready to migrate
 
- -- Simon McVittie <smcv@debian.org>  Sat, 21 Sep 2024 14:08:47 +0100
+ -- Simon McVittie <smcv@debian.org>  Sat, 21 Sep 2024 14:10:44 +0100
 
 glib2.0 (2.82.0-2) experimental; urgency=medium
 
