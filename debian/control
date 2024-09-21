@@ -203,8 +203,10 @@ Depends:
  ${python3:Depends},
  ${shlibs:Depends},
 Breaks:
+ libgio-2.0-dev (<< 2.82.1-1~),
  libglib2.0-0-dbg (<< 2.51.4-1~),
 Replaces:
+ libgio-2.0-dev (<< 2.82.1-1~),
  libglib2.0-0-dbg (<< 2.51.4-1~),
 Suggests:
  gir1.2-glib-2.0-dev,
