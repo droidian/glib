@@ -1,1 +1,1 @@
-usr/share/gdb
+usr/share/gdb/auto-load/usr/lib/*/*-gdb.py

@@ -26,9 +26,10 @@ usr/lib/*/pkgconfig/gmodule-export-2.0.pc
 usr/lib/*/pkgconfig/gmodule-no-export-2.0.pc
 usr/lib/*/pkgconfig/gobject-2.0.pc
 usr/lib/*/pkgconfig/gthread-2.0.pc
-usr/share/aclocal
-usr/share/gettext/its
-usr/share/glib-2.0/dtds
-usr/share/glib-2.0/gettext
-usr/share/glib-2.0/schemas
-usr/share/glib-2.0/valgrind
+usr/share/aclocal/*.m4
+usr/share/gettext/its/*.its
+usr/share/gettext/its/*.loc
+usr/share/glib-2.0/dtds/*.dtd
+usr/share/glib-2.0/gettext/po/Makefile.in.in
+usr/share/glib-2.0/schemas/*.dtd
+usr/share/glib-2.0/valgrind/*.supp
