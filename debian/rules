@@ -404,11 +404,6 @@ execute_before_dh_installdeb-arch:
 	done
 
 override_dh_gencontrol-arch:
-	# TODO: After the split has been uploaded, replace
-	# ${local:SplitGiRepositoryVersion} with a concrete version
 	dh_gencontrol -pgirepository-tools -- \
-		-Vlocal:DEB-HOST-GNU-TYPE=$(DEB_HOST_GNU_TYPE) \
-		-Vlocal:SplitGiRepositoryVersion=$(DEB_VERSION)
-	dh_gencontrol -plibgio-2.0-dev -plibgio-2.0-dev-bin -- \
-		-Vlocal:SplitGiRepositoryVersion=$(DEB_VERSION)
+		-Vlocal:DEB-HOST-GNU-TYPE=$(DEB_HOST_GNU_TYPE)
 	dh_gencontrol --remaining-packages
