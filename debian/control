@@ -41,6 +41,7 @@ Build-Depends-Arch:
  python3-gi <!nocheck>,
  shared-mime-info <!nocheck>,
  tzdata <!nocheck>,
+ tzdata-legacy <!nocheck>,
  xterm <!nocheck>,
 Build-Depends-Indep:
  cross-exe-wrapper <cross !nodoc>,
@@ -101,6 +102,7 @@ Depends:
  python3-dbusmock,
  python3-gi,
  shared-mime-info,
+ tzdata-legacy,
  ${misc:Depends},
  ${python3:Depends},
  ${shlibs:Depends},
