@@ -1,8 +1,18 @@
 glib2.0 (2.82.2-1) UNRELEASED; urgency=medium
 
   * New upstream stable release
+  * d/p/gdatetime-test-Do-not-assume-PST8PDT-was-always-exactly-8.patch,
+    d/p/gdatetime-test-Try-to-make-PST8PDT-test-more-obviously-co.patch,
+    d/p/gdatetime-test-Fall-back-if-legacy-System-V-PST8PDT-is-no.patch:
+    Update to upstream glib-2-82 branch commit 2.82.2-4-g7e4fcb4fa8.
+    This addresses a FTBFS with tzdata 2024b (#1084190).
+    Thanks to Rebecca N. Palmer
+  * Build-depend on tzdata-legacy.
+    One test-case exercises the deprecated time zone name PST8PDT,
+    which is no longer available in tzdata. We'll get slightly better
+    coverage by having tzdata-legacy for as long as it's available.
 
- -- Simon McVittie <smcv@debian.org>  Thu, 17 Oct 2024 12:53:59 +0100
+ -- Simon McVittie <smcv@debian.org>  Fri, 18 Oct 2024 16:31:15 +0100
 
 glib2.0 (2.82.1-1) unstable; urgency=medium
 
