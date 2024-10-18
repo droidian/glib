@@ -1,4 +1,4 @@
-glib2.0 (2.82.2-1) UNRELEASED; urgency=medium
+glib2.0 (2.82.2-1) unstable; urgency=medium
 
   * New upstream stable release
   * d/p/gdatetime-test-Do-not-assume-PST8PDT-was-always-exactly-8.patch,
@@ -12,7 +12,7 @@ glib2.0 (2.82.2-1) UNRELEASED; urgency=medium
     which is no longer available in tzdata. We'll get slightly better
     coverage by having tzdata-legacy for as long as it's available.
 
- -- Simon McVittie <smcv@debian.org>  Fri, 18 Oct 2024 16:31:15 +0100
+ -- Simon McVittie <smcv@debian.org>  Fri, 18 Oct 2024 19:51:15 +0100
 
 glib2.0 (2.82.1-1) unstable; urgency=medium
 
