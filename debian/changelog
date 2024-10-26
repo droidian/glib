@@ -1,3 +1,12 @@
+glib2.0 (2.82.2-2) unstable; urgency=medium
+
+  * d/control: libgio-2.0-dev Breaks/Replaces older libglib2.0-dev-bin, too
+    (Closes: #1086036)
+  * d/control: List the tools included in libglib2.0-bin in its Description.
+    Very loosely based on discussion in #645491.
+
+ -- Simon McVittie <smcv@debian.org>  Sat, 26 Oct 2024 18:01:21 +0100
+
 glib2.0 (2.82.2-1) unstable; urgency=medium
 
   * New upstream stable release
