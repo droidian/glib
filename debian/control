@@ -147,8 +147,16 @@ Description: Programs for the GLib library
  as trees, hashes, lists, and strings.  It is a useful general-purpose
  C library used by projects such as GTK+, GIMP, and GNOME.
  .
- This package contains the program files which is used for the libraries
- and others.
+ This package contains command-line utilities associated with GLib,
+ including:
+ .
+  * gapplication, a client for starting applications via D-Bus activation
+  * gdbus, a tool for working with D-Bus objects and monitoring the bus
+  * gio, a file management utility that can work with GIO virtual filesystems
+  * gresource, which can extract resources from libraries and executables
+  * gsettings, a tool for inspecting and editing application configuration
+  * gio-query-modules, which updates caches used internally by GLib
+  * glib-compile-schemas, which updates caches used internally by GLib
 
 Package: libgio-2.0-dev
 Section: libdevel
