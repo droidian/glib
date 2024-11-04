@@ -1,8 +1,8 @@
 usr/lib/*/glib-2.0/gio-launch-desktop
 usr/lib/*/glib-2.0/gio-querymodules
 usr/lib/*/glib-2.0/glib-compile-schemas
-usr/lib/*/libglib*.so.*
-usr/lib/*/libgobject*.so.*
-usr/lib/*/libgmodule*.so.*
-usr/lib/*/libgthread*.so.*
 usr/lib/*/libgio*.so.*
+usr/lib/*/libglib*.so.*
+usr/lib/*/libgmodule*.so.*
+usr/lib/*/libgobject*.so.*
+usr/lib/*/libgthread*.so.*

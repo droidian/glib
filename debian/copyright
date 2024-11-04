@@ -97,8 +97,9 @@ Copyright:
  2016-2020 Endless Mobile, Inc
  2017-2022 Endless OS Foundation, LLC
  2007 Francois Gouget
+ 2024 Frank Dana
  2020-2021 Frederic Martinsons
- 1991-2023 Free Software Foundation, Inc
+ 1991-2024 Free Software Foundation, Inc
  2015 Garrett Regier
  2011-2014 Giovanni Campagna
  2020 Gisle Vanem
@@ -210,6 +211,7 @@ Copyright:
  1999-2000 Tom Tromey
  1998-2004 Tor Lillqvist
  2011 Torsten Schönfeld
+ 2024 twlvnn kraftwerk
  1995-1997 Ulrich Drepper
  2021 Unicode®, Inc
  2011 William Hua
@@ -480,10 +482,6 @@ Files:
 Copyright:
  2000-2017, Julian Seward
 License: bzip2-1.0.6
-
-Files: docs/reference/gio/menu-model.png
-Copyright: unspecified
-License: CC-BY-SA-3.0
 
 Files: docs/reference/glib/gvariant-*.svg
 Copyright: 2022 Philip Withnall

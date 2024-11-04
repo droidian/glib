@@ -1,15 +1,89 @@
-Tests: build build-static
-Depends: libglib2.0-dev, build-essential
-Restrictions: allow-stderr superficial
+Tests:
+ build,
+ build-static,
+Depends:
+ build-essential,
+ libgio-2.0-dev,
+Restrictions:
+ allow-stderr,
+ superficial,
 
-Tests: installed-tests
-Depends: dbus-daemon (>= 1.8), dbus-x11, gnome-desktop-testing, libglib2.0-tests, locales | locales-all, xauth, xvfb
-Restrictions: allow-stderr
+Tests:
+ girepository-tools,
+Depends:
+ dpkg-dev,
+ gir1.2-glib-2.0-dev,
+ girepository-tools,
+Restrictions:
+ allow-stderr,
+ superficial,
 
-Tests: closure-refcount debugcontroller gdbus-server-auth gdbus-threading gmenumodel mainloop memory-monitor-dbus socket testfilemonitor thread-pool-slow threadtests timeout timer
-Depends: dbus-daemon (>= 1.8), dbus-x11, gnome-desktop-testing, libglib2.0-tests, locales | locales-all, xauth, xvfb
-Restrictions: allow-stderr flaky
+Tests:
+ libgio-2.0-dev-bin,
+Depends:
+ libgio-2.0-dev-bin,
+Restrictions:
+ allow-stderr,
+ superficial,
 
-Tests: 1065022-futureproofing
-Depends: dconf-gsettings-backend, dpkg-repack, gsettings-desktop-schemas, libglib2.0-0t64
-Restrictions: allow-stderr breaks-testbed flaky needs-root
+Tests:
+ libglib2.0-dev,
+Depends:
+ build-essential,
+ gir1.2-glib-2.0-dev,
+ libglib2.0-dev,
+Restrictions:
+ allow-stderr,
+ superficial,
+
+Tests:
+ installed-tests,
+Depends:
+ dbus-daemon (>= 1.8),
+ dbus-x11,
+ gnome-desktop-testing,
+ libglib2.0-tests,
+ locales | locales-all,
+ xauth,
+ xvfb,
+Restrictions:
+ allow-stderr,
+
+Tests:
+ closure-refcount,
+ debugcontroller,
+ gdbus-server-auth,
+ gdbus-threading,
+ gmenumodel,
+ mainloop,
+ memory-monitor-dbus,
+ socket,
+ testfilemonitor,
+ thread-pool-slow,
+ threadtests,
+ timeout,
+ timer,
+Depends:
+ dbus-daemon (>= 1.8),
+ dbus-x11,
+ gnome-desktop-testing,
+ libglib2.0-tests,
+ locales | locales-all,
+ xauth,
+ xvfb,
+Restrictions:
+ allow-stderr,
+ flaky,
+
+Tests:
+ 1065022-futureproofing,
+Depends:
+ dconf-gsettings-backend,
+ dpkg-repack,
+ gsettings-desktop-schemas,
+ libglib2.0-0t64,
+Restrictions:
+ allow-stderr,
+ breaks-testbed,
+ flaky,
+ needs-root,

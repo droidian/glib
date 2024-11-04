@@ -26,10 +26,6 @@ DEB_CONFIGURE_EXTRA_FLAGS =
 # Can be dropped when we switch to dh compat 14
 DEB_CONFIGURE_EXTRA_FLAGS += -Dauto_features=enabled
 
-ifneq ($(DEB_HOST_ARCH_ENDIAN),$(DEB_BUILD_ARCH_ENDIAN))
-$(error Cross-compiling gobject-introspection requires host endianness = build endianness)
-endif
-
 ifneq ($(DEB_HOST_ARCH),$(DEB_BUILD_ARCH))
 # Properties of glibc. These are the same for all Debian architectures,
 # and are auto-detected when doing a native build.
@@ -77,20 +73,15 @@ cross-tools: debian/emulated-g-ir-tool.in debian/rules
 	mkdir -p debian/cross-tools
 	set -e; for tool in $(cross_tools); do \
 		sed \
-			-e 's|@CAN_RUN@|/usr/lib/$(DEB_HOST_MULTIARCH)/glib-2.0/deb-can-run|' \
-			-e 's|@DEB_HOST_ARCH@|$(DEB_HOST_ARCH)|' \
 			-e 's|@DEB_HOST_GNU_TYPE@|$(DEB_HOST_GNU_TYPE)|' \
-			-e 's|@DEB_HOST_MULTIARCH@|$(DEB_HOST_MULTIARCH)|' \
-			-e 's|@TOOL@|'"$$tool"'|' \
 			-e 's|@TOOL_PATH@|/usr/lib/$(DEB_HOST_MULTIARCH)/glib-2.0/'"$$tool"'|' \
 			< $< > debian/cross-tool.tmp; \
 		chmod 0755 debian/cross-tool.tmp; \
 		mv debian/cross-tool.tmp debian/cross-tools/$(DEB_HOST_GNU_TYPE)-$$tool; \
 	done
-	$(DEB_HOST_GNU_TYPE)-gcc $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -odebian/cross-tools/deb-can-run debian/can-run.c
 
 override_dh_auto_configure:
-	sed -e 's|@DEB_HOST_ARCH@|$(DEB_HOST_ARCH)|g' \
+	sed -e 's|@DEB_HOST_GNU_TYPE@|$(DEB_HOST_GNU_TYPE)|g' \
 		< debian/meson/exe-wrapper.ini.in \
 		> debian/meson/exe-wrapper.ini
 	dh_auto_configure \
@@ -242,6 +233,7 @@ endif
 DEB_CONFIGURE_FLAGS_deb := \
 	--default-library both \
 	-Ddtrace=disabled \
+	-Dgir_dir_prefix=lib/${DEB_HOST_MULTIARCH} \
 	-Dglib_debug=disabled \
 	-Dlibmount=$(enable_libmount) \
 	-Dmultiarch=true \
@@ -250,8 +242,7 @@ DEB_CONFIGURE_FLAGS_deb := \
 	-Dxattr=$(have_non_stub_xattr) \
 	$(NULL)
 
-ifneq ($(filter gir% %-doc,$(built_binaries)),)
-DEB_CONFIGURE_FLAGS_deb += -Dgir_dir_prefix=lib/${DEB_HOST_MULTIARCH}
+ifneq ($(filter gir1.2-% %-doc,$(built_binaries)),)
 ifneq ($(DEB_HOST_ARCH),$(DEB_BUILD_ARCH))
 DEB_CONFIGURE_FLAGS_deb += --cross-file=$(DEB_HOST_GNU_TYPE)-gobject-introspection.ini
 # GLib insists on having an exe_wrapper when we enable introspection,
@@ -337,12 +328,13 @@ endif
 override_dh_python3:
 	# dh_python3 can't process both a private directory and /usr/bin
 	# in the same invocation
-	dh_python3 -plibglib2.0-dev-bin /usr/share/glib-2.0/codegen
+	dh_python3 -plibgio-2.0-dev-bin /usr/share/glib-2.0/codegen
+	dh_python3 -plibgio-2.0-dev-bin /usr/share/glib-2.0/gdb
 	dh_python3 -plibglib2.0-tests --no-ext-rename /usr/libexec/installed-tests/glib
 	dh_python3
 
 override_dh_install:
-ifneq ($(filter gir%,$(built_binaries)),)
+ifneq ($(filter gir1.2-%,$(built_binaries)),)
 	# The build currently installs to /usr/share/gir-1.0 even though we
 	# specified lib/${DEB_HOST_MULTIARCH} as our gir_dir_prefix
 	if ! [ -d debian/tmp/usr/lib/${DEB_HOST_MULTIARCH}/gir-1.0 ]; then \
@@ -380,9 +372,9 @@ endif
 
 ifeq ($(filter nodoc,$(DEB_BUILD_PROFILES)),)
 execute_after_dh_installman-arch:
-	install -d debian/libglib2.0-dev/usr/share/man/man1
+	install -d debian/girepository-tools/usr/share/man/man1
 	set -e; for tool in $(cross_tools); do \
-		ln -s "$$tool.1.gz" "debian/libglib2.0-dev/usr/share/man/man1/$(DEB_HOST_GNU_TYPE)-$$tool.1.gz"; \
+		ln -s "$$tool.1.gz" "debian/girepository-tools/usr/share/man/man1/$(DEB_HOST_GNU_TYPE)-$$tool.1.gz"; \
 	done
 endif
 
@@ -412,9 +404,7 @@ execute_before_dh_installdeb-arch:
 		    > debian/libglib2.0-0t64.$$script ; \
 	done
 
-override_dh_gencontrol:
-ifneq ($(filter libglib2.0-dev,$(built_binaries)),)
-	dh_gencontrol -plibglib2.0-dev -plibglib2.0-dev-bin -- \
-		-Vlocal:DEB-HOST-ARCH-OS=$(DEB_HOST_ARCH_OS)
-endif
+override_dh_gencontrol-arch:
+	dh_gencontrol -pgirepository-tools -- \
+		-Vlocal:DEB-HOST-GNU-TYPE=$(DEB_HOST_GNU_TYPE)
 	dh_gencontrol --remaining-packages

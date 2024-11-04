@@ -1,3 +1,6 @@
+gdatetime-test-Do-not-assume-PST8PDT-was-always-exactly-8.patch
+gdatetime-test-Try-to-make-PST8PDT-test-more-obviously-co.patch
+gdatetime-test-Fall-back-if-legacy-System-V-PST8PDT-is-no.patch
 01_gettext-desktopfiles.patch
 debian/02_gettext-desktopfiles-ubuntu.patch
 debian/03_disble_glib_compile_schemas_warning.patch

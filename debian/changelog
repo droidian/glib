@@ -1,3 +1,111 @@
+glib2.0 (2.82.2-2) unstable; urgency=medium
+
+  * d/control: libgio-2.0-dev Breaks/Replaces older libglib2.0-dev-bin, too
+    (Closes: #1086036)
+  * d/control: List the tools included in libglib2.0-bin in its Description.
+    Very loosely based on discussion in #645491.
+
+ -- Simon McVittie <smcv@debian.org>  Sat, 26 Oct 2024 18:01:21 +0100
+
+glib2.0 (2.82.2-1) unstable; urgency=medium
+
+  * New upstream stable release
+  * d/p/gdatetime-test-Do-not-assume-PST8PDT-was-always-exactly-8.patch,
+    d/p/gdatetime-test-Try-to-make-PST8PDT-test-more-obviously-co.patch,
+    d/p/gdatetime-test-Fall-back-if-legacy-System-V-PST8PDT-is-no.patch:
+    Update to upstream glib-2-82 branch commit 2.82.2-4-g7e4fcb4fa8.
+    This addresses a FTBFS with tzdata 2024b (#1084190).
+    Thanks to Rebecca N. Palmer
+  * Build-depend on tzdata-legacy.
+    One test-case exercises the deprecated time zone name PST8PDT,
+    which is no longer available in tzdata. We'll get slightly better
+    coverage by having tzdata-legacy for as long as it's available.
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 18 Oct 2024 19:51:15 +0100
+
+glib2.0 (2.82.1-1) unstable; urgency=medium
+
+  * New upstream stable release
+  * d/copyright: Update
+  * Move gdb integration hooks (/usr/share/gdb) back to libglib2.0-dev.
+    This is not essential functionality of libgio-2.0-dev, and having
+    it in the larger package gives us more flexibility about which of
+    the dependency packages contain supporting Python libraries.
+  * Move supporting code for gdb integration hooks into libgio-2.0-dev-bin.
+    This lets us byte-compile the Python modules with the primary
+    architecture's Python interpreter, and ensures that the Python
+    packaging infrastructure will automatically clean up their associated
+    bytecode files on uninstallation. (Closes: #987802)
+  * d/libgio-2.0-dev.install: Be more specific about what is installed.
+    If files with a different purpose are added to one of these
+    directories, we will not necessarily want to install them in the
+    same binary package.
+  * Replace temporary substvar ${local:SplitGiRepositoryVersion} with a
+    hard-coded version
+  * d/control, d/tests/control, d/*.install: Normalize formatting
+    (wrap-and-sort -ast)
+  * Release to unstable, now that NEW processing has been done and
+    architecture-properties is ready to migrate
+
+ -- Simon McVittie <smcv@debian.org>  Sat, 21 Sep 2024 14:10:44 +0100
+
+glib2.0 (2.82.0-2) experimental; urgency=medium
+
+  * Improve ability to bootstrap new architectures.
+    The versions of libglib2.0-dev and -dev-bin in Debian testing/unstable
+    and Ubuntu 24.04 depend on either python3 from the host architecture
+    or qemu-user from the build architecture (for the wrapped gi-*
+    tools), which is problematic for bootstrapping.
+    Separate out the rest, so that packages that participate in
+    bootstrapping can be compiled with only libgio-2.0-dev{,-bin},
+    possibly using the nogir build-profile to disable a dependency on
+    girepository-tools.
+    This converts libglib2.0-dev into a pure metapackage, with no
+    functionally significant content of its own, except for the gi-*
+    symlinks to the primary architecture's GObject-Introspection-related
+    tools.
+    libglib2.0-dev continues to be appropriate to use as a
+    build-dependency in most cases. For low-level packages that are
+    involved in architecture bootstrapping, consider depending directly
+    on libgio-2.0-dev{,-bin} instead, and guarding any dependencies on
+    girepository-tools with a suitable build-profile such as <!nogir>.
+    (Closes: #1078929)
+    - Move the headers and libraries from libglib2.0-dev to a new
+      libgio-2.0-dev package
+    - Also move Autoconf macros and gettext rules to libgio-2.0-dev
+    - Move libglib2.0-dev-bin, except gi-*, to libgio-2.0-dev-bin
+    - Move ${multiarch}-gi-* tools to girepository-tools
+  * d/tests: Assert that each -dev package that was split out from
+    libglib2.0-dev provides its intended interface:
+    - libgio-2.0-dev: ability to include headers and link to shared and
+      static libraries
+    - libgio-2.0-dev-bin: GLib, GObject and GIO development CLI tools
+    - girepository-tools: ${multiarch}-gi-* tools
+    - libglib2.0-dev: all of the above plus the non-multiarch gi-*
+  * d/control, d/rules: Drop the local:DEB-HOST-ARCH-OS substvar.
+    This isn't actually needed any more: girepository-tools is independent
+    of the non-architecture-prefixed symlinks, because the actual
+    executables are installed into the ${libdir}.
+  * d/rules: Don't require host and build endianness to match.
+    This was necessary with the approach we used before fixing #1066904,
+    but not any more.
+  * d/rules: Set gir_dir_prefix even if we are building with nogir.
+    It affects the contents of the gi-* tools.
+  * d/control, d/rules, d/emulated-g-ir-tool.in:
+    Use the new cross-exe-wrapper from src:architecture-properties to run
+    foreign-architecture executables, instead of using qemu directly.
+    This centralizes knowledge of how to run binaries of any given
+    architecture into the architecture-properties source package. It also
+    has the right special cases to avoid needing to install qemu in common
+    situations, for example when running i386 binaries on amd64.
+    (Closes: #1070773, #1071246)
+  * d/emulated-g-ir-tool.in: Simplify and rewrite from Python into shell
+  * d/source/lintian-overrides: Remove obsolete overrides for nogir
+  * d/copyright: Update
+  * Upload to experimental for NEW processing
+
+ -- Simon McVittie <smcv@debian.org>  Sat, 14 Sep 2024 22:18:00 +0100
+
 glib2.0 (2.82.0-1) unstable; urgency=medium
 
   * New upstream release

@@ -1,2 +1,2 @@
 [binaries]
-exe_wrapper = 'qemu-@DEB_HOST_ARCH@'
+exe_wrapper = '@DEB_HOST_GNU_TYPE@-cross-exe-wrapper'

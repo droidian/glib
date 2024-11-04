@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -eux
+
+debian/tests/build
+debian/tests/build-static
+debian/tests/girepository-tools
+debian/tests/libgio-2.0-dev-bin
+
+cd "$AUTOPKGTEST_TMP"
+
+DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+gi-inspect-typelib --print-typelibs --typelib-version=2.0 GObject
+gi-compile-repository -o GLib.typelib \
+    "/usr/lib/${DEB_HOST_MULTIARCH}/gir-1.0/GLib-2.0.gir"
+gi-decompile-typelib -o GLib.gir GLib.typelib
