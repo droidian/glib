@@ -38,6 +38,11 @@
 #include <gio/gio.h>
 #include <gio/gunixmounts.h>
 
+/* We test all of the old g_unix_mount_*() API before it was renamed to
+ * g_unix_mount_entry_*(). The old API calls the new API, so both methods get
+ * tested at once. */
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+
 static void
 test_is_system_fs_type (void)
 {
@@ -349,6 +354,8 @@ test_get_mount_entries (void)
   g_free (entries);
   g_free (tmp_file);
 }
+
+G_GNUC_END_IGNORE_DEPRECATIONS
 
 int
 main (int   argc,

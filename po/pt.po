@@ -1,5 +1,5 @@
 # Portuguese Translation for glib.
-# Copyright © 2001-2023 glib.
+# Copyright © 2001-2024 glib.
 # Distributed under the same licence as the glib package.
 # Duarte Loreto <happyguy_pt@hotmail.com>, 2001-2014.
 # Pedro Albuquerque <palbuquerque73@gmail.com>, 2015.
@@ -12,9 +12,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: 3.12\n"
-"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/glib/-/issues\n"
-"POT-Creation-Date: 2024-08-31 13:01+0000\n"
-"PO-Revision-Date: 2024-09-01 22:48+0100\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/glib/issues/new\n"
+"POT-Creation-Date: 2024-07-07 14:10+0000\n"
+"PO-Revision-Date: 2024-08-30 11:57+0100\n"
 "Last-Translator: Hugo Carvalho <hugokarvalho@hotmail.com>\n"
 "Language-Team: Portuguese <https://l10n.gnome.org/teams/pt/>\n"
 "Language: pt\n"
@@ -22,23 +22,23 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.4.4\n"
 
-#: gio/gappinfo.c:374
+#: gio/gappinfo.c:339
 msgid "Setting default applications not supported yet"
 msgstr "Definição de aplicações predefinidas ainda não suportado"
 
-#: gio/gappinfo.c:406
+#: gio/gappinfo.c:372
 msgid "Setting application as last used for type not supported yet"
 msgstr "Definir aplicação como última utilizada para tipo ainda não suportado"
 
-#: gio/gappinfo.c:994
+#: gio/gappinfo.c:814
 #, c-format
 msgid "Failed to find default application for content type ‘%s’"
 msgstr ""
 "Falha ao encontrar uma aplicação predefinida para o tipo de conteúdo '%s'"
 
-#: gio/gappinfo.c:1056
+#: gio/gappinfo.c:874
 #, c-format
 msgid "Failed to find default application for URI Scheme ‘%s’"
 msgstr "Falha ao encontrar uma aplicação predefinida para o esquema URI '%s'"
@@ -70,7 +70,7 @@ msgid "Replace the running instance"
 msgstr "Substituir a instância em execução"
 
 #: gio/gapplication-tool.c:47 gio/gapplication-tool.c:48 gio/gio-tool.c:230
-#: gio/gresource-tool.c:497 gio/gsettings-tool.c:591
+#: gio/gresource-tool.c:497 gio/gsettings-tool.c:586
 msgid "Print help"
 msgstr "Imprimir a ajuda"
 
@@ -82,7 +82,7 @@ msgstr "[COMANDO]"
 msgid "Print version"
 msgstr "Imprimir versão"
 
-#: gio/gapplication-tool.c:52 gio/gsettings-tool.c:597
+#: gio/gapplication-tool.c:52 gio/gsettings-tool.c:592
 msgid "Print version information and exit"
 msgstr "Imprimir informação de versão e sair"
 
@@ -177,7 +177,7 @@ msgid "Optional parameter to the action invocation, in GVariant format"
 msgstr "Parâmetro opcional para a invocação da ação, em formato GVariant"
 
 #: gio/gapplication-tool.c:100 gio/gresource-tool.c:535
-#: gio/gsettings-tool.c:683
+#: gio/gsettings-tool.c:678
 #, c-format
 msgid ""
 "Unknown command %s\n"
@@ -191,7 +191,7 @@ msgid "Usage:\n"
 msgstr "Utilização:\n"
 
 #: gio/gapplication-tool.c:118 gio/gresource-tool.c:560
-#: gio/gsettings-tool.c:718
+#: gio/gsettings-tool.c:713
 msgid "Arguments:\n"
 msgstr "Argumentos:\n"
 
@@ -288,7 +288,7 @@ msgstr ""
 "comando não reconhecido: %s\n"
 "\n"
 
-#: gio/gbufferedinputstream.c:422 gio/gbufferedinputstream.c:500
+#: gio/gbufferedinputstream.c:421 gio/gbufferedinputstream.c:499
 #: gio/ginputstream.c:181 gio/ginputstream.c:381 gio/ginputstream.c:651
 #: gio/ginputstream.c:1056 gio/goutputstream.c:227 gio/goutputstream.c:1052
 #: gio/gpollableinputstream.c:217 gio/gpollableoutputstream.c:289
@@ -296,16 +296,16 @@ msgstr ""
 msgid "Too large count value passed to %s"
 msgstr "Valor de contagem demasiado grande passado para %s"
 
-#: gio/gbufferedinputstream.c:893 gio/gbufferedoutputstream.c:579
+#: gio/gbufferedinputstream.c:892 gio/gbufferedoutputstream.c:579
 #: gio/gdataoutputstream.c:557
 msgid "Seek not supported on base stream"
 msgstr "Procura não é suportada no fluxo base"
 
-#: gio/gbufferedinputstream.c:940
+#: gio/gbufferedinputstream.c:939
 msgid "Cannot truncate GBufferedInputStream"
 msgstr "Impossível truncar um GBufferedInputStream"
 
-#: gio/gbufferedinputstream.c:985 gio/ginputstream.c:1246 gio/giostream.c:317
+#: gio/gbufferedinputstream.c:984 gio/ginputstream.c:1246 gio/giostream.c:317
 #: gio/goutputstream.c:2208
 msgid "Stream is already closed"
 msgstr "O fluxo já se encontra fechado"
@@ -359,16 +359,16 @@ msgstr "Conversão do conjunto de caracteres “%s” para “%s” não é supo
 msgid "Could not open converter from “%s” to “%s”"
 msgstr "Impossível abrir conversor de “%s” para “%s”"
 
-#: gio/gcontenttype-fdo.c:368
+#: gio/gcontenttype.c:470
 #, c-format
 msgid "%s type"
 msgstr "Tipo %s"
 
-#: gio/gcontenttype-win32.c:199
+#: gio/gcontenttype-win32.c:198
 msgid "Unknown type"
 msgstr "Tipo desconhecido"
 
-#: gio/gcontenttype-win32.c:201
+#: gio/gcontenttype-win32.c:200
 #, c-format
 msgid "%s filetype"
 msgstr "Tipo de ficheiro %s"
@@ -606,10 +606,10 @@ msgstr "Erro ao criar o diretório “%s”: %s"
 #: gio/gdbusauthmechanismsha1.c:368 gio/gfile.c:1105 gio/gfile.c:1343
 #: gio/gfile.c:1481 gio/gfile.c:1718 gio/gfile.c:1773 gio/gfile.c:1831
 #: gio/gfile.c:1915 gio/gfile.c:1972 gio/gfile.c:2036 gio/gfile.c:2091
-#: gio/gfile.c:4086 gio/gfile.c:4261 gio/gfile.c:4668 gio/gfile.c:5136
-#: gio/gfile.c:5548 gio/gfile.c:5633 gio/gfile.c:5723 gio/gfile.c:5820
-#: gio/gfile.c:5907 gio/gfile.c:6006 gio/gfile.c:9183 gio/gfile.c:9273
-#: gio/gfile.c:9357 gio/win32/gwinhttpfile.c:453
+#: gio/gfile.c:4086 gio/gfile.c:4261 gio/gfile.c:4668 gio/gfile.c:5133
+#: gio/gfile.c:5545 gio/gfile.c:5630 gio/gfile.c:5720 gio/gfile.c:5817
+#: gio/gfile.c:5904 gio/gfile.c:6003 gio/gfile.c:9180 gio/gfile.c:9270
+#: gio/gfile.c:9354 gio/win32/gwinhttpfile.c:453
 msgid "Operation not supported"
 msgstr "Operação não suportada"
 
@@ -1345,45 +1345,45 @@ msgstr "Erro: %s não é um nome de canal válido\n"
 msgid "Not authorized to change debug settings"
 msgstr "Não autorizado a alterar as definições de depuração"
 
-#: gio/gdesktopappinfo.c:2235 gio/gdesktopappinfo.c:5127
-#: gio/gwin32appinfo.c:4257
+#: gio/gdesktopappinfo.c:2235 gio/gdesktopappinfo.c:5219
+#: gio/gwin32appinfo.c:4256
 msgid "Unnamed"
 msgstr "Sem nome"
 
-#: gio/gdesktopappinfo.c:2652
+#: gio/gdesktopappinfo.c:2645
 msgid "Desktop file didn’t specify Exec field"
 msgstr "Ficheiro do ambiente de trabalho não especificou campo Exec"
 
-#: gio/gdesktopappinfo.c:2942
+#: gio/gdesktopappinfo.c:2935
 msgid "Unable to find terminal required for application"
 msgstr "Impossível encontrar o terminal necessário à aplicação"
 
-#: gio/gdesktopappinfo.c:3002
+#: gio/gdesktopappinfo.c:2995
 #, c-format
 msgid "Program ‘%s’ not found in $PATH"
 msgstr "Programa '%s' não encontrado em $PATH"
 
-#: gio/gdesktopappinfo.c:3741
+#: gio/gdesktopappinfo.c:3731
 #, c-format
 msgid "Can’t create user application configuration folder %s: %s"
 msgstr ""
 "Impossível criar a pasta de configurações de utilizador da aplicação %s: %s"
 
-#: gio/gdesktopappinfo.c:3745
+#: gio/gdesktopappinfo.c:3735
 #, c-format
 msgid "Can’t create user MIME configuration folder %s: %s"
 msgstr "Impossível criar a pasta de configurações MIME do utilizador %s: %s"
 
-#: gio/gdesktopappinfo.c:3987 gio/gdesktopappinfo.c:4011
+#: gio/gdesktopappinfo.c:3977 gio/gdesktopappinfo.c:4001
 msgid "Application information lacks an identifier"
 msgstr "Informação da aplicação não possui um identificador"
 
-#: gio/gdesktopappinfo.c:4247
+#: gio/gdesktopappinfo.c:4237
 #, c-format
 msgid "Can’t create user desktop file %s"
 msgstr "Impossível criar ficheiro do ambiente de trabalho do utilizador %s"
 
-#: gio/gdesktopappinfo.c:4367
+#: gio/gdesktopappinfo.c:4373
 #, c-format
 msgid "Custom definition for %s"
 msgstr "Definição personalizada de %s"
@@ -1456,7 +1456,7 @@ msgstr "Esperado um GEmblem para o GEmblemedIcon"
 msgid "Containing mount does not exist"
 msgstr "Montagem contida não existe"
 
-#: gio/gfile.c:2650 gio/glocalfile.c:2578
+#: gio/gfile.c:2650 gio/glocalfile.c:2574
 msgid "Can’t copy over directory"
 msgstr "Impossível copiar sobre um diretório"
 
@@ -1515,25 +1515,25 @@ msgstr "Dado um valor de ligação simbólica inválida"
 msgid "Symbolic links not supported"
 msgstr "Ligações simbólicas não são suportadas"
 
-#: gio/gfile.c:4779
+#: gio/gfile.c:4776
 msgid "Trash not supported"
 msgstr "Não existe suporte para o lixo"
 
-#: gio/gfile.c:4889
+#: gio/gfile.c:4886
 #, c-format
 msgid "File names cannot contain “%c”"
 msgstr "Nomes de ficheiros não podem conter “%c”"
 
-#: gio/gfile.c:7315 gio/gfile.c:7441
+#: gio/gfile.c:7312 gio/gfile.c:7438
 #, c-format
 msgid "Failed to create a temporary directory for template “%s”: %s"
 msgstr "Falha ao criar um diretório temporário para o modelo \"%s\": %s"
 
-#: gio/gfile.c:7759 gio/gvolume.c:368
+#: gio/gfile.c:7756 gio/gvolume.c:362
 msgid "volume doesn’t implement mount"
 msgstr "unidade não implementa a montagem"
 
-#: gio/gfile.c:7873 gio/gfile.c:7950
+#: gio/gfile.c:7870 gio/gfile.c:7947
 msgid "No application is registered as handling this file"
 msgstr "Não existe nenhuma aplicação registada para gerir este ficheiro"
 
@@ -2969,8 +2969,8 @@ msgstr ""
 #: gio/glib-compile-schemas.c:1993
 #, c-format
 msgid ""
-"Cannot provide per-desktop overrides for localized key “%s” in schema “%s” "
-"(override file “%s”); ignoring override for this key."
+"Cannot provide per-desktop overrides for localized key “%s” in schema "
+"“%s” (override file “%s”); ignoring override for this key."
 msgstr ""
 "Impossível fornecer sobreposições per-desktop para chaves localizadas “%s” "
 "no esquema “%s” (ficheiro de sobreposição “%s”); a ignorar sobreposição para "
@@ -2979,8 +2979,8 @@ msgstr ""
 #: gio/glib-compile-schemas.c:2002
 #, c-format
 msgid ""
-"Cannot provide per-desktop overrides for localized key “%s” in schema “%s” "
-"(override file “%s”) and --strict was specified; exiting."
+"Cannot provide per-desktop overrides for localized key “%s” in schema "
+"“%s” (override file “%s”) and --strict was specified; exiting."
 msgstr ""
 "Impossível fornecer sobreposições per-desktop para chaves localizadas “%s” "
 "no esquema “%s” (ficheiro de sobreposição “%s”) e --strict foi definido; a "
@@ -3116,8 +3116,8 @@ msgstr "Erro ao renomear o ficheiro %s: %s"
 msgid "Can’t rename file, filename already exists"
 msgstr "Impossível renomear o ficheiro, o nome já existe"
 
-#: gio/glocalfile.c:1211 gio/glocalfile.c:2472 gio/glocalfile.c:2500
-#: gio/glocalfile.c:2639 gio/glocalfileoutputstream.c:658
+#: gio/glocalfile.c:1211 gio/glocalfile.c:2468 gio/glocalfile.c:2496
+#: gio/glocalfile.c:2635 gio/glocalfileoutputstream.c:658
 msgid "Invalid filename"
 msgstr "Nome de ficheiro inválido"
 
@@ -3131,93 +3131,93 @@ msgstr "Erro ao abrir o ficheiro %s: %s"
 msgid "Error removing file %s: %s"
 msgstr "Erro ao remover o ficheiro %s: %s"
 
-#: gio/glocalfile.c:2015 gio/glocalfile.c:2026 gio/glocalfile.c:2053
+#: gio/glocalfile.c:2011 gio/glocalfile.c:2022 gio/glocalfile.c:2049
 #, c-format
 msgid "Error trashing file %s: %s"
 msgstr "Erro ao enviar o ficheiro %s para o lixo: %s"
 
-#: gio/glocalfile.c:2073
+#: gio/glocalfile.c:2069
 #, c-format
 msgid "Unable to create trash directory %s: %s"
 msgstr "Impossível criar o diretório de lixo %s: %s"
 
-#: gio/glocalfile.c:2094
+#: gio/glocalfile.c:2090
 #, c-format
 msgid "Unable to find toplevel directory to trash %s"
 msgstr "Impossível encontrar o diretório de topo para o lixo %s"
 
-#: gio/glocalfile.c:2102
+#: gio/glocalfile.c:2098
 #, c-format
 msgid "Trashing on system internal mounts is not supported"
 msgstr "Impossível enviar para o lixo montagens internas do sistema"
 
-#: gio/glocalfile.c:2188 gio/glocalfile.c:2216
+#: gio/glocalfile.c:2184 gio/glocalfile.c:2212
 #, c-format
 msgid "Unable to find or create trash directory %s to trash %s"
 msgstr "Impossível encontrar ou criar o diretório de lixo %s para o lixo %s"
 
-#: gio/glocalfile.c:2311
+#: gio/glocalfile.c:2307
 #, c-format
 msgid "Unable to create trashing info file for %s: %s"
 msgstr "Impossível criar o ficheiro de informação do lixo para %s: %s"
 
-#: gio/glocalfile.c:2386
+#: gio/glocalfile.c:2382
 #, c-format
 msgid "Unable to trash file %s across filesystem boundaries"
 msgstr ""
 "Impossível enviar o ficheiro %s para o lixo através dos limites do sistema "
 "de ficheiros"
 
-#: gio/glocalfile.c:2390 gio/glocalfile.c:2443
+#: gio/glocalfile.c:2386 gio/glocalfile.c:2439
 #, c-format
 msgid "Unable to trash file %s: %s"
 msgstr "Impossível enviar o ficheiro %s para o lixo: %s"
 
-#: gio/glocalfile.c:2449
+#: gio/glocalfile.c:2445
 #, c-format
 msgid "Unable to trash file %s"
 msgstr "Impossível enviar o ficheiro %s para o lixo"
 
-#: gio/glocalfile.c:2475
+#: gio/glocalfile.c:2471
 #, c-format
 msgid "Error creating directory %s: %s"
 msgstr "Erro ao criar o diretório %s: %s"
 
-#: gio/glocalfile.c:2504
+#: gio/glocalfile.c:2500
 #, c-format
 msgid "Filesystem does not support symbolic links"
 msgstr "O sistema de ficheiros não suporta ligações simbólicas"
 
-#: gio/glocalfile.c:2507
+#: gio/glocalfile.c:2503
 #, c-format
 msgid "Error making symbolic link %s: %s"
 msgstr "Erro ao criar ligação simbólica %s: %s"
 
-#: gio/glocalfile.c:2550 gio/glocalfile.c:2585 gio/glocalfile.c:2642
+#: gio/glocalfile.c:2546 gio/glocalfile.c:2581 gio/glocalfile.c:2638
 #, c-format
 msgid "Error moving file %s: %s"
 msgstr "Erro ao mover o ficheiro %s: %s"
 
-#: gio/glocalfile.c:2573
+#: gio/glocalfile.c:2569
 msgid "Can’t move directory over directory"
 msgstr "Impossível mover uma pasta sobre uma pasta"
 
-#: gio/glocalfile.c:2599 gio/glocalfileoutputstream.c:1110
+#: gio/glocalfile.c:2595 gio/glocalfileoutputstream.c:1110
 #: gio/glocalfileoutputstream.c:1124 gio/glocalfileoutputstream.c:1139
 #: gio/glocalfileoutputstream.c:1156 gio/glocalfileoutputstream.c:1170
 msgid "Backup file creation failed"
 msgstr "Falha ao criar o ficheiro de cópia de segurança"
 
-#: gio/glocalfile.c:2618
+#: gio/glocalfile.c:2614
 #, c-format
 msgid "Error removing target file: %s"
 msgstr "Erro ao remover o ficheiro de destino: %s"
 
-#: gio/glocalfile.c:2632
+#: gio/glocalfile.c:2628
 msgid "Move between mounts not supported"
 msgstr "Não é suportado mover entre montados"
 
-#: gio/glocalfile.c:2808
+#: gio/glocalfile.c:2804
 #, c-format
 msgid "Could not determine the disk usage of %s: %s"
 msgstr "Impossível determinar a utilização de disco de %s: %s"
@@ -3463,21 +3463,21 @@ msgstr "Pedida uma procura para depois do final do fluxo"
 #. Translators: This is an error
 #. * message for mount objects that
 #. * don't implement unmount.
-#: gio/gmount.c:404
+#: gio/gmount.c:400
 msgid "mount doesn’t implement “unmount”"
 msgstr "dispositivo montado não implementa “desmontar”"
 
 #. Translators: This is an error
 #. * message for mount objects that
 #. * don't implement eject.
-#: gio/gmount.c:480
+#: gio/gmount.c:476
 msgid "mount doesn’t implement “eject”"
 msgstr "dispositivo montado não implementa “ejetar”"
 
 #. Translators: This is an error
 #. * message for mount objects that
 #. * don't implement any of unmount or unmount_with_operation.
-#: gio/gmount.c:558
+#: gio/gmount.c:554
 msgid "mount doesn’t implement “unmount” or “unmount_with_operation”"
 msgstr ""
 "dispositivo montado não implementa “desmontar” ou “desmontar_com_operacao”"
@@ -3485,28 +3485,28 @@ msgstr ""
 #. Translators: This is an error
 #. * message for mount objects that
 #. * don't implement any of eject or eject_with_operation.
-#: gio/gmount.c:643
+#: gio/gmount.c:639
 msgid "mount doesn’t implement “eject” or “eject_with_operation”"
 msgstr "dispositivo montado não implementa “eject” ou “eject_with_operation”"
 
 #. Translators: This is an error
 #. * message for mount objects that
 #. * don't implement remount.
-#: gio/gmount.c:731
+#: gio/gmount.c:727
 msgid "mount doesn’t implement “remount”"
 msgstr "dispositivo montado não implementa “remontar”"
 
 #. Translators: This is an error
 #. * message for mount objects that
 #. * don't implement content type guessing.
-#: gio/gmount.c:813
+#: gio/gmount.c:809
 msgid "mount doesn’t implement content type guessing"
 msgstr "dispositivo montado não implementa deteção do tipo de conteúdo"
 
 #. Translators: This is an error
 #. * message for mount objects that
 #. * don't implement content type guessing.
-#: gio/gmount.c:900
+#: gio/gmount.c:896
 msgid "mount doesn’t implement synchronous content type guessing"
 msgstr ""
 "dispositivo montado não implementa deteção síncrona do tipo de conteúdo"
@@ -3699,7 +3699,7 @@ msgstr ""
 msgid "  SECTION   An (optional) elf section name\n"
 msgstr "  SECÇÃO    Um nome (opcional) de secção elf\n"
 
-#: gio/gresource-tool.c:568 gio/gsettings-tool.c:725
+#: gio/gresource-tool.c:568 gio/gsettings-tool.c:720
 msgid "  COMMAND   The (optional) command to explain\n"
 msgstr "  COMANDO   O comando (opcional) a ser explicado\n"
 
@@ -3733,7 +3733,7 @@ msgstr "LOCALIZAÇÃO"
 msgid "  PATH      A resource path\n"
 msgstr "  LOCALIZAÇÃO   Uma localização de recurso\n"
 
-#: gio/gsettings-tool.c:51 gio/gsettings-tool.c:72 gio/gsettings-tool.c:930
+#: gio/gsettings-tool.c:51 gio/gsettings-tool.c:72 gio/gsettings-tool.c:925
 #, c-format
 msgid "No such schema “%s”\n"
 msgstr "Não existe o esquema “%s”\n"
@@ -3764,35 +3764,35 @@ msgstr "O caminho tem de terminar com uma barra (/)\n"
 msgid "Path must not contain two adjacent slashes (//)\n"
 msgstr "O caminho não pode conter duas barras adjacentes (//)\n"
 
-#: gio/gsettings-tool.c:560
+#: gio/gsettings-tool.c:555
 msgid "The provided value is outside of the valid range\n"
 msgstr "O valor especificado encontra-se fora do intervalo válido\n"
 
-#: gio/gsettings-tool.c:567
+#: gio/gsettings-tool.c:562
 msgid "The key is not writable\n"
 msgstr "O valor da chave não pode ser escrito\n"
 
-#: gio/gsettings-tool.c:603
+#: gio/gsettings-tool.c:598
 msgid "List the installed (non-relocatable) schemas"
 msgstr "Listar os esquemas instalados (não-realocáveis)"
 
-#: gio/gsettings-tool.c:609
+#: gio/gsettings-tool.c:604
 msgid "List the installed relocatable schemas"
 msgstr "Listar os esquemas instalados realocáveis"
 
-#: gio/gsettings-tool.c:615
+#: gio/gsettings-tool.c:610
 msgid "List the keys in SCHEMA"
 msgstr "Listar as chaves no ESQUEMA"
 
-#: gio/gsettings-tool.c:616 gio/gsettings-tool.c:622 gio/gsettings-tool.c:665
+#: gio/gsettings-tool.c:611 gio/gsettings-tool.c:617 gio/gsettings-tool.c:660
 msgid "SCHEMA[:PATH]"
 msgstr "ESQUEMA[:LOCALIZAÇÃO]"
 
-#: gio/gsettings-tool.c:621
+#: gio/gsettings-tool.c:616
 msgid "List the children of SCHEMA"
 msgstr "Listar os sub processos de ESQUEMA"
 
-#: gio/gsettings-tool.c:627
+#: gio/gsettings-tool.c:622
 msgid ""
 "List keys and values, recursively\n"
 "If no SCHEMA is given, list all keys\n"
@@ -3800,48 +3800,48 @@ msgstr ""
 "Listar as chaves e valores, recursivamente\n"
 "Se não for indicado um ESQUEMA, listar todas as chaves\n"
 
-#: gio/gsettings-tool.c:629
+#: gio/gsettings-tool.c:624
 msgid "[SCHEMA[:PATH]]"
 msgstr "[ESQUEMA[:LOCALIZAÇÃO]]"
 
-#: gio/gsettings-tool.c:634
+#: gio/gsettings-tool.c:629
 msgid "Get the value of KEY"
 msgstr "Obter o valor da CHAVE"
 
-#: gio/gsettings-tool.c:635 gio/gsettings-tool.c:641 gio/gsettings-tool.c:647
-#: gio/gsettings-tool.c:659 gio/gsettings-tool.c:671
+#: gio/gsettings-tool.c:630 gio/gsettings-tool.c:636 gio/gsettings-tool.c:642
+#: gio/gsettings-tool.c:654 gio/gsettings-tool.c:666
 msgid "SCHEMA[:PATH] KEY"
 msgstr "ESQUEMA[:LOCALIZAÇÃO] CHAVE"
 
-#: gio/gsettings-tool.c:640
+#: gio/gsettings-tool.c:635
 msgid "Query the range of valid values for KEY"
 msgstr "Consultar o intervalo de valores válidos para a CHAVE"
 
-#: gio/gsettings-tool.c:646
+#: gio/gsettings-tool.c:641
 msgid "Query the description for KEY"
 msgstr "Consultar o descritor para a CHAVE"
 
-#: gio/gsettings-tool.c:652
+#: gio/gsettings-tool.c:647
 msgid "Set the value of KEY to VALUE"
 msgstr "Definir o valor da CHAVE com o VALOR"
 
-#: gio/gsettings-tool.c:653
+#: gio/gsettings-tool.c:648
 msgid "SCHEMA[:PATH] KEY VALUE"
 msgstr "ESQUEMA[:LOCALIZAÇÃO] CHAVE VALOR"
 
-#: gio/gsettings-tool.c:658
+#: gio/gsettings-tool.c:653
 msgid "Reset KEY to its default value"
 msgstr "Repor o valor predefinido de CHAVE"
 
-#: gio/gsettings-tool.c:664
+#: gio/gsettings-tool.c:659
 msgid "Reset all keys in SCHEMA to their defaults"
 msgstr "Repor todas as chaves no ESQUEMA para os seus valores predefinidos"
 
-#: gio/gsettings-tool.c:670
+#: gio/gsettings-tool.c:665
 msgid "Check if KEY is writable"
 msgstr "Verificar se é possível definir o valor de CHAVE"
 
-#: gio/gsettings-tool.c:676
+#: gio/gsettings-tool.c:671
 msgid ""
 "Monitor KEY for changes.\n"
 "If no KEY is specified, monitor all keys in SCHEMA.\n"
@@ -3851,11 +3851,11 @@ msgstr ""
 "Se nenhuma chave for especificada, monitorizar todas as chaves do ESQUEMA.\n"
 "Utilizar ^C para parar de monitorizar.\n"
 
-#: gio/gsettings-tool.c:679
+#: gio/gsettings-tool.c:674
 msgid "SCHEMA[:PATH] [KEY]"
 msgstr "ESQUEMA[:LOCALIZAÇÃO] [CHAVE]"
 
-#: gio/gsettings-tool.c:691
+#: gio/gsettings-tool.c:686
 msgid ""
 "Usage:\n"
 "  gsettings --version\n"
@@ -3903,7 +3903,7 @@ msgstr ""
 "Utilize \"gsettings help COMANDO\" para obter ajuda detalhada.\n"
 "\n"
 
-#: gio/gsettings-tool.c:715
+#: gio/gsettings-tool.c:710
 #, c-format
 msgid ""
 "Usage:\n"
@@ -3918,11 +3918,11 @@ msgstr ""
 "%s\n"
 "\n"
 
-#: gio/gsettings-tool.c:721
+#: gio/gsettings-tool.c:716
 msgid "  SCHEMADIR A directory to search for additional schemas\n"
 msgstr "  DIRESQUEMAS Um pasta onde procurar por esquemas adicionais\n"
 
-#: gio/gsettings-tool.c:729
+#: gio/gsettings-tool.c:724
 msgid ""
 "  SCHEMA    The name of the schema\n"
 "  PATH      The path, for relocatable schemas\n"
@@ -3930,32 +3930,32 @@ msgstr ""
 "  ESQUEMA     O nome do esquema\n"
 "  LOCALIZAÇÃO     A localização, para esquemas realocáveis\n"
 
-#: gio/gsettings-tool.c:734
+#: gio/gsettings-tool.c:729
 msgid "  KEY       The (optional) key within the schema\n"
 msgstr "  CHAVE     A chave (opcional) dentro do esquema\n"
 
-#: gio/gsettings-tool.c:738
+#: gio/gsettings-tool.c:733
 msgid "  KEY       The key within the schema\n"
 msgstr "  CHAVE     A chave dentro do esquema\n"
 
-#: gio/gsettings-tool.c:742
+#: gio/gsettings-tool.c:737
 msgid "  VALUE     The value to set\n"
 msgstr "  VALOR     O valor a definir\n"
 
-#: gio/gsettings-tool.c:797
+#: gio/gsettings-tool.c:792
 #, c-format
 msgid "Could not load schemas from %s: %s\n"
 msgstr "Impossível ler esquemas de %s: %s\n"
 
-#: gio/gsettings-tool.c:809
+#: gio/gsettings-tool.c:804
 msgid "No schemas installed\n"
 msgstr "Nenhum ficheiro de esquema instalado\n"
 
-#: gio/gsettings-tool.c:888
+#: gio/gsettings-tool.c:883
 msgid "Empty schema name given\n"
 msgstr "Indicado um nome de esquema vazio\n"
 
-#: gio/gsettings-tool.c:943
+#: gio/gsettings-tool.c:938
 #, c-format
 msgid "No such key “%s”\n"
 msgstr "Não existe a chave “%s”\n"
@@ -4261,7 +4261,7 @@ msgstr "Proxy SOCKSv5 não suporta o tipo de endereço indicado."
 msgid "Unknown SOCKSv5 proxy error."
 msgstr "Erro de proxy SOCKSv5 desconhecido."
 
-#: gio/gtestdbus.c:608 glib/gspawn-win32.c:411
+#: gio/gtestdbus.c:608 glib/gspawn-win32.c:433
 #, c-format
 msgid "Failed to create pipe for communicating with child process (%s)"
 msgstr "Falha ao criar canal para comunicar com sub processo (%s)"
@@ -4441,7 +4441,7 @@ msgstr "Erro ao ler do descritor do ficheiro: %s"
 msgid "Error closing file descriptor: %s"
 msgstr "Erro ao fechar o descritor do ficheiro: %s"
 
-#: gio/gunixmounts.c:3197 gio/gunixmounts.c:3250
+#: gio/gunixmounts.c:2897 gio/gunixmounts.c:2950
 msgid "Filesystem root"
 msgstr "Raiz do sistema de ficheiros"
 
@@ -4458,23 +4458,23 @@ msgstr ""
 "Endereços abstratos de sockets de domínio UNIX não são suportados neste "
 "sistema"
 
-#: gio/gvolume.c:442
+#: gio/gvolume.c:436
 msgid "volume doesn’t implement eject"
 msgstr "unidade não implementa a ejeção"
 
 #. Translators: This is an error
 #. * message for volume objects that
 #. * don't implement any of eject or eject_with_operation.
-#: gio/gvolume.c:519
+#: gio/gvolume.c:513
 msgid "volume doesn’t implement eject or eject_with_operation"
 msgstr "unidade não implementa eject ou eject_with_operation"
 
-#: gio/gwin32appinfo.c:5217
+#: gio/gwin32appinfo.c:5216
 #, c-format
 msgid "The app ‘%s’ in the application object has no verbs"
 msgstr "A aplicação ‘%s’ no objecto da aplicação não contem verbos"
 
-#: gio/gwin32appinfo.c:5221
+#: gio/gwin32appinfo.c:5220
 #, c-format
 msgid ""
 "The app ‘%s’ and the handler ‘%s’ in the application object have no verbs"
@@ -6050,162 +6050,162 @@ msgstr ""
 msgid "Text was empty (or contained only whitespace)"
 msgstr "Texto estava vazio (ou apenas continha espaços)"
 
-#: glib/gspawn-posix.c:188
+#: glib/gspawn.c:242
 #, c-format
 msgid "Failed to read data from child process (%s)"
 msgstr "Falha ao ler dados de sub processo (%s)"
 
-#: glib/gspawn-posix.c:298
+#: glib/gspawn.c:395
 #, c-format
 msgid "Unexpected error in reading data from a child process (%s)"
 msgstr "Erro inesperado ao ler dados de sub processo (%s)"
 
-#: glib/gspawn-posix.c:378
+#: glib/gspawn.c:475
 #, c-format
 msgid "Unexpected error in waitpid() (%s)"
 msgstr "Erro inesperado em waitpid() (%s)"
 
-#: glib/gspawn-posix.c:483 glib/gspawn-win32.c:1407
+#: glib/gspawn.c:1097 glib/gspawn-win32.c:1575
 #, c-format
 msgid "Child process exited with code %ld"
 msgstr "Sub processo terminou com o código %ld"
 
-#: glib/gspawn-posix.c:491
+#: glib/gspawn.c:1105
 #, c-format
 msgid "Child process killed by signal %ld"
 msgstr "Sub processo morto com o sinal %ld"
 
-#: glib/gspawn-posix.c:498
+#: glib/gspawn.c:1112
 #, c-format
 msgid "Child process stopped by signal %ld"
 msgstr "Sub processo parado com o sinal %ld"
 
-#: glib/gspawn-posix.c:505
+#: glib/gspawn.c:1119
 #, c-format
 msgid "Child process exited abnormally"
 msgstr "O sub processo terminou anormalmente"
 
-#: glib/gspawn-posix.c:980 glib/gspawn-win32.c:450 glib/gspawn-win32.c:458
+#: glib/gspawn.c:1622 glib/gspawn-win32.c:472 glib/gspawn-win32.c:480
 #, c-format
 msgid "Failed to read from child pipe (%s)"
 msgstr "Falha ao ler de canal acima (%s)"
 
-#: glib/gspawn-posix.c:1361
+#: glib/gspawn.c:2003
 #, c-format
 msgid "Failed to spawn child process “%s” (%s)"
 msgstr "Falha ao criar sub processo “%s” (%s)"
 
-#: glib/gspawn-posix.c:1485
+#: glib/gspawn.c:2127
 #, c-format
 msgid "Failed to fork (%s)"
 msgstr "Falha ao bifurcar \"fork\" (%s)"
 
-#: glib/gspawn-posix.c:1646 glib/gspawn-win32.c:481
+#: glib/gspawn.c:2288 glib/gspawn-win32.c:503
 #, c-format
 msgid "Failed to change to directory “%s” (%s)"
 msgstr "Falha ao ir para o diretório “%s” (%s)"
 
-#: glib/gspawn-posix.c:1656
+#: glib/gspawn.c:2298
 #, c-format
 msgid "Failed to execute child process “%s” (%s)"
 msgstr "Falha ao executar o sub processo “%s” (%s)"
 
-#: glib/gspawn-posix.c:1666
+#: glib/gspawn.c:2308
 #, c-format
 msgid "Failed to open file to remap file descriptor (%s)"
 msgstr "Falha ao abrir o ficheiro para remapear o descritor do ficheiro (%s)"
 
-#: glib/gspawn-posix.c:1674
+#: glib/gspawn.c:2316
 #, c-format
 msgid "Failed to duplicate file descriptor for child process (%s)"
 msgstr "Falha ao duplicar descritor do ficheiro para o sub processo (%s)"
 
-#: glib/gspawn-posix.c:1683
+#: glib/gspawn.c:2325
 #, c-format
 msgid "Failed to fork child process (%s)"
 msgstr "Falha ao efetuar fork de sub processo (%s)"
 
-#: glib/gspawn-posix.c:1691
+#: glib/gspawn.c:2333
 #, c-format
 msgid "Failed to close file descriptor for child process (%s)"
 msgstr "Falha ao fechar o descritor de ficheiro para sub processo (%s)"
 
-#: glib/gspawn-posix.c:1699
+#: glib/gspawn.c:2341
 #, c-format
 msgid "Unknown error executing child process “%s”"
 msgstr "Erro desconhecido ao executar sub processo “%s”"
 
-#: glib/gspawn-posix.c:1723
+#: glib/gspawn.c:2365
 #, c-format
 msgid "Failed to read enough data from child pid pipe (%s)"
 msgstr "Falha ao ler dados suficientes de canal pid acima (%s)"
 
-#: glib/gspawn-private.h:166
+#: glib/gspawn-private.h:134
 #, c-format
 msgid "Invalid source FDs argument"
 msgstr "Argumento de fontes FDs inválido"
 
-#: glib/gspawn-win32.c:394
+#: glib/gspawn-win32.c:416
 msgid "Failed to read data from child process"
 msgstr "Falha ao ler dados de sub processo"
 
-#: glib/gspawn-win32.c:487 glib/gspawn-win32.c:492 glib/gspawn-win32.c:618
+#: glib/gspawn-win32.c:509 glib/gspawn-win32.c:514 glib/gspawn-win32.c:640
 #, c-format
 msgid "Failed to execute child process (%s)"
 msgstr "Falha ao executar sub processo (%s)"
 
-#: glib/gspawn-win32.c:497
+#: glib/gspawn-win32.c:519
 #, c-format
 msgid "Failed to dup() in child process (%s)"
 msgstr "Falha ao dup() no sub processo (%s)"
 
-#: glib/gspawn-win32.c:568
+#: glib/gspawn-win32.c:590
 #, c-format
 msgid "Invalid program name: %s"
 msgstr "Nome de programa inválido: %s"
 
-#: glib/gspawn-win32.c:578 glib/gspawn-win32.c:918
+#: glib/gspawn-win32.c:600 glib/gspawn-win32.c:940
 #, c-format
 msgid "Invalid string in argument vector at %d: %s"
 msgstr "Cadeia inválida no vetor de argumentos na posição %d: %s"
 
-#: glib/gspawn-win32.c:589 glib/gspawn-win32.c:934
+#: glib/gspawn-win32.c:611 glib/gspawn-win32.c:956
 #, c-format
 msgid "Invalid string in environment: %s"
 msgstr "Cadeia inválida no ambiente: %s"
 
-#: glib/gspawn-win32.c:914
+#: glib/gspawn-win32.c:936
 #, c-format
 msgid "Invalid working directory: %s"
 msgstr "Pasta de trabalho inválida: %s"
 
-#: glib/gspawn-win32.c:979
+#: glib/gspawn-win32.c:1001
 #, c-format
 msgid "Failed to execute helper program (%s)"
 msgstr "Falha ao executar aplicação auxiliar (%s)"
 
-#: glib/gspawn-win32.c:1208
+#: glib/gspawn-win32.c:1230
 msgid ""
 "Unexpected error in g_io_channel_win32_poll() reading data from a child "
 "process"
 msgstr ""
 "Erro inesperado no g_io_channel_win32_poll() ao ler dados de um sub processo"
 
-#: glib/gstrfuncs.c:3381 glib/gstrfuncs.c:3483
+#: glib/gstrfuncs.c:3373 glib/gstrfuncs.c:3475
 msgid "Empty string is not a number"
 msgstr "Cadeia vazia não é um número"
 
-#: glib/gstrfuncs.c:3405
+#: glib/gstrfuncs.c:3397
 #, c-format
 msgid "“%s” is not a signed number"
 msgstr "“%s” não é um número com sinal"
 
-#: glib/gstrfuncs.c:3415 glib/gstrfuncs.c:3519
+#: glib/gstrfuncs.c:3407 glib/gstrfuncs.c:3511
 #, c-format
 msgid "Number “%s” is out of bounds [%s, %s]"
 msgstr "Número “%s” está fora do limite [%s, %s]"
 
-#: glib/gstrfuncs.c:3509
+#: glib/gstrfuncs.c:3501
 #, c-format
 msgid "“%s” is not an unsigned number"
 msgstr "“%s” não é um valor sem sinal"

@@ -198,15 +198,15 @@ g_dbus_proxy_finalize (GObject *object)
 
   if (proxy->priv->name_owner_changed_subscription_id > 0)
     g_dbus_connection_signal_unsubscribe (proxy->priv->connection,
-                                          proxy->priv->name_owner_changed_subscription_id);
+                                          g_steal_handle_id (&proxy->priv->name_owner_changed_subscription_id));
 
   if (proxy->priv->properties_changed_subscription_id > 0)
     g_dbus_connection_signal_unsubscribe (proxy->priv->connection,
-                                          proxy->priv->properties_changed_subscription_id);
+                                          g_steal_handle_id (&proxy->priv->properties_changed_subscription_id));
 
   if (proxy->priv->signals_subscription_id > 0)
     g_dbus_connection_signal_unsubscribe (proxy->priv->connection,
-                                          proxy->priv->signals_subscription_id);
+                                          g_steal_handle_id (&proxy->priv->signals_subscription_id));
 
   if (proxy->priv->connection != NULL)
     g_object_unref (proxy->priv->connection);
@@ -954,7 +954,7 @@ invalidated_property_get_cb (GDBusConnection *connection,
   g_variant_get (value, "(v)", &unpacked_value);
 
   /* synthesize the a{sv} in the PropertiesChanged signal */
-  g_variant_builder_init (&builder, G_VARIANT_TYPE ("a{sv}"));
+  g_variant_builder_init_static (&builder, G_VARIANT_TYPE ("a{sv}"));
   g_variant_builder_add (&builder, "{sv}", data->prop_name, unpacked_value);
 
   G_LOCK (properties_lock);
@@ -1264,7 +1264,7 @@ on_name_owner_changed (GDBusConnection *connection,
           const gchar *key;
 
           /* Build changed_properties (always empty) and invalidated_properties ... */
-          g_variant_builder_init (&builder, G_VARIANT_TYPE ("a{sv}"));
+          g_variant_builder_init_static (&builder, G_VARIANT_TYPE ("a{sv}"));
 
           invalidated_properties = g_ptr_array_new_with_free_func (g_free);
           g_hash_table_iter_init (&iter, proxy->priv->properties);
