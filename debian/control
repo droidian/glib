@@ -45,7 +45,7 @@ Build-Depends-Arch:
  xterm <!nocheck>,
 Build-Depends-Indep:
  cross-exe-wrapper <cross !nodoc>,
- gi-docgen <!nodoc>,
+ gi-docgen (>= 2024.1) <!nodoc>,
  gobject-introspection (>= 1.78.1-18~) <!nodoc>,
 Rules-Requires-Root: no
 Standards-Version: 4.7.0
