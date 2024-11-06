@@ -66,12 +66,12 @@ Copyright:
  2015 Ben Boeckel
  2009 Benjamin Otte
  2023 CaiJingLong
- 2005-2023 Canonical Ltd
+ 2005-2024 Canonical Ltd
  2011 Carlos Garcia Campos
- 2018 Carlos Garnacho
+ 2018-2024 Carlos Garnacho
  2021 Casper Dik
  2016-2020 Centricular
- 2009-2022 Christian Hergert
+ 2009-2024 Christian Hergert
  2008-2010 Christian Kellner
  2009-2010 Christian Persch
  2018-2020 Christoph Reiter
@@ -88,6 +88,7 @@ Copyright:
  2023 Daniel Carpenter
  2017 Danny Forghieri
  2012 David King
+ 2022-2023 David Rheinsberg
  2010 David Zeuthen
  2013-2015 Dieter Verfaillie
  2000 Eazel, Inc
@@ -96,10 +97,12 @@ Copyright:
  2005-2023 Emmanuele Bassi
  2016-2020 Endless Mobile, Inc
  2017-2022 Endless OS Foundation, LLC
+ 2024 Evan Welsh
  2007 Francois Gouget
  2024 Frank Dana
  2020-2021 Frederic Martinsons
  1991-2024 Free Software Foundation, Inc
+ 2024 Future Crew LLC
  2015 Garrett Regier
  2011-2014 Giovanni Campagna
  2020 Gisle Vanem
@@ -213,7 +216,7 @@ Copyright:
  2011 Torsten Schönfeld
  2024 twlvnn kraftwerk
  1995-1997 Ulrich Drepper
- 2021 Unicode®, Inc
+ 2021-2024 Unicode®, Inc
  2011 William Hua
  2020 William Manley
  2018 Will Thompson
@@ -429,7 +432,7 @@ Files:
  glib/tests/NormalizationTest.txt
  unicode-data/*
 Copyright:
- 2021-2022 Unicode®, Inc.
+ 2021-2024 Unicode®, Inc.
 License: Unicode-DFS-2016
 
 Files:
