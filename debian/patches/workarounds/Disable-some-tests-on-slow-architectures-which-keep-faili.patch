@@ -16,7 +16,7 @@ Forwarded: no
  3 files changed, 33 insertions(+)
 
 diff --git a/glib/tests/mainloop.c b/glib/tests/mainloop.c
-index 152e74b..1aac153 100644
+index 6748a64..9cf034b 100644
 --- a/glib/tests/mainloop.c
 +++ b/glib/tests/mainloop.c
 @@ -524,6 +524,14 @@ test_child_sources (void)

@@ -10,7 +10,7 @@ Forwarded: not-needed
  1 file changed, 6 insertions(+)
 
 diff --git a/gio/tests/debugcontroller.c b/gio/tests/debugcontroller.c
-index 3a6b12f..c47acc0 100644
+index c5cb7a5..2b661fe 100644
 --- a/gio/tests/debugcontroller.c
 +++ b/gio/tests/debugcontroller.c
 @@ -192,6 +192,12 @@ test_dbus_properties (void)
