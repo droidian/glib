@@ -29,14 +29,18 @@ libgirepository-2.0.so.0 libgirepository-2.0-0 #MINVER#
  gi_callable_info_create_closure@Base 2.79.2
  gi_callable_info_destroy_closure@Base 2.79.2
  gi_callable_info_get_arg@Base 2.79.2
+ gi_callable_info_get_async_function@Base 2.83.0
  gi_callable_info_get_caller_owns@Base 2.79.2
  gi_callable_info_get_closure_native_address@Base 2.79.2
+ gi_callable_info_get_finish_function@Base 2.83.0
  gi_callable_info_get_instance_ownership_transfer@Base 2.79.2
  gi_callable_info_get_n_args@Base 2.79.2
  gi_callable_info_get_return_attribute@Base 2.79.2
  gi_callable_info_get_return_type@Base 2.79.2
+ gi_callable_info_get_sync_function@Base 2.83.0
  gi_callable_info_get_type@Base 2.79.2
  gi_callable_info_invoke@Base 2.79.2
+ gi_callable_info_is_async@Base 2.83.0
  gi_callable_info_is_method@Base 2.79.2
  gi_callable_info_iterate_return_attributes@Base 2.79.2
  gi_callable_info_load_arg@Base 2.79.2
