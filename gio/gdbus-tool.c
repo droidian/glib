@@ -802,7 +802,7 @@ handle_emit (gint        *argc,
     }
 
   /* Read parameters */
-  g_variant_builder_init (&builder, G_VARIANT_TYPE_TUPLE);
+  g_variant_builder_init_static (&builder, G_VARIANT_TYPE_TUPLE);
   skip_dashes = TRUE;
   parm = 0;
   for (n = 1; n < (guint) *argc; n++)
@@ -1114,7 +1114,7 @@ handle_call (gint        *argc,
     }
 
   /* Read parameters */
-  g_variant_builder_init (&builder, G_VARIANT_TYPE_TUPLE);
+  g_variant_builder_init_static (&builder, G_VARIANT_TYPE_TUPLE);
   skip_dashes = TRUE;
   parm = 0;
   for (n = 1; n < (guint) *argc; n++)
@@ -1984,10 +1984,7 @@ monitor_on_name_vanished (GDBusConnection *connection,
   g_print ("The name %s does not have an owner\n", name);
 
   if (monitor_filter_id != 0)
-    {
-      g_dbus_connection_signal_unsubscribe (connection, monitor_filter_id);
-      monitor_filter_id = 0;
-    }
+    g_dbus_connection_signal_unsubscribe (connection, g_steal_handle_id (&monitor_filter_id));
 }
 
 static const GOptionEntry monitor_entries[] =

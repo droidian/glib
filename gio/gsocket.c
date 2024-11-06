@@ -2402,7 +2402,7 @@ g_socket_w32_get_adapter_ipv4_addr (const gchar *name_or_ip)
 
   return ip_result;
 }
-#elif defined(HAVE_SIOCGIFADDR)
+#elif (defined(HAVE_SIOCGIFADDR) && (!(defined(HAVE_IP_MREQN) && !defined(__APPLE__)) || defined(IP_ADD_SOURCE_MEMBERSHIP)))
 static gulong
 g_socket_get_adapter_ipv4_addr (GSocket     *socket,
                                 const char  *iface,
@@ -4143,9 +4143,8 @@ update_condition_unlocked (GSocket *socket)
   GIOCondition condition;
 
   if (!socket->priv->closed &&
-      WSAEnumNetworkEvents (socket->priv->fd,
-			    socket->priv->event,
-			    &events) == 0)
+      (WSAWaitForMultipleEvents (1, &socket->priv->event, FALSE, 0, FALSE) == WSA_WAIT_EVENT_0) &&
+      (WSAEnumNetworkEvents (socket->priv->fd, socket->priv->event, &events) == 0))
     {
       socket->priv->current_events |= events.lNetworkEvents;
       if (events.lNetworkEvents & FD_WRITE &&
