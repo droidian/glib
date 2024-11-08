@@ -24,7 +24,7 @@ Files-Excluded-unicode-data:
  Jamo.txt
  Name*.html
  Name*.txt
- Normalization*.txt
+ NormalizationCorrections.txt
  Nushu*.txt
  Prop*.txt
  ScriptExtensions.txt

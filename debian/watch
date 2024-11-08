@@ -12,4 +12,4 @@ https://download.gnome.org/sources/glib/cache.json \
 # to verify
 opts="component=unicode-data, compression=xz, downloadurlmangle=s#/?$#/UCD.zip#, filenamemangle=s#.*/([^/]+)/?$#UCD-$1.zip#" \
 https://www.unicode.org/Public/zipped/ \
-(15\.1\.0)/?
+(16\.0\.0)/?

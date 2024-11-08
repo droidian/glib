@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: glib 2.8\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/glib/-/issues\n"
-"POT-Creation-Date: 2024-09-17 13:51+0000\n"
-"PO-Revision-Date: 2024-09-21 22:48+0200\n"
+"POT-Creation-Date: 2024-08-29 08:36+0000\n"
+"PO-Revision-Date: 2024-08-29 23:23+0200\n"
 "Last-Translator: Jordi Mas i Hernàndez <jmas@softcatala.org>\n"
 "Language-Team: Catalan <tradgnome@softcatala.org>\n"
 "Language: ca\n"
@@ -322,7 +322,7 @@ msgstr "Ja està tancat el flux"
 msgid "Truncate not supported on base stream"
 msgstr "No es permet truncar en els fluxos base"
 
-#: gio/gcancellable.c:326 gio/gdbusconnection.c:1994 gio/gdbusprivate.c:1434
+#: gio/gcancellable.c:322 gio/gdbusconnection.c:1994 gio/gdbusprivate.c:1434
 #: gio/gsimpleasyncresult.c:871 gio/gsimpleasyncresult.c:897
 #, c-format
 msgid "Operation was cancelled"
@@ -820,7 +820,7 @@ msgstr "Missatge %s: s'ha subministrat un camp de capçalera NO VÀLID"
 #, c-format
 msgid "%s message: %s header field is using the reserved value %s"
 msgstr ""
-"Missatge de %s: el camp de capçalera %s està utilitzant el valor reservat %s"
+"Missatge %s: el camp de capçalera %s està utilitzant el valor reservat %s"
 
 #: gio/gdbusmessage.c:1442
 #, c-format
@@ -4651,7 +4651,7 @@ msgstr "Error: No s'ha pogut canviar el nom de «%s» per «%s»: %s"
 
 #: girepository/compiler/compiler.c:147 girepository/decompiler/decompiler.c:53
 msgid "Include directories in GIR search path"
-msgstr "Inclou els directoris al camí de cerca GIR"
+msgstr "Inclou directoris al camí de cerca GIR"
 
 #: girepository/compiler/compiler.c:148 girepository/decompiler/decompiler.c:52
 msgid "Output file"
@@ -4690,7 +4690,7 @@ msgstr "S'ha produït un error en analitzar el fitxer «%s»: %s"
 #: girepository/compiler/compiler.c:244
 #, c-format
 msgid "Failed to build typelib for module ‘%s’"
-msgstr "No s'ha pogut construir el «typelib» del mòdul «%s»"
+msgstr "No s'ha pogut generar el «typelib» del mòdul «%s»"
 
 #: girepository/compiler/compiler.c:246
 #, c-format
@@ -4770,7 +4770,7 @@ msgstr "Especifiqueu un únic espai de noms"
 
 #: girepository/inspector/inspector.c:105
 msgid "Please specify --print-shlibs, --print-typelibs or both"
-msgstr "Especifiqueu «--print-shlibs», «--print-typelibs» o tots dos"
+msgstr "Especifiqueu «--print-shlibs», «--print-typelibs» o tots dos alhora"
 
 #: glib/gbookmarkfile.c:816
 #, c-format
@@ -6629,243 +6629,3 @@ msgstr "%.1f PB"
 #, c-format
 msgid "%.1f EB"
 msgstr "%.1f EB"
-
-#, c-format
-#~ msgid "Error in address “%s” — the port attribute is missing or malformed"
-#~ msgstr ""
-#~ "Hi ha un error a l'adreça «%s»: manca o està mal formatat l'atribut del "
-#~ "port"
-
-#, c-format
-#~ msgid ""
-#~ "Error in address “%s” — the noncefile attribute is missing or malformed"
-#~ msgstr ""
-#~ "Hi ha un error a l'adreça «%s»: l'atribut noncefile no existeix o està "
-#~ "mal formatat"
-
-#, c-format
-#~ msgid ""
-#~ "No such interface “org.freedesktop.DBus.Properties” on object at path %s"
-#~ msgstr ""
-#~ "No existeix la interfície «org.freedesktop.DBus.Properties» en l'objecte "
-#~ "al camí %s"
-
-#, c-format
-#~ msgid ""
-#~ "%s message: INTERFACE header field is using the reserved value org."
-#~ "freedesktop.DBus.Local"
-#~ msgstr ""
-#~ "Missatge %s: el camp de capçalera de la INTERFÍCIE està utilitzant el "
-#~ "valor reservat org.freedesktop.DBus.Local"
-
-#
-#~ msgid "Could not allocate %"
-#~ msgid_plural "Could not allocate %"
-#~ msgstr[0] "No s'ha pogut assignar %"
-#~ msgstr[1] "No s'han pogut assignar %"
-
-#~ msgid ""
-#~ "METHOD_RETURN message: REPLY_SERIAL header field is missing or invalid"
-#~ msgstr ""
-#~ "Missatge «METHOD_RETURN»: el camp de capçalera «REPLY_SERIAL» manca o és "
-#~ "invàlid"
-
-#~ msgid "kb"
-#~ msgstr "kb"
-
-#~ msgid "Mb"
-#~ msgstr "Mb"
-
-#~ msgid "Gb"
-#~ msgstr "Gb"
-
-#~ msgid "Tb"
-#~ msgstr "Tb"
-
-#~ msgid "Pb"
-#~ msgstr "Pb"
-
-#~ msgid "Eb"
-#~ msgstr "Eb"
-
-#~ msgid "Kib"
-#~ msgstr "Kib"
-
-#~ msgid "Mib"
-#~ msgstr "Mib"
-
-#~ msgid "Gib"
-#~ msgstr "Gib"
-
-#~ msgid "Tib"
-#~ msgstr "Tib"
-
-#~ msgid "Pib"
-#~ msgstr "Pib"
-
-#~ msgid "Eib"
-#~ msgstr "Eib"
-
-#~ msgid "GApplication options"
-#~ msgstr "Opcions de la GApplication"
-
-#, c-format
-#~ msgid "The local file URI “%s” may not include a “#”"
-#~ msgstr "Pot ser que l'URI del fitxer local «%s» no inclogui cap «#»"
-
-#~ msgid "backtracking limit reached"
-#~ msgstr "s'ha arribat al límit de tornades enrere"
-
-#~ msgid "internal error or corrupted object"
-#~ msgstr "error intern o objecte malmès"
-
-#~ msgid "invalid combination of newline flags"
-#~ msgstr "la combinació de senyaladors de línia nova no és vàlida"
-
-#~ msgid "short utf8"
-#~ msgstr "UTF-8 curt"
-
-#~ msgid "unexpected repeat"
-#~ msgstr "repetició no esperada"
-
-#~ msgid "failed to get memory"
-#~ msgstr "no s'ha pogut obtenir memòria"
-
-#~ msgid ") without opening ("
-#~ msgstr "hi ha un «)» sense el corresponent «(»"
-
-#~ msgid "unrecognized character after (?<"
-#~ msgstr "no es reconeix el caràcter després de «(?<»"
-
-#~ msgid "(?R or (?[+-]digits must be followed by )"
-#~ msgstr "«(?R» o «(?[+-]dígits» han d'anar seguits de «)»"
-
-#~ msgid "invalid condition (?(0)"
-#~ msgstr "condició «(?(0)» no vàlida"
-
-#~ msgid "escapes \\L, \\l, \\N{name}, \\U, and \\u are not supported"
-#~ msgstr ""
-#~ "no s'admeten els caràcters d'escapada «\\L», «\\l», «\\N{nom}», «\\U» i "
-#~ "«\\u»"
-
-#~ msgid "recursive call could loop indefinitely"
-#~ msgstr "la crida recursiva podria entrar en bucle indefinidament"
-
-#~ msgid "digit expected after (?+"
-#~ msgstr "s'esperava un dígit després de (?+"
-
-#~ msgid "] is an invalid data character in JavaScript compatibility mode"
-#~ msgstr ""
-#~ "el caràcter«]» no és un caràcter de dades vàlid en el mode de "
-#~ "compatibilitat amb JavaScript"
-
-#~ msgid "too many forward references"
-#~ msgstr "hi ha massa referències cap endavant"
-
-#~ msgid "character value in \\u.... sequence is too large"
-#~ msgstr "el valor del caràcter a la seqüència «\\u...» és massa gran"
-
-#~ msgid "PCRE library is compiled without UTF8 properties support"
-#~ msgstr ""
-#~ "La biblioteca PCRE no està compilada per a interpretar les propietats "
-#~ "UTF-8"
-
-#, c-format
-#~ msgid "Error while optimizing regular expression %s: %s"
-#~ msgstr "S'ha produït un error en optimitzar l'expressió regular %s: %s"
-
-#, c-format
-#~ msgid "%.1f MB"
-#~ msgstr "%.1f MB"
-
-#, c-format
-#~ msgid "%.1f GB"
-#~ msgstr "%.1f GB"
-
-#, c-format
-#~ msgid "%.1f TB"
-#~ msgstr "%.1f TB"
-
-#, c-format
-#~ msgid "%.1f PB"
-#~ msgstr "%.1f PB"
-
-#, c-format
-#~ msgid "%.1f EB"
-#~ msgstr "%.1f EB"
-
-#, c-format
-#~ msgid "%.1f KiB"
-#~ msgstr "%.1f KiB"
-
-#, c-format
-#~ msgid "%.1f MiB"
-#~ msgstr "%.1f MiB"
-
-#, c-format
-#~ msgid "%.1f GiB"
-#~ msgstr "%.1f GiB"
-
-#, c-format
-#~ msgid "%.1f TiB"
-#~ msgstr "%.1f TiB"
-
-#, c-format
-#~ msgid "%.1f PiB"
-#~ msgstr "%.1f PiB"
-
-#, c-format
-#~ msgid "%.1f EiB"
-#~ msgstr "%.1f EiB"
-
-#, c-format
-#~ msgid "%.1f kb"
-#~ msgstr "%.1f kb"
-
-#, c-format
-#~ msgid "%.1f Mb"
-#~ msgstr "%.1f Mb"
-
-#, c-format
-#~ msgid "%.1f Gb"
-#~ msgstr "%.1f Gb"
-
-#, c-format
-#~ msgid "%.1f Tb"
-#~ msgstr "%.1f Tb"
-
-#, c-format
-#~ msgid "%.1f Pb"
-#~ msgstr "%.1f Pb"
-
-#, c-format
-#~ msgid "%.1f Eb"
-#~ msgstr "%.1f Eb"
-
-#, c-format
-#~ msgid "%.1f Kib"
-#~ msgstr "%.1f Kib"
-
-#, c-format
-#~ msgid "%.1f Mib"
-#~ msgstr "%.1f Mib"
-
-#, c-format
-#~ msgid "%.1f Gib"
-#~ msgstr "%.1f Gib"
-
-#, c-format
-#~ msgid "%.1f Tib"
-#~ msgstr "%.1f Tib"
-
-#, c-format
-#~ msgid "%.1f Pib"
-#~ msgstr "%.1f Pib"
-
-#, c-format
-#~ msgid "%.1f Eib"
-#~ msgstr "%.1f Eib"
-
-#~ msgid "Unable to load /var/lib/dbus/machine-id or /etc/machine-id: "
-#~ msgstr ""
-#~ "No s'ha pogut carregar «/var/lib/dbus/machine-id» o «/etc/machine-id»: "

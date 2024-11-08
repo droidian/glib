@@ -7,7 +7,7 @@ common_gio_tests_deps = [
 
 test_c_args = [
   '-DG_LOG_DOMAIN="GLib-GIO"',
-  '-DGLIB_MKENUMS="@0@"'.format(glib_mkenums),
+  '-DGLIB_MKENUMS="@0@"'.format(glib_mkenums.full_path()),
   '-DGLIB_COMPILE_SCHEMAS="@0@"'.format(glib_compile_schemas.full_path()),
   '-UG_DISABLE_ASSERT',
 ]
@@ -544,15 +544,6 @@ if host_machine.system() != 'windows'
       },
     }
 
-    if not glib_have_cocoa
-      gio_tests += {
-        'dbus-appinfo' : {
-          'extra_sources' : extra_sources,
-          'extra_programs' : ['fake-document-portal'],
-        },
-      }
-    endif
-
     fake_document_portal_generated = custom_target('fake-document-portal-generated',
         input :   ['../org.freedesktop.portal.Documents.xml'],
         output :  ['fake-document-portal-generated.h',
@@ -566,10 +557,46 @@ if host_machine.system() != 'windows'
                    '--c-namespace', 'Fake',
                    '@INPUT@'])
 
+    fake_openuri_portal_generated = custom_target('fake-openuri-portal-generated',
+        input :   ['../org.freedesktop.portal.OpenURI.xml'],
+        output :  ['fake-openuri-portal-generated.h',
+                   'fake-openuri-portal-generated.c'],
+        depend_files : gdbus_codegen_built_files,
+        depends : gdbus_codegen_built_targets,
+        command : [python, gdbus_codegen,
+                   '--interface-prefix', 'org.freedesktop.portal.',
+                   '--output-directory', '@OUTDIR@',
+                   '--generate-c-code', 'fake-openuri-portal-generated',
+                   '--c-namespace', 'Fake',
+                   '@INPUT@'])
+
+    fake_request_portal_generated = custom_target('fake-request-portal-generated',
+        input :   ['../org.freedesktop.portal.Request.xml'],
+        output :  ['fake-request-portal-generated.h',
+                   'fake-request-portal-generated.c'],
+        depend_files : gdbus_codegen_built_files,
+        depends : gdbus_codegen_built_targets,
+        command : [python, gdbus_codegen,
+                   '--interface-prefix', 'org.freedesktop.portal.',
+                   '--output-directory', '@OUTDIR@',
+                   '--generate-c-code', 'fake-request-portal-generated',
+                   '--c-namespace', 'Fake',
+                   '@INPUT@'])
+
+    if not glib_have_cocoa
+      gio_tests += {
+        'dbus-appinfo' : {
+          'extra_sources' : [extra_sources,
+                             'fake-document-portal.c',
+                             fake_document_portal_generated,
+                             'fake-desktop-portal.c',
+                             fake_openuri_portal_generated,
+                             fake_request_portal_generated],
+        },
+      }
+    endif
+
     test_extra_programs += {
-      'fake-document-portal' : {
-        'extra_sources': fake_document_portal_generated,
-      },
       'fake-service-name' : {}
     }
   endif # have_dbus_daemon
@@ -859,6 +886,21 @@ if not meson.is_cross_build()
     install_tag : 'tests',
     install : installed_tests_enabled)
 
+  test6_gresource = custom_target('test6.gresource',
+    input : 'test6.gresource.xml',
+    depends : [gspawn_helpers],
+    output : 'test6.gresource',
+    command : [glib_compile_resources,
+               compiler_type,
+               '--target=@OUTPUT@',
+               '--sourcedir=' + meson.current_source_dir(),
+               '--sourcedir=' + meson.current_build_dir(),
+               '--internal',
+               '@INPUT@'],
+    install_dir : installed_tests_execdir,
+    install_tag : 'tests',
+    install : installed_tests_enabled)
+
   test_resources2_c = custom_target('test_resources2.c',
     input : 'test3.gresource.xml',
     depends : [gspawn_helpers],
@@ -930,6 +972,7 @@ if not meson.is_cross_build()
 
   resources_extra_sources = [
     test_gresource,
+    test6_gresource,
     test_resources_c,
     test_resources2_c,
     test_resources2_h,
