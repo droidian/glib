@@ -6,15 +6,6 @@ glib2.0 (2.83.0-1) UNRELEASED; urgency=medium
 
  -- Simon McVittie <smcv@debian.org>  Wed, 06 Nov 2024 16:44:07 +0000
 
-glib2.0 (2.82.2-3) UNRELEASED; urgency=medium
-
-  * d/gbp.conf, d/watch: Only watch for stable (2.82.x) versions.
-    GLib 2.83.0 has been released, but is not ready to be included in
-    Debian testing/unstable unless the Debian 13 freeze date is pushed
-    out past the GNOME 48 release.
-
- -- Simon McVittie <smcv@debian.org>  Fri, 08 Nov 2024 09:12:35 +0000
-
 glib2.0 (2.82.2-2) unstable; urgency=medium
 
   * d/control: libgio-2.0-dev Breaks/Replaces older libglib2.0-dev-bin, too
