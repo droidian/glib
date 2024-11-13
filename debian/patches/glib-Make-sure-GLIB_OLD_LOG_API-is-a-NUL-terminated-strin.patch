@@ -1,0 +1,26 @@
+From: =?utf-8?q?Sebastian_Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Mon, 14 Oct 2024 18:59:04 +0300
+Subject: glib: Make sure GLIB_OLD_LOG_API is a NUL-terminated string
+
+Every usage in GLib ensures this but theoretically external code might
+pass something else. As this is only meant to be used internally from
+GLib, don't support the other case but at least avoid potential out of
+bound reads.
+
+Origin: upstream, 2.82.3, commit:44fb7c5b5498ecdb1720ddcd767eaddc0c57ef38
+---
+ glib/gmessages.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/glib/gmessages.c b/glib/gmessages.c
+index 9db137b..fba55b6 100644
+--- a/glib/gmessages.c
++++ b/glib/gmessages.c
+@@ -2625,6 +2625,7 @@ log_is_old_api (const GLogField *fields,
+ {
+   return (n_fields >= 1 &&
+           g_strcmp0 (fields[0].key, "GLIB_OLD_LOG_API") == 0 &&
++          fields[0].length < 0 &&
+           g_strcmp0 (fields[0].value, "1") == 0);
+ }
+ 

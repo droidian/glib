@@ -1,6 +1,12 @@
 gdatetime-test-Do-not-assume-PST8PDT-was-always-exactly-8.patch
 gdatetime-test-Try-to-make-PST8PDT-test-more-obviously-co.patch
 gdatetime-test-Fall-back-if-legacy-System-V-PST8PDT-is-no.patch
+glib-Don-t-require-GLIB_DOMAIN-to-be-a-NUL-terminated-str.patch
+glib-Make-sure-GLIB_OLD_LOG_API-is-a-NUL-terminated-strin.patch
+glib-Add-test-for-handling-of-non-NUL-terminated-strings-.patch
+gio-Fix-GFileEnumerator-leaks-in-gio-tools.patch
+arcbox-Document-that-implementing-weak-references-via-the.patch
+refstring-Fix-race-between-releasing-and-re-acquiring-an-.patch
 01_gettext-desktopfiles.patch
 debian/02_gettext-desktopfiles-ubuntu.patch
 debian/03_disble_glib_compile_schemas_warning.patch
