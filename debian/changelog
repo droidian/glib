@@ -1,4 +1,4 @@
-glib2.0 (2.82.2-3) UNRELEASED; urgency=medium
+glib2.0 (2.82.2-3) unstable; urgency=medium
 
   * d/patches: Update to upstream commit 2.82.2-15-g3e74b0a3ea, excluding
     a macOS-specific change
@@ -17,7 +17,7 @@ glib2.0 (2.82.2-3) UNRELEASED; urgency=medium
     Debian testing/unstable unless the Debian 13 freeze date is pushed
     out past the GNOME 48 release.
 
- -- Simon McVittie <smcv@debian.org>  Fri, 08 Nov 2024 09:12:35 +0000
+ -- Simon McVittie <smcv@debian.org>  Wed, 13 Nov 2024 10:02:21 +0000
 
 glib2.0 (2.82.2-2) unstable; urgency=medium
 
