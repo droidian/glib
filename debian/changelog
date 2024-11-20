@@ -1,3 +1,12 @@
+glib2.0 (2.82.2-4) UNRELEASED; urgency=medium
+
+  [ Jeremy Bícha ]
+  * Bump Breaks/Replaces to 2.82.2-1 for upgrades to Ubuntu 25.04.
+    Unfortunately, we may need to bump this again if newer versions of
+    2.82.x reach Ubuntu 24.10.
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 20 Nov 2024 09:04:00 +0000
+
 glib2.0 (2.82.2-3) unstable; urgency=medium
 
   * d/patches: Update to upstream commit 2.82.2-15-g3e74b0a3ea, excluding
