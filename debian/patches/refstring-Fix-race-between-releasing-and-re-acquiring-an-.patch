@@ -2,9 +2,6 @@ From: =?utf-8?q?Sebastian_Dr=C3=B6ge?= <sebastian@centricular.com>
 Date: Sun, 27 Oct 2024 13:33:28 +0200
 Subject: refstring: Fix race between releasing and re-acquiring an interned
  GRefString
-MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
 
 There is a race between releasing and re-acquiring an interned
 GRefString if this happens on two threads at the same time. This can
@@ -42,17 +39,14 @@ As a side-effect this also
 
   * doesn't lock a mutex when freeing non-interned GRefStrings.
 
-Cherry-pick to `glib-2-82`: Drop changes to `g_ref_string_equal()`,
-which doesn’t exist on this branch.
-
-Origin: upstream, 2.82.3, commit:79bfee1371d0b5390c9ea59aacd9e6451c192285
+Origin: upstream, 2.83.1, commit:1c78ed95d4652a6147532f54667ef11997bfc150
 ---
- glib/grefstring.c      | 147 ++++++++++++++++++++++++++++++++++++-------------
+ glib/grefstring.c      | 149 ++++++++++++++++++++++++++++++++++++-------------
  glib/tests/refstring.c |  26 +++++++++
- 2 files changed, 136 insertions(+), 37 deletions(-)
+ 2 files changed, 137 insertions(+), 38 deletions(-)
 
 diff --git a/glib/grefstring.c b/glib/grefstring.c
-index 167c24a..b1c07f7 100644
+index e00d0b4..80024ed 100644
 --- a/glib/grefstring.c
 +++ b/glib/grefstring.c
 @@ -24,7 +24,7 @@
@@ -270,19 +264,30 @@ index 167c24a..b1c07f7 100644
  }
  
  /**
-@@ -232,5 +305,5 @@ g_ref_string_length (char *str)
+@@ -232,7 +305,7 @@ g_ref_string_length (char *str)
  {
    g_return_val_if_fail (str != NULL, 0);
  
 -  return g_atomic_rc_box_get_size (str) - 1;
 +  return G_REF_STRING_IMPL_FROM_STR (str)->len;
  }
+ 
+ /**
+@@ -255,7 +328,7 @@ gboolean
+ g_ref_string_equal (const char *str1,
+                     const char *str2)
+ {
+-  if (g_atomic_rc_box_get_size ((char *) str1) != g_atomic_rc_box_get_size ((char *) str2))
++  if (G_REF_STRING_IMPL_FROM_STR ((char *) str1)->len != G_REF_STRING_IMPL_FROM_STR ((char *) str2)->len)
+     return FALSE;
+ 
+   return strcmp (str1, str2) == 0;
 diff --git a/glib/tests/refstring.c b/glib/tests/refstring.c
-index eae2f05..0e8e33f 100644
+index d0eeccf..c09075f 100644
 --- a/glib/tests/refstring.c
 +++ b/glib/tests/refstring.c
-@@ -102,6 +102,31 @@ test_refstring_intern (void)
-   g_ref_string_release (s);
+@@ -145,6 +145,31 @@ test_refstring_equal (void)
+   g_ref_string_release (ref3);
  }
  
 +static gpointer
@@ -313,10 +318,10 @@ index eae2f05..0e8e33f 100644
  int
  main (int   argc,
        char *argv[])
-@@ -113,6 +138,7 @@ main (int   argc,
-   g_test_add_func ("/refstring/length-auto", test_refstring_length_auto);
-   g_test_add_func ("/refstring/length-nuls", test_refstring_length_nuls);
+@@ -158,6 +183,7 @@ main (int   argc,
    g_test_add_func ("/refstring/intern", test_refstring_intern);
+   g_test_add_func ("/refstring/hash_equal", test_refstring_hash_equal);
+   g_test_add_func ("/refstring/equal", test_refstring_equal);
 +  g_test_add_func ("/refstring/intern-thread-safety", test_refstring_intern_thread_safety);
  
    return g_test_run ();

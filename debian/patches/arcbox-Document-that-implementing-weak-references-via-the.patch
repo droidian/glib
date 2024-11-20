@@ -3,7 +3,7 @@ Date: Sun, 27 Oct 2024 12:58:08 +0200
 Subject: arcbox: Document that implementing weak references via the
  clear_func is not safe
 
-Origin: upstream, 2.82.3, commit:546b15312f8e54603a5e68ed7f96ea93770e11af
+Origin: upstream, 2.83.1, commit:dc197cd7f30bff718ea06fe6978c9ce203a40dc6
 ---
  glib/garcbox.c | 5 +++++
  1 file changed, 5 insertions(+)

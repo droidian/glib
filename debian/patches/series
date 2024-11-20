@@ -1,7 +1,3 @@
-glib-Don-t-require-GLIB_DOMAIN-to-be-a-NUL-terminated-str.patch
-glib-Make-sure-GLIB_OLD_LOG_API-is-a-NUL-terminated-strin.patch
-glib-Add-test-for-handling-of-non-NUL-terminated-strings-.patch
-gio-Fix-GFileEnumerator-leaks-in-gio-tools.patch
 arcbox-Document-that-implementing-weak-references-via-the.patch
 refstring-Fix-race-between-releasing-and-re-acquiring-an-.patch
 01_gettext-desktopfiles.patch
