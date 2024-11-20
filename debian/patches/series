@@ -1,5 +1,6 @@
 arcbox-Document-that-implementing-weak-references-via-the.patch
 refstring-Fix-race-between-releasing-and-re-acquiring-an-.patch
+gutf8-Drop-ifunc-code-and-always-call-strlen-when-validat.patch
 01_gettext-desktopfiles.patch
 debian/02_gettext-desktopfiles-ubuntu.patch
 debian/03_disble_glib_compile_schemas_warning.patch
