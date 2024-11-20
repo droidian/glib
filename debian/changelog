@@ -12,9 +12,14 @@ glib2.0 (2.83.0-1) UNRELEASED; urgency=medium
   * d/copyright: Update
   * d/patches: Refresh patch series, dropping patches that were applied
     upstream
+    - d/p/arcbox-Document-that-implementing-weak-references-via-the.patch,
+      d/p/refstring-Fix-race-between-releasing-and-re-acquiring-an-.patch:
+      Use 2.83.x versions of these patches
   * d/control: Increase build-dependency versions as per meson.build
+  * d/p/gutf8-Drop-ifunc-code-and-always-call-strlen-when-validat.patch:
+    Add patch from upstream to fix autopkgtest failure when linking statically
 
- -- Simon McVittie <smcv@debian.org>  Wed, 06 Nov 2024 17:07:48 +0000
+ -- Simon McVittie <smcv@debian.org>  Wed, 20 Nov 2024 09:21:14 +0000
 
 glib2.0 (2.82.2-3) unstable; urgency=medium
 
