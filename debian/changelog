@@ -1,5 +1,11 @@
 glib2.0 (2.83.0-1) UNRELEASED; urgency=medium
 
+  [ Jeremy Bícha ]
+  * Bump Breaks/Replaces to 2.82.2-1 for upgrades to Ubuntu 25.04.
+    Unfortunately, we may need to bump this again if newer versions of
+    2.82.x reach Ubuntu 24.10.
+
+  [ Simon McVittie ]
   * New upstream development release
   * d/rules, d/watch: GLib 2.83.0 contains files generated from Unicode 16.0
   * d/copyright: Don't exclude NormalizationTest.txt
