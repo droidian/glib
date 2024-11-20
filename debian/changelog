@@ -10,6 +10,27 @@ glib2.0 (2.83.0-1) UNRELEASED; urgency=medium
 
  -- Simon McVittie <smcv@debian.org>  Wed, 06 Nov 2024 17:07:48 +0000
 
+glib2.0 (2.82.2-3) unstable; urgency=medium
+
+  * d/patches: Update to upstream commit 2.82.2-15-g3e74b0a3ea, excluding
+    a macOS-specific change
+    - d/p/glib-Don-t-require-GLIB_DOMAIN-to-be-a-NUL-terminated-str.patch,
+      d/p/glib-Make-sure-GLIB_OLD_LOG_API-is-a-NUL-terminated-strin.patch,
+      d/p/glib-Add-test-for-handling-of-non-NUL-terminated-strings-.patch:
+      Fix handling of non-NUL-terminated strings in default log handler
+    - d/p/gio-Fix-GFileEnumerator-leaks-in-gio-tools.patch:
+      Fix some reference leaks
+    - d/p/arcbox-Document-that-implementing-weak-references-via-the.patch:
+      Document a pattern that might seem thread-safe but is not
+    - d/p/refstring-Fix-race-between-releasing-and-re-acquiring-an-.patch:
+      Fix a race condition in refcounted strings
+  * d/gbp.conf, d/watch: Only watch for stable (2.82.x) versions.
+    GLib 2.83.0 has been released, but is not ready to be included in
+    Debian testing/unstable unless the Debian 13 freeze date is pushed
+    out past the GNOME 48 release.
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 13 Nov 2024 10:02:21 +0000
+
 glib2.0 (2.82.2-2) unstable; urgency=medium
 
   * d/control: libgio-2.0-dev Breaks/Replaces older libglib2.0-dev-bin, too
