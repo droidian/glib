@@ -297,6 +297,15 @@ DEB_CONFIGURE_FLAGS_udeb := \
 	$(NULL)
 
 override_dh_auto_build:
+	# GResource files don't contain any executable code, only an embeddable
+	# data blob, so compiler flags that would affect the behaviour of
+	# executable code (ABIs, hardening, optimizations, debug info) are
+	# not relevant.
+	@echo 'blhc: ignore-line-regexp: .*/glib-compile-resources\s+--compiler=.*'
+	# One test uses the C compiler to convert a binary blob into a raw
+	# object; again, there is no executable code involved, so compiler
+	# options that affect executable code aren't interesting.
+	@echo 'blhc: ignore-line-regexp: .*-Wl,-b,binary\s+-nostdlib\s+gio/tests/test5\.gresource.*'
 	mkdir -p debian/tmp-xdg-runtime-dir
 	dh_auto_build --builddirectory=debian/build/deb
 ifneq ($(filter %-udeb,$(built_binaries)),)
