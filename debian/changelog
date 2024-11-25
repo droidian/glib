@@ -18,6 +18,8 @@ glib2.0 (2.83.0-1) UNRELEASED; urgency=medium
   * d/control: Increase build-dependency versions as per meson.build
   * d/p/gutf8-Drop-ifunc-code-and-always-call-strlen-when-validat.patch:
     Add patch from upstream to fix autopkgtest failure when linking statically
+  * d/rules: Silence some blhc false-positives for glib-compile-resources
+  * d/salsa-ci.yml: Add salsa.debian.org Gitlab-CI integration
 
  -- Simon McVittie <smcv@debian.org>  Wed, 20 Nov 2024 09:21:14 +0000
 
