@@ -1,4 +1,4 @@
-glib2.0 (2.82.3-1) UNRELEASED; urgency=medium
+glib2.0 (2.82.3-1) unstable; urgency=medium
 
   [ Jeremy Bícha ]
   * Bump Breaks/Replaces to 2.82.2-1 for upgrades to Ubuntu 25.04.
@@ -16,7 +16,7 @@ glib2.0 (2.82.3-1) UNRELEASED; urgency=medium
   * d/upstream/metadata: Add Archive, Changelog, Documentation
   * Bump Breaks/Replaces to 2.82.3-1 for better compatibility with Ubuntu
 
- -- Simon McVittie <smcv@debian.org>  Mon, 09 Dec 2024 16:40:41 +0000
+ -- Simon McVittie <smcv@debian.org>  Mon, 09 Dec 2024 16:50:09 +0000
 
 glib2.0 (2.82.2-3) unstable; urgency=medium
 
