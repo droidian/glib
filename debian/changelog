@@ -7,6 +7,9 @@ glib2.0 (2.82.3-1) UNRELEASED; urgency=medium
 
   [ Simon McVittie ]
   * New upstream stable release
+    - Fix some memory/reference leaks
+    - Fix an incorrect assertion in a test
+  * d/patches: Drop patches that were applied in 2.28.2-3, no longer needed
   * d/rules: Silence some blhc false-positives for glib-compile-resources
   * d/salsa-ci.yml: Add salsa.debian.org Gitlab-CI integration
 
