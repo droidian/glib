@@ -1,4 +1,4 @@
-glib2.0 (2.82.3-2) UNRELEASED; urgency=medium
+glib2.0 (2.82.3-2) unstable; urgency=medium
 
   * d/p/Revert-gdbus-Fix-leak-of-method-invocation-when-registeri.patch,
     d/p/gdbusconnection-Add-a-comment-explaining-why-an-invocatio.patch,
@@ -6,7 +6,7 @@ glib2.0 (2.82.3-2) UNRELEASED; urgency=medium
     Add patches proposed upstream to fix a regression for pygobject apps
     (Closes: #1089631)
 
- -- Simon McVittie <smcv@debian.org>  Tue, 10 Dec 2024 22:00:10 +0000
+ -- Simon McVittie <smcv@debian.org>  Tue, 10 Dec 2024 22:01:11 +0000
 
 glib2.0 (2.82.3-1) unstable; urgency=medium
 
