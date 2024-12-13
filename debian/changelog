@@ -1,6 +1,13 @@
 glib2.0 (2.82.4-1) UNRELEASED; urgency=medium
 
-  * New upstream release
+  * New upstream stable release
+    - Fixes a regression for pygobject apps, already fixed in Debian
+      (#1089631)
+    - Functionally equivalent to 2.82.3-2
+  * d/p/Revert-gdbus-Fix-leak-of-method-invocation-when-registeri.patch,
+    d/p/gdbusconnection-Add-a-comment-explaining-why-an-invocatio.patch,
+    d/p/gdbusconnection-Document-existing-refcount-semantics-of-c.patch:
+    Drop patches, applied upstream
 
  -- Simon McVittie <smcv@debian.org>  Fri, 13 Dec 2024 09:34:04 +0000
 
