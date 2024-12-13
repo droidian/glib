@@ -1,7 +1,7 @@
-glib2.0 (2.83.0-1) UNRELEASED; urgency=medium
+glib2.0 (2.83.2-1) UNRELEASED; urgency=medium
 
   * New upstream development release
-  * d/rules, d/watch: GLib 2.83.0 contains files generated from Unicode 16.0
+  * d/rules, d/watch: GLib 2.83.2 contains files generated from Unicode 16.0
   * d/copyright: Don't exclude NormalizationTest.txt
   * d/copyright: Update
   * d/patches: Refresh patch series, dropping patches that were applied
@@ -13,7 +13,7 @@ glib2.0 (2.83.0-1) UNRELEASED; urgency=medium
   * d/p/gutf8-Drop-ifunc-code-and-always-call-strlen-when-validat.patch:
     Add patch from upstream to fix autopkgtest failure when linking statically
 
- -- Simon McVittie <smcv@debian.org>  Wed, 20 Nov 2024 09:21:14 +0000
+ -- Simon McVittie <smcv@debian.org>  Fri, 13 Dec 2024 14:58:33 +0000
 
 glib2.0 (2.82.4-1) unstable; urgency=medium
 
