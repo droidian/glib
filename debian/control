@@ -177,11 +177,11 @@ Recommends:
  libgio-2.0-dev-bin (= ${binary:Version}),
  libglib2.0-bin (= ${binary:Version}),
 Breaks:
- libglib2.0-dev (<< 2.82.3-1~),
- libglib2.0-dev-bin (<< 2.82.3-1~),
+ libglib2.0-dev (<< 2.82.4-1~),
+ libglib2.0-dev-bin (<< 2.82.4-1~),
 Replaces:
- libglib2.0-dev (<< 2.82.3-1~),
- libglib2.0-dev-bin (<< 2.82.3-1~),
+ libglib2.0-dev (<< 2.82.4-1~),
+ libglib2.0-dev-bin (<< 2.82.4-1~),
 Suggests:
  gir1.2-glib-2.0-dev,
  libglib2.0-doc,
