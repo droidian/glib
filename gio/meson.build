@@ -396,9 +396,7 @@ if host_system != 'windows'
     unix_sources += files('gosxappinfo.m')
     framework_dep = dependency('appleframeworks', modules : ['Foundation', 'CoreFoundation', 'AppKit'])
     platform_deps += [framework_dep]
-    if glib_have_os_x_9_or_later
-      unix_sources += files('gcocoanotificationbackend.m')
-    endif
+    unix_sources += files('gcocoanotificationbackend.m')
     unix_sources += files('gosxnetworkmonitor.c')
     application_headers += files('gosxappinfo.h')
   else
@@ -914,6 +912,16 @@ pkg.generate(libgio,
     'gdbus_codegen=' + '${bindir}' / 'gdbus-codegen',
     'gresource=' + '${bindir}' / 'gresource',
     'gsettings=' + '${bindir}' / 'gsettings',
+  ],
+  uninstalled_variables : [
+    'gio=${prefix}/gio/gio',
+    'gio_querymodules=${prefix}/gio/gio-querymodules',
+    'glib_compile_schemas=${prefix}/gio/glib-compile-schemas',
+    'glib_compile_resources=${prefix}/gio/glib-compile-resources',
+    'gdbus=${prefix}/gio/gdbus',
+    'gdbus_codegen=${prefix}/gio/gdbus-2.0/codegen/gdbus-codegen',
+    'gresource=${prefix}/gio/gresource',
+    'gsettings=${prefix}/gio/gsettings',
   ],
   version : glib_version,
   install_dir : glib_pkgconfigreldir,

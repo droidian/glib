@@ -122,13 +122,14 @@
 
 #include "glibintl.h"
 
-#define G_DBUS_CONNECTION_FLAGS_ALL \
-  (G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_CLIENT | \
-   G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_SERVER | \
-   G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_ALLOW_ANONYMOUS | \
-   G_DBUS_CONNECTION_FLAGS_MESSAGE_BUS_CONNECTION | \
-   G_DBUS_CONNECTION_FLAGS_DELAY_MESSAGE_PROCESSING | \
-   G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_REQUIRE_SAME_USER)
+#define G_DBUS_CONNECTION_FLAGS_ALL                           \
+  (G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_CLIENT |            \
+   G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_SERVER |            \
+   G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_ALLOW_ANONYMOUS |   \
+   G_DBUS_CONNECTION_FLAGS_MESSAGE_BUS_CONNECTION |           \
+   G_DBUS_CONNECTION_FLAGS_DELAY_MESSAGE_PROCESSING |         \
+   G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_REQUIRE_SAME_USER | \
+   G_DBUS_CONNECTION_FLAGS_CROSS_NAMESPACE)
 
 /**
  * GDBusConnection:
@@ -5950,6 +5951,11 @@ register_with_closures_on_method_call (GDBusConnection       *connection,
   g_value_set_variant (&params[5], parameters);
 
   g_value_init (&params[6], G_TYPE_DBUS_METHOD_INVOCATION);
+  /* NOTE: This is deliberately *not* g_value_take_object(). A reference to
+   * `invocation` is transferred in to this function, and it needs to be
+   * transferred onwards to the `g_dbus_method_invocation_return_*()` method
+   * call which must eventually happen (either in the closure function, or in
+   * a delayed consequence from it). Changing this will break API. */
   g_value_set_object (&params[6], invocation);
 
   g_closure_invoke (data->method_call_closure, NULL, G_N_ELEMENTS (params), params, NULL);
@@ -6083,6 +6089,11 @@ register_with_closures_on_set_property (GDBusConnection *connection,
  *
  * Version of g_dbus_connection_register_object() using closures instead of a
  * #GDBusInterfaceVTable for easier binding in other languages.
+ *
+ * Note that the reference counting semantics of the function wrapped by
+ * @method_call_closure are the same as those of
+ * [callback@Gio.DBusInterfaceMethodCallFunc]: ownership of a reference to the
+ * [class@Gio.DBusMethodInvocation] is transferred to the function.
  *
  * Returns: 0 if @error is set, otherwise a registration ID (never 0)
  * that can be used with g_dbus_connection_unregister_object() .
@@ -6866,7 +6877,7 @@ g_dbus_connection_call_with_unix_fd_list (GDBusConnection     *connection,
 /**
  * g_dbus_connection_call_with_unix_fd_list_finish:
  * @connection: a #GDBusConnection
- * @out_fd_list: (out) (optional): return location for a #GUnixFDList or %NULL
+ * @out_fd_list: (out) (optional) (nullable): return location for a #GUnixFDList or %NULL
  * @res: a #GAsyncResult obtained from the #GAsyncReadyCallback passed to
  *     g_dbus_connection_call_with_unix_fd_list()
  * @error: return location for error or %NULL
@@ -6913,7 +6924,7 @@ g_dbus_connection_call_with_unix_fd_list_finish (GDBusConnection  *connection,
  * @timeout_msec: the timeout in milliseconds, -1 to use the default
  *     timeout or %G_MAXINT for no timeout
  * @fd_list: (nullable): a #GUnixFDList or %NULL
- * @out_fd_list: (out) (optional): return location for a #GUnixFDList or %NULL
+ * @out_fd_list: (out) (optional) (nullable): return location for a #GUnixFDList or %NULL
  * @cancellable: (nullable): a #GCancellable or %NULL
  * @error: return location for error or %NULL
  *
