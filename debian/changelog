@@ -1,6 +1,7 @@
 glib2.0 (2.83.2-1) UNRELEASED; urgency=medium
 
   * New upstream development release
+  * d/*.symbols: Update
   * d/rules, d/watch: GLib 2.83.2 contains files generated from Unicode 16.0
   * d/copyright: Don't exclude NormalizationTest.txt
   * d/copyright: Update
@@ -8,7 +9,7 @@ glib2.0 (2.83.2-1) UNRELEASED; urgency=medium
     upstream
   * d/control: Increase build-dependency versions as per meson.build
 
- -- Simon McVittie <smcv@debian.org>  Fri, 13 Dec 2024 14:58:33 +0000
+ -- Simon McVittie <smcv@debian.org>  Fri, 13 Dec 2024 16:21:16 +0000
 
 glib2.0 (2.82.4-1) unstable; urgency=medium
 
