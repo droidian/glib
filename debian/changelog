@@ -1,4 +1,4 @@
-glib2.0 (2.82.4-1) UNRELEASED; urgency=medium
+glib2.0 (2.82.4-1) unstable; urgency=medium
 
   * New upstream stable release
     - Fixes a regression for pygobject apps, already fixed in Debian
@@ -9,7 +9,7 @@ glib2.0 (2.82.4-1) UNRELEASED; urgency=medium
     d/p/gdbusconnection-Document-existing-refcount-semantics-of-c.patch:
     Drop patches, applied upstream
 
- -- Simon McVittie <smcv@debian.org>  Fri, 13 Dec 2024 09:34:04 +0000
+ -- Simon McVittie <smcv@debian.org>  Fri, 13 Dec 2024 09:45:10 +0000
 
 glib2.0 (2.82.3-2) unstable; urgency=medium
 
