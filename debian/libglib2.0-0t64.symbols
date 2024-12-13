@@ -1430,7 +1430,7 @@ libgio-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_resource_flags_get_type@Base 2.32.0
  g_resource_get_info@Base 2.32.0
  g_resource_get_type@Base 2.32.0
- g_resource_has_children@Base 2.83.0~
+ g_resource_has_children@Base 2.83.0
  g_resource_load@Base 2.32.0
  g_resource_lookup_data@Base 2.32.0
  g_resource_lookup_flags_get_type@Base 2.32.0
@@ -1440,7 +1440,7 @@ libgio-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_resource_unref@Base 2.32.0
  g_resources_enumerate_children@Base 2.32.0
  g_resources_get_info@Base 2.32.0
- g_resources_has_children@Base 2.83.0~
+ g_resources_has_children@Base 2.83.0
  g_resources_lookup_data@Base 2.32.0
  g_resources_open_stream@Base 2.32.0
  g_resources_register@Base 2.32.0
@@ -2013,27 +2013,27 @@ libgio-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_unix_mount_at@Base 2.16.0
  g_unix_mount_compare@Base 2.16.0
  g_unix_mount_copy@Base 2.54.0
- g_unix_mount_entries_changed_since@Base 2.83.0~
- g_unix_mount_entries_get@Base 2.83.0~
- g_unix_mount_entries_get_from_file@Base 2.83.0~
- g_unix_mount_entry_at@Base 2.83.0~
- g_unix_mount_entry_compare@Base 2.83.0~
- g_unix_mount_entry_copy@Base 2.83.0~
- g_unix_mount_entry_for@Base 2.83.0~
- g_unix_mount_entry_free@Base 2.83.0~
- g_unix_mount_entry_get_device_path@Base 2.83.0~
- g_unix_mount_entry_get_fs_type@Base 2.83.0~
- g_unix_mount_entry_get_mount_path@Base 2.83.0~
- g_unix_mount_entry_get_options@Base 2.83.0~
- g_unix_mount_entry_get_root_path@Base 2.83.0~
+ g_unix_mount_entries_changed_since@Base 2.83.0
+ g_unix_mount_entries_get@Base 2.83.0
+ g_unix_mount_entries_get_from_file@Base 2.83.0
+ g_unix_mount_entry_at@Base 2.83.0
+ g_unix_mount_entry_compare@Base 2.83.0
+ g_unix_mount_entry_copy@Base 2.83.0
+ g_unix_mount_entry_for@Base 2.83.0
+ g_unix_mount_entry_free@Base 2.83.0
+ g_unix_mount_entry_get_device_path@Base 2.83.0
+ g_unix_mount_entry_get_fs_type@Base 2.83.0
+ g_unix_mount_entry_get_mount_path@Base 2.83.0
+ g_unix_mount_entry_get_options@Base 2.83.0
+ g_unix_mount_entry_get_root_path@Base 2.83.0
  g_unix_mount_entry_get_type@Base 2.54.0
- g_unix_mount_entry_guess_can_eject@Base 2.83.0~
- g_unix_mount_entry_guess_icon@Base 2.83.0~
- g_unix_mount_entry_guess_name@Base 2.83.0~
- g_unix_mount_entry_guess_should_display@Base 2.83.0~
- g_unix_mount_entry_guess_symbolic_icon@Base 2.83.0~
- g_unix_mount_entry_is_readonly@Base 2.83.0~
- g_unix_mount_entry_is_system_internal@Base 2.83.0~
+ g_unix_mount_entry_guess_can_eject@Base 2.83.0
+ g_unix_mount_entry_guess_icon@Base 2.83.0
+ g_unix_mount_entry_guess_name@Base 2.83.0
+ g_unix_mount_entry_guess_should_display@Base 2.83.0
+ g_unix_mount_entry_guess_symbolic_icon@Base 2.83.0
+ g_unix_mount_entry_is_readonly@Base 2.83.0
+ g_unix_mount_entry_is_system_internal@Base 2.83.0
  g_unix_mount_for@Base 2.52.0
  g_unix_mount_free@Base 2.16.0
  g_unix_mount_get_device_path@Base 2.16.0
@@ -3192,7 +3192,7 @@ libglib-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_ref_count_inc@Base 2.58.0
  g_ref_count_init@Base 2.58.0
  g_ref_string_acquire@Base 2.58.0
- g_ref_string_equal@Base 2.83.0~
+ g_ref_string_equal@Base 2.83.0
  g_ref_string_length@Base 2.58.0
  g_ref_string_new@Base 2.58.0
  g_ref_string_new_intern@Base 2.58.0
@@ -3828,7 +3828,7 @@ libglib-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_variant_builder_close@Base 2.24.0
  g_variant_builder_end@Base 2.24.0
  g_variant_builder_init@Base 2.24.0
- g_variant_builder_init_static@Base 2.83.0~
+ g_variant_builder_init_static@Base 2.83.0
  g_variant_builder_new@Base 2.24.0
  g_variant_builder_open@Base 2.24.0
  g_variant_builder_ref@Base 2.24.0
