@@ -1,11 +1,5 @@
 glib2.0 (2.83.0-1) UNRELEASED; urgency=medium
 
-  [ Jeremy Bícha ]
-  * Bump Breaks/Replaces to 2.82.2-1 for upgrades to Ubuntu 25.04.
-    Unfortunately, we may need to bump this again if newer versions of
-    2.82.x reach Ubuntu 24.10.
-
-  [ Simon McVittie ]
   * New upstream development release
   * d/rules, d/watch: GLib 2.83.0 contains files generated from Unicode 16.0
   * d/copyright: Don't exclude NormalizationTest.txt
@@ -18,10 +12,51 @@ glib2.0 (2.83.0-1) UNRELEASED; urgency=medium
   * d/control: Increase build-dependency versions as per meson.build
   * d/p/gutf8-Drop-ifunc-code-and-always-call-strlen-when-validat.patch:
     Add patch from upstream to fix autopkgtest failure when linking statically
-  * d/rules: Silence some blhc false-positives for glib-compile-resources
-  * d/salsa-ci.yml: Add salsa.debian.org Gitlab-CI integration
 
  -- Simon McVittie <smcv@debian.org>  Wed, 20 Nov 2024 09:21:14 +0000
+
+glib2.0 (2.82.4-1) unstable; urgency=medium
+
+  * New upstream stable release
+    - Fixes a regression for pygobject apps, already fixed in Debian
+      (#1089631)
+    - Functionally equivalent to 2.82.3-2
+  * d/p/Revert-gdbus-Fix-leak-of-method-invocation-when-registeri.patch,
+    d/p/gdbusconnection-Add-a-comment-explaining-why-an-invocatio.patch,
+    d/p/gdbusconnection-Document-existing-refcount-semantics-of-c.patch:
+    Drop patches, applied upstream
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 13 Dec 2024 09:45:10 +0000
+
+glib2.0 (2.82.3-2) unstable; urgency=medium
+
+  * d/p/Revert-gdbus-Fix-leak-of-method-invocation-when-registeri.patch,
+    d/p/gdbusconnection-Add-a-comment-explaining-why-an-invocatio.patch,
+    d/p/gdbusconnection-Document-existing-refcount-semantics-of-c.patch:
+    Add patches proposed upstream to fix a regression for pygobject apps
+    (Closes: #1089631)
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 10 Dec 2024 22:01:11 +0000
+
+glib2.0 (2.82.3-1) unstable; urgency=medium
+
+  [ Jeremy Bícha ]
+  * Bump Breaks/Replaces to 2.82.2-1 for upgrades to Ubuntu 25.04.
+    Unfortunately, we may need to bump this again if newer versions of
+    2.82.x reach Ubuntu 24.10.
+
+  [ Simon McVittie ]
+  * New upstream stable release
+    - Fix some memory/reference leaks
+    - Fix an incorrect assertion in a test
+  * d/patches: Drop patches that were applied in 2.28.2-3, no longer needed
+  * d/rules: Silence some blhc false-positives for glib-compile-resources
+  * d/salsa-ci.yml: Add salsa.debian.org Gitlab-CI integration
+  * d/upstream/metadata: Add Bug-Submit, fix Bug-Database
+  * d/upstream/metadata: Add Archive, Changelog, Documentation
+  * Bump Breaks/Replaces to 2.82.3-1 for better compatibility with Ubuntu
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 09 Dec 2024 16:50:09 +0000
 
 glib2.0 (2.82.2-3) unstable; urgency=medium
 
