@@ -1,0 +1,12 @@
+#!/bin/sh
+
+set -eux
+
+gdbus-codegen --help
+glib-compile-resources --version
+glib-genmarshal --version
+glib-gettextize --version
+glib-mkenums --version
+gobject-query tree
+gtester --version
+gtester-report --version

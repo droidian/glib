@@ -1,3 +1,9 @@
+include:
+  - component: gitlab.gnome.org/GNOME/citemplates/release-service@master
+    inputs:
+      dist-job-name: "dist-job"
+      tarball-artifact-path: "${TARBALL_ARTIFACT_PATH}"
+
 stages:
   - style-check
   - build
@@ -11,14 +17,16 @@ cache:
     - _ccache/
 
 variables:
-  FEDORA_IMAGE: "registry.gitlab.gnome.org/gnome/glib/fedora:v26"
+  FEDORA_IMAGE: "registry.gitlab.gnome.org/gnome/glib/fedora:v39.1"
   COVERITY_IMAGE: "registry.gitlab.gnome.org/gnome/glib/coverity:v7"
   DEBIAN_IMAGE: "registry.gitlab.gnome.org/gnome/glib/debian-stable:v19"
   ALPINE_IMAGE: "registry.gitlab.gnome.org/gnome/glib/alpine:v3"
-  MINGW_IMAGE: "registry.gitlab.gnome.org/gnome/glib/mingw:v15"
+  MINGW_IMAGE: "registry.gitlab.gnome.org/gnome/glib/mingw:v39.1"
   MESON_TEST_TIMEOUT_MULTIPLIER: 4
   G_MESSAGES_DEBUG: all
   MESON_COMMON_OPTIONS: "--buildtype debug --wrap-mode=nodownload --fatal-meson-warnings"
+  # expected naming scheme for the release-service job
+  TARBALL_ARTIFACT_PATH: "_build/meson-dist/${CI_PROJECT_NAME}-${CI_COMMIT_TAG}.tar.xz"
 
 # Default CI job setup; contrast with `.only-origin`.
 #
@@ -174,7 +182,8 @@ fedora-x86_64:
   stage: build
   needs: []
   variables:
-    CFLAGS: "-coverage -ftest-coverage -fprofile-arcs"
+    CFLAGS: "--coverage -ftest-coverage -fprofile-arcs -fprofile-update=atomic"
+    CXXFLAGS: "--coverage -ftest-coverage -fprofile-arcs -fprofile-update=atomic"
   before_script:
     - !reference [".build-linux", "before_script"]
     - !reference [".with-git", "before_script"]
@@ -185,8 +194,8 @@ fedora-x86_64:
             --prefix=$HOME/glib-installed
             --localstatedir=/var
             --libdir=lib
-            -Dsystemtap=true
-            -Ddtrace=true
+            -Dsystemtap=enabled
+            -Ddtrace=enabled
             -Dinstalled_tests=true
             -Ddocumentation=true
             -Dintrospection=enabled
@@ -194,9 +203,11 @@ fedora-x86_64:
             _build
     - meson compile -C _build
     - mkdir -p _coverage
-    - lcov --config-file .lcovrc --directory _build --capture --initial --output-file "_coverage/${CI_JOB_NAME}-baseline.lcov"
+    - lcov --config-file .lcovrc --directory _build --capture --initial
+      --output-file "_coverage/${CI_JOB_NAME}-baseline.lcov"
     - .gitlab-ci/run-tests.sh
-    - lcov --config-file .lcovrc --directory _build --capture --output-file "_coverage/${CI_JOB_NAME}.lcov"
+    - lcov --config-file .lcovrc --directory _build --capture
+      --output-file "_coverage/${CI_JOB_NAME}.lcov"
     # Copy the built documentation to an artifact directory. The build for docs.gtk.org
     # can then pull it from there — see https://gitlab.gnome.org/GNOME/gtk/-/blob/docs-gtk-org/README.md
     - mkdir -p _reference/
@@ -240,8 +251,8 @@ debian-stable-x86_64:
             --prefix=$HOME/glib-installed
             --localstatedir=/var
             --libdir=lib
-            -Dsystemtap=true
-            -Ddtrace=true
+            -Dsystemtap=enabled
+            -Ddtrace=enabled
             _build
     - meson compile -C _build
     - .gitlab-ci/run-tests.sh
@@ -312,7 +323,6 @@ muslc-alpine-x86_64:
             --prefix=$HOME/glib-installed
             --localstatedir=/var
             --libdir=lib
-            -Dsystemtap=true
             _build
     - meson compile -C _build
     - .gitlab-ci/run-tests.sh
@@ -343,7 +353,7 @@ installed-tests:
             --prefix=/usr --libdir=/usr/lib64
             -Dinstalled_tests=true
             -Ddefault_library=both
-            -Ddtrace=false
+            -Ddtrace=disabled
             _build
     - meson compile -C _build
     - sudo meson install -C _build
@@ -383,8 +393,8 @@ G_DISABLE_ASSERT:
   script:
     - meson setup ${MESON_COMMON_OPTIONS}
             --werror
-            -Dsystemtap=true
-            -Ddtrace=true
+            -Dsystemtap=enabled
+            -Ddtrace=enabled
             -Dinstalled_tests=true
             -Dglib_assert=false
             -Dintrospection=enabled
@@ -421,8 +431,8 @@ valgrind:
   script:
     - meson setup ${MESON_COMMON_OPTIONS}
             --werror
-            -Dsystemtap=true
-            -Ddtrace=true
+            -Dsystemtap=enabled
+            -Ddtrace=enabled
             -Dinstalled_tests=true
             -Dintrospection=enabled
             _build
@@ -492,7 +502,23 @@ cross-mingw64:
       - _build/gthread/libgthread-2.0-0.dll
       - _build/gobject/libgobject-2.0-0.dll
 
+# A note about msys2: it’s a rolling release distribution, running Windows under
+# Docker isn’t really supported, and the win32-ps CI runner is shared. All that
+# adds up to mean that we have to run CI against the latest msys2 packages, and
+# that this occasionally causes build failures in GLib due to changes in msys2.
+# In order to avoid that pre-empting other GLib development, the policy in such
+# cases is to:
+#  1. Immediately and without hesitation make the msys2-* CI jobs non-fatal
+#     (add `allow_failure: true` below).
+#  2. File an issue about fixing the GLib msys2 build and re-enabling failure
+#     on the CI job
+#  3. Set the milestone for that issue to be the next GLib release, so it’s done
+#     in a timely manner; and tag it as ~win32 so the GLib Windows maintainers
+#     are notified and can work on it.
+#  4. Rebase any pending broken MRs on top of the commit which makes the CI job
+#     non-fatal, so that development on `main` is unblocked.
 msys2-mingw32:
+  allow_failure: true
   extends: .only-default-and-merges
   stage: build
   tags:
@@ -503,6 +529,7 @@ msys2-mingw32:
     CHERE_INVOKING: "yes"
     CFLAGS: -coverage -ftest-coverage -fprofile-arcs
     PYTHONUTF8: "1"
+    G_DEBUGGER: 'gdb.exe -batch -ex "set logging enabled on" -ex "attach %p" -ex "signal-event %e" -ex "c" -ex "thread apply all bt full" -ex "k"'
   script:
     - C:\msys64\usr\bin\pacman --noconfirm -Syyuu --ask 20
     - C:\msys64\usr\bin\bash .gitlab-ci/show-execution-environment.sh
@@ -517,9 +544,11 @@ msys2-mingw32:
     expire_in: 1 week
     paths:
       - _build/meson-logs
+      - _build/gdb.txt
       - _coverage/
       - _reference/
 
+# See the note about msys2 CI job failure policy above.
 msys2-clang64:
   extends: .only-schedules-or-manual
   stage: build
@@ -550,6 +579,8 @@ vs2017-x64:
     - win32-ps
   needs: []
   variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+    GIT_SUBMODULE_DEPTH: 1
     PYTHONUTF8: "1"
   script:
     # FIXME: These should use --wrap-mode=nodownload but the Windows CI machines
@@ -581,6 +612,8 @@ vs2017-x64-static:
     - win32-ps
   needs: []
   variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+    GIT_SUBMODULE_DEPTH: 1
     PYTHONUTF8: "1"
   script:
     # FIXME: These should use --wrap-mode=nodownload but the Windows CI machines
@@ -621,7 +654,13 @@ freebsd-13-x86_64:
     # --fatal-meson-warnings. This should be fixed in Meson 1.4. It’s also fine
     # with Meson 1.2.3 (which is what we use on all the other CI runners).
     # See https://github.com/GNOME/glib/commit/71061fdcb33b8c26f5f8467cb3ac10704d65c87d
-    - meson setup --buildtype debug --wrap-mode=nodownload --localstatedir=/var -Db_lundef=false -Dxattr=false _build
+    - meson setup --buildtype debug --wrap-mode=nodownload
+            --localstatedir=/var
+            -Db_lundef=false
+            -Dxattr=false
+            -Dsystemtap=disabled
+            -Ddtrace=disabled
+            _build
     - meson compile -C _build
     - bash -x ./.gitlab-ci/run-tests.sh
   artifacts:
@@ -637,12 +676,16 @@ freebsd-13-x86_64:
       - "_build/glib/glibconfig.h"
       - "_build/meson-logs"
 
-macos-x86_64:
-  # The macOS runner is not allowed in forks. This is about trust, not capacity.
-  extends: .only-origin
+macos-arm64:
+  only:
+    - branches@GNOME/glib
+    # runner's maintainer
+    - branches@dehesselle/glib
+  except:
+    - tags
   stage: build
   tags:
-    - macosintel
+    - macosarm
   needs: []
   cache: []
   variables:
@@ -651,30 +694,26 @@ macos-x86_64:
     # libpcre2 gets built as a subproject, but the default Clang options on
     # macOS limit string lengths to 4095B — pcre2_error.c has a string of length
     # 4380B
-    CFLAGS: "-Wno-overlength-strings"
+    CFLAGS: -Wno-overlength-strings
     # redirect to the runner's volatile temporary directory
     TMPDIR: /Users/Shared/work/tmp
     # keep the user profile clean
-    PIP_CACHE_DIR: /Users/Shared/build/cache
+    PIP_CACHE_DIR: /Users/Shared/work/cache
     PIPENV_CACHE_DIR: $PIP_CACHE_DIR
     PYTHONPYCACHEPREFIX: $PIP_CACHE_DIR
-    # target OS X 10.9 Mavericks for backward compatibility
-    SDKROOT: /opt/sdks/MacOSX10.9.sdk
+    # target macOS 11 Big Sur
+    SDKROOT: /opt/sdks/MacOSX11.3.sdk
     # use the runner's ccache directory
     CCACHE_DIR: /Users/Shared/work/ccache
   before_script:
     - bash .gitlab-ci/show-execution-environment.sh
     - python3 -m venv .venv
-    - ln -s /opt/cmake/CMake.app/Contents/bin/cmake .venv/bin
-    - ln -s /opt/ccache/ccache .venv/bin
+    - curl -L https://github.com/ccache/ccache/releases/download/v4.9.1/ccache-4.9.1-darwin.tar.gz | tar -C .venv/bin -xz --strip-components=1 ccache-4.9.1-darwin/ccache
     - source .venv/bin/activate
-    - pip3 install meson==1.2.3
-    - pip3 install ninja==1.11.1
-    - pip3 install packaging==23.2
+    - pip3 install meson==1.2.3 ninja==1.11.1.1 packaging==23.2
   script:
-    # FIXME: Use --wrap-mode=default so we download dependencies each time,
-    # until the macOS runner is a VM where we can use a pre-made image which
-    # already contains the dependencies. See:
+    # FIXME: These should use --wrap-mode=nodownload but the macOS CI machine
+    # isn't currently set up for that. See:
     #  - https://gitlab.gnome.org/GNOME/glib/merge_requests/388
     #  - https://gitlab.gnome.org/Infrastructure/Infrastructure/issues/225
     - meson setup ${MESON_COMMON_OPTIONS}
@@ -725,6 +764,23 @@ scan-build:
   image: $FEDORA_IMAGE
   stage: analysis
   needs: []
+  variables:
+    # FIXME: Eventually we want static analysis on the tests and copylibs, for
+    # code quality, but for the moment it’s just busywork.
+    # FIXME: Disable the dead code checkers for now because they create a lot of
+    # noise and don’t indicate high severity problems.
+    SCAN_BUILD_FLAGS: >-
+      --exclude gio/tests/
+      --exclude girepository/tests/
+      --exclude glib/tests/
+      --exclude gmodule/tests/
+      --exclude gobject/tests/
+      --exclude gthread/tests/
+      --exclude girepository/cmph/
+      --exclude glib/libcharset/
+      --exclude gio/xdgmime/
+      -disable-checker deadcode.DeadStores
+      --status-bugs
   script:
     - meson setup ${MESON_COMMON_OPTIONS}
             --werror
@@ -732,12 +788,13 @@ scan-build:
             --prefix=$HOME/glib-installed
             --localstatedir=/var
             --libdir=lib
-            -Dsystemtap=true
-            -Ddtrace=true
+            -Dglib_debug=enabled
+            -Dsystemtap=enabled
+            -Ddtrace=enabled
             -Dinstalled_tests=true
             -Dintrospection=enabled
             _scan_build
-    - ninja -C _scan_build scan-build
+    - SCANBUILD="$(pwd)/.gitlab-ci/scan-build.sh" ninja -C _scan_build scan-build
   artifacts:
     name: "glib-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
     when: always
@@ -762,8 +819,8 @@ scan-build:
             --prefix=$HOME/glib-installed
             --localstatedir=/var
             --libdir=lib
-            -Dsystemtap=true
-            -Ddtrace=true
+            -Dsystemtap=enabled
+            -Ddtrace=enabled
             -Dinstalled_tests=true
             -Dintrospection=enabled
             _coverity_build
@@ -791,25 +848,33 @@ pages:
       - public
 
 dist-job:
-  image: $FEDORA_IMAGE
+  extends:
+    - .build-linux
+    - .with-git
+  image: "${FEDORA_IMAGE}"
   stage: build
+  needs: []
+  before_script:
+    - !reference [".build-linux", "before_script"]
+    - !reference [".with-git", "before_script"]
   only:
+    - schedules
     - tags
   script:
-    # Ignore extra git security checks as we don't care in CI.
-    - git config --global --add safe.directory "${PWD}"
-    - git submodule update --init
-    - for m in $(git submodule foreach -q 'echo $path'); do git config --global --add safe.directory "${PWD}/${m}"; done
-    - meson subprojects download
-    - meson setup ${MESON_COMMON_OPTIONS} --buildtype release -Ddocumentation=true -Dman-pages=enabled _build
+    - meson setup ${MESON_COMMON_OPTIONS}
+            --buildtype release
+            -Ddocumentation=true
+            -Dintrospection=enabled
+            -Dman-pages=enabled
+            _build
     - meson dist -C _build
     # Compile again to build the docs
     - meson compile -C _build
-    - tar -c -J -f "glib-docs-$CI_COMMIT_TAG.tar.xz" -C _build/docs/reference/glib glib-2.0
-    - tar -c -J -f "gmodule-docs-$CI_COMMIT_TAG.tar.xz" -C _build/docs/reference/gmodule gmodule-2.0
-    - tar -c -J -f "gobject-docs-$CI_COMMIT_TAG.tar.xz" -C _build/docs/reference/gobject gobject-2.0
-    - tar -c -J -f "gio-docs-$CI_COMMIT_TAG.tar.xz" -C _build/docs/reference/gio gio-2.0
-    - tar -c -J -f "girepository-docs-$CI_COMMIT_TAG.tar.xz" -C _build/docs/reference/girepository girepository-2.0
+    - tar -c -J -f "_build/glib-docs-${CI_COMMIT_TAG}.tar.xz" -C _build/docs/reference/glib glib-2.0
+    - tar -c -J -f "_build/gmodule-docs-${CI_COMMIT_TAG}.tar.xz" -C _build/docs/reference/gmodule gmodule-2.0
+    - tar -c -J -f "_build/gobject-docs-${CI_COMMIT_TAG}.tar.xz" -C _build/docs/reference/gobject gobject-2.0
+    - tar -c -J -f "_build/gio-docs-${CI_COMMIT_TAG}.tar.xz" -C _build/docs/reference/gio gio-2.0
+    - tar -c -J -f "_build/girepository-docs-${CI_COMMIT_TAG}.tar.xz" -C _build/docs/reference/girepository girepository-2.0
   artifacts:
     paths:
       - "${CI_PROJECT_DIR}/_build/glib-docs-$CI_COMMIT_TAG.tar.xz"

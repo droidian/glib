@@ -30,10 +30,10 @@ Forwarded: no
  1 file changed, 6 insertions(+)
 
 diff --git a/gio/tests/gdbus-threading.c b/gio/tests/gdbus-threading.c
-index 755b490..bba070d 100644
+index 297929a..1464ace 100644
 --- a/gio/tests/gdbus-threading.c
 +++ b/gio/tests/gdbus-threading.c
-@@ -679,6 +679,12 @@ main (int   argc,
+@@ -680,6 +680,12 @@ main (int   argc,
  
    g_test_init (&argc, &argv, G_TEST_OPTION_ISOLATE_DIRS, NULL);
  

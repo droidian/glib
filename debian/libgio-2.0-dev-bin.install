@@ -6,6 +6,5 @@ usr/bin/glib-mkenums
 usr/bin/gobject-query
 usr/bin/gtester
 usr/bin/gtester-report
-usr/share/aclocal
 usr/share/glib-2.0/codegen/*.py
-usr/share/glib-2.0/gettext
+usr/share/glib-2.0/gdb/*.py

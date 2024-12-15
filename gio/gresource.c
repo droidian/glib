@@ -352,7 +352,7 @@ g_resource_find_overlay (const gchar    *path,
   /* This is a null-terminated array of replacement strings (with '=' inside) */
   static const gchar * const *overlay_dirs;
   gboolean res = FALSE;
-  gint path_len = -1;
+  size_t path_len = 0;
   gint i;
 
   /* We try to be very fast in case there are no overlays.  Otherwise,
@@ -449,9 +449,9 @@ g_resource_find_overlay (const gchar    *path,
   for (i = 0; overlay_dirs[i]; i++)
     {
       const gchar *src;
-      gint src_len;
+      size_t src_len;
       const gchar *dst;
-      gint dst_len;
+      size_t dst_len;
       gchar *candidate;
 
       {
@@ -466,7 +466,7 @@ g_resource_find_overlay (const gchar    *path,
         /* hold off on dst_len because we will probably fail the checks below */
       }
 
-      if (path_len == -1)
+      if (i == 0)
         path_len = strlen (path);
 
       /* The entire path is too short to match the source */
@@ -1029,14 +1029,16 @@ g_resources_register_unlocked (GResource *resource)
 static void
 g_resources_unregister_unlocked (GResource *resource)
 {
-  if (g_list_find (registered_resources, resource) == NULL)
+  GList *resource_link = g_list_find (registered_resources, resource);
+
+  if (resource_link == NULL)
     {
       g_warning ("Tried to remove not registered resource");
     }
   else
     {
-      registered_resources = g_list_remove (registered_resources, resource);
-      g_resource_unref (resource);
+      g_resource_unref (resource_link->data);
+      registered_resources = g_list_delete_link (registered_resources, resource_link);
     }
 }
 

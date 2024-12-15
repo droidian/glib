@@ -21,15 +21,14 @@ pacman --noconfirm -S --needed \
     "${MINGW_PACKAGE_PREFIX}"-python-pip \
     "${MINGW_PACKAGE_PREFIX}"-toolchain \
     "${MINGW_PACKAGE_PREFIX}"-zlib \
-    "${MINGW_PACKAGE_PREFIX}"-libelf
+    "${MINGW_PACKAGE_PREFIX}"-libelf \
+    "${MINGW_PACKAGE_PREFIX}"-gdb
 
 mkdir -p _coverage
 mkdir -p _ccache
 CCACHE_BASEDIR="$(pwd)"
 CCACHE_DIR="${CCACHE_BASEDIR}/_ccache"
 export CCACHE_BASEDIR CCACHE_DIR
-
-pip3 install --upgrade --user packaging==23.2
 
 PATH="$(cygpath "$USERPROFILE")/.local/bin:$HOME/.local/bin:$PATH"
 DIR="$(pwd)"

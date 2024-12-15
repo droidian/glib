@@ -1,84 +1,15 @@
-#!/usr/bin/python3
+#!/bin/sh
 # Copyright 2023 Collabora Ltd.
 # Copyright 2024 Simon McVittie
 # SPDX-License-Identifier: MIT
 
-import os
-import shutil
-import subprocess
-import sys
-import sysconfig
-from typing import NoReturn
+set -eu
 
+DEB_HOST_GNU_TYPE='@DEB_HOST_GNU_TYPE@'
+TOOL_PATH='@TOOL_PATH@'
 
-CAN_RUN = '@CAN_RUN@'
-DEB_HOST_ARCH = '@DEB_HOST_ARCH@'
-DEB_HOST_GNU_TYPE = '@DEB_HOST_GNU_TYPE@'
-DEB_HOST_MULTIARCH = '@DEB_HOST_MULTIARCH@'
-TOOL = '@TOOL@'
-TOOL_PATH = '@TOOL_PATH@'
-
-ME = f'{DEB_HOST_GNU_TYPE}-{TOOL}'
-
-
-class CrossGirTool:
-    def __init__(
-        self,
-        argv: list[str],
-    ) -> None:
-        self.argv = argv
-
-    def can_run(self) -> bool:
-        python_arch = sysconfig.get_config_var('MULTIARCH')
-
-        if python_arch == DEB_HOST_MULTIARCH:
-            # Common case: if python3 is already an executable of the desired
-            # architecture, then trivially we can run it
-            return True
-
-        try:
-            completed = subprocess.run(
-                [CAN_RUN],
-                check=False,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.DEVNULL,
-            )
-        except OSError:
-            return False
-        else:
-            return completed.stdout == b'ok\n' and completed.returncode == 0
-
-    def find_qemu(self) -> str:
-        qemu = shutil.which(f'qemu-{DEB_HOST_ARCH}')
-
-        if qemu is not None:
-            return qemu
-
-        qemu = shutil.which(f'qemu-{DEB_HOST_ARCH}-static')
-
-        if qemu is not None:
-            return qemu
-
-        raise SystemExit(f'{ME}: Cannot find qemu-{DEB_HOST_ARCH}(-static)')
-
-    def exec(self) -> NoReturn:
-        exe_wrapper = []
-
-        if not self.can_run():
-            print(
-                (f'{ME}: Cannot run {DEB_HOST_ARCH} executables '
-                 + 'directly, using qemu'),
-                file=sys.stderr,
-            )
-            exe_wrapper = [self.find_qemu()]
-
-        argv = exe_wrapper + [TOOL_PATH] + sys.argv[1:]
-        try:
-            os.execvp(argv[0], argv)
-        except OSError:
-            print(f'{ME}: Unable to run: {argv}')
-            raise
-
-
-if __name__ == '__main__':
-    CrossGirTool(sys.argv).exec()
+if command -v "${DEB_HOST_GNU_TYPE}-cross-exe-wrapper" > /dev/null; then
+    exec "${DEB_HOST_GNU_TYPE}-cross-exe-wrapper" "${TOOL_PATH}" "$@"
+else
+    exec "${TOOL_PATH}" "$@"
+fi

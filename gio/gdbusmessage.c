@@ -1416,13 +1416,18 @@ validate_headers (GDBusMessage  *message,
         case G_DBUS_MESSAGE_HEADER_FIELD_PATH:
           if (!validate_header (message, field_type, header_value, G_VARIANT_TYPE_OBJECT_PATH, error))
             goto out;
-          if (g_strcmp0 (g_variant_get_string (header_value, NULL), "/org/freedesktop/DBus/Local") == 0)
+          if (g_strcmp0 (g_variant_get_string (header_value, NULL), DBUS_PATH_LOCAL) == 0)
             {
               g_set_error (error,
                            G_IO_ERROR,
                            G_IO_ERROR_INVALID_ARGUMENT,
-                           _("%s message: PATH header field is using the reserved value /org/freedesktop/DBus/Local"),
-                           message_type_to_string (message->type));
+                           /* Translators: The first placeholder is a D-Bus message type,
+                            * the second is the name of a header field and the third is
+                            * a value that is reserved for the given field. */
+                           _("%s message: %s header field is using the reserved value %s"),
+                           message_type_to_string (message->type),
+                           "PATH",
+                           DBUS_PATH_LOCAL);
               goto out;
             }
           break;
@@ -1438,13 +1443,15 @@ validate_headers (GDBusMessage  *message,
                            message_type_to_string (message->type));
               goto out;
             }
-          if (g_strcmp0 (g_variant_get_string (header_value, NULL), "org.freedesktop.DBus.Local") == 0)
+          if (g_strcmp0 (g_variant_get_string (header_value, NULL), DBUS_INTERFACE_LOCAL) == 0)
             {
               g_set_error (error,
                            G_IO_ERROR,
                            G_IO_ERROR_INVALID_ARGUMENT,
-                           _("%s message: INTERFACE header field is using the reserved value org.freedesktop.DBus.Local"),
-                           message_type_to_string (message->type));
+                           _("%s message: %s header field is using the reserved value %s"),
+                           message_type_to_string (message->type),
+                           "INTERFACE",
+                           DBUS_INTERFACE_LOCAL);
               goto out;
             }
           break;
@@ -2852,7 +2859,7 @@ append_value_to_blob (GVariant            *value,
               const gchar *signature;
               child = g_variant_get_child_value (value, 0);
               signature = g_variant_get_type_string (child);
-              g_memory_buffer_put_byte (mbuf, strlen (signature));
+              g_memory_buffer_put_byte (mbuf, (guint8) strlen (signature));  /* signature is already validated to be this short */
               g_memory_buffer_put_string (mbuf, signature);
               g_memory_buffer_put_byte (mbuf, '\0');
               if (!append_value_to_blob (child,

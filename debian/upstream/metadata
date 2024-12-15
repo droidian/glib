@@ -1,5 +1,9 @@
 ---
-Bug-Database: https://gitlab.gnome.org/GNOME/glib/issues/new
+Archive: GNOME
+Bug-Database: https://gitlab.gnome.org/GNOME/glib/-/issues
+Bug-Submit: https://gitlab.gnome.org/GNOME/glib/-/issues/new
+Changelog: https://gitlab.gnome.org/GNOME/glib/-/commits/main/
+Documentation: https://docs.gtk.org/#core-libraries
 Repository: https://gitlab.gnome.org/GNOME/glib.git
 Repository-Browse: https://gitlab.gnome.org/GNOME/glib/
 Security-Contact: https://gitlab.gnome.org/GNOME/glib/-/blob/HEAD/SECURITY.md

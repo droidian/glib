@@ -70,12 +70,12 @@ Copyright:
  2011 Carlos Garcia Campos
  2018 Carlos Garnacho
  2021 Casper Dik
- 2018-2020 Centricular
+ 2016-2020 Centricular
  2009-2022 Christian Hergert
  2008-2010 Christian Kellner
  2009-2010 Christian Persch
  2018-2020 Christoph Reiter
- 2014-2020 Chun-wei Fan
+ 2014-2024 Chun-wei Fan
  2021 Cimbali
  2008 Claus Tondering
  2008 Clemens N. Buss
@@ -91,15 +91,17 @@ Copyright:
  2010 David Zeuthen
  2013-2015 Dieter Verfaillie
  2000 Eazel, Inc
+ 2023 Eli Schwartz
  2019-2022 Emmanuel Fleury
  2005-2023 Emmanuele Bassi
  2016-2020 Endless Mobile, Inc
  2017-2022 Endless OS Foundation, LLC
  2007 Francois Gouget
+ 2024 Frank Dana
  2020-2021 Frederic Martinsons
- 1991-2023 Free Software Foundation, Inc
+ 1991-2024 Free Software Foundation, Inc
  2015 Garrett Regier
- 2014 Giovanni Campagna
+ 2011-2014 Giovanni Campagna
  2020 Gisle Vanem
  2001-2022 GLib contributors
  2016 GNOME i18n Project for Vietnamese
@@ -160,6 +162,7 @@ Copyright:
  2012 Pavel Vasin
  2018 Pavlo Solntsev
  2018 pdknsk
+ 2022 Peter Bloomfield
  1995-2011 Peter Mattis
  1995-2011 Peter Mattis, Spencer Kimball, Josh MacDonald, Sebastian Wilhelmi and others
  2018 Peter Wu
@@ -167,7 +170,7 @@ Copyright:
  2008 Philip Van Hoof
  2022-2023 Philip Withnall
  2011-2022 Ray Strode
- 2000-2022 Red Hat, Inc
+ 2000-2024 Red Hat, Inc
  1999-2003 Red Hat Software
  2014 Robert Roth
  2001 Ron Steinke
@@ -208,6 +211,7 @@ Copyright:
  1999-2000 Tom Tromey
  1998-2004 Tor Lillqvist
  2011 Torsten Schönfeld
+ 2024 twlvnn kraftwerk
  1995-1997 Ulrich Drepper
  2021 Unicode®, Inc
  2011 William Hua
@@ -350,6 +354,23 @@ Copyright:
 License: LGPL-2+
 
 Files:
+ .gitignore
+ */.gitignore
+ fuzzing/*.corpus
+ fuzzing/*.dict
+ gio/tests/cert-tests/*.p12
+ gio/tests/cert-tests/*.pem
+ gio/tests/desktop-files/**.desktop
+ gio/tests/schema-tests/*.gschema.xml
+ gio/tests/thumbnails/*.png
+ glib/tests/bookmarks/*.xbel
+ glib/tests/markups/*.cdata-as-text
+ glib/tests/markups/*.expected
+ glib/tests/markups/*.gmarkup
+Copyright: none or unspecified
+License: CC0-1.0
+
+Files:
  glib/libcharset/*
 Copyright:
  2000-2006 Free Software Foundation, Inc.
@@ -386,21 +407,6 @@ Files:
  glib/win_iconv.c
 Copyright: none
 License: Iconv-PD
-
-Files:
- fuzzing/*.corpus
- fuzzing/*.dict
- gio/tests/cert-tests/*.p12
- gio/tests/cert-tests/*.pem
- gio/tests/desktop-files/**.desktop
- gio/tests/schema-tests/*.gschema.xml
- gio/tests/thumbnails/*.png
- glib/tests/bookmarks/*.xbel
- glib/tests/markups/*.cdata-as-text
- glib/tests/markups/*.expected
- glib/tests/markups/*.gmarkup
-Copyright: none or unspecified
-License: CC0-1.0
 
 Files:
  gio/gwin32api-application-activation-manager.h
@@ -476,10 +482,6 @@ Files:
 Copyright:
  2000-2017, Julian Seward
 License: bzip2-1.0.6
-
-Files: docs/reference/gio/menu-model.png
-Copyright: unspecified
-License: CC-BY-SA-3.0
 
 Files: docs/reference/glib/gvariant-*.svg
 Copyright: 2022 Philip Withnall
