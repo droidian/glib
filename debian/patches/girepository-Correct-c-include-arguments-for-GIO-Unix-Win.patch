@@ -1,0 +1,66 @@
+From: Simon McVittie <smcv@collabora.com>
+Date: Fri, 13 Dec 2024 23:34:00 +0000
+Subject: girepository: Correct --c-include arguments for GIO Unix/Windows
+ headers
+
+The deprecated construct '@0@'.format(h) (where h is a file object)
+expanded to the filename relative to the project root, which in this
+particular case happens to be what we wanted:
+`--c-include=gio/gunixmounts.h` resulted in a recommendation to
+`#include <gio/gunixmounts.h>` and so on. Replacing it with
+h.full_path() resulted in GIR XML and documentation that recommended
+constructs like `#include </home/me/src/glib/gio/gunixmounts.h>`,
+which is not what was intended (and caused new differences between
+different architectures' Gio-2.0.gir on multiarch systems, which is
+how I discovered this).
+
+Hard-coding `gio/` and appending the basename of the header seems like
+the simplest non-deprecated spelling that will do what we wanted.
+
+Fixes: 51e3e7d9 "build: Bump Meson dependency to 1.4.0"
+Bug: https://gitlab.gnome.org/GNOME/glib/-/issues/3564
+Signed-off-by: Simon McVittie <smcv@collabora.com>
+Forwarded: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4439
+---
+ girepository/introspection/meson.build | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/girepository/introspection/meson.build b/girepository/introspection/meson.build
+index 97fd731..a846a76 100644
+--- a/girepository/introspection/meson.build
++++ b/girepository/introspection/meson.build
+@@ -242,14 +242,14 @@ gio_gir_args = [
+ if host_system == 'windows'
+   gio_gir_sources += [ gio_win32_include_headers, win32_sources ]
+   foreach h: gio_win32_include_headers
+-    gio_gir_args += '--c-include=' + h.full_path()
++    gio_gir_args += '--c-include=gio/' + fs.name(h)
+   endforeach
+   gio_gir_packages += 'gio-windows-2.0'
+   gio_gir_args += '--pkg=gio-windows-2.0'
+ else
+   gio_gir_sources += [ gio_unix_include_headers, unix_sources ]
+   foreach h: gio_unix_include_headers
+-    gio_gir_args += '--c-include=' + h.full_path()
++    gio_gir_args += '--c-include=gio/' + fs.name(h)
+   endforeach
+   gio_gir_packages += 'gio-unix-2.0'
+   gio_gir_args += '--pkg=gio-unix-2.0'
+@@ -278,7 +278,7 @@ gio_gir = gnome.generate_gir(libgio,
+ if host_system == 'windows'
+   gio_win32_gir_c_includes = []
+   foreach h: gio_win32_include_headers
+-    gio_win32_gir_c_includes += '--c-include=' + h.full_path()
++    gio_win32_gir_c_includes += '--c-include=gio/' + fs.name(h)
+   endforeach
+ 
+   gio_win32_gir = gnome.generate_gir(libgio,
+@@ -308,7 +308,7 @@ if host_system == 'windows'
+ else
+   gio_unix_gir_c_includes = []
+   foreach h: gio_unix_include_headers
+-    gio_unix_gir_c_includes += '--c-include=' + h.full_path()
++    gio_unix_gir_c_includes += '--c-include=gio/' + fs.name(h)
+   endforeach
+ 
+   gio_unix_gir = gnome.generate_gir(libgio,
