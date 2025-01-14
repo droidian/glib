@@ -1,4 +1,4 @@
-glib2.0 (2.83.2-2) UNRELEASED; urgency=medium
+glib2.0 (2.83.2-2) experimental; urgency=medium
 
   * Merge packaging from unstable
     - d/rules: Let dh_auto_test choose suitable arguments for `meson test`;
@@ -12,7 +12,7 @@ glib2.0 (2.83.2-2) UNRELEASED; urgency=medium
   * d/p/girepository-Correct-c-include-arguments-for-GIO-Unix-Win.patch:
     Mark patch as applied upstream
 
- -- Simon McVittie <smcv@debian.org>  Tue, 14 Jan 2025 13:03:24 +0000
+ -- Simon McVittie <smcv@debian.org>  Tue, 14 Jan 2025 13:05:11 +0000
 
 glib2.0 (2.83.2-1) experimental; urgency=medium
 
