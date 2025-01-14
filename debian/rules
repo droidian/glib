@@ -218,10 +218,6 @@ endif
 # running them once per architecture is plenty.
 override_dh_auto_test-indep:
 
-# Let's get failing tests' stdout and stderr so we have some information when
-# a build fails
-export VERBOSE=1
-
 ifeq ($(DEB_HOST_ARCH_OS),linux)
 enable_libmount := enabled
 enable_selinux := enabled
