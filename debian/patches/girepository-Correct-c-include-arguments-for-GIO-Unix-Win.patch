@@ -21,6 +21,7 @@ Fixes: 51e3e7d9 "build: Bump Meson dependency to 1.4.0"
 Bug: https://gitlab.gnome.org/GNOME/glib/-/issues/3564
 Signed-off-by: Simon McVittie <smcv@collabora.com>
 Forwarded: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4439
+Applied-upstream: 2.83.3, commit:feca93e51ee57b5c8cbc6502f2976d08fd11e214
 ---
  girepository/introspection/meson.build | 8 ++++----
  1 file changed, 4 insertions(+), 4 deletions(-)
