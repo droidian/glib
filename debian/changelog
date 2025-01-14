@@ -1,3 +1,11 @@
+glib2.0 (2.83.2-2) UNRELEASED; urgency=medium
+
+  * d/rules: Let dh_auto_test choose suitable arguments for `meson test`;
+    in particular this avoids --no-rebuild, which is problematic with
+    Meson 1.7 prereleases (Closes: #1092945)
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 14 Jan 2025 00:02:12 +0000
+
 glib2.0 (2.83.2-1) experimental; urgency=medium
 
   * New upstream development release
@@ -14,17 +22,6 @@ glib2.0 (2.83.2-1) experimental; urgency=medium
     XML and documentation for the gio-unix-2.0 module.
 
  -- Simon McVittie <smcv@debian.org>  Sun, 15 Dec 2024 13:46:34 +0000
-
-glib2.0 (2.82.4-2) UNRELEASED; urgency=medium
-
-  * d/gbp.conf:
-    Use debian/trixie branch for uploads targeting inclusion in trixie.
-    The debian/latest branch now has 2.83.x, for experimental.
-  * d/rules: Let dh_auto_test choose suitable arguments for `meson test`;
-    in particular this avoids --no-rebuild, which is problematic with
-    Meson 1.7 prereleases (Closes: #1092945)
-
- -- Simon McVittie <smcv@debian.org>  Mon, 13 Jan 2025 23:59:56 +0000
 
 glib2.0 (2.82.4-1) unstable; urgency=medium
 
