@@ -157,7 +157,6 @@ ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 		-u LD_PRELOAD \
 		DEB_BUILD_TIME_TESTS=1 \
 		LC_ALL=C.UTF-8 \
-		MESON_TESTTHREADS=1 \
 	debian/tests/run-with-locales \
 		--generate de_DE=ISO-8859-1 \
 		--generate de_DE.utf8 \
@@ -190,9 +189,10 @@ ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 		--generate tt_RU.utf8 \
 		--generate tt_RU@iqtelif=UTF-8 \
 		-- \
-	meson test -C debian/build/deb \
-		--no-rebuild \
-		--num-processes 1 \
+	dh_auto_test \
+		-B debian/build/deb \
+		--no-parallel \
+		-- \
 		--timeout-multiplier $(test_timeout_multiplier) \
 		--no-suite flaky \
 		--verbose \
@@ -204,10 +204,10 @@ ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 		-u LD_PRELOAD \
 		DEB_BUILD_TIME_TESTS=1 \
 		LC_ALL=C.UTF-8 \
-		MESON_TESTTHREADS=1 \
-	meson test -C debian/build/deb \
-		--no-rebuild \
-		--num-processes 1 \
+	dh_auto_test \
+		-B debian/build/deb \
+		--no-parallel \
+		-- \
 		--timeout-multiplier $(test_timeout_multiplier) \
 		--suite flaky \
 		--verbose \
