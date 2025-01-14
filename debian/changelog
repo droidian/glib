@@ -4,8 +4,15 @@ glib2.0 (2.83.2-2) UNRELEASED; urgency=medium
     - d/rules: Let dh_auto_test choose suitable arguments for `meson test`;
       in particular this avoids --no-rebuild, which is problematic with
       Meson 1.7 prereleases (Closes: #1092945)
+  * d/rules: Stop setting VERBOSE.
+    This was an Autotools thing, and hasn't been relevant for years now.
+  * d/rules: Stop forcing tests to run serially.
+    This was apparently necessary 10 years ago, but hopefully not any more.
+    An upload to experimental is a good opportunity to find out.
+  * d/p/girepository-Correct-c-include-arguments-for-GIO-Unix-Win.patch:
+    Mark patch as applied upstream
 
- -- Simon McVittie <smcv@debian.org>  Tue, 14 Jan 2025 00:02:12 +0000
+ -- Simon McVittie <smcv@debian.org>  Tue, 14 Jan 2025 13:03:24 +0000
 
 glib2.0 (2.83.2-1) experimental; urgency=medium
 
