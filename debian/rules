@@ -191,7 +191,6 @@ ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 		-- \
 	dh_auto_test \
 		-B debian/build/deb \
-		--no-parallel \
 		-- \
 		--timeout-multiplier $(test_timeout_multiplier) \
 		--no-suite flaky \
@@ -206,7 +205,6 @@ ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 		LC_ALL=C.UTF-8 \
 	dh_auto_test \
 		-B debian/build/deb \
-		--no-parallel \
 		-- \
 		--timeout-multiplier $(test_timeout_multiplier) \
 		--suite flaky \
