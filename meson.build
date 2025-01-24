@@ -1,5 +1,5 @@
 project('glib', 'c',
-  version : '2.83.2',
+  version : '2.83.3',
   # NOTE: See the policy in docs/meson-version.md before changing the Meson dependency
   meson_version : '>= 1.4.0',
   default_options : [
@@ -187,7 +187,7 @@ test_timeout = 30
 test_timeout_slow = 90
 
 add_test_setup('default',
-  is_default: true,
+  is_default: not meson.is_subproject(),
   exclude_suites: ['flaky', 'failing'],
   env: common_test_env,
   timeout_multiplier: 2,
@@ -2338,8 +2338,11 @@ endif
 
 if host_system == 'windows'
   winsock2 = cc.find_library('ws2_32')
+  # Used for g_win32_clear_com() tests...
+  wincodecs = cc.find_library('windowscodecs')
 else
   winsock2 = not_found
+  wincodecs = not_found
 endif
 
 selinux_dep = []
