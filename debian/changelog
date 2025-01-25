@@ -1,8 +1,9 @@
-glib2.0 (2.83.3-1) UNRELEASED; urgency=medium
+glib2.0 (2.83.3-1) experimental; urgency=medium
 
   * New upstream release
+  * Remove GIO-Unix-Win.patch: applied in new release
 
- -- Jeremy Bícha <jbicha@ubuntu.com>  Fri, 24 Jan 2025 18:58:04 -0500
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Fri, 24 Jan 2025 19:02:57 -0500
 
 glib2.0 (2.83.2-2) experimental; urgency=medium
 
