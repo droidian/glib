@@ -1,3 +1,9 @@
+glib2.0 (2.83.3-2) unstable; urgency=medium
+
+  * Release to unstable
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Tue, 04 Feb 2025 14:06:00 -0500
+
 glib2.0 (2.83.3-1) experimental; urgency=medium
 
   * New upstream release
