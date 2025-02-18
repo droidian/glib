@@ -177,11 +177,11 @@ Recommends:
  libgio-2.0-dev-bin (= ${binary:Version}),
  libglib2.0-bin (= ${binary:Version}),
 Breaks:
- libglib2.0-dev (<< 2.82.4-1~),
- libglib2.0-dev-bin (<< 2.82.4-1~),
+ libglib2.0-dev (<< 2.83),
+ libglib2.0-dev-bin (<< 2.83),
 Replaces:
- libglib2.0-dev (<< 2.82.4-1~),
- libglib2.0-dev-bin (<< 2.82.4-1~),
+ libglib2.0-dev (<< 2.83),
+ libglib2.0-dev-bin (<< 2.83),
 Suggests:
  gir1.2-glib-2.0-dev,
  libglib2.0-doc,
@@ -215,10 +215,10 @@ Depends:
  ${python3:Depends},
  ${shlibs:Depends},
 Breaks:
- libgio-2.0-dev (<< 2.82.1-1~),
+ libgio-2.0-dev (<< 2.83),
  libglib2.0-0-dbg (<< 2.51.4-1~),
 Replaces:
- libgio-2.0-dev (<< 2.82.1-1~),
+ libgio-2.0-dev (<< 2.83),
  libglib2.0-0-dbg (<< 2.51.4-1~),
 Suggests:
  gir1.2-glib-2.0-dev,
@@ -251,11 +251,11 @@ Suggests:
  libgdk-pixbuf2.0-bin,
  libxml2-utils,
 Breaks:
- libgio-2.0-dev (<< 2.82.1-1~),
- libglib2.0-dev-bin (<< 2.82.0-2~),
+ libgio-2.0-dev (<< 2.83),
+ libglib2.0-dev-bin (<< 2.83),
 Replaces:
- libgio-2.0-dev (<< 2.82.1-1~),
- libglib2.0-dev-bin (<< 2.82.0-2~),
+ libgio-2.0-dev (<< 2.83),
+ libglib2.0-dev-bin (<< 2.83),
 Multi-Arch: foreign
 Description: Development utilities for GLib, GObject and GIO libraries
  GLib is a library containing many useful C routines for things such
@@ -344,11 +344,11 @@ Depends:
  ${misc:Depends},
  ${shlibs:Depends},
 Breaks:
- libglib2.0-dev (<< 2.82.0-2~),
- libglib2.0-dev-bin (<< 2.82.0-2~),
+ libglib2.0-dev (<< 2.83),
+ libglib2.0-dev-bin (<< 2.83),
 Replaces:
- libglib2.0-dev (<< 2.82.0-2~),
- libglib2.0-dev-bin (<< 2.82.0-2~),
+ libglib2.0-dev (<< 2.83),
+ libglib2.0-dev-bin (<< 2.83),
 Description: Tools for working with GObject-Introspection repositories
  GLib is a library containing many useful C routines for things such
  as trees, hashes, lists, and strings.  It is a useful general-purpose
