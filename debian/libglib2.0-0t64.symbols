@@ -350,6 +350,7 @@ libgio-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_dbus_connection_new_for_address_sync@Base 2.26.0
  g_dbus_connection_new_sync@Base 2.26.0
  g_dbus_connection_register_object@Base 2.26.0
+ g_dbus_connection_register_object_with_closures2@Base 2.83.4
  g_dbus_connection_register_object_with_closures@Base 2.46.0
  g_dbus_connection_register_subtree@Base 2.26.0
  g_dbus_connection_remove_filter@Base 2.26.0
@@ -4348,6 +4349,7 @@ libgobject-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_type_children@Base 2.12.0
  g_type_class_add_private@Base 2.12.0
  g_type_class_adjust_private_offset@Base 2.38.0
+ g_type_class_get@Base 2.83.4
  g_type_class_get_instance_private_offset@Base 2.38.0
  g_type_class_get_private@Base 2.24.0
  g_type_class_peek@Base 2.12.0
@@ -4357,6 +4359,7 @@ libgobject-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_type_class_unref@Base 2.12.0
  g_type_class_unref_uncached@Base 2.12.0
  g_type_create_instance@Base 2.12.0
+ g_type_default_interface_get@Base 2.83.4
  g_type_default_interface_peek@Base 2.12.0
  g_type_default_interface_ref@Base 2.12.0
  g_type_default_interface_unref@Base 2.12.0
