@@ -541,6 +541,10 @@ calculate_max_length (GOptionGroup *group,
       if (!NO_ARG (entry) && entry->arg_description)
         len += 1 + _g_utf8_strwidth (TRANSLATE (group, entry->arg_description));
 
+      /* " (deprecated)" */
+      if (entry->flags & G_OPTION_FLAG_DEPRECATED)
+        len += 3 + _g_utf8_strwidth (_("deprecated"));
+
       max_length = MAX (max_length, len);
     }
 
@@ -577,9 +581,16 @@ print_entry (GOptionGroup       *group,
   if (entry->arg_description)
     g_string_append_printf (str, "=%s", TRANSLATE (group, entry->arg_description));
 
+  if (entry->flags & G_OPTION_FLAG_DEPRECATED)
+    {
+      const char *deprecated = _("deprecated");
+      g_string_append_printf (str, " (%s)", deprecated);
+    }
+
   g_string_append_printf (string, "%s%*s %s\n", str->str,
                           (int) (max_length + 4 - _g_utf8_strwidth (str->str)), "",
                           entry->description ? TRANSLATE (group, entry->description) : "");
+
   g_string_free (str, TRUE);
 }
 
@@ -1784,9 +1795,9 @@ platform_get_argv0 (void)
  * this function will produce help output to stdout and
  * call `exit (0)`.
  *
- * Note that function depends on the [current locale][setlocale] for
- * automatic character set conversion of string and filename
- * arguments.
+ * Note that function depends on the
+ * [current locale](running.html#locale) for automatic
+ * character set conversion of string and filename arguments.
  *
  * Returns: %TRUE if the parsing was successful,
  *               %FALSE if an error occurred
