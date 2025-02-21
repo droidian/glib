@@ -1,0 +1,164 @@
+From: Simon McVittie <smcv@collabora.com>
+Date: Fri, 21 Feb 2025 12:35:16 +0000
+Subject: tests: Search the appropriate directories for our GIR XML inputs
+
+During "as-installed" testing, we should search the GIR_DIR for GIR XML,
+instead of hard-coding that it is `${prefix}/share/gir-1.0`. This is
+not the case on at least Debian, in order to make it possible to
+install more than one architecture's flavour of `GLib-2.0.gir`,
+which contains some architecture-specific `#define`s.
+
+Also search GOBJECT_INTROSPECTION_DATADIR/GIR_SUFFIX (in practice
+something like `/usr/share/gir-1.0` in all cases) to accommodate
+distributions like Debian that move the architecture-independent
+majority of GIR XML into /usr/share to avoid duplication, leaving
+only the architecture-specific minority of files like `GLib-2.0.gir`
+in the GIR_DIR.
+
+Signed-off-by: Simon McVittie <smcv@collabora.com>
+Forwarded: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4509
+---
+ girepository/tests/gi-compile-repository.py | 41 ++++++++++++++++++++---------
+ girepository/tests/meson.build              | 12 ++++++++-
+ girepository/tests/print-gir-path.c         | 30 +++++++++++++++++++++
+ 3 files changed, 69 insertions(+), 14 deletions(-)
+ create mode 100644 girepository/tests/print-gir-path.c
+
+diff --git a/girepository/tests/gi-compile-repository.py b/girepository/tests/gi-compile-repository.py
+index a0b2bcf..ed05527 100644
+--- a/girepository/tests/gi-compile-repository.py
++++ b/girepository/tests/gi-compile-repository.py
+@@ -23,6 +23,7 @@
+ """ Integration tests for gi-compile-repository. """
+ 
+ import os
++import subprocess
+ import unittest
+ 
+ import taptestrunner
+@@ -40,18 +41,25 @@ class TestGICompileRepositoryBase(testprogramrunner.TestProgramRunner):
+         super().setUpClass()
+ 
+         if "G_TEST_BUILDDIR" in os.environ:
+-            cls._gir_path = os.path.join(
+-                os.environ["G_TEST_BUILDDIR"], "..", "introspection"
+-            )
++            cls._gir_path = [
++                os.path.join(os.environ["G_TEST_BUILDDIR"], "..", "introspection")
++            ]
+         else:
+-            cls._gir_path = os.path.join(
+-                os.path.dirname(os.path.realpath(__file__)),
+-                "..",
+-                "..",
+-                "..",
+-                "share",
+-                "gir-1.0",
++            result = subprocess.run(
++                [
++                    os.path.join(
++                        os.path.dirname(os.path.realpath(__file__)),
++                        "print-gir-path",
++                    )
++                ],
++                check=True,
++                encoding="utf-8",
++                stdout=subprocess.PIPE,
++                text=True,
++                universal_newlines=True,
+             )
++            cls._gir_path = result.stdout.rstrip("\n").split(os.pathsep)
++
+         print(f"gir path set to {cls._gir_path}")
+ 
+ 
+@@ -73,13 +81,20 @@ class TestGICompileRepositoryForGLib(TestGICompileRepositoryBase):
+     GIR_NAME = "GLib-2.0"
+ 
+     def runTestProgram(self, *args, **kwargs):
+-        gir_file = os.path.join(self._gir_path, f"{self.GIR_NAME}.gir")
+-        self.assertTrue(os.path.exists(gir_file))
++        for d in self._gir_path:
++            gir_file = os.path.join(d, f"{self.GIR_NAME}.gir")
++
++            if os.path.exists(gir_file):
++                break
++        else:
++            self.fail(f"Could not find {self.GIR_NAME}.gir in {self._gir_path}")
++
+         argv = [gir_file]
+         argv.extend(*args)
+ 
+         if self.GIR_NAME != "GLib-2.0":
+-            argv.extend(["--includedir", self._gir_path])
++            for d in self._gir_path:
++                argv.extend(["--includedir", d])
+ 
+         return super().runTestProgram(argv, **kwargs)
+ 
+diff --git a/girepository/tests/meson.build b/girepository/tests/meson.build
+index fb3b5b0..3b5140d 100644
+--- a/girepository/tests/meson.build
++++ b/girepository/tests/meson.build
+@@ -13,6 +13,16 @@ girepository_tests = {
+   },
+ }
+ 
++print_gir_path = executable(
++  'print-gir-path',
++  sources: ['print-gir-path.c'],
++  c_args : gir_c_args,
++  dependencies : libgirepository_dep,
++  install_dir : installed_tests_execdir,
++  install_tag : 'tests',
++  install : installed_tests_enabled,
++)
++
+ # Some tests require GIR files to have been generated
+ if enable_gir
+   glib_gir_testing_dep = glib_gir
+@@ -167,7 +177,7 @@ python_tests = {}
+ if enable_gir
+   python_tests += {
+     'gi-compile-repository.py': {
+-      'depends': [gicompilerepository, glib_gir[0], gobject_gir[0], gio_gir[0]],
++      'depends': [gicompilerepository, glib_gir[0], gobject_gir[0], gio_gir[0], print_gir_path],
+       'env': {
+         '_G_TEST_PROGRAM_RUNNER_PATH': fs.parent(gicompilerepository.full_path()),
+       },
+diff --git a/girepository/tests/print-gir-path.c b/girepository/tests/print-gir-path.c
+new file mode 100644
+index 0000000..ac028e0
+--- /dev/null
++++ b/girepository/tests/print-gir-path.c
+@@ -0,0 +1,30 @@
++/* -*- mode: C; c-file-style: "gnu"; indent-tabs-mode: nil; -*-
++ *
++ * Copyright 2025 Simon McVittie
++ * SPDX-License-Identifier: LGPL-2.1-or-later
++ */
++
++#include "config.h"
++
++#include <stdio.h>
++
++#include <glib.h>
++
++/*
++ * Output the hard-coded GObject-Introspection search path for GLib itself,
++ * within GLib's ${prefix}.
++ * This is a subset of what's used in locate_gir() in girparser.c,
++ * and is used to find GLib-2.0.gir, GObject-2.0.gir, Gio-2.0.gir
++ * when integration-testing gi-compile-repository.
++ */
++int
++main (int    argc,
++      char **argv)
++{
++  puts (/* might be "/usr/lib/x86_64-linux-gnu/gir-1.0" */
++        GIR_DIR
++        G_SEARCHPATH_SEPARATOR_S
++        /* might be "/usr/share" + "/" + "gir-1.0" */
++        GOBJECT_INTROSPECTION_DATADIR G_DIR_SEPARATOR_S GIR_SUFFIX);
++  return 0;
++}
