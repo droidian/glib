@@ -18,35 +18,68 @@ in the GIR_DIR.
 Signed-off-by: Simon McVittie <smcv@collabora.com>
 Forwarded: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4509
 ---
- girepository/tests/gi-compile-repository.py | 41 ++++++++++++++++++++---------
- girepository/tests/meson.build              | 12 ++++++++-
- girepository/tests/print-gir-path.c         | 30 +++++++++++++++++++++
- 3 files changed, 69 insertions(+), 14 deletions(-)
- create mode 100644 girepository/tests/print-gir-path.c
+ gio/tests/meson.build                       |  1 +
+ girepository/girparser.c                    |  2 ++
+ girepository/tests/gi-compile-repository.py | 33 +++++++++++++----------------
+ girepository/tests/meson.build              |  1 +
+ glib/tests/meson.build                      |  1 +
+ gobject/tests/meson.build                   |  1 +
+ meson.build                                 |  1 +
+ tests/black.sh                              |  2 +-
+ tests/flake8.sh                             |  2 +-
+ tests/lib/glibconfig.py.in                  | 29 +++++++++++++++++++++++++
+ tests/lib/meson.build                       | 25 ++++++++++++++++++++++
+ tests/meson.build                           | 16 +-------------
+ 12 files changed, 79 insertions(+), 35 deletions(-)
+ create mode 100644 tests/lib/glibconfig.py.in
+ create mode 100644 tests/lib/meson.build
 
+diff --git a/gio/tests/meson.build b/gio/tests/meson.build
+index ba04916..26091b6 100644
+--- a/gio/tests/meson.build
++++ b/gio/tests/meson.build
+@@ -1175,6 +1175,7 @@ endforeach
+ 
+ python_test_env = test_env
+ python_test_env.prepend('PYTHONPATH', python_test_libraries_path)
++python_test_env.prepend('PYTHONPATH', python_test_libraries_built)
+ 
+ foreach test_name, extra_args : python_tests
+   depends = [extra_args.get('depends', [])]
+diff --git a/girepository/girparser.c b/girepository/girparser.c
+index 0cf3415..6314371 100644
+--- a/girepository/girparser.c
++++ b/girepository/girparser.c
+@@ -303,6 +303,8 @@ static GMarkupParser firstpass_parser =
+   NULL,
+ };
+ 
++/* If you change this search order, gobject-introspection.git and
++ * tests/installed/glibconfig.py.in will probably also need updating */
+ static char *
+ locate_gir (GIIrParser *parser,
+             const char *girname)
 diff --git a/girepository/tests/gi-compile-repository.py b/girepository/tests/gi-compile-repository.py
-index a0b2bcf..ed05527 100644
+index a0b2bcf..3b96103 100644
 --- a/girepository/tests/gi-compile-repository.py
 +++ b/girepository/tests/gi-compile-repository.py
-@@ -23,6 +23,7 @@
- """ Integration tests for gi-compile-repository. """
- 
+@@ -25,6 +25,7 @@
  import os
-+import subprocess
  import unittest
  
++import glibconfig
  import taptestrunner
-@@ -40,18 +41,25 @@ class TestGICompileRepositoryBase(testprogramrunner.TestProgramRunner):
+ import testprogramrunner
+ 
+@@ -39,20 +40,9 @@ class TestGICompileRepositoryBase(testprogramrunner.TestProgramRunner):
+     def setUpClass(cls):
          super().setUpClass()
  
-         if "G_TEST_BUILDDIR" in os.environ:
+-        if "G_TEST_BUILDDIR" in os.environ:
 -            cls._gir_path = os.path.join(
 -                os.environ["G_TEST_BUILDDIR"], "..", "introspection"
 -            )
-+            cls._gir_path = [
-+                os.path.join(os.environ["G_TEST_BUILDDIR"], "..", "introspection")
-+            ]
-         else:
+-        else:
 -            cls._gir_path = os.path.join(
 -                os.path.dirname(os.path.realpath(__file__)),
 -                "..",
@@ -54,111 +87,200 @@ index a0b2bcf..ed05527 100644
 -                "..",
 -                "share",
 -                "gir-1.0",
-+            result = subprocess.run(
-+                [
-+                    os.path.join(
-+                        os.path.dirname(os.path.realpath(__file__)),
-+                        "print-gir-path",
-+                    )
-+                ],
-+                check=True,
-+                encoding="utf-8",
-+                stdout=subprocess.PIPE,
-+                text=True,
-+                universal_newlines=True,
-             )
-+            cls._gir_path = result.stdout.rstrip("\n").split(os.pathsep)
-+
-         print(f"gir path set to {cls._gir_path}")
+-            )
+-        print(f"gir path set to {cls._gir_path}")
++        # list of pathlib.Path
++        cls._gir_paths = glibconfig.GIR_XML_SEARCH_PATHS
++        print(f"gir path set to {cls._gir_paths}")
  
  
-@@ -73,13 +81,20 @@ class TestGICompileRepositoryForGLib(TestGICompileRepositoryBase):
+ class TestGICompileRepository(TestGICompileRepositoryBase):
+@@ -73,13 +63,20 @@ class TestGICompileRepositoryForGLib(TestGICompileRepositoryBase):
      GIR_NAME = "GLib-2.0"
  
      def runTestProgram(self, *args, **kwargs):
 -        gir_file = os.path.join(self._gir_path, f"{self.GIR_NAME}.gir")
 -        self.assertTrue(os.path.exists(gir_file))
-+        for d in self._gir_path:
-+            gir_file = os.path.join(d, f"{self.GIR_NAME}.gir")
+-        argv = [gir_file]
++        for d in self._gir_paths:
++            gir_file = d / f"{self.GIR_NAME}.gir"
 +
-+            if os.path.exists(gir_file):
++            if gir_file.exists():
 +                break
 +        else:
-+            self.fail(f"Could not find {self.GIR_NAME}.gir in {self._gir_path}")
++            self.fail(f"Could not find {self.GIR_NAME}.gir in {self._gir_paths}")
 +
-         argv = [gir_file]
++        argv = [str(gir_file)]
          argv.extend(*args)
  
          if self.GIR_NAME != "GLib-2.0":
 -            argv.extend(["--includedir", self._gir_path])
-+            for d in self._gir_path:
-+                argv.extend(["--includedir", d])
++            for d in self._gir_paths:
++                argv.extend(["--includedir", str(d)])
  
          return super().runTestProgram(argv, **kwargs)
  
 diff --git a/girepository/tests/meson.build b/girepository/tests/meson.build
-index fb3b5b0..3b5140d 100644
+index fb3b5b0..ab5e9f7 100644
 --- a/girepository/tests/meson.build
 +++ b/girepository/tests/meson.build
-@@ -13,6 +13,16 @@ girepository_tests = {
-   },
+@@ -183,6 +183,7 @@ endif
+ 
+ python_test_env = test_env
+ python_test_env.prepend('PYTHONPATH', python_test_libraries_path)
++python_test_env.prepend('PYTHONPATH', python_test_libraries_built)
+ 
+ foreach test_name, extra_args : python_tests
+   depends = [extra_args.get('depends', [])]
+diff --git a/glib/tests/meson.build b/glib/tests/meson.build
+index 5734001..b662c37 100644
+--- a/glib/tests/meson.build
++++ b/glib/tests/meson.build
+@@ -514,6 +514,7 @@ endif
+ 
+ python_test_env = test_env
+ python_test_env.prepend('PYTHONPATH', python_test_libraries_path)
++python_test_env.prepend('PYTHONPATH', python_test_libraries_built)
+ 
+ foreach test_name, extra_args : python_tests
+   depends = [extra_args.get('depends', [])]
+diff --git a/gobject/tests/meson.build b/gobject/tests/meson.build
+index 933461f..268dd5d 100644
+--- a/gobject/tests/meson.build
++++ b/gobject/tests/meson.build
+@@ -234,6 +234,7 @@ endforeach
+ 
+ python_test_env = test_env
+ python_test_env.prepend('PYTHONPATH', python_test_libraries_path)
++python_test_env.prepend('PYTHONPATH', python_test_libraries_built)
+ 
+ foreach test_name, extra_args : python_tests
+   depends = [extra_args.get('depends', [])]
+diff --git a/meson.build b/meson.build
+index a8bcadc..af34463 100644
+--- a/meson.build
++++ b/meson.build
+@@ -2500,6 +2500,7 @@ assert(fs.exists(python_test_libraries_path))
+ if not python_version.version_compare(python_version_req)
+   error('Requires Python @0@, @1@ found.'.format(python_version_req, python_version))
+ endif
++python_test_libraries_built = meson.project_build_root() / 'tests' / 'lib'
+ 
+ # Determine which user environment-dependent files that we want to install
+ bash = find_program('bash', required : false)
+diff --git a/tests/black.sh b/tests/black.sh
+index 37473be..2e21490 100755
+--- a/tests/black.sh
++++ b/tests/black.sh
+@@ -16,7 +16,7 @@ export TEST_REQUIRES_TOOLS="black git"
+ 
+ run_lint () {
+     # shellcheck disable=SC2046
+-    black --diff --check $(git ls-files '*.py')
++    black --diff --check $(git ls-files '*.py' 'tests/lib/*.py.in')
  }
  
-+print_gir_path = executable(
-+  'print-gir-path',
-+  sources: ['print-gir-path.c'],
-+  c_args : gir_c_args,
-+  dependencies : libgirepository_dep,
-+  install_dir : installed_tests_execdir,
-+  install_tag : 'tests',
-+  install : installed_tests_enabled,
+ # shellcheck source=tests/lint-common.sh
+diff --git a/tests/flake8.sh b/tests/flake8.sh
+index 10a0a6f..627a2ae 100755
+--- a/tests/flake8.sh
++++ b/tests/flake8.sh
+@@ -21,7 +21,7 @@ run_lint () {
+     # shellcheck disable=SC2046
+     flake8 \
+         --max-line-length=88 --ignore="$formatting_warnings" \
+-        $(git ls-files '*.py')
++        $(git ls-files '*.py' 'tests/lib/*.py.in')
+ }
+ 
+ # shellcheck source=tests/lint-common.sh
+diff --git a/tests/lib/glibconfig.py.in b/tests/lib/glibconfig.py.in
+new file mode 100644
+index 0000000..5da950f
+--- /dev/null
++++ b/tests/lib/glibconfig.py.in
+@@ -0,0 +1,29 @@
++# Copyright 2025 Simon McVittie
++# SPDX-License-Identifier: LGPL-2.1-or-later
++
++import os
++from pathlib import Path
++
++
++if "G_TEST_BUILDDIR" in os.environ:
++    # During build-time testing, we search the build tree.
++    # We can't use the value of G_TEST_BUILDDIR here because we don't
++    # know how deeply nested the current build directory is.
++    project_build_root = Path(__file__).resolve().parent.parent.parent
++
++    # Where to find GLib-2.0.gir, etc. as a list of Path, highest priority first
++    GIR_XML_SEARCH_PATHS = [
++        project_build_root / "girepository" / "introspection",
++    ]
++
++else:
++    # During as-installed testing, we search the final paths.
++
++    # This is a subset of the search path from girparser.c locate_gir(),
++    # with only the directories that are part of GLib's prefix,
++    # excluding XDG_DATA_HOME, XDG_DATA_DIRS and the hard-coded
++    # /usr/share fallback
++    GIR_XML_SEARCH_PATHS = [
++        Path(r"@glib_girdir@"),
++        Path(r"@glib_datadir@") / "gir-1.0",
++    ]
+diff --git a/tests/lib/meson.build b/tests/lib/meson.build
+new file mode 100644
+index 0000000..c519f19
+--- /dev/null
++++ b/tests/lib/meson.build
+@@ -0,0 +1,25 @@
++# Copyright 2024 Collabora Ltd.
++# Copyright 2025 Simon McVittie
++# SPDX-License-Identifier: LGPL-2.1-or-later
++
++install_data(
++  files(
++    'taptestrunner.py',
++    'testprogramrunner.py',
++  ),
++  install_dir: installed_tests_execdir,
++  install_tag: 'tests',
 +)
 +
- # Some tests require GIR files to have been generated
- if enable_gir
-   glib_gir_testing_dep = glib_gir
-@@ -167,7 +177,7 @@ python_tests = {}
- if enable_gir
-   python_tests += {
-     'gi-compile-repository.py': {
--      'depends': [gicompilerepository, glib_gir[0], gobject_gir[0], gio_gir[0]],
-+      'depends': [gicompilerepository, glib_gir[0], gobject_gir[0], gio_gir[0], print_gir_path],
-       'env': {
-         '_G_TEST_PROGRAM_RUNNER_PATH': fs.parent(gicompilerepository.full_path()),
-       },
-diff --git a/girepository/tests/print-gir-path.c b/girepository/tests/print-gir-path.c
-new file mode 100644
-index 0000000..ac028e0
---- /dev/null
-+++ b/girepository/tests/print-gir-path.c
-@@ -0,0 +1,30 @@
-+/* -*- mode: C; c-file-style: "gnu"; indent-tabs-mode: nil; -*-
-+ *
-+ * Copyright 2025 Simon McVittie
-+ * SPDX-License-Identifier: LGPL-2.1-or-later
-+ */
++tests_conf = configuration_data()
++tests_conf.set('glib_datadir', glib_datadir)
++tests_conf.set('glib_girdir', glib_girdir)
 +
-+#include "config.h"
-+
-+#include <stdio.h>
-+
-+#include <glib.h>
-+
-+/*
-+ * Output the hard-coded GObject-Introspection search path for GLib itself,
-+ * within GLib's ${prefix}.
-+ * This is a subset of what's used in locate_gir() in girparser.c,
-+ * and is used to find GLib-2.0.gir, GObject-2.0.gir, Gio-2.0.gir
-+ * when integration-testing gi-compile-repository.
-+ */
-+int
-+main (int    argc,
-+      char **argv)
-+{
-+  puts (/* might be "/usr/lib/x86_64-linux-gnu/gir-1.0" */
-+        GIR_DIR
-+        G_SEARCHPATH_SEPARATOR_S
-+        /* might be "/usr/share" + "/" + "gir-1.0" */
-+        GOBJECT_INTROSPECTION_DATADIR G_DIR_SEPARATOR_S GIR_SUFFIX);
-+  return 0;
-+}
++configure_file(
++  configuration: tests_conf,
++  input: 'glibconfig.py.in',
++  output: 'glibconfig.py',
++  install: installed_tests_enabled,
++  install_dir: installed_tests_execdir,
++  install_tag: 'tests',
++)
+diff --git a/tests/meson.build b/tests/meson.build
+index e5518c6..42162f4 100644
+--- a/tests/meson.build
++++ b/tests/meson.build
+@@ -34,18 +34,4 @@ test(
+   protocol : 'tap',
+ )
+ 
+-# TAP test runner for Python tests
+-if installed_tests_enabled
+-  lib_path = fs.relative_to(
+-      meson.project_source_root() / python_test_libraries_path,
+-      meson.current_source_dir())
+-
+-  install_data(
+-    files(
+-      lib_path / 'taptestrunner.py',
+-      lib_path / 'testprogramrunner.py',
+-    ),
+-    install_dir: installed_tests_execdir,
+-    install_tag: 'tests',
+-  )
+-endif
++subdir('lib')
