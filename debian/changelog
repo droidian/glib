@@ -1,9 +1,18 @@
 glib2.0 (2.83.4-1) UNRELEASED; urgency=medium
 
+  [ Jeremy Bícha ]
   * New upstream release
   * Bump Breaks/Replaces to ensure smooth Ubuntu 24.10 → 25.04 upgrades
+  * Refresh patches
+  * debian/libglib2.0-0t64.symbols: Add new symbols
 
- -- Jeremy Bícha <jbicha@ubuntu.com>  Thu, 20 Feb 2025 12:03:12 -0500
+  [ Simon McVittie ]
+  * libglib2.0-tests: Depend on GIR XML referenced by gi-compile-repository.py
+  * d/copyright: Update location of taptestrunner.py
+  * d/p/tests-Search-the-appropriate-directories-for-our-GIR-XML-.patch:
+    Add proposed patch to fix an autopkgtest failure
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 21 Feb 2025 15:02:45 +0000
 
 glib2.0 (2.83.3-2) unstable; urgency=medium
 
