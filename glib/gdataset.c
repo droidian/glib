@@ -354,10 +354,10 @@ datalist_remove (GData *data, guint32 idx)
   g_assert (idx < data->len);
 #endif
 
-  /* g_data_remove_internal() relies on the fact, that this function removes
-   * the entry similar to g_array_remove_index_fast(). That is, the entries up
-   * to @idx are left unchanged, and the last entry is moved to position @idx.
-   * */
+  /* We remove the element similar to g_array_remove_index_fast(). That is, the
+   * entries up to @idx are left unchanged, and the last entry is moved to
+   * position @idx.
+   */
 
   index = datalist_index_get (data);
   if (G_UNLIKELY (index))
@@ -464,8 +464,8 @@ datalist_find (GData *data, GQuark key_id, guint32 *out_idx)
   GHashTable *index;
   guint32 i;
 
-  if (!data)
-    goto out_not_found;
+  if (G_UNLIKELY (!data))
+    return NULL;
 
   index = datalist_index_get (data);
 
@@ -483,12 +483,12 @@ datalist_find (GData *data, GQuark key_id, guint32 *out_idx)
             }
         }
 
-      goto out_not_found;
+      return NULL;
     }
 
   data_elt = g_hash_table_lookup (index, &key_id);
   if (!data_elt)
-    goto out_not_found;
+    return NULL;
 
 #if G_ENABLE_DEBUG
   g_assert (data_elt >= data->data && data_elt < &data->data[data->len]);
@@ -497,11 +497,6 @@ datalist_find (GData *data, GQuark key_id, guint32 *out_idx)
   if (out_idx)
     *out_idx = (data_elt - data->data);
   return data_elt;
-
-out_not_found:
-  if (out_idx)
-    *out_idx = G_MAXUINT32;
-  return NULL;
 }
 
 /**
@@ -712,10 +707,26 @@ g_data_set_internal (GData	  **datalist,
 
 }
 
-static inline void
-g_data_remove_internal (GData  **datalist,
-                        GQuark  *keys,
-                        gsize    n_keys)
+/**
+ * g_datalist_id_remove_multiple:
+ * @datalist: a datalist
+ * @keys: (array length=n_keys): keys to remove
+ * @n_keys: length of @keys.
+ *
+ * Removes multiple keys from a datalist.
+ *
+ * This is more efficient than calling g_datalist_id_remove_data()
+ * multiple times in a row.
+ *
+ * Before 2.80, @n_keys had to be not larger than 16.
+ * Since 2.84, performance is improved for larger number of keys.
+ *
+ * Since: 2.74
+ */
+void
+g_datalist_id_remove_multiple (GData **datalist,
+                               GQuark *keys,
+                               gsize n_keys)
 {
   GData *d;
   GDataElt *old;
@@ -737,17 +748,15 @@ g_data_remove_internal (GData  **datalist,
 
   /* Allocate an array of GDataElt to hold copies of the elements
    * that are removed from the datalist. Allow enough space for all
-   * the keys; if a key is not found, the corresponding element of
-   * old is not populated, so we initialize them all to NULL to
-   * detect that case.
+   * the keys.
    *
    * At most allocate 400 bytes on the stack. Especially since we call
    * out to external code, we don't know how much stack we can use. */
   if (n_keys <= 400u / sizeof (GDataElt))
-    old = g_newa0 (GDataElt, n_keys);
+    old = g_newa (GDataElt, n_keys);
   else
     {
-      old_to_free = g_new0 (GDataElt, n_keys);
+      old_to_free = g_new (GDataElt, n_keys);
       old = old_to_free;
     }
 
@@ -975,30 +984,6 @@ g_datalist_id_set_data_full (GData	  **datalist,
 }
 
 /**
- * g_datalist_id_remove_multiple:
- * @datalist: a datalist
- * @keys: (array length=n_keys): keys to remove
- * @n_keys: length of @keys.
- *
- * Removes multiple keys from a datalist.
- *
- * This is more efficient than calling g_datalist_id_remove_data()
- * multiple times in a row.
- *
- * Before 2.80, @n_keys had to be not larger than 16.
- * Since 2.84, performance is improved for larger number of keys.
- *
- * Since: 2.74
- */
-void
-g_datalist_id_remove_multiple (GData  **datalist,
-                               GQuark  *keys,
-                               gsize    n_keys)
-{
-  g_data_remove_internal (datalist, keys, n_keys);
-}
-
-/**
  * g_dataset_id_remove_no_notify: (skip)
  * @dataset_location: (not nullable): the location identifying the dataset.
  * @key_id: the #GQuark ID identifying the data element.
@@ -1129,7 +1114,7 @@ g_datalist_id_update_atomic (GData **datalist,
       new_destroy = NULL;
     }
 
-  result = callback (key_id, &new_data, &new_destroy, user_data);
+  result = callback (&new_data, &new_destroy, user_data);
 
   if (data && !new_data)
     {

@@ -261,7 +261,7 @@ else
     getpwuid_preload = shared_library('getpwuid-preload',
                                       'getpwuid-preload.c',
                                       name_prefix : '',
-                                      dependencies: libdl_dep,
+                                      dependencies: [libdl_dep, libglib_dep],
                                       install_dir : installed_tests_execdir,
                                       install_tag : 'tests',
                                       install: installed_tests_enabled)
@@ -514,6 +514,7 @@ endif
 
 python_test_env = test_env
 python_test_env.prepend('PYTHONPATH', python_test_libraries_path)
+python_test_env.prepend('PYTHONPATH', python_test_libraries_built)
 
 foreach test_name, extra_args : python_tests
   depends = [extra_args.get('depends', [])]
