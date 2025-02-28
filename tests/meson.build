@@ -25,27 +25,15 @@ if have_bash
   endforeach
 endif
 
-test(
-  'check-missing-install-tag.py',
-  python,
-  args : ['-B', files('check-missing-install-tag.py')],
-  env : test_env,
-  suite : ['lint', 'no-valgrind'],
-  protocol : 'tap',
-)
-
-# TAP test runner for Python tests
-if installed_tests_enabled
-  lib_path = fs.relative_to(
-      meson.project_source_root() / python_test_libraries_path,
-      meson.current_source_dir())
-
-  install_data(
-    files(
-      lib_path / 'taptestrunner.py',
-      lib_path / 'testprogramrunner.py',
-    ),
-    install_dir: installed_tests_execdir,
-    install_tag: 'tests',
+if not meson.is_subproject()
+  test(
+    'check-missing-install-tag.py',
+    python,
+    args : ['-B', files('check-missing-install-tag.py')],
+    env : test_env,
+    suite : ['lint', 'no-valgrind'],
+    protocol : 'tap',
   )
 endif
+
+subdir('lib')

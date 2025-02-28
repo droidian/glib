@@ -1,5 +1,5 @@
 project('glib', 'c',
-  version : '2.83.4',
+  version : '2.83.5',
   # NOTE: See the policy in docs/meson-version.md before changing the Meson dependency
   meson_version : '>= 1.4.0',
   default_options : [
@@ -2225,9 +2225,13 @@ else
 endif
 
 pcre2_req = '>=10.32'
+pcre2_options = [
+  'default_library=static',
+  'test=false',
+]
 
 # Pick up pcre from the system, or if "--force-fallback-for libpcre2-8" was specified
-pcre2 = dependency('libpcre2-8', version: pcre2_req, required: false, default_options: ['default_library=static'])
+pcre2 = dependency('libpcre2-8', version: pcre2_req, required: false, default_options: pcre2_options)
 if not pcre2.found()
   if cc.get_id() == 'msvc' or cc.get_id() == 'clang-cl'
   # MSVC: Search for the PCRE2 library by the configuration, which corresponds
@@ -2243,7 +2247,7 @@ endif
 
 # Try again with the fallback
 if not pcre2.found()
-  pcre2 = dependency('libpcre2-8', version: pcre2_req, allow_fallback: true, default_options: ['default_library=static'])
+  pcre2 = dependency('libpcre2-8', version: pcre2_req, allow_fallback: true, default_options: pcre2_options)
   assert(pcre2.type_name() == 'internal')
   # static flags are automatically enabled by the subproject if it's built
   # with default_library=static
@@ -2500,6 +2504,7 @@ assert(fs.exists(python_test_libraries_path))
 if not python_version.version_compare(python_version_req)
   error('Requires Python @0@, @1@ found.'.format(python_version_req, python_version))
 endif
+python_test_libraries_built = meson.project_build_root() / 'tests' / 'lib'
 
 # Determine which user environment-dependent files that we want to install
 bash = find_program('bash', required : false)
@@ -2681,7 +2686,9 @@ subdir('gmodule')
 subdir('gio')
 subdir('girepository')
 subdir('fuzzing')
-subdir('tests')
+if get_option('tests')
+  subdir('tests')
+endif
 
 # xgettext is optional (on Windows for instance)
 if find_program('xgettext', required : get_option('nls')).found()
