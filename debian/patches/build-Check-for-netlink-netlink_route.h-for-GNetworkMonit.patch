@@ -1,0 +1,56 @@
+From: Philip Withnall <pwithnall@gnome.org>
+Date: Mon, 10 Mar 2025 12:01:52 +0000
+Subject: build: Check for <netlink/netlink_route.h> for
+ GNetworkMonitorNetlink
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+Apparently it’s possible for `netlink/netlink.h` to be available on
+Linux, when we expected it to only be available on FreeBSD, but for
+`netlink/netlink_route.h` to not exist. So add a check for the latter.
+
+Signed-off-by: Philip Withnall <pwithnall@gnome.org>
+
+Fixes: #3630
+Origin: upstream, 2.84.1, commit:31546be3f83048580109e6c818cc1cb757b568c9
+---
+ gio/gnetworkmonitornetlink.c | 2 +-
+ meson.build                  | 4 +++-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/gio/gnetworkmonitornetlink.c b/gio/gnetworkmonitornetlink.c
+index adaa77d..a2fb292 100644
+--- a/gio/gnetworkmonitornetlink.c
++++ b/gio/gnetworkmonitornetlink.c
+@@ -42,7 +42,7 @@
+ #include <linux/netlink.h>
+ #include <linux/rtnetlink.h>
+ #endif
+-#ifdef HAVE_NETLINK_NETLINK_H
++#if defined(HAVE_NETLINK_NETLINK_H) && defined(HAVE_NETLINK_NETLINK_ROUTE_H)
+ #include <netlink/netlink.h>
+ #include <netlink/netlink_route.h>
+ #endif
+diff --git a/meson.build b/meson.build
+index ddd0998..bc0b033 100644
+--- a/meson.build
++++ b/meson.build
+@@ -417,6 +417,7 @@ headers = [
+   'memory.h',
+   'mntent.h',
+   'netlink/netlink.h',
++  'netlink/netlink_route.h',
+   'poll.h',
+   'pwd.h',
+   'sched.h',
+@@ -475,7 +476,8 @@ if cc.check_header('malloc.h')
+   glib_conf_prefix = glib_conf_prefix + '#define HAVE_MALLOC_H 1\n'
+ endif
+ 
+-if glib_conf.has('HAVE_LINUX_NETLINK_H') or glib_conf.has('HAVE_NETLINK_NETLINK_H')
++if (glib_conf.has('HAVE_LINUX_NETLINK_H') or
++    (glib_conf.has('HAVE_NETLINK_NETLINK_H') and glib_conf.has('HAVE_NETLINK_NETLINK_ROUTE_H')))
+   glib_conf.set('HAVE_NETLINK', 1)
+ endif
+ 
