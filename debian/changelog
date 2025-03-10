@@ -1,8 +1,9 @@
 glib2.0 (2.84.0-1) UNRELEASED; urgency=medium
 
   * New upstream release
+  * d/gbp.conf, d/watch: Watch for 2.84.x stable releases for trixie
 
- -- Simon McVittie <smcv@debian.org>  Mon, 10 Mar 2025 10:01:33 +0000
+ -- Simon McVittie <smcv@debian.org>  Mon, 10 Mar 2025 10:05:08 +0000
 
 glib2.0 (2.83.5-1) unstable; urgency=medium
 
