@@ -1,9 +1,12 @@
 glib2.0 (2.84.0-1) UNRELEASED; urgency=medium
 
   * New upstream release
+  * d/patches: Add post-release fixes up to commit 2.84.0-12-g55a7660f18.
+    In particular this fixes a FTBFS with the current version of
+    gobject-introspection.
   * d/gbp.conf, d/watch: Watch for 2.84.x stable releases for trixie
 
- -- Simon McVittie <smcv@debian.org>  Mon, 10 Mar 2025 10:05:08 +0000
+ -- Simon McVittie <smcv@debian.org>  Mon, 10 Mar 2025 18:08:02 +0000
 
 glib2.0 (2.83.5-1) unstable; urgency=medium
 
