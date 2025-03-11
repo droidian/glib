@@ -254,9 +254,11 @@ Suggests:
  libxml2-utils,
 Breaks:
  libgio-2.0-dev (<< 2.83),
+ libglib2.0-dev (<< 2.83),
  libglib2.0-dev-bin (<< 2.83),
 Replaces:
  libgio-2.0-dev (<< 2.83),
+ libglib2.0-dev (<< 2.83),
  libglib2.0-dev-bin (<< 2.83),
 Multi-Arch: foreign
 Description: Development utilities for GLib, GObject and GIO libraries
