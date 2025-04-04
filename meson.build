@@ -1,5 +1,5 @@
 project('glib', 'c',
-  version : '2.84.0',
+  version : '2.84.1',
   # NOTE: See the policy in docs/meson-version.md before changing the Meson dependency
   meson_version : '>= 1.4.0',
   default_options : [
@@ -417,6 +417,7 @@ headers = [
   'memory.h',
   'mntent.h',
   'netlink/netlink.h',
+  'netlink/netlink_route.h',
   'poll.h',
   'pwd.h',
   'sched.h',
@@ -475,7 +476,8 @@ if cc.check_header('malloc.h')
   glib_conf_prefix = glib_conf_prefix + '#define HAVE_MALLOC_H 1\n'
 endif
 
-if glib_conf.has('HAVE_LINUX_NETLINK_H') or glib_conf.has('HAVE_NETLINK_NETLINK_H')
+if (glib_conf.has('HAVE_LINUX_NETLINK_H') or
+    (glib_conf.has('HAVE_NETLINK_NETLINK_H') and glib_conf.has('HAVE_NETLINK_NETLINK_ROUTE_H')))
   glib_conf.set('HAVE_NETLINK', 1)
 endif
 
@@ -2673,6 +2675,11 @@ endif
 gir_args = [
   '--quiet',
 ]
+if gobject_introspection.version().version_compare('>=1.83.2')
+  gir_args += [
+    '--doc-format=gi-docgen',
+  ]
+endif
 
 pkg = import('pkgconfig')
 windows = import('windows')
