@@ -1,8 +1,9 @@
-glib2.0 (2.84.1-1) UNRELEASED; urgency=medium
+glib2.0 (2.84.1-1) unstable; urgency=medium
 
-  * New upstream release
+  * New upstream bugfix release (LP: #2106264)
+  * Remove patches applied in new release
 
- -- Jeremy Bícha <jbicha@ubuntu.com>  Fri, 04 Apr 2025 09:50:12 -0400
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Fri, 04 Apr 2025 15:01:37 -0400
 
 glib2.0 (2.84.0-2) unstable; urgency=medium
 
