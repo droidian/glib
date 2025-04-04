@@ -107,7 +107,8 @@ typedef enum
   STATE_ALIAS,
   STATE_TYPE,
   STATE_ATTRIBUTE,
-  STATE_PASSTHROUGH
+  STATE_PASSTHROUGH,
+  STATE_DOC_FORMAT,  /* 35 */
 } ParseState;
 
 typedef struct _ParseContext ParseContext;
@@ -2311,7 +2312,7 @@ end_type_top (ParseContext *ctx)
   if (!ctx->type_parameters)
     goto out;
 
-  typenode = (GIIrNodeType*)ctx->type_parameters->data;
+  typenode = (GIIrNodeType *) g_steal_pointer (&ctx->type_parameters->data);
 
   /* Default to pointer for unspecified containers */
   if (typenode->tag == GI_TYPE_TAG_ARRAY ||
@@ -2335,32 +2336,32 @@ end_type_top (ParseContext *ctx)
     case GI_IR_NODE_PARAM:
       {
         GIIrNodeParam *param = (GIIrNodeParam *)ctx->current_typed;
-        param->type = typenode;
+        param->type = g_steal_pointer (&typenode);
       }
       break;
     case GI_IR_NODE_FIELD:
       {
         GIIrNodeField *field = (GIIrNodeField *)ctx->current_typed;
-        field->type = typenode;
+        field->type = g_steal_pointer (&typenode);
       }
       break;
     case GI_IR_NODE_PROPERTY:
       {
         GIIrNodeProperty *property = (GIIrNodeProperty *) ctx->current_typed;
-        property->type = typenode;
+        property->type = g_steal_pointer (&typenode);
       }
       break;
     case GI_IR_NODE_CONSTANT:
       {
         GIIrNodeConstant *constant = (GIIrNodeConstant *)ctx->current_typed;
-        constant->type = typenode;
+        constant->type = g_steal_pointer (&typenode);
       }
       break;
     default:
       g_printerr("current node is %d\n", CURRENT_NODE (ctx)->type);
       g_assert_not_reached ();
     }
-  g_list_free (ctx->type_parameters);
+  g_list_free_full (ctx->type_parameters, (GDestroyNotify) gi_ir_node_free);
 
  out:
   ctx->type_depth = 0;
@@ -2376,7 +2377,7 @@ end_type_recurse (ParseContext *ctx)
 
   parent = (GIIrNodeType *) ((GList*)ctx->type_stack->data)->data;
   if (ctx->type_parameters)
-    param = (GIIrNodeType *) ctx->type_parameters->data;
+    param = (GIIrNodeType *) g_steal_pointer (&ctx->type_parameters->data);
 
   if (parent->tag == GI_TYPE_TAG_ARRAY ||
       parent->tag == GI_TYPE_TAG_GLIST ||
@@ -2385,7 +2386,7 @@ end_type_recurse (ParseContext *ctx)
       g_assert (param != NULL);
 
       if (parent->parameter_type1 == NULL)
-        parent->parameter_type1 = param;
+        parent->parameter_type1 = g_steal_pointer (&param);
       else
         g_assert_not_reached ();
     }
@@ -2394,13 +2395,18 @@ end_type_recurse (ParseContext *ctx)
       g_assert (param != NULL);
 
       if (parent->parameter_type1 == NULL)
-        parent->parameter_type1 = param;
+        parent->parameter_type1 = g_steal_pointer (&param);
       else if (parent->parameter_type2 == NULL)
-        parent->parameter_type2 = param;
+        parent->parameter_type2 = g_steal_pointer (&param);
       else
         g_assert_not_reached ();
     }
-  g_list_free (ctx->type_parameters);
+
+  if (param != NULL)
+    gi_ir_node_free ((GIIrNode *) param);
+  param = NULL;
+
+  g_list_free_full (ctx->type_parameters, (GDestroyNotify) gi_ir_node_free);
   ctx->type_parameters = (GList *)ctx->type_stack->data;
   ctx->type_stack = g_list_delete_link (ctx->type_stack, ctx->type_stack);
 }
@@ -3159,6 +3165,11 @@ start_element_handler (GMarkupParseContext  *context,
           state_switch (ctx, STATE_PASSTHROUGH);
           goto out;
         }
+      else if (strcmp ("doc:format", element_name) == 0)
+        {
+          state_switch (ctx, STATE_DOC_FORMAT);
+          goto out;
+        }
       break;
 
     case 'e':
@@ -3842,6 +3853,10 @@ end_element_handler (GMarkupParseContext  *context,
         {
           state_switch (ctx, ctx->prev_state);
         }
+      break;
+    case STATE_DOC_FORMAT:
+      if (require_end_element (context, ctx, "doc:format", element_name, error))
+        state_switch (ctx, STATE_REPOSITORY);
       break;
 
     case STATE_PASSTHROUGH:
