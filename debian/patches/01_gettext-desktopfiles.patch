@@ -16,7 +16,7 @@ Applied-upstream: no, rejected because "this will be solved soon" (in 2013)
  1 file changed, 83 insertions(+)
 
 diff --git a/glib/gkeyfile.c b/glib/gkeyfile.c
-index 3a99433..569ae13 100644
+index 0e4335d..6c44183 100644
 --- a/glib/gkeyfile.c
 +++ b/glib/gkeyfile.c
 @@ -501,6 +501,17 @@
@@ -90,7 +90,7 @@ index 3a99433..569ae13 100644
    return TRUE;
  }
  
-@@ -2261,6 +2290,8 @@ g_key_file_get_locale_string (GKeyFile     *key_file,
+@@ -2270,6 +2299,8 @@ g_key_file_get_locale_string (GKeyFile     *key_file,
    GError *key_file_error;
    gchar **languages;
    gboolean free_languages = FALSE;
@@ -99,7 +99,7 @@ index 3a99433..569ae13 100644
    gint i;
  
    g_return_val_if_fail (key_file != NULL, NULL);
-@@ -2282,6 +2313,25 @@ g_key_file_get_locale_string (GKeyFile     *key_file,
+@@ -2291,6 +2322,25 @@ g_key_file_get_locale_string (GKeyFile     *key_file,
        free_languages = FALSE;
      }
    
@@ -125,7 +125,7 @@ index 3a99433..569ae13 100644
    for (i = 0; languages[i]; i++)
      {
        if (g_strcmp0 (languages[i], "C") == 0)
-@@ -2298,6 +2348,39 @@ g_key_file_get_locale_string (GKeyFile     *key_file,
+@@ -2307,6 +2357,39 @@ g_key_file_get_locale_string (GKeyFile     *key_file,
  	break;
     }
  
