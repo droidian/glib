@@ -13,6 +13,9 @@ Closes GNOME/dconf#76
 (cherry picked from commit 3cc0c0de33bc4b461e89b05d142e1ecf5f474317)
 
 Origin: upstream glib-2-84 branch, after 2.84.1
+Comment: This was actually reverted from the glib-2-84 branch but
+ it seems reasonable to keep it for trixie anyway
+ https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4608
 ---
  glib/gfileutils.c      | 25 +++++++++++++++++++++++--
  glib/tests/fileutils.c | 14 ++++++++++----
