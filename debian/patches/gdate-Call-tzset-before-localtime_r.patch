@@ -1,0 +1,24 @@
+From: Alessandro Astone <alessandro.astone@canonical.com>
+Date: Wed, 30 Apr 2025 16:04:34 +0200
+Subject: gdate: Call tzset before localtime_r
+
+From `man 3 ctime`:
+  According to POSIX.1, localtime() is required to behave as though tzset(3)
+  was called, while localtime_r() does not have this requirement.
+  For portable code, tzset(3) should be called before localtime_r().
+---
+ glib/gdate.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/glib/gdate.c b/glib/gdate.c
+index ffc21f1..ed25ec3 100644
+--- a/glib/gdate.c
++++ b/glib/gdate.c
+@@ -1392,6 +1392,7 @@ _g_localtime (time_t timet, struct tm *out_tm)
+   gboolean success = TRUE;
+ 
+ #ifdef HAVE_LOCALTIME_R
++  tzset ();
+   if (!localtime_r (&timet, out_tm))
+     success = FALSE;
+ #else

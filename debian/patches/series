@@ -18,3 +18,4 @@ gclosure-fix-ATOMIC_CHANGE_FIELD-to-read-vint-atomically.patch
 gfileutils-Preserve-mode-during-atomic-updates.patch
 gstring-carefully-handle-gssize-parameters.patch
 gstring-Make-len_unsigned-unsigned.patch
+gdate-Call-tzset-before-localtime_r.patch
