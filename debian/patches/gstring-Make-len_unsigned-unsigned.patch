@@ -1,0 +1,25 @@
+From: Peter Bloomfield <peterbloomfield@bellsouth.net>
+Date: Fri, 11 Apr 2025 05:52:33 +0000
+Subject: gstring: Make len_unsigned unsigned
+
+Bug: https://gitlab.gnome.org/GNOME/glib/-/issues/3677
+Bug-CVE: CVE-2025-4373
+Bug-Debian: https://bugs.debian.org/1104930
+Origin: upstream, 2.84.2, commit:f32f4aea514e39086a2627e9483d841c9eeb9bc3
+---
+ glib/gstring.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/glib/gstring.c b/glib/gstring.c
+index d79a484..2a399ee 100644
+--- a/glib/gstring.c
++++ b/glib/gstring.c
+@@ -928,7 +928,7 @@ g_string_overwrite_len (GString     *string,
+                         const gchar *val,
+                         gssize       len)
+ {
+-  gssize len_unsigned;
++  gsize len_unsigned;
+   gsize end;
+ 
+   g_return_val_if_fail (string != NULL, NULL);
