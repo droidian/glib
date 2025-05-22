@@ -14,8 +14,4 @@ workarounds/Skip-memory-monitor-dbus-test-if-not-specifically-request.patch
 workarounds/tests-Skip-debugcontroller-test.patch
 workarounds/testfilemonitor-Skip-if-we-are-avoiding-flaky-tests.patch
 debian/girepository-Describe-the-Debian-specific-cross-prefixed-.patch
-gclosure-fix-ATOMIC_CHANGE_FIELD-to-read-vint-atomically.patch
 gfileutils-Preserve-mode-during-atomic-updates.patch
-gstring-carefully-handle-gssize-parameters.patch
-gstring-Make-len_unsigned-unsigned.patch
-gdate-Call-tzset-before-localtime_r.patch
