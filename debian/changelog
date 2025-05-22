@@ -1,6 +1,20 @@
 glib2.0 (2.84.2-1) UNRELEASED; urgency=medium
 
-  * New upstream release
+  * New upstream stable release
+    - Avoid potential negative string offsets in g_get_locale_variants()
+      if the input is syntactically invalid; add test and fuzzing coverage
+      (glib#3405 upstream)
+    - Minor improvements in tests (no effect on library)
+    - Don't use faccess() with flags on Android (no effect on Debian)
+    - Windows adjustments in girepository (no effect on Debian packages)
+    - CI updates (no effect on Debian packages)
+    - Other changes were already included in 2.84.1-3
+  * d/p/gclosure-fix-ATOMIC_CHANGE_FIELD-to-read-vint-atomically.patch,
+    d/p/gstring-carefully-handle-gssize-parameters.patch,
+    d/p/gstring-Make-len_unsigned-unsigned.patch,
+    d/p/gdate-Call-tzset-before-localtime_r.patch:
+    Drop patches from 2.84.1-2 and 2.84.1-3 that were included in the
+    upstream release
 
  -- Simon McVittie <smcv@debian.org>  Thu, 22 May 2025 16:17:21 +0100
 
