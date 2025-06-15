@@ -1,3 +1,13 @@
+glib2.0 (2.84.3-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+    - Move an ineffective string length overflow check to a location where it
+      will be effective, fixing a possible buffer overflow when working with
+      multi-gigabyte strings (CVE-2025-6052, Closes: #1107797; unlikely to be
+      exploitable in practice)
+
+ -- Simon McVittie <smcv@debian.org>  Sun, 15 Jun 2025 11:47:59 +0100
+
 glib2.0 (2.84.2-1) unstable; urgency=medium
 
   * New upstream stable release
