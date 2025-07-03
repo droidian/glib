@@ -16,10 +16,10 @@ Forwarded: no
  3 files changed, 33 insertions(+)
 
 diff --git a/glib/tests/mainloop.c b/glib/tests/mainloop.c
-index 6748a64..9cf034b 100644
+index 243becd..fb0cd17 100644
 --- a/glib/tests/mainloop.c
 +++ b/glib/tests/mainloop.c
-@@ -524,6 +524,14 @@ test_child_sources (void)
+@@ -528,6 +528,14 @@ test_child_sources (void)
    GMainLoop *loop;
    GSource *parent, *child_b, *child_c, *end;
  
@@ -34,7 +34,7 @@ index 6748a64..9cf034b 100644
    ctx = g_main_context_new ();
    loop = g_main_loop_new (ctx, FALSE);
  
-@@ -602,6 +610,14 @@ test_recursive_child_sources (void)
+@@ -606,6 +614,14 @@ test_recursive_child_sources (void)
    GMainLoop *loop;
    GSource *parent, *child_b, *child_c, *end;
  
@@ -70,7 +70,7 @@ index 1ae3f3a..f838c9c 100644
  
    last_time = g_get_monotonic_time ();
 diff --git a/gobject/tests/threadtests.c b/gobject/tests/threadtests.c
-index 9b923f3..c048f6b 100644
+index 2ae2578..991c8a7 100644
 --- a/gobject/tests/threadtests.c
 +++ b/gobject/tests/threadtests.c
 @@ -482,6 +482,14 @@ test_threaded_toggle_notify (void)
