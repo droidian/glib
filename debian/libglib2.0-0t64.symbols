@@ -2130,9 +2130,11 @@ libgio-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_volume_should_automount@Base 2.16.0
  g_zlib_compressor_format_get_type@Base 2.24.0
  g_zlib_compressor_get_file_info@Base 2.26.0
+ g_zlib_compressor_get_os@Base 2.85.1
  g_zlib_compressor_get_type@Base 2.24.0
  g_zlib_compressor_new@Base 2.24.0
  g_zlib_compressor_set_file_info@Base 2.26.0
+ g_zlib_compressor_set_os@Base 2.85.1
  g_zlib_decompressor_get_file_info@Base 2.26.0
  g_zlib_decompressor_get_type@Base 2.24.0
  g_zlib_decompressor_new@Base 2.24.0
@@ -2260,11 +2262,13 @@ libglib-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_base64_encode_step@Base 2.12.0
  g_basename@Base 2.12.0
  g_bit_lock@Base 2.24.0
+ g_bit_lock_and_get@Base 2.85.1
  g_bit_nth_lsf@Base 2.12.0
  g_bit_nth_msf@Base 2.12.0
  g_bit_storage@Base 2.12.0
  g_bit_trylock@Base 2.24.0
  g_bit_unlock@Base 2.24.0
+ g_bit_unlock_and_set@Base 2.85.1
  g_blow_chunks@Base 2.12.0
  g_bookmark_file_add_application@Base 2.12.0
  g_bookmark_file_add_group@Base 2.12.0
@@ -2444,7 +2448,9 @@ libglib-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_date_get_month@Base 2.12.0
  g_date_get_sunday_week_of_year@Base 2.12.0
  g_date_get_sunday_weeks_in_year@Base 2.12.0
+ g_date_get_week_of_year@Base 2.85.1
  g_date_get_weekday@Base 2.12.0
+ g_date_get_weeks_in_year@Base 2.85.1
  g_date_get_year@Base 2.12.0
  g_date_is_first_of_month@Base 2.12.0
  g_date_is_last_of_month@Base 2.12.0
@@ -2822,6 +2828,7 @@ libglib-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_locale_to_utf8@Base 2.12.0
  g_log@Base 2.12.0
  g_log_default_handler@Base 2.12.0
+ g_log_get_always_fatal@Base 2.85.1
  g_log_get_debug_enabled@Base 2.72.0
  g_log_remove_handler@Base 2.12.0
  g_log_set_always_fatal@Base 2.12.0
@@ -3363,6 +3370,7 @@ libglib-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_source_add_unix_fd@Base 2.36.0
  g_source_attach@Base 2.12.0
  g_source_destroy@Base 2.12.0
+ g_source_dup_context@Base 2.85.1
  g_source_get_can_recurse@Base 2.12.0
  g_source_get_context@Base 2.12.0
  g_source_get_current_time@Base 2.12.0
@@ -3471,6 +3479,7 @@ libglib-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_string_chunk_insert_const@Base 2.12.0
  g_string_chunk_insert_len@Base 2.12.0
  g_string_chunk_new@Base 2.12.0
+ g_string_copy@Base 2.85.1
  g_string_down@Base 2.12.0
  g_string_equal@Base 2.12.0
  g_string_erase@Base 2.12.0
