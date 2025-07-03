@@ -705,7 +705,7 @@ test_mkdir_with_parents_1 (const gchar *base)
   if (g_file_test (p1, G_FILE_TEST_EXISTS))
     g_error ("failed, did g_rmdir(%s), but %s is still there", p1, p1);
 
-  f = g_fopen (p1, "w");
+  f = g_fopen (p1, "we");
   if (f == NULL)
     g_error ("failed, couldn't create file %s", p1);
   fclose (f);
@@ -1446,7 +1446,7 @@ test_get_contents (void)
   char *filename = g_build_filename (g_get_tmp_dir (), "file-test-get-contents", NULL);
   gsize bytes_written;
 
-  f = g_fopen (filename, "w");
+  f = g_fopen (filename, "we");
   bytes_written = fwrite (text, 1, strlen (text), f);
   g_assert_cmpint (bytes_written, ==, strlen (text));
   fclose (f);
@@ -1687,7 +1687,9 @@ test_set_contents_full (void)
           EXISTING_FILE_DIRECTORY,
         }
       existing_file;
-      int new_mode;  /* only relevant if @existing_file is %EXISTING_FILE_NONE */
+      /* only relevant if @existing_file is
+       * %EXISTING_FILE_NONE or %EXISTING_FILE_REGULAR */
+      int mode;
       gboolean use_strlen;
 
       gboolean expected_success;
@@ -1698,6 +1700,8 @@ test_set_contents_full (void)
       { EXISTING_FILE_NONE, 0644, FALSE, TRUE, 0 },
       { EXISTING_FILE_NONE, 0644, TRUE, TRUE, 0 },
       { EXISTING_FILE_NONE, 0600, FALSE, TRUE, 0 },
+      // Assume umask is 022, ensures that we preserve perms with, eg. 077
+      { EXISTING_FILE_REGULAR, 0666, FALSE, TRUE, 0 },
       { EXISTING_FILE_REGULAR, 0644, FALSE, TRUE, 0 },
 #ifndef G_OS_WIN32
       { EXISTING_FILE_SYMLINK, 0644, FALSE, TRUE, 0 },
@@ -1742,6 +1746,8 @@ test_set_contents_full (void)
                 g_assert_no_errno (g_fsync (fd));
                 close (fd);
 
+                g_assert_no_errno (chmod (file_name, tests[i].mode));
+
 #ifndef G_OS_WIN32
                 /* Pass an existing symlink to g_file_set_contents_full() to see
                  * what it does. */
@@ -1785,7 +1791,7 @@ test_set_contents_full (void)
           /* Set the file contents */
           ret = g_file_set_contents_full (set_contents_name, "b",
                                           tests[i].use_strlen ? -1 : 1,
-                                          flags, tests[i].new_mode, &error);
+                                          flags, tests[i].mode, &error);
 
           if (!tests[i].expected_success)
             {
@@ -1809,10 +1815,10 @@ test_set_contents_full (void)
 
               g_assert_no_errno (g_lstat (set_contents_name, &statbuf));
 
-              if (tests[i].existing_file == EXISTING_FILE_NONE)
+              if (tests[i].existing_file & (EXISTING_FILE_NONE | EXISTING_FILE_REGULAR))
                 {
                   int mode = statbuf.st_mode & ~S_IFMT;
-                  int new_mode = tests[i].new_mode;
+                  int new_mode = tests[i].mode;
 #ifdef G_OS_WIN32
                   /* on windows, group and others perms handling is different */
                   /* only check the rwx user permissions */
@@ -2036,7 +2042,7 @@ test_read_link (void)
   g_free (newpath);
   g_free (badpath);
 
-  file = fopen (filename, "w");
+  file = g_fopen (filename, "we");
   g_assert_nonnull (file);
   fclose (file);
 
@@ -2213,7 +2219,36 @@ test_fopen_modes (void)
       "a+b",
       "wb+",
       "rb+",
-      "ab+"
+      "ab+",
+      "we",
+      "re",
+      "ae",
+      "w+e",
+      "r+e",
+      "a+e",
+      "wbe",
+      "rbe",
+      "abe",
+      "w+be",
+      "r+be",
+      "a+be",
+      "wb+e",
+      "rb+e",
+      "ab+e",
+      "web",
+      "reb",
+      "aeb",
+      "w+eb",
+      "r+eb",
+      "a+eb",
+      "web+",
+      "reb+",
+      "aeb+",
+#ifdef G_OS_WIN32
+      /* https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/fopen-wfopen?view=msvc-170#unicode-support */
+      "w, ccs=utf-16le",
+      "we, ccs=utf-16le",
+#endif
     };
 
   g_test_bug ("https://gitlab.gnome.org/GNOME/glib/merge_requests/119");
