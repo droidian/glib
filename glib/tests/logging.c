@@ -614,6 +614,20 @@ test_default_handler (void)
 }
 
 static void
+test_journald_handler (void)
+{
+  /* We can’t require that the journal exists on the test system. But if it
+   * does, we can check that the writer doesn’t crash. */
+  const GLogField fields[] = {
+    { "MESSAGE", "This is a test message.", -1 },
+    { "MESSAGE_ID", "7187d27ad7f84351b76b7612eef52cd6", -1 },
+    { "MY_APPLICATION_CUSTOM_FIELD", "some debug string", -1 },
+  };
+
+  g_log_writer_journald (G_LOG_LEVEL_DEBUG, fields, G_N_ELEMENTS (fields), NULL);
+}
+
+static void
 test_fatal_log_mask (void)
 {
   if (g_test_subprocess ())
@@ -627,6 +641,17 @@ test_fatal_log_mask (void)
   g_test_trap_assert_failed ();
   /* G_LOG_LEVEL_INFO isn't printed by default */
   g_test_trap_assert_stdout_unmatched ("*fatal*");
+}
+
+static void
+test_always_fatal (void)
+{
+  GLogLevelFlags log_level;
+
+  log_level = G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_WARNING;
+  g_log_set_always_fatal (log_level);
+
+  g_assert_cmpint (g_log_get_always_fatal (), ==, log_level | G_LOG_LEVEL_ERROR);
 }
 
 static gint my_print_count = 0;
@@ -1151,8 +1176,10 @@ main (int argc, char *argv[])
   g_test_add_func ("/logging/default-handler/subprocess/would-drop-env-systemd", test_default_handler_would_drop_env_systemd);
   g_test_add_func ("/logging/default-handler/subprocess/would-drop-robustness", test_default_handler_would_drop_robustness);
   g_test_add_func ("/logging/default-handler/subprocess/structured-logging-non-null-terminated-strings", test_default_handler_structured_logging_non_nul_terminated_strings);
+  g_test_add_func ("/logging/journald-handler", test_journald_handler);
   g_test_add_func ("/logging/warnings", test_warnings);
   g_test_add_func ("/logging/fatal-log-mask", test_fatal_log_mask);
+  g_test_add_func ("/logging/always-fatal", test_always_fatal);
   g_test_add_func ("/logging/set-handler", test_set_handler);
   g_test_add_func ("/logging/print-handler", test_print_handler);
   g_test_add_func ("/logging/printerr-handler", test_printerr_handler);

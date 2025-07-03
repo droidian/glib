@@ -219,7 +219,7 @@
  *
  * You can make warnings fatal at runtime by setting the `G_DEBUG`
  * environment variable (see
- * [Running GLib Applications](glib-running.html)):
+ * [Running GLib Applications](running.html)):
  *
  * ```
  * G_DEBUG=fatal-warnings gdb ./my-program
@@ -254,7 +254,7 @@
  *
  * You can make critical warnings fatal at runtime by
  * setting the `G_DEBUG` environment variable (see
- * [Running GLib Applications](glib-running.html)):
+ * [Running GLib Applications](running.html)):
  *
  * ```
  * G_DEBUG=fatal-warnings gdb ./my-program
@@ -558,6 +558,48 @@ g_log_domain_get_handler_L (GLogDomain	*domain,
 }
 
 /**
+ * g_log_get_always_fatal:
+ *
+ * Gets the current fatal mask.
+ *
+ * This is mostly used by custom log writers to make fatal messages
+ * (`fatal-warnings`, `fatal-criticals`) work as expected, when using the
+ * `G_DEBUG` environment variable (see [Running GLib Applications](running.html)).
+ *
+ * An example usage is shown below:
+ *
+ * ```c
+ * static GLogWriterOutput
+ * my_custom_log_writer_fn (GLogLevelFlags log_level,
+ *                          const GLogField *fields,
+ *                          gsize n_fields,
+ *                          gpointer user_data)
+ * {
+ *
+ *    // abort if the message was fatal
+ *    if (log_level & g_log_get_always_fatal ())
+ *      g_abort ();
+ *
+ *    // custom log handling code
+ *    ...
+ *    ...
+ *
+ *    // success
+ *    return G_LOG_WRITER_HANDLED;
+ * }
+ * ```
+ *
+ * Returns: the current fatal mask
+ *
+ * Since: 2.86
+ */
+GLogLevelFlags
+g_log_get_always_fatal (void)
+{
+  return g_log_always_fatal;
+}
+
+/**
  * g_log_set_always_fatal:
  * @fatal_mask: the mask containing bits set for each level of error which is
  *   to be fatal
@@ -570,7 +612,7 @@ g_log_domain_get_handler_L (GLogDomain	*domain,
  *
  * You can also make some message levels fatal at runtime by setting
  * the `G_DEBUG` environment variable (see
- * [Running GLib Applications](glib-running.html)).
+ * [Running GLib Applications](running.html)).
  *
  * Libraries should not call this function, as it affects all messages logged
  * by a process, including those from other libraries.
@@ -1900,13 +1942,29 @@ g_log_structured_standard (const gchar    *log_domain,
       { "CODE_FUNC", func, -1 },
       /* Filled in later: */
       { "MESSAGE", NULL, -1 },
-      /* If @log_domain is %NULL, we will not pass this field: */
-      { "GLIB_DOMAIN", log_domain, -1 },
+      /* Optionally GLIB_DOMAIN and/or SYSLOG_IDENTIFIER */
+      { NULL, NULL, -1 },
+      { NULL, NULL, -1 },
     };
-  gsize n_fields;
+  gsize n_fields = 5;
+  const gchar *prgname = g_get_prgname ();
   gchar *message_allocated = NULL;
   gchar buffer[1025];
   va_list args;
+
+  if (log_domain)
+    {
+      fields[n_fields].key = "GLIB_DOMAIN";
+      fields[n_fields].value = log_domain;
+      n_fields++;
+    }
+
+  if (prgname)
+    {
+      fields[n_fields].key = "SYSLOG_IDENTIFIER";
+      fields[n_fields].value = prgname;
+      n_fields++;
+    }
 
   va_start (args, message_format);
 
@@ -1927,7 +1985,6 @@ g_log_structured_standard (const gchar    *log_domain,
 
   va_end (args);
 
-  n_fields = G_N_ELEMENTS (fields) - ((log_domain == NULL) ? 1 : 0);
   g_log_structured_array (log_level, fields, n_fields);
 
   g_free (message_allocated);
@@ -2397,7 +2454,7 @@ journal_sendv (struct iovec *iov,
 
   memset (&mh, 0, sizeof (mh));
   mh.msg_name = &sa;
-  mh.msg_namelen = offsetof (struct sockaddr_un, sun_path) + strlen (sa.sun_path);
+  mh.msg_namelen = offsetof (struct sockaddr_un, sun_path) + (socklen_t) strlen (sa.sun_path);
   mh.msg_iov = iov;
   mh.msg_iovlen = iovlen;
 
@@ -3395,8 +3452,9 @@ g_log_default_handler (const gchar   *log_domain,
 		       const gchar   *message,
 		       gpointer	      unused_data)
 {
-  GLogField fields[4];
+  GLogField fields[5];
   int n_fields = 0;
+  const gchar *prgname;
 
   /* we can be called externally with recursion for whatever reason */
   if (log_level & G_LOG_FLAG_RECURSION)
@@ -3422,9 +3480,18 @@ g_log_default_handler (const gchar   *log_domain,
 
   if (log_domain)
     {
-      fields[3].key = "GLIB_DOMAIN";
-      fields[3].value = log_domain;
-      fields[3].length = -1;
+      fields[n_fields].key = "GLIB_DOMAIN";
+      fields[n_fields].value = log_domain;
+      fields[n_fields].length = -1;
+      n_fields++;
+    }
+
+  prgname = g_get_prgname ();
+  if (prgname)
+    {
+      fields[n_fields].key = "SYSLOG_IDENTIFIER";
+      fields[n_fields].value = prgname;
+      fields[n_fields].length = -1;
       n_fields++;
     }
 

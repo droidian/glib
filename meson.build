@@ -1,5 +1,5 @@
 project('glib', 'c',
-  version : '2.84.3',
+  version : '2.85.1',
   # NOTE: See the policy in docs/meson-version.md before changing the Meson dependency
   meson_version : '>= 1.4.0',
   default_options : [
@@ -120,6 +120,7 @@ glib_bindir = join_paths(glib_prefix, get_option('bindir'))
 glib_libdir = join_paths(glib_prefix, get_option('libdir'))
 glib_libexecdir = join_paths(glib_prefix, get_option('libexecdir'))
 glib_datadir = join_paths(glib_prefix, get_option('datadir'))
+glib_localedir = join_paths(glib_prefix, get_option('localedir'))
 glib_pkgdatadir = join_paths(glib_datadir, 'glib-2.0')
 glib_includedir = join_paths(glib_prefix, get_option('includedir'), 'glib-2.0')
 if get_option('gio_module_dir') != ''
@@ -660,6 +661,13 @@ if have_cxx
   add_project_arguments(cxx.get_supported_arguments(warning_cxx_args), language: 'cpp')
 endif
 
+# FIXME: This is checked and implemented separately from warning_common_args for
+# now because it causes so many warnings. Adding it as a variable in various
+# directories allows us to gradually tighten up support for it. Eventually, the
+# warning can be enabled unconditionally in warning_c_args, and this variable
+# removed. See https://gitlab.gnome.org/GNOME/glib/-/issues/3405
+warning_sign_conversion_args = cc.get_supported_arguments(['-Wsign-conversion'])
+
 # FIXME: We cannot build some of the GResource tests with -z nodelete, which
 # means we cannot use that flag in add_project_link_arguments(), and must add
 # it to the relevant targets manually. We do the same with -Bsymbolic-functions
@@ -715,6 +723,7 @@ functions = [
   'getfsent',
   'getfsstat',
   'getgrgid_r',
+  'getifaddrs',
   'getmntent_r',
   'getpwuid_r',
   'getresuid',
@@ -2338,7 +2347,7 @@ glib_conf.set('HAVE_BIND_TEXTDOMAIN_CODESET', have_bind_textdomain_codeset)
 glib_conf.set('HAVE_DCGETTEXT', 1)
 glib_conf.set('HAVE_GETTEXT', 1)
 
-glib_conf.set_quoted('GLIB_LOCALE_DIR', join_paths(glib_datadir, 'locale'))
+glib_conf.set_quoted('GLIB_LOCALE_DIR', glib_localedir)
 
 glib_conf.set_quoted('GLIB_LOCALSTATEDIR', glib_localstatedir)
 glib_conf.set_quoted('GLIB_RUNSTATEDIR', glib_runstatedir)
@@ -2507,6 +2516,26 @@ if not python_version.version_compare(python_version_req)
   error('Requires Python @0@, @1@ found.'.format(python_version_req, python_version))
 endif
 python_test_libraries_built = meson.project_build_root() / 'tests' / 'lib'
+
+# FIXME: https://github.com/mesonbuild/meson/issues/4668
+#
+# If we have a Python test which spawns a built native binary, that binary is
+# listed in the `depends` argument of the `test()`. On Linux, this results in
+# the directories containing the built libraries which the binary depends on
+# being added to the `LD_LIBRARY_PATH` of the test invocation. On Windows,
+# however, Meson currently doesn’t add those directories to `PATH` (which is the
+# equivalent of `LD_LIBRARY_PATH`), so we have to do it manually.
+python_test_env_common_path = []
+if host_system == 'windows'
+  build_root = meson.project_build_root()
+  python_test_env_common_path += [
+    build_root / 'gmodule',
+    build_root / 'girepository',
+    build_root / 'gio',
+    build_root / 'glib',
+    build_root / 'gobject',
+  ]
+endif
 
 # Determine which user environment-dependent files that we want to install
 bash = find_program('bash', required : false)
@@ -2767,6 +2796,7 @@ summary({
   'libexecdir' : glib_libexecdir,
   'pkgdatadir' : glib_pkgdatadir,
   'datadir' : glib_datadir,
+  'localedir' : glib_localedir,
   'includedir' : glib_includedir,
   'giomodulesdir' : glib_giomodulesdir,
   'localstatedir' : glib_localstatedir,
