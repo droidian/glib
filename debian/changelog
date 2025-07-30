@@ -1,3 +1,9 @@
+glib2.0 (2.85.2-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+
+ -- Alessandro Astone <alessandro.astone@canonical.com>  Wed, 30 Jul 2025 12:04:15 +0200
+
 glib2.0 (2.85.1-2) experimental; urgency=medium
 
   * Backport patch fixing deadlock regression
