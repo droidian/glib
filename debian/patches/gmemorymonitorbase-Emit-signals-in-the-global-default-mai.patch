@@ -1,0 +1,113 @@
+From: Philip Withnall <pwithnall@gnome.org>
+Date: Wed, 23 Jul 2025 13:27:58 +0100
+Subject: gmemorymonitorbase: Emit signals in the global default main context
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+`GMemoryMonitor` is a singleton, which means we can’t use the usual
+approach of emitting signals in the thread-default main context from the
+time of construction of the object.
+
+The next best thing is to emit them in the global default main context.
+For many applications, this will be exactly what they are expecting. For
+multi-threaded applications, they will need to implement their own
+thread safety in the signal handler, but they would have to do that
+anyway.
+
+Currently, the signals are emitted in the GLib worker thread (for the
+PSI and poll implementations of `GMemoryMonitor`) — this is the worst
+option, because it means that third party signal handlers could block
+the worker thread (which is precisely what the worker thread is meant to
+avoid).
+
+Signed-off-by: Philip Withnall <pwithnall@gnome.org>
+---
+ gio/gmemorymonitor.c     |  8 +++++++-
+ gio/gmemorymonitorbase.c | 41 +++++++++++++++++++++++++++++++++++++++--
+ 2 files changed, 46 insertions(+), 3 deletions(-)
+
+diff --git a/gio/gmemorymonitor.c b/gio/gmemorymonitor.c
+index 148ada6..2cf758b 100644
+--- a/gio/gmemorymonitor.c
++++ b/gio/gmemorymonitor.c
+@@ -131,11 +131,17 @@ g_memory_monitor_default_init (GMemoryMonitorInterface *iface)
+    * @monitor: a #GMemoryMonitor
+    * @level: the #GMemoryMonitorWarningLevel warning level
+    *
+-   * Emitted when the system is running low on free memory. The signal
++   * Emitted when the system is running low on free memory.
++   *
++   * The signal
+    * handler should then take the appropriate action depending on the
+    * warning level. See the #GMemoryMonitorWarningLevel documentation for
+    * details.
+    *
++   * Since the [iface@Gio.MemoryMonitor] is a singleton, this signal will be
++   * emitted in the [func@GLib.MainContext.default][global-default main
++   * context].
++   *
+    * Since: 2.64
+    */
+   signals[LOW_MEMORY_WARNING] =
+diff --git a/gio/gmemorymonitorbase.c b/gio/gmemorymonitorbase.c
+index ce28ebe..c84ade0 100644
+--- a/gio/gmemorymonitorbase.c
++++ b/gio/gmemorymonitorbase.c
+@@ -103,6 +103,34 @@ g_memory_monitor_base_level_enum_to_byte (GMemoryMonitorLowMemoryLevel level)
+   return level_bytes[level];
+ }
+ 
++typedef struct
++{
++  GWeakRef monitor_weak;
++  GMemoryMonitorWarningLevel level;
++} SendEventData;
++
++static void
++send_event_data_free (SendEventData *data)
++{
++  g_weak_ref_clear (&data->monitor_weak);
++  g_free (data);
++}
++
++/* Invoked in the global default main context */
++static gboolean
++send_event_cb (void *user_data)
++{
++  SendEventData *data = user_data;
++  GMemoryMonitor *monitor = g_weak_ref_get (&data->monitor_weak);
++
++  if (monitor != NULL)
++    g_signal_emit_by_name (monitor, "low-memory-warning", data->level);
++
++  g_clear_object (&monitor);
++
++  return G_SOURCE_REMOVE;
++}
++
+ void
+ g_memory_monitor_base_send_event_to_user (GMemoryMonitorBase              *monitor,
+                                           GMemoryMonitorLowMemoryLevel     warning_level)
+@@ -115,10 +143,19 @@ g_memory_monitor_base_send_event_to_user (GMemoryMonitorBase              *monit
+   if (priv->last_trigger_us[warning_level] == 0 ||
+       (current_time - priv->last_trigger_us[warning_level]) > (RECOVERY_INTERVAL_SEC * G_USEC_PER_SEC))
+     {
++      SendEventData *data = NULL;
++
+       g_debug ("Send low memory signal with warning level %u", warning_level);
+ 
+-      g_signal_emit_by_name (monitor, "low-memory-warning",
+-                             g_memory_monitor_base_level_enum_to_byte (warning_level));
++      /* The signal has to be emitted in the global default main context,
++       * because the `GMemoryMonitor` is a singleton which may have been created
++       * in an arbitrary thread, or which may be calling this function from the
++       * GLib worker thread. */
++      data = g_new0 (SendEventData, 1);
++      g_weak_ref_init (&data->monitor_weak, monitor);
++      data->level = g_memory_monitor_base_level_enum_to_byte (warning_level);
++      g_main_context_invoke_full (NULL, G_PRIORITY_DEFAULT, send_event_cb,
++                                  g_steal_pointer (&data), (GDestroyNotify) send_event_data_free);
+       priv->last_trigger_us[warning_level] = current_time;
+     }
+ }
