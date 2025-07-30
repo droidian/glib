@@ -1008,6 +1008,7 @@ libgio-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_icon_to_string@Base 2.20.0
  g_inet_address_equal@Base 2.30.0
  g_inet_address_get_family@Base 2.22.0
+ g_inet_address_get_flowinfo@Base 2.85.2
  g_inet_address_get_is_any@Base 2.22.0
  g_inet_address_get_is_link_local@Base 2.22.0
  g_inet_address_get_is_loopback@Base 2.22.0
@@ -1019,6 +1020,7 @@ libgio-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_inet_address_get_is_multicast@Base 2.22.0
  g_inet_address_get_is_site_local@Base 2.22.0
  g_inet_address_get_native_size@Base 2.22.0
+ g_inet_address_get_scope_id@Base 2.85.2
  g_inet_address_get_type@Base 2.22.0
  g_inet_address_mask_equal@Base 2.32.0
  g_inet_address_mask_get_address@Base 2.32.0
@@ -1031,6 +1033,7 @@ libgio-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_inet_address_mask_to_string@Base 2.32.0
  g_inet_address_new_any@Base 2.22.0
  g_inet_address_new_from_bytes@Base 2.22.0
+ g_inet_address_new_from_bytes_with_ipv6_info@Base 2.85.2
  g_inet_address_new_from_string@Base 2.22.0
  g_inet_address_new_loopback@Base 2.22.0
  g_inet_address_to_bytes@Base 2.22.0
@@ -1141,6 +1144,8 @@ libgio-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_memory_input_stream_new_from_data@Base 2.16.0
  g_memory_monitor_dup_default@Base 2.64.0
  g_memory_monitor_get_type@Base 2.64.0
+ g_memory_monitor_poll_get_type@Base 2.85.2
+ g_memory_monitor_psi_get_type@Base 2.85.2
  g_memory_monitor_warning_level_get_type@Base 2.64.0
  g_memory_output_stream_get_data@Base 2.16.0
  g_memory_output_stream_get_data_size@Base 2.18.0
