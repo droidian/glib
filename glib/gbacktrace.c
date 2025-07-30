@@ -290,7 +290,13 @@ g_on_error_stack_trace (const gchar *prg_name)
   while (1)
     {
       pid_t retval = waitpid (pid, &status, 0);
-      if (WIFEXITED (retval) || WIFSIGNALED (retval))
+      if (retval == -1)
+        {
+          if (errno == EAGAIN || errno == EINTR)
+            continue;
+          break;
+        }
+      else if (WIFEXITED (status) || WIFSIGNALED (status))
         break;
     }
 #else
@@ -491,7 +497,7 @@ stack_trace (const char * const *args)
                     }
                   break;
                 case 1:
-                  if (idx < BUFSIZE)
+                  if (idx < BUFSIZE - 1)
                     buffer[idx++] = c;
                   if ((c == '\n') || (c == '\r'))
                     {

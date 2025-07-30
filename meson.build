@@ -1,5 +1,5 @@
 project('glib', 'c',
-  version : '2.85.1',
+  version : '2.85.2',
   # NOTE: See the policy in docs/meson-version.md before changing the Meson dependency
   meson_version : '>= 1.4.0',
   default_options : [
@@ -759,6 +759,7 @@ functions = [
   'strtoll_l',
   'strtoull_l',
   'symlink',
+  'sysinfo',
   'timegm',
   'unsetenv',
   'uselocale',

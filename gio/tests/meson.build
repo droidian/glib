@@ -98,6 +98,7 @@ gio_tests = {
     # FIXME: https://gitlab.gnome.org/GNOME/glib/-/issues/3148
     'can_fail' : host_system in ['darwin', 'windows', 'gnu'],
   },
+  'file-enumerator' : {},
   'inet-address' : {},
   'io-stream' : {},
   'max-version' : {'install' : false},
@@ -153,6 +154,18 @@ gio_tests = {
   },
   'win32-appinfo' : {},
 }
+
+if host_system == 'linux'
+  gio_tests += {
+    'memory-monitor-psi' : {},
+  }
+endif
+
+if glib_conf.has('HAVE_SYSINFO')
+  gio_tests += {
+    'memory-monitor-poll' : {},
+  }
+endif
 
 if glib_have_cocoa
   gio_tests += {

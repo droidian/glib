@@ -26,10 +26,11 @@
 
 #undef G_DISABLE_ASSERT
 
+#include "glib.h"
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "glib.h"
 
 /* Test data to be passed to any function which calls g_array_new(), providing
  * the parameters for that call. Most #GArray tests should be repeated for all
@@ -98,6 +99,20 @@ array_set_size (gconstpointer test_data)
       g_assert_cmpint (g_array_index (garray, gint, i), ==, 0);
 
   g_array_unref (garray);
+}
+
+/* Check that unallocated zero terminated arrays can be set to size 0. */
+static void
+array_set_size_zero_terminated_null (void)
+{
+  GArray *garray;
+
+  garray = g_array_new_take_zero_terminated(NULL, FALSE, sizeof (gchar));
+
+  g_array_set_size (garray, 0);
+  g_assert_cmpuint (garray->len, ==, 0);
+
+  g_array_free (garray, TRUE);
 }
 
 /* As with array_set_size(), but with a sized array. */
@@ -307,11 +322,45 @@ array_new_take_zero_terminated (void)
   g_clear_pointer (&old_data_copy, g_free);
 }
 
+/* Check that zero terminated arrays with zero size elements are not allowed. */
+static void
+array_new_take_zero_terminated_zero_size (void)
+{
+  gpointer str = g_strdup ("not null");
+
+  g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                         "*assertion 'element_size > 0 && element_size <= G_MAXUINT' failed");
+  g_assert_null (
+      g_array_new_take_zero_terminated (str, FALSE, 0));
+  g_test_assert_expected_messages ();
+
+  g_free (str);
+}
+
+/* Check that a non-existing array becomes a zero-terminated one when requested. */
+static void
+array_new_take_zero_terminated_null (void)
+{
+  GArray *garray;
+  gchar *out_str = NULL;
+  gsize len;
+
+  garray = g_array_new_take_zero_terminated (NULL, FALSE, sizeof (gchar));
+  g_assert_cmpuint (garray->len, ==, 0);
+
+  out_str = g_array_steal (garray, &len);
+  g_assert_cmpstr (out_str, ==, NULL);
+  g_assert_cmpuint (len, ==, 0);
+
+  g_free (out_str);
+  g_array_free (garray, TRUE);
+}
+
 static void
 array_new_take_overflow (void)
 {
 #if SIZE_WIDTH <= UINT_WIDTH
-  g_test_skip ("Overflow test requires UINT_WIDTH > SIZE_WIDTH.");
+  g_test_skip ("Overflow test requires SIZE_WIDTH > UINT_WIDTH.");
 #else
   if (!g_test_undefined ())
       return;
@@ -325,11 +374,22 @@ array_new_take_overflow (void)
   g_test_assert_expected_messages ();
 
   g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
-                         "*assertion 'element_size <= G_MAXUINT' failed");
+                         "*assertion 'element_size > 0 && element_size <= G_MAXUINT' failed");
   g_assert_null (
     g_array_new_take (NULL, 0, FALSE, (gsize) G_MAXUINT + 1));
   g_test_assert_expected_messages ();
 #endif
+}
+
+/* Check that arrays with zero size elements are not allowed. */
+static void
+array_new_take_zero_size (void)
+{
+  g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
+                         "*assertion 'element_size > 0 && element_size <= G_MAXUINT' failed");
+  g_assert_null (
+      g_array_new_take (NULL, 0, FALSE, 0));
+  g_test_assert_expected_messages ();
 }
 
 /* Check g_array_steal() function */
@@ -669,6 +729,21 @@ array_remove_range (gconstpointer test_data)
 
   g_assert_cmpint (garray->len, ==, 0);
   assert_int_array_zero_terminated (config, garray);
+
+  g_array_free (garray, TRUE);
+}
+
+/* Check that g_array_remove_range() works with a zero terminated array
+ * without any data. */
+static void
+array_remove_range_zero_terminated_null (void)
+{
+  GArray *garray;
+
+  garray = g_array_new_take_zero_terminated(NULL, FALSE, sizeof (gchar));
+
+  g_array_remove_range (garray, 0, 0);
+  g_assert_cmpuint (garray->len, ==, 0);
 
   g_array_free (garray, TRUE);
 }
@@ -1037,6 +1112,26 @@ test_array_copy_sized (void)
   g_array_unref (array1);
 }
 
+/* Check that copying does not exponentially grow array size. */
+static void
+test_array_copy_zero_terminated (void)
+{
+  GArray *array;
+
+  array = g_array_new_take_zero_terminated (NULL, FALSE, 1);
+
+  for (gint i = 0; i < 32; i++)
+    {
+      GArray *next;
+
+      next = g_array_copy (array);
+      g_array_unref (array);
+      array = next;
+    }
+
+  g_array_unref (array);
+}
+
 static void
 array_overflow_append_vals (void)
 {
@@ -1281,7 +1376,7 @@ static void
 pointer_array_new_take_overflow (void)
 {
 #if SIZE_WIDTH <= UINT_WIDTH
-  g_test_skip ("Overflow test requires UINT_WIDTH > SIZE_WIDTH.");
+  g_test_skip ("Overflow test requires SIZE_WIDTH > UINT_WIDTH.");
 #else
   if (!g_test_undefined ())
       return;
@@ -1586,7 +1681,7 @@ static void
 pointer_array_new_from_array_overflow (void)
 {
 #if SIZE_WIDTH <= UINT_WIDTH
-  g_test_skip ("Overflow test requires UINT_WIDTH > SIZE_WIDTH.");
+  g_test_skip ("Overflow test requires SIZE_WIDTH > UINT_WIDTH.");
 #else
   if (!g_test_undefined ())
       return;
@@ -2824,7 +2919,7 @@ static void
 byte_array_new_take_overflow (void)
 {
 #if SIZE_WIDTH <= UINT_WIDTH
-  g_test_skip ("Overflow test requires G_MAXSIZE > G_MAXUINT.");
+  g_test_skip ("Overflow test requires SIZE_WIDTH > UINT_WIDTH.");
 #else
   GByteArray* arr;
 
@@ -3193,14 +3288,20 @@ main (int argc, char *argv[])
   g_test_add_func ("/array/new/take", array_new_take);
   g_test_add_func ("/array/new/take/empty", array_new_take_empty);
   g_test_add_func ("/array/new/take/overflow", array_new_take_overflow);
+  g_test_add_func ("/array/new/take/zero-size", array_new_take_zero_size);
   g_test_add_func ("/array/new/take-zero-terminated", array_new_take_zero_terminated);
+  g_test_add_func ("/array/new/take-zero-terminated/zero-size", array_new_take_zero_terminated_zero_size);
+  g_test_add_func ("/array/new/take-zero-terminated/null", array_new_take_zero_terminated_null);
   g_test_add_func ("/array/ref-count", array_ref_count);
   g_test_add_func ("/array/steal", array_steal);
   g_test_add_func ("/array/clear-func", array_clear_func);
   g_test_add_func ("/array/binary-search", test_array_binary_search);
-  g_test_add_func ("/array/copy-sized", test_array_copy_sized);
+  g_test_add_func ("/array/copy/sized", test_array_copy_sized);
+  g_test_add_func ("/array/copy/zero-terminated", test_array_copy_zero_terminated);
   g_test_add_func ("/array/overflow-append-vals", array_overflow_append_vals);
   g_test_add_func ("/array/overflow-set-size", array_overflow_set_size);
+  g_test_add_func ("/array/remove-range/zero-terminated-null", array_remove_range_zero_terminated_null);
+  g_test_add_func ("/array/set-size/zero-terminated-null", array_set_size_zero_terminated_null);
 
   for (i = 0; i < G_N_ELEMENTS (array_configurations); i++)
     {
