@@ -1,4 +1,4 @@
-glib2.0 (2.84.4-1) UNRELEASED; urgency=medium
+glib2.0 (2.84.4-1) unstable; urgency=medium
 
   * d/control, d/gbp.conf: Use debian/forky packaging branch.
     The debian/latest branch is now tracking 2.85.x for Debian
@@ -18,7 +18,7 @@ glib2.0 (2.84.4-1) UNRELEASED; urgency=medium
     - Fix several memory leaks
       (glib#3721, glib!4702 upstream)
 
- -- Simon McVittie <smcv@debian.org>  Fri, 08 Aug 2025 18:53:22 +0100
+ -- Simon McVittie <smcv@debian.org>  Fri, 08 Aug 2025 19:13:23 +0100
 
 glib2.0 (2.84.3-1) unstable; urgency=medium
 
