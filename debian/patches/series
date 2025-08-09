@@ -14,7 +14,3 @@ workarounds/Skip-memory-monitor-dbus-test-if-not-specifically-request.patch
 workarounds/tests-Skip-debugcontroller-test.patch
 workarounds/testfilemonitor-Skip-if-we-are-avoiding-flaky-tests.patch
 debian/girepository-Describe-the-Debian-specific-cross-prefixed-.patch
-gio-gmemorymonitorpoll-Fix-unit-test-error-since-the-call.patch
-gio-gmemorymonitorpsi-Fix-test-error-since-memory-free-ra.patch
-tests-Connect-to-GMemoryMonitor-signals-earlier.patch
-gmemorymonitorbase-Emit-signals-in-the-global-default-mai.patch
