@@ -1,8 +1,6 @@
 glib2.0 (2.85.3-1) UNRELEASED; urgency=medium
 
   * New upstream development release
-    - Among other things this addresses CVE-2025-7039 via changes similar to
-      those in 2.84.4
   * d/copyright: Update
 
  -- Simon McVittie <smcv@debian.org>  Sat, 09 Aug 2025 11:28:29 +0100
@@ -17,6 +15,8 @@ glib2.0 (2.85.2-1) experimental; urgency=medium
 
   * Team upload
   * New upstream release
+    - Among other things this addresses CVE-2025-7039 via changes similar to
+      those in 2.84.4 (Closes: #1110640)
   * debian/patches: Drop patch applied upstream
   * debian/patches: Refresh
   * debian/libglib2.0-0t64.symbols: Add new symbols
