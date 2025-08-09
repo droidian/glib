@@ -1,6 +1,9 @@
 glib2.0 (2.85.3-1) UNRELEASED; urgency=medium
 
-  * New upstream release
+  * New upstream development release
+    - Among other things this addresses CVE-2025-7039 via changes similar to
+      those in 2.84.4
+  * d/copyright: Update
 
  -- Simon McVittie <smcv@debian.org>  Sat, 09 Aug 2025 11:28:29 +0100
 
