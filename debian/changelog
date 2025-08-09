@@ -29,6 +29,28 @@ glib2.0 (2.85.1-1) experimental; urgency=medium
 
  -- Jeremy Bícha <jbicha@ubuntu.com>  Thu, 03 Jul 2025 11:35:13 -0400
 
+glib2.0 (2.84.4-1) unstable; urgency=medium
+
+  * d/control, d/gbp.conf: Use debian/forky packaging branch.
+    The debian/latest branch is now tracking 2.85.x for Debian
+    experimental.
+  * New upstream stable release
+    - Ensure that generating temporary file names does not access memory
+      outside the intended array of alphanumeric characters if a long-running
+      program generates billions of temporary file names
+      (CVE-2025-7039, glib#3716 upstream; believed to be unlikely to be
+      exploitable in practice)
+    - Fix the intended ability for g_settings_bind_with_mapping_closures()
+      to copy a value to the destination object
+      (glib!4667 upstream)
+    - If creating a thread pool fails, report a recoverable error instead
+      of crashing with a fatal error
+      (glib#3712 upstream)
+    - Fix several memory leaks
+      (glib#3721, glib!4702 upstream)
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 08 Aug 2025 19:13:23 +0100
+
 glib2.0 (2.84.3-1) unstable; urgency=medium
 
   * New upstream stable release
