@@ -1,3 +1,9 @@
+glib2.0 (2.84.4-2) UNRELEASED; urgency=medium
+
+  * Mention #1110640 in previous changelog entry
+
+ -- Simon McVittie <smcv@debian.org>  Sat, 09 Aug 2025 16:46:41 +0100
+
 glib2.0 (2.84.4-1) unstable; urgency=medium
 
   * d/control, d/gbp.conf: Use debian/forky packaging branch.
@@ -8,7 +14,7 @@ glib2.0 (2.84.4-1) unstable; urgency=medium
       outside the intended array of alphanumeric characters if a long-running
       program generates billions of temporary file names
       (CVE-2025-7039, glib#3716 upstream; believed to be unlikely to be
-      exploitable in practice)
+      exploitable in practice. Closes: #1110640)
     - Fix the intended ability for g_settings_bind_with_mapping_closures()
       to copy a value to the destination object
       (glib!4667 upstream)
