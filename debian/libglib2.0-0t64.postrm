@@ -9,6 +9,11 @@ set -e
 clean_up_giomodule_cache ()
 {
     local multiarch="#DEB_HOST_MULTIARCH#"
+    local modules="/usr/lib/${multiarch}/gio/modules"
+
+    if ! [ -d "$modules" ]; then
+        return 0
+    fi
 
     # Don't remove giomodule.cache if libglib2.0-0t64 has been replaced
     # by some other ABI variant of essentially the same library
@@ -18,15 +23,23 @@ clean_up_giomodule_cache ()
     # This implementation is based on the assumption that any GLib
     # version that still uses ${libdir}/gio/modules/giomodule.cache
     # will also continue to ship ${libdir}/glib-2.0.
-
-    if [ -d "/usr/lib/${multiarch}/gio/modules" ] && ! [ -d "/usr/lib/${multiarch}/glib-2.0" ]; then
-        rm -f "/usr/lib/${multiarch}/gio/modules/giomodule.cache"
-        rmdir -p --ignore-fail-on-non-empty "/usr/lib/${multiarch}/gio/modules"
+    if [ -d "/usr/lib/${multiarch}/glib-2.0" ]; then
+        return 0
     fi
+
+    rm -f "$modules/giomodule.cache"
+    rmdir -p --ignore-fail-on-non-empty "$modules"
 }
 
 clean_up_gsettings_schemas ()
 {
+    local schemas="/usr/share/glib-2.0/schemas"
+    local iter
+
+    if ! [ -d "$schemas" ]; then
+        return 0
+    fi
+
     # Similarly, instead of using $DPKG_MAINTSCRIPT_PACKAGE_REFCOUNT, only
     # remove gschemas.compiled if GLib has completely gone away - not just
     # libglib2.0-0 and libglib2.0-0t64, but any possible future ABI variant
@@ -35,10 +48,14 @@ clean_up_gsettings_schemas ()
     # This implementation is based on the assumption that any GLib
     # version that still uses ${datadir}/glib-2.0/schemas
     # will also continue to ship ${libdir}/glib-2.0.
-    if [ -d /usr/share/glib-2.0/schemas ] && [ "$(echo /usr/lib/*/glib-2.0)" = "/usr/lib/*/glib-2.0" ]; then
-        rm -f /usr/share/glib-2.0/schemas/gschemas.compiled
-        rmdir -p --ignore-fail-on-non-empty /usr/share/glib-2.0/schemas
-    fi
+    for iter in /usr/lib/*/glib-2.0; do
+        if [ -e "$iter" ]; then
+            return 0
+        fi
+    done
+
+    rm -f "$schemas/gschemas.compiled"
+    rmdir -p --ignore-fail-on-non-empty "$schemas"
 }
 
 case "$1" in
