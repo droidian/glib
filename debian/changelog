@@ -1,8 +1,25 @@
 glib2.0 (2.84.4-2) UNRELEASED; urgency=medium
 
   * Mention #1110640 in previous changelog entry
+  * libgirepository-2.0-0: Generate a dependency on a virtual package
+    for libffi-related symbols, to avoid trouble during future libffi ABI
+    transitions (Closes: #1110825)
+  * libglib2.0-0t64: Make maintainer scripts shellcheck-clean
+  * libglib2.0-0t64.postrm:
+    - Refactor to use functions that early-return if we do not want to
+      do the cleanup, avoiding stacking conditionals
+    - Don't remove cache files if they would be non-empty,
+      guarding against issues similar to #1065022 and #1110696
+      (mitigates: #1110696)
+  * libglib2.0-0t64.preinst: Disarm libglib2.0-0 postrm for all
+    architectures, avoiding a corner case where the faulty postrm that
+    suffered from #1065022 would still exist if it belonged to a former
+    foreign architecture that was already disabled, but libglib2.0-0
+    from that architecture was still in removed-but-not-purged state,
+    resulting in #1065022 recurring when that version of libglib2.0-0
+    was subsequently purged (Closes: #1110696)
 
- -- Simon McVittie <smcv@debian.org>  Sat, 09 Aug 2025 16:46:41 +0100
+ -- Simon McVittie <smcv@debian.org>  Mon, 11 Aug 2025 11:49:27 +0100
 
 glib2.0 (2.84.4-1) unstable; urgency=medium
 
