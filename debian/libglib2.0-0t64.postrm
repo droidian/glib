@@ -1,10 +1,15 @@
 #! /bin/sh
+# Debian Policy §10.4 says /bin/sh has a superset of POSIX functionality
+# shellcheck disable=SC3043
+
 set -e
 
 #DEBHELPER#
 
 clean_up_giomodule_cache ()
 {
+    local multiarch="#DEB_HOST_MULTIARCH#"
+
     # Don't remove giomodule.cache if libglib2.0-0t64 has been replaced
     # by some other ABI variant of essentially the same library
     # (for example libglib2.0-0xyz), if that ever happens, to
@@ -14,9 +19,9 @@ clean_up_giomodule_cache ()
     # version that still uses ${libdir}/gio/modules/giomodule.cache
     # will also continue to ship ${libdir}/glib-2.0.
 
-    if [ -d /usr/lib/#DEB_HOST_MULTIARCH#/gio/modules ] && ! [ -d "/usr/lib/#DEB_HOST_MULTIARCH#/glib-2.0" ]; then
-        rm -f /usr/lib/#DEB_HOST_MULTIARCH#/gio/modules/giomodule.cache
-        rmdir -p --ignore-fail-on-non-empty /usr/lib/#DEB_HOST_MULTIARCH#/gio/modules
+    if [ -d "/usr/lib/${multiarch}/gio/modules" ] && ! [ -d "/usr/lib/${multiarch}/glib-2.0" ]; then
+        rm -f "/usr/lib/${multiarch}/gio/modules/giomodule.cache"
+        rmdir -p --ignore-fail-on-non-empty "/usr/lib/${multiarch}/gio/modules"
     fi
 }
 
