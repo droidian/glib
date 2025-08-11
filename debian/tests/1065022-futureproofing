@@ -80,7 +80,7 @@ env \
         -e 's/^(Replaces:.*)$/$1, $ENV{binary_package}/;' \
         dpkg-repack.*/DEBIAN/control
 dpkg-deb --build dpkg-repack.* "$future_binary_package.deb"
-apt-get -y install ./"$future_binary_package.deb"
+apt-get -y install ./"$future_binary_package.deb" dconf-gsettings-backend gsettings-desktop-schemas
 
 assert test -e /usr/share/glib-2.0/schemas/org.gnome.desktop.interface.gschema.xml
 assert test -s /usr/share/glib-2.0/schemas/gschemas.compiled
