@@ -17,13 +17,16 @@ srcdir="$(pwd)"
 tmpdir="$(mktemp -d)"
 cd "$tmpdir"
 
+# Machine-readable TAP on fd 3, human-readable diagnostics on fds 1 and 2
+exec 3>&1 >&2
+
 assert () {
     n=$(( n + 1 ))
 
     if "$@"; then
-        echo "ok $n - $*"
+        echo "ok $n - $*" >&3
     else
-        echo "not ok $n - $* exit status $?"
+        echo "not ok $n - $* exit status $?" >&3
         failed=1
     fi
 }
@@ -32,9 +35,9 @@ assert_not () {
     n=$(( n + 1 ))
 
     if ! "$@"; then
-        echo "ok $n - unsuccessful as expected: $*"
+        echo "ok $n - unsuccessful as expected: $*" >&3
     else
-        echo "not ok $n - should not have succeeded: $*"
+        echo "not ok $n - should not have succeeded: $*" >&3
         failed=1
     fi
 }
@@ -120,7 +123,7 @@ for f in /usr/lib/*/gio/modules/giomodule.cache; do
     assert_not test -e "$f"
 done
 
-echo "1..$n"
+echo "1..$n" >&3
 exit "$failed"
 
 # vim:set sw=4 sts=4 et:
