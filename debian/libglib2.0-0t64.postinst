@@ -6,7 +6,7 @@ handle_triggers () {
     local trigger
 
     for trigger in "$@"; do
-        if ! [ -d $trigger ]; then
+        if ! [ -d "$trigger" ]; then
             continue
         fi
         case $trigger in
