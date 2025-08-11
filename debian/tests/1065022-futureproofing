@@ -59,6 +59,9 @@ fi
 # This assumes that libglib2.0-0t64 has at least one each of Breaks, Provides
 # and Replaces, and will need to be adjusted if that assumption is broken in
 # the future for whatever reason.
+# The $ substitution is to be expanded by dpkg-query:
+# shellcheck disable=SC2016
+binary_version="$(dpkg-query -W -f '${Version}' "$binary_package")"
 dpkg-repack --generate "$binary_package"
 grep -q '^Breaks:' dpkg-repack.*/DEBIAN/control
 grep -q '^Provides:' dpkg-repack.*/DEBIAN/control
@@ -68,11 +71,12 @@ grep -q '^Replaces:' dpkg-repack.*/DEBIAN/control
 # shellcheck disable=SC2016
 env \
     binary_package="$binary_package" \
+    binary_version="$binary_version" \
     future_binary_package="$future_binary_package" \
     perl -p -i \
         -e 's/^Package:.*$/Package: $ENV{future_binary_package}/;' \
         -e 's/^(Breaks:.*)$/$1, $ENV{binary_package}/;' \
-        -e 's/^(Provides:.*)$/$1, $ENV{binary_package}/;' \
+        -e 's/^(Provides:.*)$/$1, $ENV{binary_package} (= $ENV{binary_version})/;' \
         -e 's/^(Replaces:.*)$/$1, $ENV{binary_package}/;' \
         dpkg-repack.*/DEBIAN/control
 dpkg-deb --build dpkg-repack.* "$future_binary_package.deb"
