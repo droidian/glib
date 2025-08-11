@@ -10,6 +10,7 @@ clean_up_giomodule_cache ()
 {
     local multiarch="#DEB_HOST_MULTIARCH#"
     local modules="/usr/lib/${multiarch}/gio/modules"
+    local iter
 
     if ! [ -d "$modules" ]; then
         return 0
@@ -26,6 +27,15 @@ clean_up_giomodule_cache ()
     if [ -d "/usr/lib/${multiarch}/glib-2.0" ]; then
         return 0
     fi
+
+    # As an additional safety-catch, don't remove giomodule.cache if
+    # there is at least one module that should have been listed in it.
+    for iter in "$modules"/*.so; do
+        if [ -e "$iter" ]; then
+            echo "$0: not removing $modules/giomodule.cache because $iter still exists" >&2
+            return 0
+        fi
+    done
 
     rm -f "$modules/giomodule.cache"
     rmdir -p --ignore-fail-on-non-empty "$modules"
@@ -50,6 +60,15 @@ clean_up_gsettings_schemas ()
     # will also continue to ship ${libdir}/glib-2.0.
     for iter in /usr/lib/*/glib-2.0; do
         if [ -e "$iter" ]; then
+            return 0
+        fi
+    done
+
+    # As an additional safety-catch, don't remove gschemas.compiled if
+    # there is at least one schema that should have been listed in it.
+    for iter in "$schemas"/*.xml; do
+        if [ -e "$iter" ]; then
+            echo "$0: not removing $schemas/gschemas.compiled because $iter still exists" >&2
             return 0
         fi
     done
