@@ -62,6 +62,9 @@ maintainer-update-unicode-data:
 	rm -f glib/tests/casemap.txt
 	$(CURDIR)/tools/update-unicode-data.sh $(CURDIR)/unicode-data 16.0.0
 
+debian/extra-substvars:
+	dpkg-architecture -c debian/extra-substvars.py > debian/extra-substvars
+
 execute_before_dh_auto_configure: cross-tools
 
 cross_tools = \
@@ -407,7 +410,5 @@ execute_before_dh_installdeb-arch:
 		    > debian/libglib2.0-0t64.$$script ; \
 	done
 
-override_dh_gencontrol-arch:
-	dh_gencontrol -pgirepository-tools -- \
-		-Vlocal:DEB-HOST-GNU-TYPE=$(DEB_HOST_GNU_TYPE)
-	dh_gencontrol --remaining-packages
+override_dh_gencontrol: debian/extra-substvars
+	dh_gencontrol -- -Tdebian/extra-substvars
