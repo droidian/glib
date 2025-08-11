@@ -18,8 +18,18 @@ glib2.0 (2.84.4-2) UNRELEASED; urgency=medium
     from that architecture was still in removed-but-not-purged state,
     resulting in #1065022 recurring when that version of libglib2.0-0
     was subsequently purged (Closes: #1110696)
+  * d/tests/1065022-futureproofing:
+    - Fix a test regression by generating a versioned Provides when
+      building a mockup of a hypothetical future libglib2.0-0xyz.
+      This regression wasn't immediately obvious because the autopkgtest
+      is marked as flaky (it depends on various implementation details
+      which we can't completely rely on).
+    - Make sure required packages stay installed, failing the test early
+      if their dependencies cannot be satisfied
+    - Produce only TAP output on stdout, and a diagnostic log on stderr
+    - Improve diagnostic output
 
- -- Simon McVittie <smcv@debian.org>  Mon, 11 Aug 2025 11:49:27 +0100
+ -- Simon McVittie <smcv@debian.org>  Tue, 12 Aug 2025 00:38:25 +0100
 
 glib2.0 (2.84.4-1) unstable; urgency=medium
 
