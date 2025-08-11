@@ -4,7 +4,6 @@ set -e
 
 handle_triggers () {
     local trigger
-    local dirs
 
     for trigger in "$@"; do
         if ! [ -d $trigger ]; then
