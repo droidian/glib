@@ -410,5 +410,12 @@ execute_before_dh_installdeb-arch:
 		    > debian/libglib2.0-0t64.$$script ; \
 	done
 
+debian/libgirepository-2.0-0.symbols: debian/libgirepository-2.0-0.symbols.in debian/extra-substvars
+	set -e; \
+	libffiN=$$(sed -ne 's/^local:libffiN=//p' debian/extra-substvars); \
+	sed -e "s/@libffiN@/$$libffiN/" < $< > $@
+
+execute_before_dh_makeshlibs: debian/libgirepository-2.0-0.symbols
+
 override_dh_gencontrol: debian/extra-substvars
 	dh_gencontrol -- -Tdebian/extra-substvars

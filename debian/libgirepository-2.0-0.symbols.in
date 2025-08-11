@@ -1,4 +1,7 @@
+# Dependency template 0: ordinary symbols
 libgirepository-2.0.so.0 libgirepository-2.0-0 #MINVER#
+# Dependency template 1: symbols whose meaning depends on libffi ABI
+| libgirepository-2.0-0 #MINVER#, libgirepository-2.0-0-with-@libffiN@ #MINVER#
 * Build-Depends-Package: libgirepository-2.0-dev
  gi_arg_info_get_closure_index@Base 2.79.2
  gi_arg_info_get_destroy_index@Base 2.79.2
@@ -26,12 +29,12 @@ libgirepository-2.0.so.0 libgirepository-2.0-0 #MINVER#
  gi_base_info_ref@Base 2.79.2
  gi_base_info_unref@Base 2.79.2
  gi_callable_info_can_throw_gerror@Base 2.79.2
- gi_callable_info_create_closure@Base 2.79.2
- gi_callable_info_destroy_closure@Base 2.79.2
+ gi_callable_info_create_closure@Base 2.79.2 1
+ gi_callable_info_destroy_closure@Base 2.79.2 1
  gi_callable_info_get_arg@Base 2.79.2
  gi_callable_info_get_async_function@Base 2.83.0
  gi_callable_info_get_caller_owns@Base 2.79.2
- gi_callable_info_get_closure_native_address@Base 2.79.2
+ gi_callable_info_get_closure_native_address@Base 2.79.2 1
  gi_callable_info_get_finish_function@Base 2.83.0
  gi_callable_info_get_instance_ownership_transfer@Base 2.79.2
  gi_callable_info_get_n_args@Base 2.79.2
@@ -74,9 +77,9 @@ libgirepository-2.0.so.0 libgirepository-2.0-0 #MINVER#
  gi_function_info_get_type@Base 2.79.2
  gi_function_info_get_vfunc@Base 2.79.2
  gi_function_info_invoke@Base 2.79.2
- gi_function_info_prep_invoker@Base 2.79.2
- gi_function_invoker_clear@Base 2.79.2
- gi_function_invoker_new_for_address@Base 2.79.2
+ gi_function_info_prep_invoker@Base 2.79.2 1
+ gi_function_invoker_clear@Base 2.79.2 1
+ gi_function_invoker_new_for_address@Base 2.79.2 1
  gi_interface_info_find_method@Base 2.79.2
  gi_interface_info_find_signal@Base 2.79.2
  gi_interface_info_find_vfunc@Base 2.79.2
@@ -186,11 +189,11 @@ libgirepository-2.0.so.0 libgirepository-2.0-0 #MINVER#
  gi_struct_info_is_foreign@Base 2.79.2
  gi_struct_info_is_gtype_struct@Base 2.79.2
  gi_type_info_argument_from_hash_pointer@Base 2.79.2
- gi_type_info_extract_ffi_return_value@Base 2.79.2
+ gi_type_info_extract_ffi_return_value@Base 2.79.2 1
  gi_type_info_get_array_fixed_size@Base 2.79.2
  gi_type_info_get_array_length_index@Base 2.79.2
  gi_type_info_get_array_type@Base 2.79.2
- gi_type_info_get_ffi_type@Base 2.79.2
+ gi_type_info_get_ffi_type@Base 2.79.2 1
  gi_type_info_get_interface@Base 2.79.2
  gi_type_info_get_param_type@Base 2.79.2
  gi_type_info_get_storage_type@Base 2.79.2
@@ -200,8 +203,8 @@ libgirepository-2.0.so.0 libgirepository-2.0-0 #MINVER#
  gi_type_info_is_pointer@Base 2.79.2
  gi_type_info_is_zero_terminated@Base 2.79.2
  gi_type_tag_argument_from_hash_pointer@Base 2.79.2
- gi_type_tag_extract_ffi_return_value@Base 2.79.2
- gi_type_tag_get_ffi_type@Base 2.79.2
+ gi_type_tag_extract_ffi_return_value@Base 2.79.2 1
+ gi_type_tag_get_ffi_type@Base 2.79.2 1
  gi_type_tag_hash_pointer_from_argument@Base 2.79.2
  gi_type_tag_to_string@Base 2.79.2
  gi_typelib_get_namespace@Base 2.79.2
