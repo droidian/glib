@@ -17,13 +17,16 @@ srcdir="$(pwd)"
 tmpdir="$(mktemp -d)"
 cd "$tmpdir"
 
+# Machine-readable TAP on fd 3, human-readable diagnostics on fds 1 and 2
+exec 3>&1 >&2
+
 assert () {
     n=$(( n + 1 ))
 
     if "$@"; then
-        echo "ok $n - $*"
+        echo "ok $n - $*" >&3
     else
-        echo "not ok $n - $* exit status $?"
+        echo "not ok $n - $* exit status $?" >&3
         failed=1
     fi
 }
@@ -32,9 +35,9 @@ assert_not () {
     n=$(( n + 1 ))
 
     if ! "$@"; then
-        echo "ok $n - unsuccessful as expected: $*"
+        echo "ok $n - unsuccessful as expected: $*" >&3
     else
-        echo "not ok $n - should not have succeeded: $*"
+        echo "not ok $n - should not have succeeded: $*" >&3
         failed=1
     fi
 }
@@ -56,6 +59,10 @@ fi
 # This assumes that libglib2.0-0t64 has at least one each of Breaks, Provides
 # and Replaces, and will need to be adjusted if that assumption is broken in
 # the future for whatever reason.
+dpkg-query -s "$binary_package"
+# The $ substitution is to be expanded by dpkg-query:
+# shellcheck disable=SC2016
+binary_version="$(dpkg-query -W -f '${Version}' "$binary_package")"
 dpkg-repack --generate "$binary_package"
 grep -q '^Breaks:' dpkg-repack.*/DEBIAN/control
 grep -q '^Provides:' dpkg-repack.*/DEBIAN/control
@@ -65,15 +72,18 @@ grep -q '^Replaces:' dpkg-repack.*/DEBIAN/control
 # shellcheck disable=SC2016
 env \
     binary_package="$binary_package" \
+    binary_version="$binary_version" \
     future_binary_package="$future_binary_package" \
     perl -p -i \
         -e 's/^Package:.*$/Package: $ENV{future_binary_package}/;' \
         -e 's/^(Breaks:.*)$/$1, $ENV{binary_package}/;' \
-        -e 's/^(Provides:.*)$/$1, $ENV{binary_package}/;' \
+        -e 's/^(Provides:.*)$/$1, $ENV{binary_package} (= $ENV{binary_version})/;' \
         -e 's/^(Replaces:.*)$/$1, $ENV{binary_package}/;' \
         dpkg-repack.*/DEBIAN/control
 dpkg-deb --build dpkg-repack.* "$future_binary_package.deb"
-apt-get -y install ./"$future_binary_package.deb"
+dpkg-deb --info "$future_binary_package.deb"
+dpkg-deb --contents "$future_binary_package.deb"
+apt-get -y install ./"$future_binary_package.deb" dconf-gsettings-backend gsettings-desktop-schemas
 
 assert test -e /usr/share/glib-2.0/schemas/org.gnome.desktop.interface.gschema.xml
 assert test -s /usr/share/glib-2.0/schemas/gschemas.compiled
@@ -120,7 +130,7 @@ for f in /usr/lib/*/gio/modules/giomodule.cache; do
     assert_not test -e "$f"
 done
 
-echo "1..$n"
+echo "1..$n" >&3
 exit "$failed"
 
 # vim:set sw=4 sts=4 et:

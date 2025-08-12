@@ -1,13 +1,15 @@
 #!/bin/sh
+# Debian Policy §10.4 says /bin/sh has a superset of POSIX functionality
+# shellcheck disable=SC3043
+
 set -e
 
 
 handle_triggers () {
     local trigger
-    local dirs
 
     for trigger in "$@"; do
-        if ! [ -d $trigger ]; then
+        if ! [ -d "$trigger" ]; then
             continue
         fi
         case $trigger in
@@ -28,6 +30,8 @@ handle_triggers () {
 }
 
 if [ "$1" = triggered ]; then
+    # The list of triggers is space-separated, so word-splitting is intended:
+    # shellcheck disable=SC2086
     handle_triggers $2
     exit 0
 fi

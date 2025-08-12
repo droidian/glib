@@ -13,12 +13,12 @@ set -e
 case "$1" in
     (install|upgrade)
         # Do this cleanup on upgrade from any version older than the one that
-        # introduced this change to experimental.
+        # addressed #1110696.
         #
         # We also need to do this cleanup on new installations of
         # libglib2.0-0t64 (because any new installation might be replacing
         # libglib2.0-0) so treat an empty version as being arbitrarily old.
-        if dpkg --compare-versions "${2:-}" lt "2.79.3-3"
+        if dpkg --compare-versions "${2:-}" lt "2.84.4-2~"
         then
             # If there are several multiarch instances, they might have been
             # removed but not purged, in which case purging them (perhaps
@@ -28,7 +28,12 @@ case "$1" in
             # only doing this cleanup for the current architecture, we attempt
             # to clean up all multiarch instances the first time any single
             # instance is installed or upgraded.
-            for arch in $(dpkg --print-architecture) $(dpkg --print-foreign-architectures)
+            # This originally used $(dpkg --print-architecture) and
+            # $(dpkg --print-foreign-architectures), but it is possible for
+            # libglib2.0-0:i386 to still exist in removed-but-not-purged
+            # state after an i386 foreign architecture has been disabled:
+            # see #1110696.
+            for arch in $(dpkg-query -W -f '${Architecture}\n' libglib2.0-0 2>/dev/null || true)
             do
                 if old_postrm=$(dpkg-query --control-path "libglib2.0-0:$arch" postrm 2>/dev/null) \
                     && [ -n "$old_postrm" ] \

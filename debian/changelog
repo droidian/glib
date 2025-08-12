@@ -38,6 +38,39 @@ glib2.0 (2.85.1-1) experimental; urgency=medium
 
  -- Jeremy Bícha <jbicha@ubuntu.com>  Thu, 03 Jul 2025 11:35:13 -0400
 
+glib2.0 (2.84.4-2) unstable; urgency=medium
+
+  * Mention #1110640 in previous changelog entry
+  * libgirepository-2.0-0: Generate a dependency on a virtual package
+    for libffi-related symbols, to avoid trouble during future libffi ABI
+    transitions (Closes: #1110825)
+  * libglib2.0-0t64: Make maintainer scripts shellcheck-clean
+  * libglib2.0-0t64.postrm:
+    - Refactor to use functions that early-return if we do not want to
+      do the cleanup, avoiding stacking conditionals
+    - Don't remove cache files if they would be non-empty,
+      guarding against issues similar to #1065022 and #1110696
+      (mitigates: #1110696)
+  * libglib2.0-0t64.preinst: Disarm libglib2.0-0 postrm for all
+    architectures, avoiding a corner case where the faulty postrm that
+    suffered from #1065022 would still exist if it belonged to a former
+    foreign architecture that was already disabled, but libglib2.0-0
+    from that architecture was still in removed-but-not-purged state,
+    resulting in #1065022 recurring when that version of libglib2.0-0
+    was subsequently purged (Closes: #1110696)
+  * d/tests/1065022-futureproofing:
+    - Fix a test regression by generating a versioned Provides when
+      building a mockup of a hypothetical future libglib2.0-0xyz.
+      This regression wasn't immediately obvious because the autopkgtest
+      is marked as flaky (it depends on various implementation details
+      which we can't completely rely on).
+    - Make sure required packages stay installed, failing the test early
+      if their dependencies cannot be satisfied
+    - Produce only TAP output on stdout, and a diagnostic log on stderr
+    - Improve diagnostic output
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 12 Aug 2025 10:01:06 +0100
+
 glib2.0 (2.84.4-1) unstable; urgency=medium
 
   * d/control, d/gbp.conf: Use debian/forky packaging branch.
@@ -48,7 +81,7 @@ glib2.0 (2.84.4-1) unstable; urgency=medium
       outside the intended array of alphanumeric characters if a long-running
       program generates billions of temporary file names
       (CVE-2025-7039, glib#3716 upstream; believed to be unlikely to be
-      exploitable in practice)
+      exploitable in practice. Closes: #1110640)
     - Fix the intended ability for g_settings_bind_with_mapping_closures()
       to copy a value to the destination object
       (glib!4667 upstream)
