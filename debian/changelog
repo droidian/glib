@@ -1,4 +1,4 @@
-glib2.0 (2.84.4-2) UNRELEASED; urgency=medium
+glib2.0 (2.84.4-2) unstable; urgency=medium
 
   * Mention #1110640 in previous changelog entry
   * libgirepository-2.0-0: Generate a dependency on a virtual package
@@ -29,7 +29,7 @@ glib2.0 (2.84.4-2) UNRELEASED; urgency=medium
     - Produce only TAP output on stdout, and a diagnostic log on stderr
     - Improve diagnostic output
 
- -- Simon McVittie <smcv@debian.org>  Tue, 12 Aug 2025 00:38:25 +0100
+ -- Simon McVittie <smcv@debian.org>  Tue, 12 Aug 2025 10:01:06 +0100
 
 glib2.0 (2.84.4-1) unstable; urgency=medium
 
