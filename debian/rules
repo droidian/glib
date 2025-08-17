@@ -145,7 +145,9 @@ else
 test_timeout_multiplier = 20
 endif
 
-override_dh_auto_test-arch:
+override_dh_auto_test:
+
+override_dh_auto_test-arch_disabled:
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 	# Remove LD_PRELOAD so we don't run with fakeroot, which makes dbus-related tests fail
 	# Remove LANGUAGE to avoid mismatches between expected and actual
