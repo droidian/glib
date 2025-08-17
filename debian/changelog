@@ -1,3 +1,9 @@
+glib2.0 (2.84.4-3) unstable; urgency=medium
+
+  * d/control: Generate the intended Provides in libgirepository-2.0-0
+
+ -- Simon McVittie <smcv@debian.org>  Sun, 17 Aug 2025 17:30:44 +0100
+
 glib2.0 (2.84.4-2) unstable; urgency=medium
 
   * Mention #1110640 in previous changelog entry
