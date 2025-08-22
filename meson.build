@@ -1,5 +1,5 @@
 project('glib', 'c',
-  version : '2.85.3',
+  version : '2.85.4',
   # NOTE: See the policy in docs/meson-version.md before changing the Meson dependency
   meson_version : '>= 1.4.0',
   default_options : [
@@ -2682,8 +2682,8 @@ if enable_systemtap
   endif
   stp_cdata = configuration_data()
   stp_cdata.set('ABS_GLIB_RUNTIME_LIBDIR', glib_libdir)
-  stp_cdata.set('LT_CURRENT', minor_version * 100)
-  stp_cdata.set('LT_REVISION', micro_version)
+  stp_cdata.set('LT_CURRENT', current)
+  stp_cdata.set('LT_REVISION', interface_age)
 endif
 
 # Introspection
