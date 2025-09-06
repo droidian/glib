@@ -2874,7 +2874,7 @@ g_test_add_data_func (const char     *testpath,
  *
  * Creates a new test case.
  *
- * In constract to [func@GLib.test_add_data_func], this function
+ * In contrast to [func@GLib.test_add_data_func], this function
  * is freeing @test_data after the test run is complete.
  *
  * Since: 2.34
@@ -4097,7 +4097,7 @@ g_test_trap_subprocess (const char           *test_path,
  *       }
  *
  *     // Reruns this same test in a subprocess
- *     g_autoptr(GStrv) envp = g_get_environ ();
+ *     g_auto(GStrv) envp = g_get_environ ();
  *     envp = g_environ_setenv (g_steal_pointer (&envp), "USER", "charlie", TRUE);
  *     g_test_trap_subprocess_with_envp (NULL, envp, 0, G_TEST_SUBPROCESS_DEFAULT);
  *     g_test_trap_assert_passed ();
@@ -4177,7 +4177,7 @@ g_test_trap_subprocess_with_envp (const char           *test_path,
   flags = G_SPAWN_DO_NOT_REAP_CHILD;
   if (test_log_fd != -1)
     flags |= G_SPAWN_LEAVE_DESCRIPTORS_OPEN;
-  if (test_flags & G_TEST_TRAP_INHERIT_STDIN)
+  if (test_flags & G_TEST_SUBPROCESS_INHERIT_STDIN)
     flags |= G_SPAWN_CHILD_INHERITS_STDIN;
 
   if (!g_spawn_async_with_pipes (test_initial_cwd,
