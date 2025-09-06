@@ -1,8 +1,12 @@
-glib2.0 (2.85.4-2) UNRELEASED; urgency=medium
+glib2.0 (2.86.0-1) UNRELEASED; urgency=medium
 
+  [ Jeremy Bícha ]
+  * New upstream release
+
+  [ Simon McVittie ]
   * Standards-Version: 4.7.2 (no changes required)
 
- -- Simon McVittie <smcv@debian.org>  Fri, 22 Aug 2025 22:07:55 +0100
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Sat, 06 Sep 2025 08:31:13 -0400
 
 glib2.0 (2.85.4-1) experimental; urgency=medium
 
