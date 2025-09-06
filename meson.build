@@ -1,5 +1,5 @@
 project('glib', 'c',
-  version : '2.85.4',
+  version : '2.86.0',
   # NOTE: See the policy in docs/meson-version.md before changing the Meson dependency
   meson_version : '>= 1.4.0',
   default_options : [
@@ -2301,7 +2301,7 @@ endif
 
 # First check in libc, fallback to libintl, and as last chance build
 # proxy-libintl subproject.
-# FIXME: glib-gettext.m4 has much more checks to detect broken/uncompatible
+# FIXME: glib-gettext.m4 has much more checks to detect broken/incompatible
 # implementations. This could be extended if issues are found in some platforms.
 libintl_deps = []
 libintl_prefix = '#include <libintl.h>'
