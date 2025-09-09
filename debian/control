@@ -419,6 +419,7 @@ Depends:
 Provides:
  ${gir:Provides},
 Breaks:
+ libgjs0 (<< 1.85.90~),
  libgirepository-1.0-1 (<< 1.78.1-3~),
 Description: Introspection data for GLib, GObject, Gio and GModule
  GObject Introspection is a project for providing machine readable
