@@ -1,0 +1,47 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Wed, 10 Sep 2025 02:40:03 +0200
+Subject: gtype: Define copy and free functions for GTypeClass and
+ GTypeInterface
+
+We have some (deprecated) methods that technically still return
+transfer-full instances of GTypeClass's and GTypeInterface's.
+
+The introspection scanner cannot generate bindings for them though since
+it does not know how to manage their lifecycle, and we end up skipping
+these symbols.
+
+This is breaking some language bindings, and in particular gjs [1] and
+lua-lgi, that were using the .ref methods.
+
+While we should not use deprecated functions in the language bindings,
+these symbols should still be introspected.
+
+[1] https://gitlab.gnome.org/GNOME/gjs/-/issues/711
+
+Origin: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4792
+---
+ gobject/gtype.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/gobject/gtype.h b/gobject/gtype.h
+index fcb176d..a083042 100644
+--- a/gobject/gtype.h
++++ b/gobject/gtype.h
+@@ -444,7 +444,7 @@ typedef struct _GTypeQuery		GTypeQuery;
+ /* Basic Type Structures
+  */
+ /**
+- * GTypeClass:
++ * GTypeClass: (copy-func g_type_class_ref) (free-func g_type_class_unref)
+  * 
+  * An opaque structure used as the base of all classes.
+  */
+@@ -464,7 +464,7 @@ struct _GTypeInstance
+   GTypeClass *g_class;
+ };
+ /**
+- * GTypeInterface:
++ * GTypeInterface: (copy-func g_type_default_interface_ref) (free-func g_type_default_interface_unref)
+  * 
+  * An opaque structure used as the base of all interface types.
+  */
