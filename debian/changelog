@@ -1,4 +1,4 @@
-glib2.0 (2.86.0-1) UNRELEASED; urgency=medium
+glib2.0 (2.86.0-1) experimental; urgency=medium
 
   [ Jeremy Bícha ]
   * New upstream release
@@ -17,7 +17,7 @@ glib2.0 (2.86.0-1) UNRELEASED; urgency=medium
   * debian/patches: Introspect missing GObject type classes ref methods
   * debian/libglib2.0-tests.lintian-overrides: Ignore testprogramrunner warn
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 11 Sep 2025 14:00:32 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 11 Sep 2025 14:01:28 +0200
 
 glib2.0 (2.85.4-1) experimental; urgency=medium
 
