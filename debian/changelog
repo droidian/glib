@@ -2,11 +2,22 @@ glib2.0 (2.86.0-1) UNRELEASED; urgency=medium
 
   [ Jeremy Bícha ]
   * New upstream release
+  * Refresh patches
+  * Remove obsolete Rules-Requires-Root: no field
+  * Remove a reference to the debian/forky branch
 
   [ Simon McVittie ]
   * Standards-Version: 4.7.2 (no changes required)
 
- -- Jeremy Bícha <jbicha@ubuntu.com>  Sat, 06 Sep 2025 08:31:13 -0400
+  [ Marco Trevisan (Treviño) ]
+  * debian/control:
+    - Add breaks on GLib gir for libgjs0 << 1.85.90
+    - Add breaks on GLib gir for python3-gi << 3.50.0-5
+    - Add a Breaks to gir1.2-glib-2.0 on gnome-shell << 49~rc
+  * debian/patches: Introspect missing GObject type classes ref methods
+  * debian/libglib2.0-tests.lintian-overrides: Ignore testprogramrunner warn
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 11 Sep 2025 14:00:32 +0200
 
 glib2.0 (2.85.4-1) experimental; urgency=medium
 
