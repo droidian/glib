@@ -1,3 +1,20 @@
+glib2.0 (2.86.0-3) UNRELEASED; urgency=medium
+
+  * d/control: Update gir1.2-glib-2.0 Breaks on cinnamon.
+    6.4.10-3 was never uploaded, and 6.4.12-1 is the first version that
+    included the necessary changes to be compatible with GLib 2.86.
+  * d/control: Reduce Breaks on gnome-shell to 48.5-2.
+    The necessary changes have been backported. In the 48.5-2 packaging,
+    I've set it up to have a versioned dependency on
+    gir1.2-glib-2.0 (>= 2.86) or (<< 2.86) depending which one it was
+    compiled against, so that it can be binNMU'd.
+  * Add a versioned Breaks on libgjs0g, not just libgjs0.
+    Version 1.82.3-2 has backports of the changes that make gjs 1.86.0
+    compatible with GLib 2.86.
+  * d/patches: Update to glib-2-86 branch commit 2.86.0-53-g043d14fdd3
+
+ -- Simon McVittie <smcv@debian.org>  Thu, 18 Sep 2025 12:48:56 +0100
+
 glib2.0 (2.86.0-2) experimental; urgency=medium
 
   * debian/control: Add breaks to gir on cinnamon << 6.4.10-3.
