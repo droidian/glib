@@ -419,6 +419,7 @@ Depends:
 Provides:
  ${gir:Provides},
 Breaks:
+ awesome (<< 4.3-7.1~),
  cinnamon (<< 6.4.12-1~),
  gnome-shell (<< 48.5-2~),
  libgjs0 (<< 1.85.90~),
