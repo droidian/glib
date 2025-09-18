@@ -1,0 +1,77 @@
+From: Tobias Stoeckmann <tobias@stoeckmann.org>
+Date: Tue, 16 Sep 2025 08:58:28 +0200
+Subject: fuzzing: Fix fuzz_special_dirs
+
+Always NUL-terminate the data, which g_file_get_contents does as well.
+This fixes unnecessary fuzzer warnings.
+
+For further clarification of this requirement, rename the internally
+used function.
+
+Bug: https://gitlab.gnome.org/GNOME/glib/-/issues/3783
+Origin: upstream, 2.86.1, commit:0bebad35cf212c759cf6859d171d0655b0d87310
+---
+ fuzzing/fuzz_special_dirs.c | 7 ++++++-
+ glib/gutils.c               | 2 +-
+ glib/gutilsprivate.c        | 4 ++--
+ 3 files changed, 9 insertions(+), 4 deletions(-)
+
+diff --git a/fuzzing/fuzz_special_dirs.c b/fuzzing/fuzz_special_dirs.c
+index db20e4f..2d88fdf 100644
+--- a/fuzzing/fuzz_special_dirs.c
++++ b/fuzzing/fuzz_special_dirs.c
+@@ -26,10 +26,13 @@ int
+ LLVMFuzzerTestOneInput (const unsigned char *data, size_t size)
+ {
+   gchar *special_dirs[G_USER_N_DIRECTORIES] = { 0 };
++  unsigned char *nul_terminated_data = NULL;
+ 
+   fuzz_set_logging_func ();
+ 
+-  load_user_special_dirs_from_data ((const gchar *) data, "/dev/null", special_dirs);
++  nul_terminated_data = (unsigned char *) g_strndup ((const char *) data, size);
++
++  load_user_special_dirs_from_string ((const gchar *) nul_terminated_data, "/dev/null", special_dirs);
+ 
+   /* Test directories and make sure that, if they exist, they are absolute. */
+   for (GUserDirectory dir_type = G_USER_DIRECTORY_DESKTOP; dir_type < G_USER_N_DIRECTORIES; dir_type++)
+@@ -39,5 +42,7 @@ LLVMFuzzerTestOneInput (const unsigned char *data, size_t size)
+       g_free (dir);
+     }
+ 
++  g_free (nul_terminated_data);
++
+   return 0;
+ }
+diff --git a/glib/gutils.c b/glib/gutils.c
+index df744c7..9a4f7a7 100644
+--- a/glib/gutils.c
++++ b/glib/gutils.c
+@@ -2287,7 +2287,7 @@ load_user_special_dirs (void)
+     }
+ 
+   home_dir = g_get_home_dir_unlocked ();
+-  load_user_special_dirs_from_data ((const gchar *) data, home_dir, g_user_special_dirs);
++  load_user_special_dirs_from_string (data, home_dir, g_user_special_dirs);
+ 
+   g_free (data);
+   g_free (config_file);
+diff --git a/glib/gutilsprivate.c b/glib/gutilsprivate.c
+index 4b48f91..e74f80f 100644
+--- a/glib/gutilsprivate.c
++++ b/glib/gutilsprivate.c
+@@ -23,12 +23,12 @@
+  * SOFTWARE.
+  */
+ static void
+-load_user_special_dirs_from_data (const gchar *data, const gchar *home_dir, gchar **special_dirs)
++load_user_special_dirs_from_string (const gchar *string, const gchar *home_dir, gchar **special_dirs)
+ {
+   gchar **lines;
+   gint n_lines, i;
+ 
+-  lines = g_strsplit (data, "\n", -1);
++  lines = g_strsplit (string, "\n", -1);
+   n_lines = g_strv_length (lines);
+ 
+   for (i = 0; i < n_lines; i++)

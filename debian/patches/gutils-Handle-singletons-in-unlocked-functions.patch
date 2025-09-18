@@ -1,0 +1,44 @@
+From: Michael Catanzaro <mcatanzaro@redhat.com>
+Date: Tue, 16 Sep 2025 11:09:15 -0500
+Subject: gutils: Handle singletons in unlocked functions
+
+Make sure that results of build functions are stored in singletons to
+avoid creating multiple instances which eventually could leak.
+
+(cherry picked from commit 18a7e7b4a2f248d3c70b3f50a56e16003d625d36)
+
+Co-authored-by: Tobias Stoeckmann <tobias@stoeckmann.org>
+Bug: https://gitlab.gnome.org/GNOME/glib/-/issues/3784
+Origin: upstream, 2.86.1, commit:bcf4274f4381841f90b7b2ea898190d6fa31e4a5
+---
+ glib/gutils.c | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/glib/gutils.c b/glib/gutils.c
+index 9a4f7a7..26f22d8 100644
+--- a/glib/gutils.c
++++ b/glib/gutils.c
+@@ -902,7 +902,10 @@ g_build_home_dir (void)
+ static const gchar *
+ g_get_home_dir_unlocked (void)
+ {
+-  return g_home_dir == NULL ? g_build_home_dir () : g_home_dir;
++  if (g_home_dir == NULL)
++    g_home_dir = g_build_home_dir ();
++
++  return g_home_dir;
+ }
+ 
+ /**
+@@ -1960,7 +1963,10 @@ g_build_user_config_dir (void)
+ static const char *
+ g_get_user_config_dir_unlocked (void)
+ {
+-  return g_user_config_dir == NULL ? g_build_user_config_dir () : g_user_config_dir;
++  if (g_user_config_dir == NULL)
++    g_user_config_dir = g_build_user_config_dir ();
++
++  return g_user_config_dir;
+ }
+ 
+ /**

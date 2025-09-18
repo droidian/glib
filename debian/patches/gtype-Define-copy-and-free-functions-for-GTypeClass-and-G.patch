@@ -18,7 +18,7 @@ these symbols should still be introspected.
 
 [1] https://gitlab.gnome.org/GNOME/gjs/-/issues/711
 
-Origin: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4792
+Forwarded: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4792
 ---
  gobject/gtype.h | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)

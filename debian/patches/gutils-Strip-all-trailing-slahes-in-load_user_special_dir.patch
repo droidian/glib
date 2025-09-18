@@ -1,0 +1,58 @@
+From: Tobias Stoeckmann <tobias@stoeckmann.org>
+Date: Thu, 11 Sep 2025 19:22:04 +0200
+Subject: gutils: Strip all trailing slahes in load_user_special_dirs
+
+Do what the comment states and strip all trailing slashes. Also, do not
+strip the trailing slash if it's the only character left, i.e. if it
+denotes the root directory.
+
+Origin: upstream, 2.86.1, commit:43d9e506548a4a00446fa365eb0871d942cb19d0
+---
+ glib/gutils.c               | 7 +++----
+ glib/tests/utils-isolated.c | 6 +++++-
+ 2 files changed, 8 insertions(+), 5 deletions(-)
+
+diff --git a/glib/gutils.c b/glib/gutils.c
+index 42e5096..a42ba00 100644
+--- a/glib/gutils.c
++++ b/glib/gutils.c
+@@ -2379,12 +2379,11 @@ load_user_special_dirs (void)
+       *d = 0;
+ 
+       d = p;
+-      
++
+       /* remove trailing slashes */
+-      len = strlen (d);
+-      if (d[len - 1] == '/')
++      for (len = strlen (d); len > 1 && d[len - 1] == '/'; len--)
+         d[len - 1] = 0;
+-      
++
+       if (is_relative)
+         {
+           const gchar *home_dir = g_get_home_dir_unlocked ();
+diff --git a/glib/tests/utils-isolated.c b/glib/tests/utils-isolated.c
+index 6434d8d..c7ff908 100644
+--- a/glib/tests/utils-isolated.c
++++ b/glib/tests/utils-isolated.c
+@@ -209,7 +209,8 @@ test_load_user_special_dirs (void)
+       result = g_file_set_contents (user_dirs_file,
+                                     "XDG_DESKTOP_DIR = \"/root\"\nXDG_DESKTOP_DIR = \"$HOMER/Desktop\"\n"
+                                     "XDG_DOCUMENTS_DIR = \"$HOME\"\n"
+-                                    "XDG_DOWNLOAD_DIR = \"$HOME/Downloads\"\n",
++                                    "XDG_DOWNLOAD_DIR = \"$HOME/Downloads\"\n"
++                                    "XDG_MUSIC_DIR = \"///\"\n",
+                                     -1, NULL);
+       g_assert_true (result);
+       g_free (user_dirs_file);
+@@ -226,6 +227,9 @@ test_load_user_special_dirs (void)
+       dir = g_get_user_special_dir (G_USER_DIRECTORY_DOWNLOAD);
+       g_assert_cmpstr (dir, ==, expected);
+       g_free (expected);
++
++      dir = g_get_user_special_dir (G_USER_DIRECTORY_MUSIC);
++      g_assert_cmpstr (dir, ==, "/");
+     }
+   else
+     {

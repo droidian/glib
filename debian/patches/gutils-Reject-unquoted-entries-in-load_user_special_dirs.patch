@@ -1,0 +1,50 @@
+From: Tobias Stoeckmann <tobias@stoeckmann.org>
+Date: Thu, 11 Sep 2025 19:24:18 +0200
+Subject: gutils: Reject unquoted entries in load_user_special_dirs
+
+If the end quote is missing, reject the entry. Please note that this
+still allows entries with an uneven amount of quotes, e.g. "/"".
+
+Origin: upstream, 2.86.1, commit:9a2d221e90b5e00062e32b610754a98cc25ed834
+---
+ glib/gutils.c               | 2 +-
+ glib/tests/utils-isolated.c | 6 +++++-
+ 2 files changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/glib/gutils.c b/glib/gutils.c
+index a42ba00..6ff9c79 100644
+--- a/glib/gutils.c
++++ b/glib/gutils.c
+@@ -2374,7 +2374,7 @@ load_user_special_dirs (void)
+         continue;
+ 
+       d = strrchr (p, '"');
+-      if (!d)
++      if (d < p)
+         continue;
+       *d = 0;
+ 
+diff --git a/glib/tests/utils-isolated.c b/glib/tests/utils-isolated.c
+index c7ff908..d376121 100644
+--- a/glib/tests/utils-isolated.c
++++ b/glib/tests/utils-isolated.c
+@@ -210,7 +210,8 @@ test_load_user_special_dirs (void)
+                                     "XDG_DESKTOP_DIR = \"/root\"\nXDG_DESKTOP_DIR = \"$HOMER/Desktop\"\n"
+                                     "XDG_DOCUMENTS_DIR = \"$HOME\"\n"
+                                     "XDG_DOWNLOAD_DIR = \"$HOME/Downloads\"\n"
+-                                    "XDG_MUSIC_DIR = \"///\"\n",
++                                    "XDG_MUSIC_DIR = \"///\"\n"
++                                    "XDG_PICTURES_DIR = \"/\"\nXDG_DOWNLOAD_DIR = \"/dev/null\n",
+                                     -1, NULL);
+       g_assert_true (result);
+       g_free (user_dirs_file);
+@@ -230,6 +231,9 @@ test_load_user_special_dirs (void)
+ 
+       dir = g_get_user_special_dir (G_USER_DIRECTORY_MUSIC);
+       g_assert_cmpstr (dir, ==, "/");
++
++      dir = g_get_user_special_dir (G_USER_DIRECTORY_PICTURES);
++      g_assert_cmpstr (dir, ==, "/");
+     }
+   else
+     {
