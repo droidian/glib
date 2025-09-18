@@ -419,7 +419,7 @@ Depends:
 Provides:
  ${gir:Provides},
 Breaks:
- cinnamon (<< 6.4.10-3~),
+ cinnamon (<< 6.4.12-1~),
  gnome-shell (<< 49~rc-0ubuntu2~),
  libgjs0 (<< 1.85.90~),
  libgirepository-1.0-1 (<< 1.78.1-3~),
