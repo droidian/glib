@@ -328,8 +328,6 @@ Section: doc
 Architecture: all
 Depends:
  ${misc:Depends},
-Suggests:
- devhelp,
 Multi-Arch: foreign
 Description: Documentation files for the GLib library
  GLib is a library containing many useful C routines for things such
