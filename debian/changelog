@@ -1,3 +1,20 @@
+glib2.0 (2.86.0-4) UNRELEASED; urgency=medium
+
+  [ Simon McVittie ]
+  * d/p/gio-tests-Factor-out-connection_wait_for_bus-from-gdbus-s.patch,
+    d/p/gio-tests-Avoid-a-race-condition.patch,
+    d/p/gio-tests-Convert-the-time-to-wait-for-expected-signal-in.patch,
+    d/p/gio-tests-Wait-up-to-10-seconds-for-a-signal-to-be-receiv.patch:
+    Add proposed patches to fix a test failure seen on s390x
+    (Closes: #1115617)
+  * d/libglib2.0-0t64.symbols: g_memory_monitor_poll_get_type()
+    is Linux-only
+
+  [ Jeremy Bícha ]
+  * libglib2.0-doc: Remove Suggests: devhelp
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 19 Sep 2025 13:50:40 +0100
+
 glib2.0 (2.86.0-3) experimental; urgency=medium
 
   * d/control: Update gir1.2-glib-2.0 Breaks on cinnamon.
