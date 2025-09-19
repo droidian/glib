@@ -1,0 +1,33 @@
+From: Simon McVittie <smcv@debian.org>
+Date: Fri, 19 Sep 2025 13:12:29 +0100
+Subject: gio/tests: Wait up to 10 seconds for a signal to be received
+
+If the build/test machine is slow, heavily-loaded or otherwise
+inconvenienced, it might take a few seconds for the signal to be sent
+by the subprocess, received by the message bus, re-broadcasted by the
+message bus and received by the test code. Wait a few more seconds
+before giving up.
+
+If this test is successful, increasing this timeout will not slow it
+down: we stop waiting for the signal as soon as we receive it. This will
+only make any difference if the test would have failed.
+
+Signed-off-by: Simon McVittie <smcv@debian.org>
+Forwarded: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4820
+---
+ gio/tests/gdbus-connection-slow.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/gio/tests/gdbus-connection-slow.c b/gio/tests/gdbus-connection-slow.c
+index ec71f90..061463f 100644
+--- a/gio/tests/gdbus-connection-slow.c
++++ b/gio/tests/gdbus-connection-slow.c
+@@ -28,7 +28,7 @@
+ 
+ #include "gdbus-tests.h"
+ 
+-#define WAIT_FOR_FLUSH_MSEC 1000
++#define WAIT_FOR_FLUSH_MSEC 10000
+ 
+ /* all tests rely on a shared mainloop */
+ static GMainLoop *loop = NULL;

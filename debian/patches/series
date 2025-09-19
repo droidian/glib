@@ -28,6 +28,10 @@ gutils-Handle-singletons-in-unlocked-functions.patch
 Update-Esperanto-translation.patch
 Update-Serbian-translation.patch
 gtype-Define-copy-and-free-functions-for-GTypeClass-and-G.patch
+gio-tests-Factor-out-connection_wait_for_bus-from-gdbus-s.patch
+gio-tests-Avoid-a-race-condition.patch
+gio-tests-Convert-the-time-to-wait-for-expected-signal-in.patch
+gio-tests-Wait-up-to-10-seconds-for-a-signal-to-be-receiv.patch
 01_gettext-desktopfiles.patch
 debian/02_gettext-desktopfiles-ubuntu.patch
 debian/03_disble_glib_compile_schemas_warning.patch

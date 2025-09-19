@@ -1,0 +1,119 @@
+From: Simon McVittie <smcv@debian.org>
+Date: Fri, 19 Sep 2025 12:54:09 +0100
+Subject: gio/tests: Factor out connection_wait_for_bus() from gdbus-subscribe
+
+Signed-off-by: Simon McVittie <smcv@debian.org>
+Forwarded: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4820
+---
+ gio/tests/gdbus-subscribe.c | 29 -----------------------------
+ gio/tests/gdbus-tests.c     | 36 ++++++++++++++++++++++++++++++++++++
+ gio/tests/gdbus-tests.h     |  2 ++
+ 3 files changed, 38 insertions(+), 29 deletions(-)
+
+diff --git a/gio/tests/gdbus-subscribe.c b/gio/tests/gdbus-subscribe.c
+index f04ff20..ce72915 100644
+--- a/gio/tests/gdbus-subscribe.c
++++ b/gio/tests/gdbus-subscribe.c
+@@ -620,35 +620,6 @@ typedef struct
+   guint finished_subscription;
+ } Fixture;
+ 
+-/* Wait for asynchronous messages from @conn to have been processed
+- * by the message bus, as a sequence point so that we can make
+- * "happens before" and "happens after" assertions relative to this.
+- * The easiest way to achieve this is to call a message bus method that has
+- * no arguments and wait for it to return: because the message bus processes
+- * messages in-order, anything we sent before this must have been processed
+- * by the time this call arrives. */
+-static void
+-connection_wait_for_bus (GDBusConnection *conn)
+-{
+-  GError *error = NULL;
+-  GVariant *call_result;
+-
+-  call_result = g_dbus_connection_call_sync (conn,
+-                                             DBUS_SERVICE_DBUS,
+-                                             DBUS_PATH_DBUS,
+-                                             DBUS_INTERFACE_DBUS,
+-                                             "GetId",
+-                                             NULL,   /* arguments */
+-                                             NULL,   /* result type */
+-                                             G_DBUS_CALL_FLAGS_NONE,
+-                                             -1,
+-                                             NULL,
+-                                             &error);
+-  g_assert_no_error (error);
+-  g_assert_nonnull (call_result);
+-  g_variant_unref (call_result);
+-}
+-
+ /*
+  * Called when the subscriber receives a message from any connection
+  * announcing that it has emitted all the signals that it plans to emit.
+diff --git a/gio/tests/gdbus-tests.c b/gio/tests/gdbus-tests.c
+index 857de01..7b329fd 100644
+--- a/gio/tests/gdbus-tests.c
++++ b/gio/tests/gdbus-tests.c
+@@ -27,6 +27,8 @@
+ 
+ #include "gdbus-tests.h"
+ 
++#include "gdbusprivate.h"
++
+ /* ---------------------------------------------------------------------------------------------------- */
+ 
+ typedef struct
+@@ -155,6 +157,40 @@ ensure_gdbus_testserver_up (GDBusConnection *connection,
+   g_main_context_pop_thread_default (context);
+ }
+ 
++/*
++ * connection_wait_for_bus:
++ * @conn: A connection
++ *
++ * Wait for asynchronous messages from @conn to have been processed
++ * by the message bus, as a sequence point so that we can make
++ * "happens before" and "happens after" assertions relative to this.
++ * The easiest way to achieve this is to call a message bus method that has
++ * no arguments and wait for it to return: because the message bus processes
++ * messages in-order, anything we sent before this must have been processed
++ * by the time this call arrives.
++ */
++void
++connection_wait_for_bus (GDBusConnection *conn)
++{
++  GError *error = NULL;
++  GVariant *call_result;
++
++  call_result = g_dbus_connection_call_sync (conn,
++                                             DBUS_SERVICE_DBUS,
++                                             DBUS_PATH_DBUS,
++                                             DBUS_INTERFACE_DBUS,
++                                             "GetId",
++                                             NULL,   /* arguments */
++                                             NULL,   /* result type */
++                                             G_DBUS_CALL_FLAGS_NONE,
++                                             -1,
++                                             NULL,
++                                             &error);
++  g_assert_no_error (error);
++  g_assert_nonnull (call_result);
++  g_variant_unref (call_result);
++}
++
+ /* ---------------------------------------------------------------------------------------------------- */
+ 
+ typedef struct
+diff --git a/gio/tests/gdbus-tests.h b/gio/tests/gdbus-tests.h
+index 9cca556..9cf188f 100644
+--- a/gio/tests/gdbus-tests.h
++++ b/gio/tests/gdbus-tests.h
+@@ -119,6 +119,8 @@ GDBusConnection *_g_bus_get_priv (GBusType            bus_type,
+ void ensure_gdbus_testserver_up (GDBusConnection *connection,
+                                  GMainContext    *context);
+ 
++void connection_wait_for_bus (GDBusConnection *conn);
++
+ G_END_DECLS
+ 
+ #endif /* __TESTS_H__ */

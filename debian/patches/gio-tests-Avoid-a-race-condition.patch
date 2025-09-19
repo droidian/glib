@@ -1,0 +1,59 @@
+From: Simon McVittie <smcv@debian.org>
+Date: Fri, 19 Sep 2025 13:07:59 +0100
+Subject: gio/tests: Avoid a race condition
+
+We have two things happening in parallel:
+
+1. The GDBus worker thread writes out an AddMatch call to the socket,
+   the message bus reads that method call from the other end of the
+   socket, and the message bus responds by adding the match rule
+   for the signal subscription
+
+2. The main thread forks, and the child execs
+   gdbus-connection-flush-helper, which sends the signal that we are
+   expecting; the message bus receives that signal, and broadcasts it
+   to subscribers, if any
+
+Normally (1.) wins the race because exec'ing a child process is more
+time-consuming than IPC, and the test passes.
+
+However, it is possible for (2.) to win the race. If so, we will never
+receive the expected signal (because it was received by the message bus
+before the AddMatch() method call, so at the time it was received, the
+test was not yet a subscriber); the test waits until the timeout and
+then gives up, and the test fails.
+
+For whatever reason, Debian's s390x buildd seems to be reliably failing
+this test since this week, having previously passed. I don't know what
+changed. I can (very rarely) reproduce the race condition described
+above on a developer-accessible s390x machine by repeatedly running the
+/gdbus/connection/flush test in a loop.
+
+Bug-Debian: https://bugs.debian.org/1115617
+Signed-off-by: Simon McVittie <smcv@debian.org>
+Forwarded: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4820
+---
+ gio/tests/gdbus-connection-slow.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/gio/tests/gdbus-connection-slow.c b/gio/tests/gdbus-connection-slow.c
+index 0f445d4..55e8b35 100644
+--- a/gio/tests/gdbus-connection-slow.c
++++ b/gio/tests/gdbus-connection-slow.c
+@@ -82,6 +82,16 @@ test_connection_flush (void)
+                                                           NULL);
+   g_assert_cmpint (signal_handler_id, !=, 0);
+ 
++  /* We need to wait for the subscription to have actually taken effect
++   * before forking the subprocess, otherwise there is a race condition
++   * between the message bus adding the match rule and the subprocess
++   * sending the signal. If the message bus wins the race, then the test
++   * passes, but if the subprocess wins the race, it will be too late
++   * for this process to receive the signal because it already happened.
++   * The easiest way to avoid this race is to do a round-trip to the
++   * message bus and back. */
++  connection_wait_for_bus (connection);
++
+   flush_helper = g_test_get_filename (G_TEST_BUILT, "gdbus-connection-flush-helper", NULL);
+   for (n = 0; n < 50; n++)
+     {
