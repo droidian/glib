@@ -1144,7 +1144,7 @@ libgio-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_memory_input_stream_new_from_data@Base 2.16.0
  g_memory_monitor_dup_default@Base 2.64.0
  g_memory_monitor_get_type@Base 2.64.0
- g_memory_monitor_poll_get_type@Base 2.85.2
+ (arch=linux-any)g_memory_monitor_poll_get_type@Base 2.85.2
  g_memory_monitor_psi_get_type@Base 2.85.2
  g_memory_monitor_warning_level_get_type@Base 2.64.0
  g_memory_output_stream_get_data@Base 2.16.0
