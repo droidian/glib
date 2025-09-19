@@ -1,4 +1,4 @@
-glib2.0 (2.86.0-4) UNRELEASED; urgency=medium
+glib2.0 (2.86.0-4) experimental; urgency=medium
 
   [ Simon McVittie ]
   * d/p/gio-tests-Factor-out-connection_wait_for_bus-from-gdbus-s.patch,
@@ -13,7 +13,7 @@ glib2.0 (2.86.0-4) UNRELEASED; urgency=medium
   [ Jeremy Bícha ]
   * libglib2.0-doc: Remove Suggests: devhelp
 
- -- Simon McVittie <smcv@debian.org>  Fri, 19 Sep 2025 13:50:40 +0100
+ -- Simon McVittie <smcv@debian.org>  Fri, 19 Sep 2025 14:23:19 +0100
 
 glib2.0 (2.86.0-3) experimental; urgency=medium
 
