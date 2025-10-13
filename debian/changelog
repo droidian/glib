@@ -1,8 +1,9 @@
 glib2.0 (2.86.0-5) UNRELEASED; urgency=medium
 
-  * d/control: gir1.2-glib-2.0 Breaks older gnome-menus
+  * d/control: gir1.2-glib-2.0 Breaks older versions of gnome-menus
+  * Release to unstable (transition: #1115340)
 
- -- Simon McVittie <smcv@debian.org>  Fri, 26 Sep 2025 19:52:27 +0100
+ -- Simon McVittie <smcv@debian.org>  Mon, 13 Oct 2025 14:51:55 +0100
 
 glib2.0 (2.86.0-4) experimental; urgency=medium
 
