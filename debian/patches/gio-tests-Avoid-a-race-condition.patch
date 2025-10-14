@@ -31,7 +31,7 @@ above on a developer-accessible s390x machine by repeatedly running the
 
 Bug-Debian: https://bugs.debian.org/1115617
 Signed-off-by: Simon McVittie <smcv@debian.org>
-Forwarded: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4820
+Applied-upstream: 2.86.1, commit:f866de57bf1e4e7cf3358b0b34960b383d4ddb90
 ---
  gio/tests/gdbus-connection-slow.c | 10 ++++++++++
  1 file changed, 10 insertions(+)

@@ -6,7 +6,7 @@ Subject: gio/tests: Convert the time to wait for expected signal into a
 No functional change.
 
 Signed-off-by: Simon McVittie <smcv@debian.org>
-Forwarded: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4820
+Applied-upstream: 2.86.1, commit:b8f88557ab86625368b28de09c5a1ae944be7177
 ---
  gio/tests/gdbus-connection-slow.c | 6 ++++--
  1 file changed, 4 insertions(+), 2 deletions(-)

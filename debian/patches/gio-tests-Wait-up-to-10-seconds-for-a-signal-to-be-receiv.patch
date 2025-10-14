@@ -13,7 +13,7 @@ down: we stop waiting for the signal as soon as we receive it. This will
 only make any difference if the test would have failed.
 
 Signed-off-by: Simon McVittie <smcv@debian.org>
-Forwarded: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4820
+Applied-upstream: 2.86.1, commit:209dff23f118407c52a7446af22411c8daf9f914
 ---
  gio/tests/gdbus-connection-slow.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)

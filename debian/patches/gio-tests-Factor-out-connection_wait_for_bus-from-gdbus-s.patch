@@ -3,7 +3,7 @@ Date: Fri, 19 Sep 2025 12:54:09 +0100
 Subject: gio/tests: Factor out connection_wait_for_bus() from gdbus-subscribe
 
 Signed-off-by: Simon McVittie <smcv@debian.org>
-Forwarded: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4820
+Applied-upstream: 2.86.1, commit:50592945355df9c24cbb1592edd65ec3ef9509cd
 ---
  gio/tests/gdbus-subscribe.c | 29 -----------------------------
  gio/tests/gdbus-tests.c     | 36 ++++++++++++++++++++++++++++++++++++
