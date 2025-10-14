@@ -420,7 +420,7 @@ Breaks:
  awesome (<< 4.3-7.1~),
  cinnamon (<< 6.4.12-1~),
  gnome-menus (<< 3.36.0-4~),
- gnome-shell (<< 48.5-2~),
+ gnome-shell (<< 48.5-3~),
  libgjs0 (<< 1.85.90~),
  libgjs0g (<< 1.82.3-2~),
  libgirepository-1.0-1 (<< 1.78.1-3~),
