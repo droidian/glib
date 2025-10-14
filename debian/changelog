@@ -1,4 +1,4 @@
-glib2.0 (2.86.0-6) UNRELEASED; urgency=medium
+glib2.0 (2.86.0-6) experimental; urgency=low
 
   * d/p/gio-tests-Factor-out-connection_wait_for_bus-from-gdbus-s.patch,
     d/p/gio-tests-Avoid-a-race-condition.patch,
@@ -19,8 +19,9 @@ glib2.0 (2.86.0-6) UNRELEASED; urgency=medium
   * d/control: Remove Breaks/Replaces on packages older than Debian 12.
     We only support single-release upgrades (Debian 12 -> 13 -> 14)
     so we certainly don't need Breaks on Debian 11 packages.
+  * Upload to experimental to avoid disrupting #1115340
 
- -- Simon McVittie <smcv@debian.org>  Tue, 14 Oct 2025 11:06:30 +0100
+ -- Simon McVittie <smcv@debian.org>  Tue, 14 Oct 2025 15:14:47 +0100
 
 glib2.0 (2.86.0-5) unstable; urgency=medium
 
