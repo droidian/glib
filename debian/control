@@ -72,13 +72,8 @@ Recommends:
  shared-mime-info,
  xdg-user-dirs,
 Breaks:
- glib-networking-tests (<< 2.70.0~),
- gnome-keyring (<< 40.0-3~),
  gnome-shell (<< 44.9-2~),
- libedataserver-1.2-26 (<< 3.44.3-2~),
- libgladeui-2-6 (<< 3.22.2),
  libglib2.0-0 (<< 2.80.0-7~),
- libsoup2.4-tests (<< 2.72.0-3~),
 Suggests:
  low-memory-monitor,
 Multi-Arch: same
@@ -218,10 +213,8 @@ Depends:
  ${shlibs:Depends},
 Breaks:
  libgio-2.0-dev (<< 2.83),
- libglib2.0-0-dbg (<< 2.51.4-1~),
 Replaces:
  libgio-2.0-dev (<< 2.83),
- libglib2.0-0-dbg (<< 2.51.4-1~),
 Suggests:
  gir1.2-glib-2.0-dev,
  libglib2.0-doc,
