@@ -1,0 +1,53 @@
+From: Philip Withnall <pwithnall@gnome.org>
+Date: Thu, 18 Sep 2025 16:30:05 +0100
+Subject: gutils: Fix a leak when user-dirs.dirs declares a variable twice
+
+Found by the oss-fuzz test for this parser,
+`fuzzing/fuzz_special_dirs.c`.
+
+Signed-off-by: Philip Withnall <pwithnall@gnome.org>
+
+oss-fuzz#445870121
+oss-fuzz#445848222
+
+Origin: upstream, 2.86.1, commit:e4c2b08218705f3aa12ed1be4ddea3371ce2f39c
+---
+ glib/gutilsprivate.c | 11 ++++++++---
+ glib/tests/utils.c   |  1 +
+ 2 files changed, 9 insertions(+), 3 deletions(-)
+
+diff --git a/glib/gutilsprivate.c b/glib/gutilsprivate.c
+index e74f80f..083f88c 100644
+--- a/glib/gutilsprivate.c
++++ b/glib/gutilsprivate.c
+@@ -126,10 +126,15 @@ load_user_special_dirs_from_string (const gchar *string, const gchar *home_dir,
+       for (len = strlen (d); len > 1 && d[len - 1] == '/'; len--)
+         d[len - 1] = 0;
+ 
++      /* Duplicates override the previous value. This is not explicit in the
++       * spec, but given that the spec[1] is designed to allow user-dirs.dirs to
++       * be sourced in a shell, overriding is the behaviour that would imply.
++       *
++       * [1]: https://www.freedesktop.org/wiki/Software/xdg-user-dirs/ */
++      g_clear_pointer (&special_dirs[directory], g_free);
++
+       if (is_relative)
+-        {
+-          special_dirs[directory] = g_build_filename (home_dir, d, NULL);
+-        }
++        special_dirs[directory] = g_build_filename (home_dir, d, NULL);
+       else
+         special_dirs[directory] = g_strdup (d);
+     }
+diff --git a/glib/tests/utils.c b/glib/tests/utils.c
+index 568817b..00ba3e9 100644
+--- a/glib/tests/utils.c
++++ b/glib/tests/utils.c
+@@ -871,6 +871,7 @@ test_user_special_dirs_load_unlocked (void)
+                                     "XDG_DOCUMENTS_DIR = \"$HOME\"\n"
+                                     "XDG_DOWNLOAD_DIR = \"$HOME/Downloads\"\n"
+                                     "XDG_MUSIC_DIR = \"///\"\n"
++                                    "XDG_PICTURES_DIR = \"$HOME/Pictures\"\n"
+                                     "XDG_PICTURES_DIR = \"/\"\nXDG_DOWNLOAD_DIR = \"/dev/null\n",
+                                     -1, NULL);
+       g_assert_true (result);

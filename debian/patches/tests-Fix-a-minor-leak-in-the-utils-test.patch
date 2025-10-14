@@ -1,0 +1,50 @@
+From: Philip Withnall <pwithnall@gnome.org>
+Date: Thu, 18 Sep 2025 16:28:45 +0100
+Subject: tests: Fix a minor leak in the utils test
+
+Found with `meson test --setup valgrind`, although I also had to change
+relevant lines in `glib/tests/meson.build` temporarily to avoid the
+other tests in the file taking forever:
+```
+  'utils' : {
+    'c_standards': c_standards.keys(),
+    'args': ['-p', '/utils/user-special-dirs'],
+  },
+```
+
+Signed-off-by: Philip Withnall <pwithnall@gnome.org>
+Origin: upstream, 2.86.1, commit:888415030e752b86a6a92e7628a83f0e0764b692
+---
+ glib/tests/utils.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/glib/tests/utils.c b/glib/tests/utils.c
+index 5eb1492..568817b 100644
+--- a/glib/tests/utils.c
++++ b/glib/tests/utils.c
+@@ -856,6 +856,7 @@ test_user_special_dirs_load_unlocked (void)
+   if (g_test_subprocess ())
+     {
+       gchar *user_dirs_file;
++      char *user_dirs_parent = NULL;
+       const gchar *config_dir;
+       const gchar *dir;
+       gchar *expected;
+@@ -863,7 +864,8 @@ test_user_special_dirs_load_unlocked (void)
+ 
+       config_dir = g_get_user_config_dir ();
+       user_dirs_file = g_build_filename (config_dir, "user-dirs.dirs", NULL);
+-      g_mkdir_with_parents (g_path_get_dirname (user_dirs_file), 0700);
++      user_dirs_parent = g_path_get_dirname (user_dirs_file);
++      g_mkdir_with_parents (user_dirs_parent, 0700);
+       result = g_file_set_contents (user_dirs_file,
+                                     "XDG_DESKTOP_DIR = \"/root\"\nXDG_DESKTOP_DIR = \"$HOMER/Desktop\"\n"
+                                     "XDG_DOCUMENTS_DIR = \"$HOME\"\n"
+@@ -873,6 +875,7 @@ test_user_special_dirs_load_unlocked (void)
+                                     -1, NULL);
+       g_assert_true (result);
+       g_free (user_dirs_file);
++      g_free (user_dirs_parent);
+ 
+       g_reload_user_special_dirs_cache ();
+ 
