@@ -1,3 +1,9 @@
+glib2.0 (2.86.1-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 21 Oct 2025 17:34:19 +0100
+
 glib2.0 (2.86.0-7) unstable; urgency=medium
 
   * d/p/gtype-Use-transfer-none-for-types-un-ref-functions.patch,
