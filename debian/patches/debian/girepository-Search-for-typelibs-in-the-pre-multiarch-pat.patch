@@ -6,6 +6,11 @@ The majority of GIR typelibs are now installed in
 /usr/lib/${DEB_HOST_MULTIARCH}/girepository-1.0, but a small number of
 packages still install typelibs into /usr/lib/girepository-1.0.
 
+This patch can (and should) be dropped after the result of
+`apt-file search /usr/lib/girepository-1.0` becomes empty.
+See bug reports:
+https://udd.debian.org/cgi-bin/bts-usertags.cgi?user=pkg-gnome-maintainers%40lists.alioth.debian.org&tag=usr-lib-girepository-1.0
+
 Bug-Debian: https://bugs.debian.org/1099192
 Forwarded: not-needed
 ---
