@@ -1,0 +1,29 @@
+From: Simon McVittie <smcv@debian.org>
+Date: Tue, 21 Oct 2025 13:45:14 +0100
+Subject: girepository: Search for typelibs in the pre-multiarch path
+
+The majority of GIR typelibs are now installed in
+/usr/lib/${DEB_HOST_MULTIARCH}/girepository-1.0, but a small number of
+packages still install typelibs into /usr/lib/girepository-1.0.
+
+Bug-Debian: https://bugs.debian.org/1099192
+Forwarded: not-needed
+---
+ girepository/girepository.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/girepository/girepository.c b/girepository/girepository.c
+index 1c816d1..c1421b8 100644
+--- a/girepository/girepository.c
++++ b/girepository/girepository.c
+@@ -306,6 +306,10 @@ gi_repository_init (GIRepository *repository)
+       typelib_dir = g_build_filename (libdir, "girepository-1.0", NULL);
+ 
+       g_ptr_array_add (repository->typelib_search_path, g_steal_pointer (&typelib_dir));
++
++      /* Debian-specific, should be removed after
++       * `apt-file search /usr/lib/girepository-1.0` stops returning results */
++      g_ptr_array_add (repository->typelib_search_path, g_strdup ("/usr/lib/girepository-1.0"));
+     }
+ 
+   repository->library_paths = g_ptr_array_new_null_terminated (1, g_free, TRUE);
