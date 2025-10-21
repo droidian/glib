@@ -306,6 +306,10 @@ gi_repository_init (GIRepository *repository)
       typelib_dir = g_build_filename (libdir, "girepository-1.0", NULL);
 
       g_ptr_array_add (repository->typelib_search_path, g_steal_pointer (&typelib_dir));
+
+      /* Debian-specific, should be removed after
+       * `apt-file search /usr/lib/girepository-1.0` stops returning results */
+      g_ptr_array_add (repository->typelib_search_path, g_strdup ("/usr/lib/girepository-1.0"));
     }
 
   repository->library_paths = g_ptr_array_new_null_terminated (1, g_free, TRUE);
