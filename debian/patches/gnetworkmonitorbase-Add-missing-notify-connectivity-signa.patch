@@ -1,0 +1,27 @@
+From: Philip Withnall <pwithnall@gnome.org>
+Date: Mon, 20 Oct 2025 16:15:45 +0100
+Subject: gnetworkmonitorbase: Add missing notify::connectivity signal
+
+The connectivity is directly derived from the `is_available` variable,
+so if that changes, we need to notify of a change in `connectivity` too.
+
+Signed-off-by: Philip Withnall <pwithnall@gnome.org>
+
+Bug: https://gitlab.gnome.org/GNOME/glib/-/issues/3803
+Origin: upstream, 2.86.1, commit:9373f55278dd7fef42c84240e38c619b257465cd
+---
+ gio/gnetworkmonitorbase.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/gio/gnetworkmonitorbase.c b/gio/gnetworkmonitorbase.c
+index 78e2634..3d916a6 100644
+--- a/gio/gnetworkmonitorbase.c
++++ b/gio/gnetworkmonitorbase.c
+@@ -443,6 +443,7 @@ emit_network_changed (gpointer user_data)
+     {
+       monitor->priv->is_available = is_available;
+       g_object_notify (G_OBJECT (monitor), "network-available");
++      g_object_notify (G_OBJECT (monitor), "connectivity");
+     }
+ 
+   g_signal_emit (monitor, network_changed_signal, 0, is_available);

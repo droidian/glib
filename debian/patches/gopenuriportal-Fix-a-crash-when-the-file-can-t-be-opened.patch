@@ -1,0 +1,43 @@
+From: Philip Withnall <pwithnall@gnome.org>
+Date: Mon, 13 Oct 2025 17:33:16 +0100
+Subject: =?utf-8?q?gopenuriportal=3A_Fix_a_crash_when_the_file_can=E2=80=99?=
+ =?utf-8?q?t_be_opened?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+Rather than reporting an error via a new `GTask`, report it via the
+`GTask` we’ve already created. This avoids a critical warning about
+destroying the `GTask` without returning a result.
+
+Also ensure to disconnect the D-Bus signal subscription first, to avoid
+an assertion failure in `call_data_free()`.
+
+Signed-off-by: Philip Withnall <pwithnall@gnome.org>
+
+Bug: https://gitlab.gnome.org/GNOME/glib/-/issues/3798
+Origin: upstream, 2.86.1, commit:7a9a3821495ac9c299c77948a61dbfb686e0183b
+---
+ gio/gopenuriportal.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/gio/gopenuriportal.c b/gio/gopenuriportal.c
+index d23a992..c0e2353 100644
+--- a/gio/gopenuriportal.c
++++ b/gio/gopenuriportal.c
+@@ -352,10 +352,13 @@ g_openuri_portal_open_file_async (GFile               *file,
+       errsv = errno;
+       if (fd == -1)
+         {
+-          g_clear_object (&task);
+-          g_task_report_new_error (NULL, callback, user_data, NULL,
++          g_task_return_new_error (task,
+                                    G_IO_ERROR, g_io_error_from_errno (errsv),
+                                    "Failed to open ‘%s’: %s", path, g_strerror (errsv));
++
++          if (call_data != NULL)
++            g_dbus_connection_signal_unsubscribe (connection, g_steal_handle_id (&call_data->response_signal_id));
++          g_clear_object (&task);
+           g_clear_object (&openuri);
+           return;
+         }

@@ -47,7 +47,9 @@ Update-Portuguese-translation.patch
 Update-Romanian-translation.patch
 girnode-Fix-computation-of-union-member-offsets.patch
 Update-British-English-translation.patch
-gtype-Define-copy-and-free-functions-for-GTypeClass-and-G.patch
+gtype-Use-transfer-none-for-types-un-ref-functions.patch
+gopenuriportal-Fix-a-crash-when-the-file-can-t-be-opened.patch
+gnetworkmonitorbase-Add-missing-notify-connectivity-signa.patch
 01_gettext-desktopfiles.patch
 debian/02_gettext-desktopfiles-ubuntu.patch
 debian/03_disble_glib_compile_schemas_warning.patch
