@@ -1,3 +1,21 @@
+glib2.0 (2.86.0-7) UNRELEASED; urgency=medium
+
+  * d/p/gtype-Use-transfer-none-for-types-un-ref-functions.patch,
+    d/p/gopenuriportal-Fix-a-crash-when-the-file-can-t-be-opened.patch,
+    d/p/gnetworkmonitorbase-Add-missing-notify-connectivity-signa.patch:
+    Update to upstream glib-2-86 branch commit 2.86.0-89-gb97228a7c7,
+    excluding CI-only changes.
+    - d/p/gtype-Define-copy-and-free-functions-for-GTypeClass-and-G.patch:
+      Remove patch. The issue was fixed differently upstream by
+      d/p/gtype-Use-transfer-none-for-types-un-ref-functions.patch.
+  * d/p/debian/girepository-Search-for-typelibs-in-the-pre-multiarch-pat.patch:
+    Add patch adding support for the legacy pre-multiarch typelib path.
+    This avoids pygobject 3.54 and gjs 1.86 being unable to load typelibs
+    from that legacy location, which caused an autopkgtest failure in
+    isenkram and a runtime failure in ibus-anthy. (Closes: #1099192)
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 21 Oct 2025 14:23:31 +0100
+
 glib2.0 (2.86.0-6) experimental; urgency=low
 
   * d/p/gio-tests-Factor-out-connection_wait_for_bus-from-gdbus-s.patch,
