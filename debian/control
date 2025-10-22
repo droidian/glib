@@ -11,8 +11,6 @@ Build-Depends:
  debhelper-compat (= 13),
  dh-sequence-gnome,
  dh-sequence-python3,
- docbook-xml,
- docbook-xsl,
  dpkg-dev (>= 1.22.5),
  gettext,
  libdbus-1-dev <!nocheck> <!noinsttest>,
@@ -30,7 +28,6 @@ Build-Depends:
  python3-docutils <!nodoc>,
  python3-packaging:native,
  python3:native,
- xsltproc,
  zlib1g-dev,
 Build-Depends-Arch:
  cross-exe-wrapper <cross !nogir>,
