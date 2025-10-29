@@ -6,6 +6,7 @@ Uploaders:
  Jeremy Bícha <jbicha@ubuntu.com>,
  Marco Trevisan (Treviño) <marco@ubuntu.com>,
  Simon McVittie <smcv@debian.org>,
+# B-D on dbus-daemon, etc. if (!nocheck) || (!noinsttest)
 Build-Depends:
  dbus-daemon <!nocheck> <!noinsttest>,
  debhelper-compat (= 13),
@@ -29,6 +30,7 @@ Build-Depends:
  python3-packaging:native,
  python3:native,
  zlib1g-dev,
+# B-D-A on cross-exe-wrapper if (cross && !nogir)
 Build-Depends-Arch:
  cross-exe-wrapper <cross !nogir>,
  desktop-file-utils <!nocheck>,
@@ -41,6 +43,7 @@ Build-Depends-Arch:
  tzdata <!nocheck>,
  tzdata-legacy <!nocheck>,
  xterm <!nocheck>,
+# B-D-I on cross-exe-wrapper if (cross && !nodoc)
 Build-Depends-Indep:
  cross-exe-wrapper <cross !nodoc>,
  gi-docgen (>= 2024.1) <!nodoc>,
