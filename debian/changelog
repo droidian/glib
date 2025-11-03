@@ -15,7 +15,7 @@ glib2.0 (2.86.1-2) unstable; urgency=medium
     profile conditions
   * d/watch: Convert to uscan format v5
 
- -- Simon McVittie <smcv@debian.org>  Mon, 03 Nov 2025 17:10:46 +0000
+ -- Simon McVittie <smcv@debian.org>  Mon, 03 Nov 2025 18:50:56 +0000
 
 glib2.0 (2.86.1-1) unstable; urgency=medium
 
