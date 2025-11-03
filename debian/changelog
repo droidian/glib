@@ -1,13 +1,21 @@
 glib2.0 (2.86.1-2) UNRELEASED; urgency=medium
 
+  * d/p/gresolver-Fix-loopback-detection-of-IPv6-addresses.patch,
+    d/p/glib-tests-regex-Add-a-future-proof-test-case-for-missing.patch,
+    d/p/gregex-Handle-PCRE2_ERROR_MISSING_NUMBER_TERMINATOR-if-de.patch,
+    d/p/tests-regex-Add-the-error-messages-to-tests.patch,
+    d/p/gutils-Strip-all-trailing-slashes.patch:
+    Add bug fixes from upstream glib-2-86 branch up to 2.86.1-8-g61384f791d.
+    In particular this should fix test failures with pcre2 10.47
+    (Closes: #1118572)
   * d/control: Drop B-D on docbook-xml, docbook-xsl, xsltproc.
     The man pages are now written in reStructuredText rather than Docbook
     XML, so we no longer need these.
-  * d/watch: Convert to uscan format v5
   * d/control: Add comments clarifying the meaning of non-trivial build
     profile conditions
+  * d/watch: Convert to uscan format v5
 
- -- Simon McVittie <smcv@debian.org>  Wed, 29 Oct 2025 13:55:50 +0000
+ -- Simon McVittie <smcv@debian.org>  Mon, 03 Nov 2025 17:04:11 +0000
 
 glib2.0 (2.86.1-1) unstable; urgency=medium
 
