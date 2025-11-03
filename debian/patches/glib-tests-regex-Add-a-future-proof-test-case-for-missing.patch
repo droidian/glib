@@ -1,0 +1,28 @@
+From: Nick Wilson <163766-ncw@users.noreply.gitlab.gnome.org>
+Date: Mon, 27 Oct 2025 16:42:45 +0100
+Subject: glib/tests/regex: Add a future-proof test case for missing back
+ reference
+
+This test applies to both old and newer versions of PCRE2 where
+back reference error has now increased the granularity and is referred
+as PCRE2_ERROR_MISSING_NUMBER_TERMINATOR instead.
+
+Co-Authored-By: Marco Trevisan <mail@3v1n0.net>
+Origin: upstream, 2.86.2, commit:183bccc4c99673da07b2f8677a91030d15bd2589
+Bug-Debian: https://bugs.debian.org/1118572
+---
+ glib/tests/regex.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/glib/tests/regex.c b/glib/tests/regex.c
+index d7a698e..13361c4 100644
+--- a/glib/tests/regex.c
++++ b/glib/tests/regex.c
+@@ -2642,6 +2642,7 @@ G_GNUC_END_IGNORE_DEPRECATIONS
+   TEST_NEW_FAIL ("\\666", G_REGEX_RAW, G_REGEX_ERROR_INVALID_OCTAL_VALUE);
+   TEST_NEW_FAIL ("^(?(DEFINE) abc | xyz ) ", 0, G_REGEX_ERROR_TOO_MANY_BRANCHES_IN_DEFINE);
+   TEST_NEW_FAIL ("a", G_REGEX_NEWLINE_CRLF | G_REGEX_NEWLINE_ANYCRLF, G_REGEX_ERROR_INCONSISTENT_NEWLINE_OPTIONS);
++  TEST_NEW_FAIL ("^(a)\\g\"3", 0, G_REGEX_ERROR_MISSING_BACK_REFERENCE);
+   TEST_NEW_FAIL ("^(a)\\g{3", 0, G_REGEX_ERROR_MISSING_BACK_REFERENCE);
+   TEST_NEW_FAIL ("^(a)\\g{0}", 0, G_REGEX_ERROR_INEXISTENT_SUBPATTERN_REFERENCE);
+   TEST_NEW ("abc(*FAIL:123)xyz", 0, 0);
