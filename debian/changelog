@@ -1,9 +1,10 @@
 glib2.0 (2.86.2-1) UNRELEASED; urgency=medium
 
-  * d/watch: Only watch for stable (even-numbered) branches for now
   * New upstream release
+  * d/patches: Drop patches that were included in the new upstream release
+  * d/watch: Only watch for stable (even-numbered) branches for now
 
- -- Simon McVittie <smcv@debian.org>  Wed, 19 Nov 2025 10:11:58 +0000
+ -- Simon McVittie <smcv@debian.org>  Wed, 19 Nov 2025 10:13:39 +0000
 
 glib2.0 (2.86.1-2) unstable; urgency=medium
 
