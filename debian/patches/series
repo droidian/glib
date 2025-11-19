@@ -1,8 +1,3 @@
-gresolver-Fix-loopback-detection-of-IPv6-addresses.patch
-glib-tests-regex-Add-a-future-proof-test-case-for-missing.patch
-gregex-Handle-PCRE2_ERROR_MISSING_NUMBER_TERMINATOR-if-de.patch
-tests-regex-Add-the-error-messages-to-tests.patch
-gutils-Strip-all-trailing-slashes.patch
 01_gettext-desktopfiles.patch
 debian/02_gettext-desktopfiles-ubuntu.patch
 debian/03_disble_glib_compile_schemas_warning.patch
