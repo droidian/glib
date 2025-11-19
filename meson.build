@@ -1,5 +1,5 @@
 project('glib', 'c',
-  version : '2.86.1',
+  version : '2.86.2',
   # NOTE: See the policy in docs/meson-version.md before changing the Meson dependency
   meson_version : '>= 1.4.0',
   default_options : [
@@ -760,7 +760,6 @@ functions = [
   'strtoll_l',
   'strtoull_l',
   'symlink',
-  'sysinfo',
   'timegm',
   'unsetenv',
   'uselocale',
@@ -822,6 +821,11 @@ endif
 # AIX splice is something else
 if host_system != 'aix'
   functions += ['splice']
+endif
+
+# SVR4 sysinfo() does not behave the same as sysinfo() on other Unixes
+if host_system != 'sunos'
+  functions += ['sysinfo']
 endif
 
 foreach f : functions
