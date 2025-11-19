@@ -1,3 +1,9 @@
+glib2.0 (2.86.1-3) UNRELEASED; urgency=medium
+
+  * d/watch: Only watch for stable (even-numbered) branches for now
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 19 Nov 2025 10:10:23 +0000
+
 glib2.0 (2.86.1-2) unstable; urgency=medium
 
   * d/p/gresolver-Fix-loopback-detection-of-IPv6-addresses.patch,
