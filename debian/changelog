@@ -1,4 +1,4 @@
-glib2.0 (2.86.3-1) UNRELEASED; urgency=medium
+glib2.0 (2.86.3-1) unstable; urgency=medium
 
   * New upstream security-fix release
     - Fix calculation of buffer sizes when escaping URI strings
@@ -9,7 +9,7 @@ glib2.0 (2.86.3-1) UNRELEASED; urgency=medium
       (glib#3845 upstream)
     - Windows-specific changes not described in detail here
 
- -- Simon McVittie <smcv@debian.org>  Tue, 09 Dec 2025 13:23:39 +0000
+ -- Simon McVittie <smcv@debian.org>  Tue, 09 Dec 2025 13:31:14 +0000
 
 glib2.0 (2.86.2-1) unstable; urgency=medium
 
