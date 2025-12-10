@@ -1,12 +1,18 @@
+glib2.0 (2.86.3-2) UNRELEASED; urgency=medium
+
+  * Mention #1122346, #1122347 in previous changelog entry
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 10 Dec 2025 12:05:48 +0000
+
 glib2.0 (2.86.3-1) unstable; urgency=medium
 
   * New upstream security-fix release
     - Fix calculation of buffer sizes when escaping URI strings
       (CVE-2025-13601, glib#3827 upstream, Closes: #1121488)
     - Fix possible buffer underflow parsing GVariant strings/bytestrings
-      (CVE-2025-14087, glib#3834 upstream)
+      (CVE-2025-14087, glib#3834 upstream, Closes: #1122347)
     - Fix integer overflow in file attribute escaping
-      (glib#3845 upstream)
+      (glib#3845 upstream, Closes: #1122346)
     - Windows-specific changes not described in detail here
 
  -- Simon McVittie <smcv@debian.org>  Tue, 09 Dec 2025 13:31:14 +0000
