@@ -169,7 +169,6 @@ Depends:
  pkgconf,
  zlib1g-dev,
  ${misc:Depends},
- ${shlibs:Depends},
 Recommends:
  libgio-2.0-dev-bin (= ${binary:Version}),
  libglib2.0-bin (= ${binary:Version}),
@@ -209,8 +208,6 @@ Depends:
  libglib2.0-bin (= ${binary:Version}),
  libglib2.0-dev-bin (= ${binary:Version}),
  ${misc:Depends},
- ${python3:Depends},
- ${shlibs:Depends},
 Breaks:
  libgio-2.0-dev (<< 2.83),
 Replaces:
@@ -285,7 +282,6 @@ Depends:
  girepository-tools (= ${binary:Version}),
  libgio-2.0-dev-bin (= ${binary:Version}),
  ${misc:Depends},
- ${shlibs:Depends},
 Suggests:
  libgdk-pixbuf2.0-bin,
  libxml2-utils,
@@ -388,7 +384,6 @@ Depends:
  libgirepository-2.0-0 (= ${binary:Version}),
  libglib2.0-dev (= ${binary:Version}),
  ${misc:Depends},
- ${shlibs:Depends},
 Description: Development files for the GObject introspection library
  GLib is a library containing many useful C routines for things such
  as trees, hashes, lists, and strings.  It is a useful general-purpose
