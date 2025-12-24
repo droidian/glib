@@ -101,7 +101,8 @@ override_dh_clean:
 	       $(CURDIR)/debian/install
 	dh_clean -Xorg.gtk.test.gschema.xml.orig -Xorg.gtk.test.gschema.override.orig
 
-override_dh_gnome_clean:
+# We only use dh_gnome to automatically run dh_translations in Ubuntu
+override_dh_gnome:
 
 override_dh_makeshlibs:
 ifneq ($(filter libglib2.0-tests,$(built_binaries)),)
