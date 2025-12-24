@@ -43,12 +43,6 @@ DEB_CONFIGURE_EXTRA_FLAGS += --cross-file=$(CURDIR)/debian/meson/linux.ini
 endif
 endif # cross-compiling
 
-ifneq ($(filter kfreebsd,$(DEB_HOST_ARCH_OS)),)
-have_non_stub_xattr = false
-else
-have_non_stub_xattr = true
-endif
-
 # This target can be run manually to verify that we have the source code
 # for these files. If all goes well, it should result in no diff.
 # This is not done automatically during the build, because it requires a
@@ -237,7 +231,6 @@ DEB_CONFIGURE_FLAGS_deb := \
 	-Dmultiarch=true \
 	-Dselinux=$(enable_selinux) \
 	-Dsystemtap=disabled \
-	-Dxattr=$(have_non_stub_xattr) \
 	$(NULL)
 
 ifneq ($(filter gir1.2-% %-doc,$(built_binaries)),)
@@ -283,7 +276,6 @@ DEB_CONFIGURE_FLAGS_udeb := \
 	-Dselinux=disabled \
 	-Dsysprof=disabled \
 	-Dsystemtap=disabled \
-	-Dxattr=$(have_non_stub_xattr) \
 	$(NULL)
 
 override_dh_auto_build:
