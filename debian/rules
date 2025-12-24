@@ -222,6 +222,7 @@ override_dh_auto_test-indep:
 ifeq ($(DEB_HOST_ARCH_OS),linux)
 enable_libmount := enabled
 enable_selinux := enabled
+DEB_CONFIGURE_FLAGS_deb += -Dsysprof=disabled
 else
 enable_libmount := disabled
 enable_selinux := disabled
@@ -267,14 +268,6 @@ ifeq ($(filter nodoc,$(DEB_BUILD_PROFILES)),)
 DEB_CONFIGURE_FLAGS_deb += -Dman-pages=enabled
 else
 DEB_CONFIGURE_FLAGS_deb += -Dman-pages=disabled
-endif
-
-ifneq ($(filter pkg.glib2.0.nosysprof,$(DEB_BUILD_PROFILES)),)
-DEB_CONFIGURE_FLAGS_deb += -Dsysprof=disabled
-else
-ifeq ($(filter amd64 arm64 armel armhf i386 mips64el ppc64el riscv64 s390x hppa loong64 powerpc ppc64 sh4,$(DEB_HOST_ARCH)),)
-DEB_CONFIGURE_FLAGS_deb += -Dsysprof=disabled
-endif
 endif
 
 DEB_CONFIGURE_FLAGS_udeb := \
