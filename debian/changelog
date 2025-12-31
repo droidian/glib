@@ -1,10 +1,19 @@
-glib2.0 (2.86.3-2) UNRELEASED; urgency=medium
+glib2.0 (2.86.3-2) unstable; urgency=medium
 
+  [ Jeremy Bícha ]
+  * Remove :native from Build-Depends: python3-packaging (Closes: #1124385)
+  * Remove nosysprof build profile because libsysprof-capture-4-dev
+    is built for all Linux architectures and does not require glib2.0
+  * Remove kfreebsd reference
+  * Override dh_gnome to avoid build warnings
+  * Bump Standards Version to 4.7.3
+
+  [ Simon McVittie ]
   * Mention #1122346, #1122347 in previous changelog entry
   * Mention CVE-2025-14512 in previous changelog entry now that it has
     been allocated
 
- -- Simon McVittie <smcv@debian.org>  Wed, 10 Dec 2025 12:05:48 +0000
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Wed, 31 Dec 2025 10:32:42 -0500
 
 glib2.0 (2.86.3-1) unstable; urgency=medium
 
