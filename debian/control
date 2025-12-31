@@ -26,7 +26,7 @@ Build-Depends:
  pkgconf,
  python3-debian:native,
  python3-docutils <!nodoc>,
- python3-packaging:native,
+ python3-packaging,
  python3:native,
  zlib1g-dev,
 # B-D-A on cross-exe-wrapper if (cross && !nogir)
