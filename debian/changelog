@@ -1,3 +1,9 @@
+glib2.0 (2.86.3-3) unstable; urgency=medium
+
+  * Fix hurd build
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Wed, 31 Dec 2025 18:35:13 -0500
+
 glib2.0 (2.86.3-2) unstable; urgency=medium
 
   [ Jeremy Bícha ]
