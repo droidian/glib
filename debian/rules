@@ -217,10 +217,10 @@ override_dh_auto_test-indep:
 ifeq ($(DEB_HOST_ARCH_OS),linux)
 enable_libmount := enabled
 enable_selinux := enabled
-DEB_CONFIGURE_FLAGS_deb += -Dsysprof=disabled
 else
 enable_libmount := disabled
 enable_selinux := disabled
+DEB_CONFIGURE_FLAGS_deb += -Dsysprof=disabled
 endif
 
 DEB_CONFIGURE_FLAGS_deb := \
