@@ -220,10 +220,10 @@ enable_selinux := enabled
 else
 enable_libmount := disabled
 enable_selinux := disabled
-DEB_CONFIGURE_FLAGS_deb += -Dsysprof=disabled
+DEB_CONFIGURE_FLAGS_deb := -Dsysprof=disabled
 endif
 
-DEB_CONFIGURE_FLAGS_deb := \
+DEB_CONFIGURE_FLAGS_deb += \
 	--default-library both \
 	-Ddtrace=disabled \
 	-Dgir_dir_prefix=lib/${DEB_HOST_MULTIARCH} \
