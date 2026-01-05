@@ -1,8 +1,9 @@
-glib2.0 (2.87.1-1) UNRELEASED; urgency=medium
+glib2.0 (2.87.1-1) experimental; urgency=medium
 
   * New upstream release
+  * debian/libglib2.0-0t64.symbols: Add new symbols
 
- -- Jeremy Bícha <jbicha@ubuntu.com>  Mon, 05 Jan 2026 12:19:25 -0500
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Mon, 05 Jan 2026 12:27:25 -0500
 
 glib2.0 (2.86.3-4) unstable; urgency=medium
 
