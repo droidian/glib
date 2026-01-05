@@ -2916,6 +2916,7 @@ libglib-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_markup_parse_context_free@Base 2.12.0
  g_markup_parse_context_get_element@Base 2.12.0
  g_markup_parse_context_get_element_stack@Base 2.16.0
+ g_markup_parse_context_get_offset@Base 2.87.1
  g_markup_parse_context_get_position@Base 2.12.0
  g_markup_parse_context_get_user_data@Base 2.18.0
  g_markup_parse_context_new@Base 2.12.0
@@ -3753,6 +3754,7 @@ libglib-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_unix_error_quark@Base 2.30.0
  g_unix_fd_add@Base 2.36.0
  g_unix_fd_add_full@Base 2.36.0
+ g_unix_fd_query_path@Base 2.87.1
  g_unix_fd_source_funcs@Base 2.38.0
  g_unix_fd_source_new@Base 2.36.0
  g_unix_get_passwd_entry@Base 2.64.0
