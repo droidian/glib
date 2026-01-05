@@ -99,6 +99,9 @@
 #ifndef ECANCELED
 #define ECANCELED 105
 #endif
+#ifndef ERROR_CANCELLED
+#define ERROR_CANCELLED 1223
+#endif
 #endif
 
 
@@ -684,6 +687,8 @@ get_fs_type (long f_type)
       return "nsfs";
     case 0x5346544e:
       return "ntfs";
+    case 0x7366746e:
+      return "ntfs3";
     case 0x7461636f:
       return "ocfs2";
     case 0x9fa1:
@@ -766,7 +771,7 @@ static guint64 mount_info_hash_cache_time = 0;
 
 typedef enum {
   MOUNT_INFO_READONLY = 1<<0
-} MountInfo;
+} G_GNUC_FLAG_ENUM MountInfo;
 
 static gboolean
 device_equal (gconstpointer v1,
@@ -1280,7 +1285,19 @@ g_local_file_query_exists (GFile        *file,
 {
   GLocalFile *local = G_LOCAL_FILE (file);
 
-  return faccessat (0, local->filename, F_OK, AT_EACCESS | AT_SYMLINK_NOFOLLOW) == 0;
+  if (faccessat (AT_FDCWD, local->filename, F_OK, AT_EACCESS | AT_SYMLINK_NOFOLLOW) == 0)
+    return TRUE;
+
+  if G_UNLIKELY (errno == EBADF)
+    {
+      g_critical ("g_local_file_query_exists: faccessat didn't accept supplied dirfd");
+    }
+  else if G_UNLIKELY (errno == EINVAL)
+    {
+      g_critical ("g_local_file_query_exists: faccessat doesn't support supplied flags");
+    }
+
+  return FALSE;
 }
 #endif
 
@@ -2360,6 +2377,7 @@ g_local_file_trash (GFile         *file,
               if (basename_len <= strlen (".trashinfo"))
                 break; /* fail with ENAMETOOLONG */
               basename_len -= strlen (".trashinfo");
+              memmove (basename, basename + strlen (".trashinfo"), basename_len);
               basename[basename_len] = '\0';
               i = 1;
               continue;
@@ -2383,6 +2401,7 @@ g_local_file_trash (GFile         *file,
               if (basename_len <= strlen (".XXXXXX"))
                 break; /* fail with ENAMETOOLONG */
               basename_len -= strlen (".XXXXXX");
+              memmove (basename, basename + strlen (".XXXXXX"), basename_len);
               basename[basename_len] = '\0';
               i = 1;
               g_clear_error (&my_error);
@@ -2539,6 +2558,7 @@ g_local_file_trash (GFile         *file,
   gboolean success;
   wchar_t *wfilename;
   long len;
+  int errcode;
 
   wfilename = g_utf8_to_utf16 (local->filename, -1, NULL, &len, NULL);
   /* SHFILEOPSTRUCT.pFrom is double-zero-terminated */
@@ -2549,9 +2569,10 @@ g_local_file_trash (GFile         *file,
   op.pFrom = wfilename;
   op.fFlags = FOF_ALLOWUNDO;
 
-  success = SHFileOperationW (&op) == 0;
+  errcode = SHFileOperationW (&op);
+  success = errcode == 0;
 
-  if (success && op.fAnyOperationsAborted)
+  if ((success || errcode == ERROR_CANCELLED) && op.fAnyOperationsAborted)
     {
       if (cancellable && !g_cancellable_is_cancelled (cancellable))
 	g_cancellable_cancel (cancellable);

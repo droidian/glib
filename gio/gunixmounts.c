@@ -292,6 +292,7 @@ g_unix_is_mount_path_system_internal (const char *mount_path)
     "/",              /* we already have "Filesystem root" in Nautilus */ 
     "/bin",
     "/boot",
+    "/boot/efi",
     "/compat/linux/proc",
     "/compat/linux/sys",
     "/dev",
@@ -375,7 +376,10 @@ g_unix_is_system_fs_type (const char *fs_type)
     "auto",
     "autofs",
     "autofs4",
+    "binfmt_misc",
+    "bpf",
     "cgroup",
+    "cgroup2",
     "configfs",
     "cxfs",
     "debugfs",
@@ -383,7 +387,10 @@ g_unix_is_system_fs_type (const char *fs_type)
     "devpts",
     "devtmpfs",
     "ecryptfs",
+    "efivarfs",
     "fdescfs",
+    "fuse.gvfsd-fuse",
+    "fuse.portal",
     "fusectl",
     "gfs",
     "gfs2",
@@ -411,6 +418,7 @@ g_unix_is_system_fs_type (const char *fs_type)
     "selinuxfs",
     "sysfs",
     "tmpfs",
+    "tracefs",
     "usbfs",
     NULL
   };
@@ -1569,7 +1577,7 @@ aix_fs_get (FILE               *fd,
     }
 
   word[strlen(word) - 1] = 0;
-  strcpy (prop->mnt_mount, word);
+  g_strlcpy (prop->mnt_mount, word, sizeof (prop->mnt_mount));
   
   /* read attributes and value */
   
@@ -1586,11 +1594,11 @@ aix_fs_get (FILE               *fd,
       aix_fs_getword (fd, value);
       
       if (strcmp (word, "dev") == 0)
-	strcpy (prop->mnt_special, value);
+	g_strlcpy (prop->mnt_special, value, sizeof (prop->mnt_special));
       else if (strcmp (word, "vfs") == 0)
-	strcpy (prop->mnt_fstype, value);
+	g_strlcpy (prop->mnt_fstype, value, sizeof (prop->mnt_fstype));
       else if (strcmp (word, "options") == 0)
-	strcpy(prop->mnt_options, value);
+	g_strlcpy (prop->mnt_options, value, sizeof (prop->mnt_options));
     }
   
   return 0;
@@ -3991,7 +3999,12 @@ _resolve_dev_root (void)
                     }
                 }
 
+              /* endmntent() calls fclose() for us, but scan-build doesn’t know that */
+#if !G_ANALYZER_ANALYZING
               endmntent (f);
+#else
+              fclose (f);
+#endif
 
 #ifndef HAVE_GETMNTENT_R
 	      G_UNLOCK (getmntent);

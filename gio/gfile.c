@@ -84,7 +84,6 @@
 typedef off_t loff_t;
 #endif
 
-
 /**
  * GFile:
  *
@@ -176,9 +175,9 @@ typedef off_t loff_t;
  * short. Entity tags are somewhat like a more abstract version of the
  * traditional mtime, and can be used to quickly determine if the file
  * has been modified from the version on the file system. See the
- * HTTP 1.1 
- * [specification](http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html)
- * for HTTP `ETag` headers, which are a very similar concept.
+ * description of HTTP ETags in
+ * [RFC9110](https://www.rfc-editor.org/rfc/rfc9110.html#name-etag).
+ * `GFile` Entity Tags are a very similar concept.
  */
 
 static void               g_file_real_query_info_async            (GFile                  *file,
@@ -783,9 +782,17 @@ g_file_hash (gconstpointer file)
  *
  * Checks if the two given #GFiles refer to the same file.
  *
+ * This function can be used with [method@Gio.File.hash] to insert
+ * [iface@Gio.File]s efficiently in a hash table.
+ *
  * Note that two #GFiles that differ can still refer to the same
  * file on the filesystem due to various forms of filename
- * aliasing.
+ * aliasing. For local files, this function essentially compares the file paths,
+ * so two [iface@Gio.File]s which point to different hard or soft links will not
+ * be considered equal, despite pointing to the same content.
+ *
+ * For determining whether two files are hardlinked, see
+ * [const@Gio.FILE_ATTRIBUTE_ID_FILE].
  *
  * This call does no blocking I/O.
  *

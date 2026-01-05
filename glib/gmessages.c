@@ -421,8 +421,30 @@ _g_log_abort (gboolean breakpoint)
 
 #ifdef G_OS_WIN32
   debugger_present = IsDebuggerPresent ();
+#elif defined(G_OS_UNIX)
+  gchar *proc_status = NULL;
+  gsize len;
+
+  /* It's possible for /proc to exist on *BSD as well, so we will
+   * attempt to read the file regardless.
+   */
+  if (g_file_get_contents ("/proc/self/status",
+                           &proc_status,
+                           &len,
+                           NULL))
+    {
+      /* First, check if the line even exists... */
+      if (g_strstr_len (proc_status, len, "TracerPid:"))
+        debugger_present = (g_strstr_len (proc_status, len, "TracerPid:\t0") == NULL);
+      else /* Otherwise, very likely not debugging. */
+        debugger_present = FALSE;
+    }
+  else /* The file likely doesn't exist, so we'll just assume we are debugging. */
+    debugger_present = TRUE;
+
+  g_free (proc_status);
 #else
-  /* Assume GDB is attached. */
+  /* Assume debugger is attached. */
   debugger_present = TRUE;
 #endif /* !G_OS_WIN32 */
 
@@ -2690,6 +2712,8 @@ g_log_writer_standard_streams (GLogLevelFlags   log_level,
                                gsize            n_fields,
                                gpointer         user_data)
 {
+  static gboolean use_color;
+  static size_t use_color_init = 0;
   FILE *stream;
   char *out;
 
@@ -2700,9 +2724,20 @@ g_log_writer_standard_streams (GLogLevelFlags   log_level,
   if (!stream || fileno (stream) < 0)
     return G_LOG_WRITER_UNHANDLED;
 
-  out = log_writer_format_fields_utf8 (log_level, fields, n_fields,
-                                       g_log_writer_supports_color (fileno (stream)),
-                                       TRUE);
+  if (g_once_init_enter (&use_color_init))
+    {
+      /* Honor NO_COLOR environment variable (https://no-color.org) */
+      const char *no_color_env = g_getenv ("NO_COLOR");
+      if (no_color_env && *no_color_env != '\0')
+        use_color = FALSE;
+      else
+        use_color = g_log_writer_supports_color (fileno (stream));
+
+      g_once_init_leave (&use_color_init, 1);
+    }
+
+  out = log_writer_format_fields_utf8 (log_level, fields, n_fields, use_color, TRUE);
+
   g_fputs (out, stream);
   fflush (stream);
   g_free (out);
