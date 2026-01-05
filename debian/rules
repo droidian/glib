@@ -54,7 +54,7 @@ maintainer-update-unicode-data:
 	rm -f glib/gunidecomp.h
 	rm -f glib/tests/casefold.txt
 	rm -f glib/tests/casemap.txt
-	$(CURDIR)/tools/update-unicode-data.sh $(CURDIR)/unicode-data 16.0.0
+	$(CURDIR)/tools/update-unicode-data.sh $(CURDIR)/unicode-data 17.0.0
 
 debian/extra-substvars:
 	dpkg-architecture -c debian/extra-substvars.py > debian/extra-substvars
