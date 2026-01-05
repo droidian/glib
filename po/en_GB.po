@@ -4,15 +4,15 @@
 # Gareth Owen <gowen72@yahoo.com> 2004
 # Philip Withnall <philip@tecnocode.co.uk>, 2010-2024.
 # Zander Brown <zbrown@gnome.org>, 2019-2021.
-# Andi Chandler <andi@gowling.com>, 2024.
+# Andi Chandler <andi@gowling.com>, 2024-2025.
 # Bruce Cowan <bruce@bcowan.me.uk>, 2009-2025.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: glib\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/glib/-/issues\n"
-"POT-Creation-Date: 2025-09-30 16:34+0000\n"
-"PO-Revision-Date: 2025-10-02 11:20+0100\n"
+"POT-Creation-Date: 2025-09-30 16:00+0000\n"
+"PO-Revision-Date: 2025-10-02 11:35+0100\n"
 "Last-Translator: Bruce Cowan <bruce@bcowan.me.uk>\n"
 "Language-Team: British English <en@li.org>\n"
 "Language: en_GB\n"
@@ -602,13 +602,13 @@ msgstr ""
 msgid "Error creating directory “%s”: %s"
 msgstr "Error creating directory “%s”: %s"
 
-#: gio/gdbusauthmechanismsha1.c:368 gio/gfile.c:1105 gio/gfile.c:1363
-#: gio/gfile.c:1501 gio/gfile.c:1738 gio/gfile.c:1793 gio/gfile.c:1851
-#: gio/gfile.c:1935 gio/gfile.c:1992 gio/gfile.c:2056 gio/gfile.c:2111
-#: gio/gfile.c:4106 gio/gfile.c:4285 gio/gfile.c:4692 gio/gfile.c:5160
-#: gio/gfile.c:5572 gio/gfile.c:5657 gio/gfile.c:5747 gio/gfile.c:5844
-#: gio/gfile.c:5931 gio/gfile.c:6030 gio/gfile.c:9207 gio/gfile.c:9297
-#: gio/gfile.c:9381 gio/win32/gwinhttpfile.c:453
+#: gio/gdbusauthmechanismsha1.c:368 gio/gfile.c:1113 gio/gfile.c:1371
+#: gio/gfile.c:1509 gio/gfile.c:1746 gio/gfile.c:1801 gio/gfile.c:1859
+#: gio/gfile.c:1943 gio/gfile.c:2000 gio/gfile.c:2064 gio/gfile.c:2119
+#: gio/gfile.c:4114 gio/gfile.c:4293 gio/gfile.c:4700 gio/gfile.c:5168
+#: gio/gfile.c:5580 gio/gfile.c:5665 gio/gfile.c:5755 gio/gfile.c:5852
+#: gio/gfile.c:5939 gio/gfile.c:6038 gio/gfile.c:9215 gio/gfile.c:9305
+#: gio/gfile.c:9389 gio/win32/gwinhttpfile.c:453
 msgid "Operation not supported"
 msgstr "Operation not supported"
 
@@ -1328,44 +1328,44 @@ msgstr "Error: %s is not a valid well-known bus name.\n"
 msgid "Not authorized to change debug settings"
 msgstr "Not authorised to change debug settings"
 
-#: gio/gdesktopappinfo.c:2253 gio/gdesktopappinfo.c:5164
-#: gio/gwin32appinfo.c:4254
+#: gio/gdesktopappinfo.c:2286 gio/gdesktopappinfo.c:5197
+#: gio/gwin32appinfo.c:4255
 msgid "Unnamed"
 msgstr "Unnamed"
 
-#: gio/gdesktopappinfo.c:2672
+#: gio/gdesktopappinfo.c:2705
 msgid "Desktop file didn’t specify Exec field"
 msgstr "Desktop file didn’t specify Exec field"
 
-#: gio/gdesktopappinfo.c:2962
+#: gio/gdesktopappinfo.c:2995
 msgid "Unable to find terminal required for application"
 msgstr "Unable to find terminal required for application"
 
-#: gio/gdesktopappinfo.c:3022
+#: gio/gdesktopappinfo.c:3055
 #, c-format
 msgid "Program ‘%s’ not found in $PATH"
 msgstr "Program ‘%s’ not found in $PATH"
 
-#: gio/gdesktopappinfo.c:3761
+#: gio/gdesktopappinfo.c:3794
 #, c-format
 msgid "Can’t create user application configuration folder %s: %s"
 msgstr "Can’t create user application configuration folder %s: %s"
 
-#: gio/gdesktopappinfo.c:3765
+#: gio/gdesktopappinfo.c:3798
 #, c-format
 msgid "Can’t create user MIME configuration folder %s: %s"
 msgstr "Can’t create user MIME configuration folder %s: %s"
 
-#: gio/gdesktopappinfo.c:4017 gio/gdesktopappinfo.c:4041
+#: gio/gdesktopappinfo.c:4050 gio/gdesktopappinfo.c:4074
 msgid "Application information lacks an identifier"
 msgstr "Application information lacks an identifier"
 
-#: gio/gdesktopappinfo.c:4277
+#: gio/gdesktopappinfo.c:4310
 #, c-format
 msgid "Can’t create user desktop file %s"
 msgstr "Can’t create user desktop file %s"
 
-#: gio/gdesktopappinfo.c:4397
+#: gio/gdesktopappinfo.c:4430
 #, c-format
 msgid "Custom definition for %s"
 msgstr "Custom definition for %s"
@@ -1434,88 +1434,88 @@ msgstr "Expected a GEmblem for GEmblemedIcon"
 #. * trying to find the enclosing (user visible)
 #. * mount of a file, but none exists.
 #.
-#: gio/gfile.c:1624
+#: gio/gfile.c:1632
 msgid "Containing mount does not exist"
 msgstr "Containing mount does not exist"
 
-#: gio/gfile.c:2670 gio/glocalfile.c:2694
+#: gio/gfile.c:2678 gio/glocalfile.c:2696
 msgid "Can’t copy over directory"
 msgstr "Can’t copy over directory"
 
-#: gio/gfile.c:2730
+#: gio/gfile.c:2738
 msgid "Can’t copy directory over directory"
 msgstr "Can’t copy directory over directory"
 
-#: gio/gfile.c:2738
+#: gio/gfile.c:2746
 msgid "Target file exists"
 msgstr "Target file exists"
 
-#: gio/gfile.c:2757
+#: gio/gfile.c:2765
 msgid "Can’t recursively copy directory"
 msgstr "Can’t recursively copy directory"
 
-#: gio/gfile.c:3070 gio/gfile.c:3118
+#: gio/gfile.c:3078 gio/gfile.c:3126
 #, c-format
 msgid "Copy file range not supported"
 msgstr "Copy file range not supported"
 
-#: gio/gfile.c:3076 gio/gfile.c:3187
+#: gio/gfile.c:3084 gio/gfile.c:3195
 #, c-format
 msgid "Error splicing file: %s"
 msgstr "Error splicing file: %s"
 
-#: gio/gfile.c:3183
+#: gio/gfile.c:3191
 msgid "Splice not supported"
 msgstr "Splice not supported"
 
-#: gio/gfile.c:3347
+#: gio/gfile.c:3355
 msgid "Copy (reflink/clone) between mounts is not supported"
 msgstr "Copy (reflink/clone) between mounts is not supported"
 
-#: gio/gfile.c:3351
+#: gio/gfile.c:3359
 msgid "Copy (reflink/clone) is not supported or invalid"
 msgstr "Copy (reflink/clone) is not supported or invalid"
 
-#: gio/gfile.c:3356
+#: gio/gfile.c:3364
 msgid "Copy (reflink/clone) is not supported or didn’t work"
 msgstr "Copy (reflink/clone) is not supported or didn’t work"
 
-#: gio/gfile.c:3404 gio/gfile.c:3415
+#: gio/gfile.c:3412 gio/gfile.c:3423
 #, c-format
 msgid "Cannot retrieve attribute %s"
 msgstr "Cannot retrieve attribute %s"
 
-#: gio/gfile.c:3435
+#: gio/gfile.c:3443
 msgid "Can’t copy special file"
 msgstr "Can’t copy special file"
 
-#: gio/gfile.c:4509
+#: gio/gfile.c:4517
 msgid "Invalid symlink value given"
 msgstr "Invalid symlink value given"
 
-#: gio/gfile.c:4519 glib/gfileutils.c:2434
+#: gio/gfile.c:4527 glib/gfileutils.c:2434
 msgid "Symbolic links not supported"
 msgstr "Symbolic links not supported"
 
-#: gio/gfile.c:4803
+#: gio/gfile.c:4811
 msgid "Trash not supported"
 msgstr "Wastebasket not supported"
 
-#: gio/gfile.c:4913
+#: gio/gfile.c:4921
 #, c-format
 msgid "File names cannot contain “%c”"
 msgstr "File names cannot contain “%c”"
 
-#: gio/gfile.c:7339 gio/gfile.c:7465
+#: gio/gfile.c:7347 gio/gfile.c:7473
 #, c-format
 msgid "Failed to create a temporary directory for template “%s”: %s"
 msgstr "Failed to create a temporary directory for template “%s”: %s"
 
-#: gio/gfile.c:7783 gio/gvolume.c:368
+#: gio/gfile.c:7791 gio/gvolume.c:368
 msgid "volume doesn’t implement mount"
 msgstr "volume doesn’t implement mount"
 
-#: gio/gfile.c:7897 gio/gfile.c:7974
+#: gio/gfile.c:7905 gio/gfile.c:7982
 msgid "No application is registered as handling this file"
 msgstr "No application is registered as handling this file"
 
@@ -1776,7 +1776,7 @@ msgstr "Error writing to stdout"
 #: gio/gio-tool-monitor.c:43 gio/gio-tool-monitor.c:45
 #: gio/gio-tool-monitor.c:206 gio/gio-tool-mount.c:1236 gio/gio-tool-open.c:72
 #: gio/gio-tool-remove.c:50 gio/gio-tool-rename.c:47 gio/gio-tool-set.c:95
-#: gio/gio-tool-trash.c:225 gio/gio-tool-tree.c:246
+#: gio/gio-tool-trash.c:262 gio/gio-tool-tree.c:246
 msgid "LOCATION"
 msgstr "LOCATION"
 
@@ -1796,7 +1796,7 @@ msgstr ""
 
 #: gio/gio-tool-cat.c:164 gio/gio-tool-info.c:414 gio/gio-tool-mkdir.c:78
 #: gio/gio-tool-monitor.c:231 gio/gio-tool-mount.c:1287 gio/gio-tool-open.c:98
-#: gio/gio-tool-remove.c:74 gio/gio-tool-trash.c:306
+#: gio/gio-tool-remove.c:74 gio/gio-tool-trash.c:348
 msgid "No locations given"
 msgstr "No locations given"
 
@@ -2406,23 +2406,23 @@ msgstr ""
 "Restore a file from the wastebasket to its original location (possibly "
 "recreating the directory)"
 
-#: gio/gio-tool-trash.c:108
+#: gio/gio-tool-trash.c:145
 msgid "Unable to find original path"
 msgstr "Unable to find original path"
 
-#: gio/gio-tool-trash.c:124
+#: gio/gio-tool-trash.c:161
 msgid "Unable to recreate original location: "
 msgstr "Unable to recreate original location: "
 
-#: gio/gio-tool-trash.c:137
+#: gio/gio-tool-trash.c:174
 msgid "Unable to move file to its original location: "
 msgstr "Unable to move file to its original location: "
 
-#: gio/gio-tool-trash.c:230
+#: gio/gio-tool-trash.c:267
 msgid "Move/Restore files or directories to the trash."
 msgstr "Move/Restore files or directories to the wastebasket."
 
-#: gio/gio-tool-trash.c:232
+#: gio/gio-tool-trash.c:269
 msgid ""
 "Note: for --restore switch, if the original location of the trashed file \n"
 "already exists, it will not be overwritten unless --force is set."
@@ -2431,7 +2431,7 @@ msgstr ""
 "being moved to the wastebasket already exists, it will not be \n"
 "overwritten unless --force is set."
 
-#: gio/gio-tool-trash.c:263
+#: gio/gio-tool-trash.c:300
 msgid "Location given doesn't start with trash:///"
 msgstr "Location given doesn’t start with trash:///"
 
@@ -3093,8 +3093,8 @@ msgstr "Error renaming file %s: %s"
 msgid "Can’t rename file, filename already exists"
 msgstr "Can’t rename file, filename already exists"
 
-#: gio/glocalfile.c:1213 gio/glocalfile.c:2588 gio/glocalfile.c:2616
-#: gio/glocalfile.c:2755 gio/glocalfileoutputstream.c:658
+#: gio/glocalfile.c:1213 gio/glocalfile.c:2590 gio/glocalfile.c:2618
+#: gio/glocalfile.c:2757 gio/glocalfileoutputstream.c:658
 msgid "Invalid filename"
 msgstr "Invalid filename"
 
@@ -3138,66 +3138,66 @@ msgstr "Moving to wastebasket on system internal mounts is not supported"
 msgid "Unable to find or create trash directory %s to trash %s"
 msgstr "Unable to find or create wastebasket directory %s to move %s to"
 
-#: gio/glocalfile.c:2414
+#: gio/glocalfile.c:2416
 #, c-format
 msgid "Unable to create trashing info file for %s: %s"
 msgstr "Unable to create wastebasket info file for %s: %s"
 
-#: gio/glocalfile.c:2502
+#: gio/glocalfile.c:2504
 #, c-format
 msgid "Unable to trash file %s across filesystem boundaries"
 msgstr "Unable to move %s to wastebasket across filesystem boundaries"
 
-#: gio/glocalfile.c:2506 gio/glocalfile.c:2559
+#: gio/glocalfile.c:2508 gio/glocalfile.c:2561
 #, c-format
 msgid "Unable to trash file %s: %s"
 msgstr "Unable to move file %s to the wastebasket: %s"
 
-#: gio/glocalfile.c:2565
+#: gio/glocalfile.c:2567
 #, c-format
 msgid "Unable to trash file %s"
 msgstr "Unable to move file %s to the wastebasket"
 
-#: gio/glocalfile.c:2591
+#: gio/glocalfile.c:2593
 #, c-format
 msgid "Error creating directory %s: %s"
 msgstr "Error creating directory %s: %s"
 
-#: gio/glocalfile.c:2620
+#: gio/glocalfile.c:2622
 #, c-format
 msgid "Filesystem does not support symbolic links"
 msgstr "Filesystem does not support symbolic links"
 
-#: gio/glocalfile.c:2623
+#: gio/glocalfile.c:2625
 #, c-format
 msgid "Error making symbolic link %s: %s"
 msgstr "Error making symbolic link %s: %s"
 
-#: gio/glocalfile.c:2666 gio/glocalfile.c:2701 gio/glocalfile.c:2758
+#: gio/glocalfile.c:2668 gio/glocalfile.c:2703 gio/glocalfile.c:2760
 #, c-format
 msgid "Error moving file %s: %s"
 msgstr "Error moving file %s: %s"
 
-#: gio/glocalfile.c:2689
+#: gio/glocalfile.c:2691
 msgid "Can’t move directory over directory"
 msgstr "Can’t move directory over directory"
 
-#: gio/glocalfile.c:2715 gio/glocalfileoutputstream.c:1110
+#: gio/glocalfile.c:2717 gio/glocalfileoutputstream.c:1110
 #: gio/glocalfileoutputstream.c:1124 gio/glocalfileoutputstream.c:1139
 #: gio/glocalfileoutputstream.c:1156 gio/glocalfileoutputstream.c:1170
 msgid "Backup file creation failed"
 msgstr "Backup file creation failed"
 
-#: gio/glocalfile.c:2734
+#: gio/glocalfile.c:2736
 #, c-format
 msgid "Error removing target file: %s"
 msgstr "Error removing target file: %s"
 
-#: gio/glocalfile.c:2748
+#: gio/glocalfile.c:2750
 msgid "Move between mounts not supported"
 msgstr "Move between mounts not supported"
 
-#: gio/glocalfile.c:2924
+#: gio/glocalfile.c:2926
 #, c-format
 msgid "Could not determine the disk usage of %s: %s"
 msgstr "Could not determine the disk usage of %s: %s"
@@ -4443,12 +4443,12 @@ msgstr "volume doesn’t implement eject"
 msgid "volume doesn’t implement eject or eject_with_operation"
 msgstr "volume doesn’t implement eject or eject_with_operation"
 
-#: gio/gwin32appinfo.c:5214
+#: gio/gwin32appinfo.c:5284
 #, c-format
 msgid "The app ‘%s’ in the application object has no verbs"
 msgstr "The app ‘%s’ in the application object has no verbs"
 
-#: gio/gwin32appinfo.c:5218
+#: gio/gwin32appinfo.c:5288
 #, c-format
 msgid ""
 "The app ‘%s’ and the handler ‘%s’ in the application object have no verbs"
@@ -6155,21 +6155,21 @@ msgstr ""
 "Unexpected error in g_io_channel_win32_poll() reading data from a child "
 "process"
 
-#: glib/gstrfuncs.c:3365 glib/gstrfuncs.c:3467
+#: glib/gstrfuncs.c:3373 glib/gstrfuncs.c:3475
 msgid "Empty string is not a number"
 msgstr "Empty string is not a number"
 
-#: glib/gstrfuncs.c:3389
+#: glib/gstrfuncs.c:3397
 #, c-format
 msgid "“%s” is not a signed number"
 msgstr "“%s” is not a signed number"
 
-#: glib/gstrfuncs.c:3399 glib/gstrfuncs.c:3503
+#: glib/gstrfuncs.c:3407 glib/gstrfuncs.c:3511
 #, c-format
 msgid "Number “%s” is out of bounds [%s, %s]"
 msgstr "Number “%s” is out of bounds [%s, %s]"
 
-#: glib/gstrfuncs.c:3493
+#: glib/gstrfuncs.c:3501
 #, c-format
 msgid "“%s” is not an unsigned number"
 msgstr "“%s” is not an unsigned number"

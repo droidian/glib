@@ -102,7 +102,7 @@ typedef enum
   G_MARKUP_TREAT_CDATA_AS_TEXT              = 1 << 1,
   G_MARKUP_PREFIX_ERROR_POSITION            = 1 << 2,
   G_MARKUP_IGNORE_QUALIFIED                 = 1 << 3
-} GMarkupParseFlags;
+} G_GNUC_FLAG_ENUM GMarkupParseFlags;
 
 /**
  * GMarkupParseContext:
@@ -227,6 +227,8 @@ GLIB_AVAILABLE_IN_ALL
 void                 g_markup_parse_context_get_position (GMarkupParseContext *context,
                                                           gint                *line_number,
                                                           gint                *char_number);
+GLIB_AVAILABLE_IN_2_88
+gsize                g_markup_parse_context_get_offset   (GMarkupParseContext *context);
 GLIB_AVAILABLE_IN_ALL
 gpointer             g_markup_parse_context_get_user_data (GMarkupParseContext *context);
 

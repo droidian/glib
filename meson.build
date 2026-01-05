@@ -1,5 +1,5 @@
 project('glib', 'c',
-  version : '2.86.3',
+  version : '2.87.1',
   # NOTE: See the policy in docs/meson-version.md before changing the Meson dependency
   meson_version : '>= 1.4.0',
   default_options : [
@@ -18,7 +18,7 @@ fs = import('fs')
 cc = meson.get_compiler('c')
 c_standards = {}
 
-foreach std : ['89', '99', '11', '17']
+foreach std : ['89', '99', '11', '17', '23']
   arg = (cc.get_id() == 'msvc' ? '/std:' : '-std=') + 'c' + std
   if cc.has_argument(arg)
     c_standards += { std: arg }
@@ -41,7 +41,7 @@ if have_cxx
   cxx = meson.get_compiler('cpp')
   cxx_standards = {}
 
-  foreach std : ['98', '03', '11', '14', '17', '20', '2b', 'latest']
+  foreach std : ['98', '03', '11', '14', '17', '20', '23', '2c', 'latest']
     arg = (cxx.get_id() == 'msvc' ? '/std:' : '-std=') + 'c++' + std
     if cxx.has_argument(arg)
       cxx_standards += { std: arg }
@@ -59,7 +59,7 @@ endif
 
 if cc.get_id() == 'msvc'
   # Set the input and exec encoding to utf-8, like is the default with GCC
-  add_project_arguments(cc.get_supported_arguments(['/utf-8']), language: 'c')
+  add_project_arguments(cc.get_supported_arguments(['/utf-8']), language: ['c', 'cpp'])
   # Disable SAFESEH with MSVC for plugins and libs that use external deps that
   # are built with MinGW
   noseh_link_args = ['/SAFESEH:NO']
@@ -245,12 +245,12 @@ if valgrind.found()
   )
 endif
 
-add_project_arguments('-D_GNU_SOURCE', language: 'c')
+add_project_arguments('-D_GNU_SOURCE', language: ['c', 'cpp', 'objc', 'objcpp'])
 
 if host_system == 'qnx'
-  add_project_arguments('-D_QNX_SOURCE', language: 'c')
+  add_project_arguments('-D_QNX_SOURCE', language: ['c', 'cpp'])
 elif host_system == 'sunos'
-  add_project_arguments('-D__EXTENSIONS__', language: 'c')
+  add_project_arguments('-D__EXTENSIONS__', language: ['c', 'cpp'])
 endif
 
 # dummy/empty dependency() object to declare fallbacks and simpler dependencies
@@ -259,7 +259,7 @@ not_found = dependency('', required: false)
 get_dll_paths_script = not_found
 
 if host_system == 'windows'
-  add_project_arguments(['-DUNICODE', '-D_UNICODE'], language: 'c')
+  add_project_arguments(['-DUNICODE', '-D_UNICODE'], language: ['c', 'cpp'])
 
   # Script to obtain paths where the DLLs that we will reside for g-ir-scanner
   get_dll_paths_script = find_program('tools/grab-gio-dll-paths.py', native: true)
@@ -268,7 +268,7 @@ endif
 # Disable strict aliasing;
 # see https://bugzilla.gnome.org/show_bug.cgi?id=791622
 if cc.has_argument('-fno-strict-aliasing')
-  add_project_arguments('-fno-strict-aliasing', language: 'c')
+  add_project_arguments('-fno-strict-aliasing', language: ['c', 'cpp', 'objc', 'objcpp'])
 endif
 
 ########################
@@ -396,7 +396,7 @@ if not get_option('glib_checks')
   message('Disabling GLib checks')
 endif
 
-add_project_arguments(glib_debug_cflags, language: 'c')
+add_project_arguments(glib_debug_cflags, language: ['c', 'cpp', 'objc', 'objcpp'])
 
 # check for header files
 
@@ -409,6 +409,7 @@ headers = [
   'fstab.h',
   'ftw.h',
   'grp.h',
+  'intsafe.h',
   'inttypes.h',
   'libproc.h',
   'limits.h',
@@ -424,6 +425,7 @@ headers = [
   'sched.h',
   'spawn.h',
   'stdatomic.h',
+  'stdckdint.h',
   'stdint.h',
   'stdlib.h',
   'string.h',
@@ -615,7 +617,6 @@ if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
     '-Wno-typedef-redefinition',
   ]
   warning_cxx_args = warning_common_args
-  warning_objc_args = warning_c_args
   warning_c_link_args = [
     '-Wl,-z,nodelete',
   ]
@@ -647,18 +648,16 @@ elif cc.get_id() == 'msvc'
   ]
 
   warning_cxx_args = []
-  warning_objc_args = []
   warning_c_link_args = []
 else
   warning_c_args = []
   warning_cxx_args = []
-  warning_objc_args = []
   warning_c_link_args = []
 endif
 
-add_project_arguments(cc.get_supported_arguments(warning_c_args), language: 'c')
+add_project_arguments(cc.get_supported_arguments(warning_c_args), language: ['c', 'objc'])
 if have_cxx
-  add_project_arguments(cxx.get_supported_arguments(warning_cxx_args), language: 'cpp')
+  add_project_arguments(cxx.get_supported_arguments(warning_cxx_args), language: ['cpp', 'objcpp'])
 endif
 
 # FIXME: This is checked and implemented separately from warning_common_args for
@@ -1007,8 +1006,6 @@ if host_system == 'darwin'
                          name : 'macOS 10.13 or later')
     error('GLib requires macOS 10.13 or later.')
   endif
-
-  add_project_arguments(objcc.get_supported_arguments(warning_objc_args), language: 'objc')
 
   # Mac OS X Carbon support
   glib_have_carbon = objcc.compiles('''#include <Carbon/Carbon.h>
@@ -2290,7 +2287,7 @@ subproject('gvdb', default_options: {'tests': false})
 gvdb_dep = dependency('gvdb')
 
 libm = cc.find_library('m', required : false)
-libffi_dep = dependency('libffi', version : '>= 3.0.0')
+libffi_dep = dependency('libffi', version : '>= 3.0.0', default_options: {'werror': false})
 
 libz_dep = dependency('zlib')
 
@@ -2720,6 +2717,7 @@ pkg = import('pkgconfig')
 windows = import('windows')
 gnome = import('gnome')
 
+subdir('build-aux')
 subdir('tools')
 subdir('glib')
 subdir('gobject')
