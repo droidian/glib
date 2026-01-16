@@ -1,0 +1,25 @@
+From: Alessandro Astone <alessandro.astone@canonical.com>
+Date: Fri, 16 Jan 2026 17:01:20 +0100
+Subject: guniprop: Fix missing Unicode 17.0 scripts from conversion table
+
+Forwarded: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4967
+---
+ glib/guniprop.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/glib/guniprop.c b/glib/guniprop.c
+index fe0033f..a3af532 100644
+--- a/glib/guniprop.c
++++ b/glib/guniprop.c
+@@ -1536,6 +1536,11 @@ static const guint32 iso15924_tags[] =
+     PACK ('K', 'r', 'a', 'i'), /* G_UNICODE_SCRIPT_KIRAT_RAI */
+     PACK ('O', 'n', 'a', 'o'), /* G_UNICODE_SCRIPT_OL_ONAL */
+ 
++    PACK ('S', 'i', 'd', 't'), /* G_UNICODE_SCRIPT_SIDETIC */
++    PACK ('T', 'o', 'l', 's'), /* G_UNICODE_SCRIPT_TOLONG_SIKI */
++    PACK ('T', 'a', 'y', 'o'), /* G_UNICODE_SCRIPT_TAI_YO */
++    PACK ('B', 'e', 'r', 'f'), /* G_UNICODE_SCRIPT_BERIA_ERFE */
++
+ #undef PACK
+ };
+ 
