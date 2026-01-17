@@ -1,3 +1,13 @@
+glib2.0 (2.86.3-5) UNRELEASED; urgency=medium
+
+  * d/control, d/gbp.conf: Set branch for testing/unstable.
+    We already have 2.87.x in experimental, using the debian/latest branch.
+  * d/patches: Avoid a crash in g_buffered_input_stream_peek().
+    This is only a problem if an extremely large offset is used.
+    (CVE-2026-0988; Closes: #1125752)
+
+ -- Simon McVittie <smcv@debian.org>  Sat, 17 Jan 2026 11:28:51 +0000
+
 glib2.0 (2.86.3-4) unstable; urgency=medium
 
   * Fix hurd build
