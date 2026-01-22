@@ -15,4 +15,3 @@ workarounds/tests-Skip-debugcontroller-test.patch
 workarounds/testfilemonitor-Skip-if-we-are-avoiding-flaky-tests.patch
 debian/girepository-Describe-the-Debian-specific-cross-prefixed-.patch
 debian/girepository-Search-for-typelibs-in-the-pre-multiarch-pat.patch
-guniprop-Fix-missing-Unicode-17.0-scripts-from-conversion.patch
