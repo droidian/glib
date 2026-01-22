@@ -1,0 +1,36 @@
+From: Alessandro Astone <alessandro.astone@canonical.com>
+Date: Wed, 21 Jan 2026 15:19:51 +0100
+Subject: girepository: Fixup ffi test for big-endian systems
+
+The input arguments are of pointer type, so we need to read the full 8 bytes
+and pass them into GPOINTER_TO_INT.
+
+The return argument is an integer which follows the ffi promotion behaviour,
+so it also gets 8 bytes of allocation.
+
+Closes: https://gitlab.gnome.org/GNOME/glib/-/issues/3865
+(cherry picked from commit de5108bc646f9a29c2eb58059be0062becd784ad)
+
+Forwarded: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4973
+---
+ girepository/tests/callable-info.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/girepository/tests/callable-info.c b/girepository/tests/callable-info.c
+index 3821cf1..a9fa194 100644
+--- a/girepository/tests/callable-info.c
++++ b/girepository/tests/callable-info.c
+@@ -220,10 +220,10 @@ compare_func_callback (ffi_cif *passed_cif,
+                        void **args,
+                        void *user_data)
+ {
+-  int *return_location = ret;
++  ffi_sarg *return_location = ret;
+   unsigned *call_count = user_data;
+-  int arg1 = GPOINTER_TO_INT (*(int *) args[0]);
+-  int arg2 = GPOINTER_TO_INT (*(int *) args[1]);
++  int arg1 = GPOINTER_TO_INT (*(void **) args[0]);
++  int arg2 = GPOINTER_TO_INT (*(void **) args[1]);
+ 
+   /* cif is not needed in this simple test, but check that it is what the
+    * documentation says it is */

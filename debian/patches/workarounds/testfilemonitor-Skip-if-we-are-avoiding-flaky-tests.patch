@@ -11,7 +11,7 @@ Forwarded: no
  1 file changed, 37 insertions(+), 1 deletion(-)
 
 diff --git a/gio/tests/testfilemonitor.c b/gio/tests/testfilemonitor.c
-index 018e49f..e83d8ff 100644
+index 8ae7a20..c54b40f 100644
 --- a/gio/tests/testfilemonitor.c
 +++ b/gio/tests/testfilemonitor.c
 @@ -32,6 +32,12 @@ setup (Fixture       *fixture,
@@ -38,7 +38,7 @@ index 018e49f..e83d8ff 100644
    g_assert_no_error (local_error);
    g_clear_object (&fixture->tmp_dir);
  }
-@@ -379,6 +387,10 @@ test_atomic_replace (Fixture       *fixture,
+@@ -390,6 +398,10 @@ test_atomic_replace (Fixture       *fixture,
    if (skip_win32 ())
      return;
  
@@ -49,7 +49,7 @@ index 018e49f..e83d8ff 100644
    data.step = 0;
    data.events = NULL;
  
-@@ -487,6 +499,10 @@ test_file_changes (Fixture       *fixture,
+@@ -498,6 +510,10 @@ test_file_changes (Fixture       *fixture,
    if (skip_win32 ())
      return;
  
@@ -60,7 +60,7 @@ index 018e49f..e83d8ff 100644
    data.step = 0;
    data.events = NULL;
  
-@@ -607,6 +623,10 @@ test_dir_monitor (Fixture       *fixture,
+@@ -618,6 +634,10 @@ test_dir_monitor (Fixture       *fixture,
    if (skip_win32 ())
      return;
  
@@ -71,7 +71,7 @@ index 018e49f..e83d8ff 100644
    data.step = 0;
    data.events = NULL;
  
-@@ -707,6 +727,10 @@ test_dir_non_existent (Fixture       *fixture,
+@@ -718,6 +738,10 @@ test_dir_non_existent (Fixture       *fixture,
    if (skip_win32 ())
      return;
  
@@ -82,7 +82,7 @@ index 018e49f..e83d8ff 100644
    data.step = 0;
    data.events = NULL;
  
-@@ -819,6 +843,10 @@ test_cross_dir_moves (Fixture       *fixture,
+@@ -830,6 +854,10 @@ test_cross_dir_moves (Fixture       *fixture,
    if (skip_win32 ())
      return;
  
@@ -93,7 +93,7 @@ index 018e49f..e83d8ff 100644
    data[0].step = 0;
    data[0].events = NULL;
  
-@@ -988,6 +1016,10 @@ test_file_hard_links (Fixture       *fixture,
+@@ -999,6 +1027,10 @@ test_file_hard_links (Fixture       *fixture,
    GError *error = NULL;
    TestData data;
  
@@ -104,7 +104,7 @@ index 018e49f..e83d8ff 100644
    g_test_bug ("https://bugzilla.gnome.org/show_bug.cgi?id=755721");
  
    if (skip_win32 ())
-@@ -1047,6 +1079,10 @@ test_finalize_in_callback (Fixture       *fixture,
+@@ -1058,6 +1090,10 @@ test_finalize_in_callback (Fixture       *fixture,
    GFile *file = NULL;
    guint i;
  
