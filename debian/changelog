@@ -1,3 +1,14 @@
+glib2.0 (2.87.2-1) UNRELEASED; urgency=medium
+
+  [ Jeremy Bícha ]
+  * New upstream release
+
+  [ Simon McVittie ]
+  * Use Build-Depends: libselinux-dev instead of libselinux1-dev
+    (Closes: #1124750)
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Thu, 22 Jan 2026 15:06:27 -0500
+
 glib2.0 (2.87.1-1) experimental; urgency=medium
 
   * New upstream release
