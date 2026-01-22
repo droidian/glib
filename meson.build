@@ -1,5 +1,5 @@
 project('glib', 'c',
-  version : '2.87.1',
+  version : '2.87.2',
   # NOTE: See the policy in docs/meson-version.md before changing the Meson dependency
   meson_version : '>= 1.4.0',
   default_options : [
@@ -666,6 +666,10 @@ endif
 # warning can be enabled unconditionally in warning_c_args, and this variable
 # removed. See https://gitlab.gnome.org/GNOME/glib/-/issues/3405
 warning_sign_conversion_args = cc.get_supported_arguments(['-Wsign-conversion'])
+
+# FIXME: As above
+# See https://gitlab.gnome.org/GNOME/glib/-/issues/3527
+warning_shorten_64_to_32_args = cc.get_supported_arguments(['-Wshorten-64-to-32'])
 
 # FIXME: We cannot build some of the GResource tests with -z nodelete, which
 # means we cannot use that flag in add_project_link_arguments(), and must add
