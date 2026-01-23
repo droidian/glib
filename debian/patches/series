@@ -16,3 +16,4 @@ workarounds/testfilemonitor-Skip-if-we-are-avoiding-flaky-tests.patch
 debian/girepository-Describe-the-Debian-specific-cross-prefixed-.patch
 debian/girepository-Search-for-typelibs-in-the-pre-multiarch-pat.patch
 girepository-Fixup-ffi-test-for-big-endian-systems.patch
+gtimezone-Handle-etc-localtime-pointing-to-symlink-of-sym.patch
