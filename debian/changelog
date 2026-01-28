@@ -19,8 +19,14 @@ glib2.0 (2.86.3-5) UNRELEASED; urgency=medium
     d/p/glib-tests-unicode-Add-test-debug-information-when-parsin.patch:
     Avoid a buffer overflow if crafted multi-gigabyte text is converted
     between upper and lower case (CVE-2026-1489, Closes: #1126549)
+  * d/p/gtimezone-Handle-etc-localtime-symlink-pointing-to-anothe.patch,
+    d/p/gtimezone-Use-var-db-timezone-zoneinfo-as-the-default-TZD.patch:
+    Add patches from 2.87.x to fix handling of time zones that are symlinks
+    (Closes: #1119919) (LP: #2130378)
+  * d/control: (Build-)Depend on libselinux-dev instead of libselinux1-dev
+    (Closes: #1124750)
 
- -- Simon McVittie <smcv@debian.org>  Wed, 28 Jan 2026 13:54:08 +0000
+ -- Simon McVittie <smcv@debian.org>  Wed, 28 Jan 2026 15:34:56 +0000
 
 glib2.0 (2.86.3-4) unstable; urgency=medium
 
