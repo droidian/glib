@@ -1,4 +1,11 @@
 gbufferedinputstream-Fix-a-potential-integer-overflow-in-.patch
+gbase64-Use-gsize-to-prevent-potential-overflow.patch
+gbase64-Ensure-that-the-out-value-is-within-allocated-siz.patch
+gio-gcontenttype-fdo-Do-not-overflow-if-header-is-longer-.patch
+guniprop-Use-size_t-for-output_marks-length.patch
+guniprop-Do-not-convert-size_t-to-gint.patch
+guniprop-Ensure-we-do-not-overflow-size-in-g_utf8_-strdow.patch
+glib-tests-unicode-Add-test-debug-information-when-parsin.patch
 01_gettext-desktopfiles.patch
 debian/02_gettext-desktopfiles-ubuntu.patch
 debian/03_disble_glib_compile_schemas_warning.patch
