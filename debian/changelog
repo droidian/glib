@@ -1,3 +1,16 @@
+glib2.0 (2.87.2-2) UNRELEASED; urgency=medium
+
+  * Merge packaging from unstable
+    - Revert "d/control, d/gbp.conf: Set branch for testing/unstable"
+  * Combine patch series for unstable + experimental
+    - Drop patches that were included in 2.87.x already
+    - d/p/gtimezone-Handle-etc-localtime-symlink-pointing-to-anothe.patch,
+      d/p/gtimezone-Use-var-db-timezone-zoneinfo-as-the-default-TZD.patch:
+      Replace the patch for #1119919 with the version that was applied
+      upstream
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 28 Jan 2026 18:58:52 +0000
+
 glib2.0 (2.87.2-1) experimental; urgency=medium
 
   [ Jeremy Bícha ]
