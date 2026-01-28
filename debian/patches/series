@@ -1,4 +1,4 @@
-gbufferedinputstream-Fix-a-potential-integer-overflow-in-.patch
+girepository-Fixup-ffi-test-for-big-endian-systems.patch
 gbase64-Use-gsize-to-prevent-potential-overflow.patch
 gbase64-Ensure-that-the-out-value-is-within-allocated-siz.patch
 gio-gcontenttype-fdo-Do-not-overflow-if-header-is-longer-.patch
@@ -25,5 +25,3 @@ workarounds/tests-Skip-debugcontroller-test.patch
 workarounds/testfilemonitor-Skip-if-we-are-avoiding-flaky-tests.patch
 debian/girepository-Describe-the-Debian-specific-cross-prefixed-.patch
 debian/girepository-Search-for-typelibs-in-the-pre-multiarch-pat.patch
-girepository-Fixup-ffi-test-for-big-endian-systems.patch
-gtimezone-Handle-etc-localtime-pointing-to-symlink-of-sym.patch

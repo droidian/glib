@@ -8,7 +8,7 @@ Related to: #3870
 
 Bug: https://gitlab.gnome.org/GNOME/glib/-/issues/3870
 Bug-Debian: https://bugs.debian.org/1126551
-Origin: upstream, 2.86.4, commit:25429bd0b22222d6986d000d62b44eebf490837d
+Applied-upstream: 2.87.3, commit:431826a42fbf18cbd8566ca845812e14976d571a
 ---
  glib/gbase64.c | 8 +++++++-
  1 file changed, 7 insertions(+), 1 deletion(-)

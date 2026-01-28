@@ -8,16 +8,16 @@ source file we're at, as it might not be clear for non-ascii chars
 
 Bug: https://gitlab.gnome.org/GNOME/glib/-/issues/3872
 Bug-Debian: https://bugs.debian.org/1126549
-Origin: upstream, 2.86.4, commit:b96966058f4291db8970ced70ee22103e63679e5
+Applied-upstream: 2.87.3, commit:071b3082ffb73096f555facdadf8bef869bc1e2e
 ---
  glib/tests/unicode.c | 10 ++++++++++
  1 file changed, 10 insertions(+)
 
 diff --git a/glib/tests/unicode.c b/glib/tests/unicode.c
-index 90b5a98..44d1083 100644
+index d022834..1925462 100644
 --- a/glib/tests/unicode.c
 +++ b/glib/tests/unicode.c
-@@ -622,6 +622,7 @@ test_casemap_and_casefold (void)
+@@ -623,6 +623,7 @@ test_casemap_and_casefold (void)
    const char *locale;
    const char *test;
    const char *expected;
@@ -25,7 +25,7 @@ index 90b5a98..44d1083 100644
    char *convert;
    char *current_locale = setlocale (LC_CTYPE, NULL);
    char *old_lc_all, *old_lc_messages, *old_lang;
-@@ -642,6 +643,7 @@ test_casemap_and_casefold (void)
+@@ -643,6 +644,7 @@ test_casemap_and_casefold (void)
  
    while (fgets (buffer, sizeof (buffer), infile))
      {
@@ -33,7 +33,7 @@ index 90b5a98..44d1083 100644
        if (buffer[0] == '#')
          continue;
  
-@@ -684,6 +686,9 @@ test_casemap_and_casefold (void)
+@@ -685,6 +687,9 @@ test_casemap_and_casefold (void)
  
        convert = g_utf8_strup (test, -1);
        expected = strings[4][0] ? strings[4] : test;
@@ -43,7 +43,7 @@ index 90b5a98..44d1083 100644
        g_assert_cmpstr (convert, ==, expected);
        g_free (convert);
  
-@@ -703,9 +708,11 @@ test_casemap_and_casefold (void)
+@@ -704,9 +709,11 @@ test_casemap_and_casefold (void)
  
    infile = g_fopen (filename, "re");
    g_assert (infile != NULL);
@@ -55,7 +55,7 @@ index 90b5a98..44d1083 100644
        if (buffer[0] == '#')
          continue;
  
-@@ -715,6 +722,9 @@ test_casemap_and_casefold (void)
+@@ -716,6 +723,9 @@ test_casemap_and_casefold (void)
        test = strings[0];
  
        convert = g_utf8_casefold (test, -1);

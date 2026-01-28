@@ -1,9 +1,6 @@
-From: Marco Trevisan <mail@3v1n0.net>
-Date: Fri, 23 Jan 2026 18:48:30 +0100
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Wed, 21 Jan 2026 20:04:23 +0100
 Subject: gbase64: Use gsize to prevent potential overflow
-MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
 
 Both g_base64_encode_step() and g_base64_encode_close() return gsize
 values, but these are summed to an int value.
@@ -15,16 +12,10 @@ Spotted by treeplus.
 Thanks to the Sovereign Tech Resilience programme from the Sovereign
 Tech Agency.
 
-ID: #YWH-PGM9867-168
-Closes: #3870
-
-(cherry picked from commit 6845f7776982849a2be1d8c9b0495e389092bff2)
-
-Co-authored-by: Marco Trevisan (Treviño) <mail@3v1n0.net>
 Bug: https://gitlab.gnome.org/GNOME/glib/-/issues/3870
 Bug-CVE: CVE-2026-1484
 Bug-Debian: https://bugs.debian.org/1126551
-Origin: upstream, 2.86.4, commit:5ba0ed9ab2c28294713bdc56a8744ff0a446b59c
+Applied-upstream: 2.87.3, commit:6845f7776982849a2be1d8c9b0495e389092bff2
 ---
  glib/gbase64.c | 3 ++-
  1 file changed, 2 insertions(+), 1 deletion(-)

@@ -8,10 +8,9 @@ and pass them into GPOINTER_TO_INT.
 The return argument is an integer which follows the ffi promotion behaviour,
 so it also gets 8 bytes of allocation.
 
-Closes: https://gitlab.gnome.org/GNOME/glib/-/issues/3865
-(cherry picked from commit de5108bc646f9a29c2eb58059be0062becd784ad)
-
+Bug: https://gitlab.gnome.org/GNOME/glib/-/issues/3865
 Forwarded: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4973
+Applied-upstream: 2.87.3, commit:de5108bc646f9a29c2eb58059be0062becd784ad
 ---
  girepository/tests/callable-info.c | 6 +++---
  1 file changed, 3 insertions(+), 3 deletions(-)

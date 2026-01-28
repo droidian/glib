@@ -1,10 +1,7 @@
-From: Marco Trevisan <mail@3v1n0.net>
-Date: Fri, 23 Jan 2026 19:05:44 +0100
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Wed, 21 Jan 2026 20:19:36 +0100
 Subject: gio/gcontenttype-fdo: Do not overflow if header is longer than
  MAXINT
-MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
 
 In case the header size is longer than MAXINT we may read and write to
 invalid locations
@@ -13,16 +10,10 @@ Spotted by treeplus.
 Thanks to the Sovereign Tech Resilience programme from the Sovereign
 Tech Agency.
 
-ID: #YWH-PGM9867-169
-Closes: #3871
-
-(cherry picked from commit aacda5b07141b944408c79e83bcbed3b2e1e6e45)
-
-Co-authored-by: Marco Trevisan (Treviño) <mail@3v1n0.net>
 Bug: https://gitlab.gnome.org/GNOME/glib/-/issues/3871
 Bug-CVE: CVE-2026-1485
 Bug-Debian: https://bugs.debian.org/1126550
-Origin: upstream, 2.86.4, commit:ee5acb2cefc643450509374da2600cd3bf49a109
+Applied-upstream: 2.87.3, commit:aacda5b07141b944408c79e83bcbed3b2e1e6e45
 ---
  gio/gcontenttype-fdo.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)

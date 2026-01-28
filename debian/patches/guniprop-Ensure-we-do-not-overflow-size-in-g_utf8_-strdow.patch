@@ -16,13 +16,13 @@ ID: #YWH-PGM9867-171
 Bug: https://gitlab.gnome.org/GNOME/glib/-/issues/3872
 Bug-CVE: CVE-2026-1489
 Bug-Debian: https://bugs.debian.org/1126549
-Origin: upstream, 2.86.4, commit:170dc8c4068db4c4cbf63c7d27192e230436da21
+Applied-upstream: 2.87.3, commit:a8a9157a97b18566ef72c3d8b0912f366078c45b
 ---
  glib/guniprop.c | 107 ++++++++++++++++++++++++++++++++++++--------------------
  1 file changed, 69 insertions(+), 38 deletions(-)
 
 diff --git a/glib/guniprop.c b/glib/guniprop.c
-index fe50a28..86020b6 100644
+index ef4d6bc..b800592 100644
 --- a/glib/guniprop.c
 +++ b/glib/guniprop.c
 @@ -772,14 +772,36 @@ get_locale_type (void)
