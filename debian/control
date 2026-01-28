@@ -50,7 +50,7 @@ Build-Depends-Indep:
 Standards-Version: 4.7.3
 Homepage: https://gitlab.gnome.org/GNOME/glib
 Vcs-Browser: https://salsa.debian.org/gnome-team/glib
-Vcs-Git: https://salsa.debian.org/gnome-team/glib.git
+Vcs-Git: https://salsa.debian.org/gnome-team/glib.git -b debian/forky
 
 Package: libglib2.0-0t64
 Replaces:
