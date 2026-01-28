@@ -6,6 +6,8 @@ guniprop-Use-size_t-for-output_marks-length.patch
 guniprop-Do-not-convert-size_t-to-gint.patch
 guniprop-Ensure-we-do-not-overflow-size-in-g_utf8_-strdow.patch
 glib-tests-unicode-Add-test-debug-information-when-parsin.patch
+gtimezone-Handle-etc-localtime-symlink-pointing-to-anothe.patch
+gtimezone-Use-var-db-timezone-zoneinfo-as-the-default-TZD.patch
 01_gettext-desktopfiles.patch
 debian/02_gettext-desktopfiles-ubuntu.patch
 debian/03_disble_glib_compile_schemas_warning.patch

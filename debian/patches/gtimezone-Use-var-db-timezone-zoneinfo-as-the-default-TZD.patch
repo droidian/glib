@@ -1,0 +1,42 @@
+From: Alessandro Astone <alessandro.astone@canonical.com>
+Date: Thu, 22 Jan 2026 16:13:09 +0100
+Subject: gtimezone: Use /var/db/timezone/zoneinfo as the default TZDIR for
+ macOS
+
+macOS defines /usr/share/zoneinfo as a symlink to /var/db/timezone/zoneinfo,
+and /etc/localtime as a symlink to /var/db/timezone/zoneinfo/<identifier>.
+
+By using /usr/share/zoneinfo as TZDIR, we would break the logic that resolves
+/etc/localtime as a relative identifier by stripping the TZDIR prefix.
+An absolute path still works as identifier, but we prefer a relative one.
+
+Furthermore, by ensuring that /etc/localtime points to a subdir of TZDIR we
+correctly handle the case where /etc/localtime points to a symlink of symlink.
+
+Bug: https://gitlab.gnome.org/GNOME/glib/-/issues/3816
+Bug-Debian: https://bugs.debian.org/1119919
+Origin: upstream, 2.87.3, commit:bd04ea91dc533303c064ec1cb627844a4aa09aaf
+---
+ glib/gtimezone.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/glib/gtimezone.c b/glib/gtimezone.c
+index 5d224aa..6e8605d 100644
+--- a/glib/gtimezone.c
++++ b/glib/gtimezone.c
+@@ -558,10 +558,14 @@ resolve_symlink_to_zoneinfo (const char *initial_path, const char *zoneinfo)
+ static const gchar *
+ zone_info_base_dir (void)
+ {
+-  if (g_file_test ("/usr/share/zoneinfo", G_FILE_TEST_IS_DIR))
++  GStatBuf buf;
++
++  if (g_lstat ("/usr/share/zoneinfo", &buf) == 0 && S_ISDIR (buf.st_mode))
+     return "/usr/share/zoneinfo";     /* Most distros */
+   else if (g_file_test ("/usr/share/lib/zoneinfo", G_FILE_TEST_IS_DIR))
+     return "/usr/share/lib/zoneinfo"; /* Illumos distros */
++  else if (g_file_test ("/var/db/timezone/zoneinfo", G_FILE_TEST_IS_DIR))
++    return "/var/db/timezone/zoneinfo"; /* macOS */
+ 
+   /* need a better fallback case */
+   return "/usr/share/zoneinfo";
