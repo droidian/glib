@@ -1,4 +1,4 @@
-glib2.0 (2.86.3-5) UNRELEASED; urgency=medium
+glib2.0 (2.86.3-5) unstable; urgency=medium
 
   * d/control, d/gbp.conf: Set branch for testing/unstable.
     We already have 2.87.x in experimental, using the debian/latest branch.
@@ -26,7 +26,7 @@ glib2.0 (2.86.3-5) UNRELEASED; urgency=medium
   * d/control: (Build-)Depend on libselinux-dev instead of libselinux1-dev
     (Closes: #1124750)
 
- -- Simon McVittie <smcv@debian.org>  Wed, 28 Jan 2026 15:34:56 +0000
+ -- Simon McVittie <smcv@debian.org>  Wed, 28 Jan 2026 18:44:21 +0000
 
 glib2.0 (2.86.3-4) unstable; urgency=medium
 
