@@ -1,4 +1,4 @@
-glib2.0 (2.87.2-2) UNRELEASED; urgency=medium
+glib2.0 (2.87.2-2) experimental; urgency=medium
 
   * Merge packaging from unstable
     - Revert "d/control, d/gbp.conf: Set branch for testing/unstable"
@@ -8,8 +8,9 @@ glib2.0 (2.87.2-2) UNRELEASED; urgency=medium
       d/p/gtimezone-Use-var-db-timezone-zoneinfo-as-the-default-TZD.patch:
       Replace the patch for #1119919 with the version that was applied
       upstream
+  * d/copyright: Remove mentions of files that were removed upstream
 
- -- Simon McVittie <smcv@debian.org>  Wed, 28 Jan 2026 18:58:52 +0000
+ -- Simon McVittie <smcv@debian.org>  Thu, 29 Jan 2026 15:05:52 +0000
 
 glib2.0 (2.87.2-1) experimental; urgency=medium
 
