@@ -413,11 +413,6 @@ Copyright: none
 License: Iconv-PD
 
 Files:
- gio/gwin32api-application-activation-manager.h
- gio/gwin32api-iterator.h
- gio/gwin32api-misc.h
- gio/gwin32api-package.h
- gio/gwin32api-storage.h
  glib/dirent/dirent.c
  glib/dirent/dirent.h
 Copyright: none
