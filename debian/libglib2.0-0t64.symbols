@@ -692,6 +692,7 @@ libgio-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_dtls_connection_shutdown_finish@Base 2.48.0
  g_dtls_server_connection_get_type@Base 2.48.0
  g_dtls_server_connection_new@Base 2.48.0
+ g_ecn_code_point_get_type@Base 2.87.3
  g_emblem_get_icon@Base 2.18.0
  g_emblem_get_origin@Base 2.18.0
  g_emblem_get_type@Base 2.18.0
@@ -1112,6 +1113,14 @@ libgio-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_io_stream_splice_async@Base 2.28.0
  g_io_stream_splice_finish@Base 2.28.0
  g_io_stream_splice_flags_get_type@Base 2.28.0
+ g_ip_tos_message_get_dscp@Base 2.87.3
+ g_ip_tos_message_get_ecn@Base 2.87.3
+ g_ip_tos_message_get_type@Base 2.87.3
+ g_ip_tos_message_new@Base 2.87.3
+ g_ipv6_tclass_message_get_dscp@Base 2.87.3
+ g_ipv6_tclass_message_get_ecn@Base 2.87.3
+ g_ipv6_tclass_message_get_type@Base 2.87.3
+ g_ipv6_tclass_message_new@Base 2.87.3
  g_keyfile_settings_backend_new@Base 2.26.0
  g_list_model_get_item@Base 2.44.0
  g_list_model_get_item_type@Base 2.44.0
@@ -2604,6 +2613,7 @@ libglib-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_get_language_names_with_category@Base 2.58.0
  g_get_locale_variants@Base 2.28.0
  g_get_monotonic_time@Base 2.28.0
+ g_get_monotonic_time_ns@Base 2.87.3
  g_get_num_processors@Base 2.36.0
  g_get_os_info@Base 2.64.0
  g_get_prgname@Base 2.12.0
@@ -2918,6 +2928,7 @@ libglib-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_markup_parse_context_get_element_stack@Base 2.16.0
  g_markup_parse_context_get_offset@Base 2.87.1
  g_markup_parse_context_get_position@Base 2.12.0
+ g_markup_parse_context_get_tag_start@Base 2.87.3
  g_markup_parse_context_get_user_data@Base 2.18.0
  g_markup_parse_context_new@Base 2.12.0
  g_markup_parse_context_parse@Base 2.12.0
@@ -3598,6 +3609,7 @@ libglib-2.0.so.0 libglib2.0-0t64 #MINVER#
  g_test_trap_assertions@Base 2.16.0
  g_test_trap_fork@Base 2.16.0
  g_test_trap_has_passed@Base 2.16.0
+ g_test_trap_has_skipped@Base 2.87.3
  g_test_trap_reached_timeout@Base 2.16.0
  g_test_trap_subprocess@Base 2.38.0
  g_test_trap_subprocess_with_envp@Base 2.80.0
