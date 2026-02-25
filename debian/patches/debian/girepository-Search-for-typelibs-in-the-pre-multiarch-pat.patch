@@ -19,7 +19,7 @@ Forwarded: not-needed
  2 files changed, 10 insertions(+), 3 deletions(-)
 
 diff --git a/girepository/girepository.c b/girepository/girepository.c
-index 1c816d1..c1421b8 100644
+index b22bad1..a6e2736 100644
 --- a/girepository/girepository.c
 +++ b/girepository/girepository.c
 @@ -306,6 +306,10 @@ gi_repository_init (GIRepository *repository)
