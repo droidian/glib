@@ -419,21 +419,24 @@ if host_system != 'windows'
     contenttype_sources += files('gcontenttype-fdo.c')
     unix_sources += files('gdesktopappinfo.c')
     gio_unix_include_headers += files('gdesktopappinfo.h')
-    launch_desktop_sources = files('gio-launch-desktop.c')
 
-    if host_system == 'linux'
-      launch_desktop_sources += files('../glib/gjournal-private.c')
+    if process_spawn_allowed
+      launch_desktop_sources = files('gio-launch-desktop.c')
+
+      if host_system == 'linux'
+        launch_desktop_sources += files('../glib/gjournal-private.c')
+      endif
+
+      gio_launch_desktop = executable('gio-launch-desktop', launch_desktop_sources,
+        dependencies: [app_profile_dep],
+        include_directories : glibinc,
+        install : true,
+        install_dir : multiarch_libexecdir,
+        install_tag : 'bin',
+        c_args : gio_c_args,
+        # intl.lib is not compatible with SAFESEH
+        link_args : noseh_link_args)
     endif
-
-    gio_launch_desktop = executable('gio-launch-desktop', launch_desktop_sources,
-      dependencies: [app_profile_dep],
-      include_directories : glibinc,
-      install : true,
-      install_dir : multiarch_libexecdir,
-      install_tag : 'bin',
-      c_args : gio_c_args,
-      # intl.lib is not compatible with SAFESEH
-      link_args : noseh_link_args)
   endif
 
   subdir('xdgmime')
@@ -549,6 +552,8 @@ gio_base_sources = files(
   'giomodule-priv.c',
   'gioscheduler.c',
   'giostream.c',
+  'giptosmessage.c',
+  'gipv6tclassmessage.c',
   'gloadableicon.c',
   'gmarshal-internal.c',
   'gmount.c',
@@ -707,6 +712,8 @@ gio_headers = files(
   'gioscheduler.h',
   'giostream.h',
   'giotypes.h',
+  'giptosmessage.h',
+  'gipv6tclassmessage.h',
   'gloadableicon.h',
   'gmount.h',
   'gmemoryinputstream.h',
@@ -1114,7 +1121,7 @@ install_data(['gschema.loc', 'gschema.its'],
   install_tag : 'devel',
 )
 
-executable('gdbus', 'gdbus-tool.c',
+gdbus_tool = executable('gdbus', 'gdbus-tool.c',
   install : true,
   install_tag : 'bin',
   c_args : gio_c_args,

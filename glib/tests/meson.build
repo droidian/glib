@@ -78,6 +78,7 @@ glib_tests = {
     'link_args' : cc.get_id() == 'gcc' and cc.version().version_compare('> 6')
       ? ['-Wno-alloc-size-larger-than'] : [],
   },
+  'monotonic-time' : {},
   'mutex' : {},
   'node' : {},
   'once' : {},
@@ -260,6 +261,7 @@ if host_machine.system() == 'windows'
 else
   glib_tests += {
     'include' : {},
+    'poll-fdset' : {},
     'unix' : {},
   }
   if have_rtld_next and glib_build_shared
@@ -271,7 +273,7 @@ else
                                       install_tag : 'tests',
                                       install: installed_tests_enabled)
 
-    if host_system not in ['ios', 'darwin']
+    if host_system != 'darwin'
       var_preload = 'LD_PRELOAD'
     else
       var_preload = 'DYLD_INSERT_LIBRARIES'
@@ -323,6 +325,11 @@ if installed_tests_enabled
   install_subdir('time-zones',
     install_dir : installed_tests_execdir,
     install_tag : 'tests',
+  )
+  install_subdir('localtime',
+    install_dir : installed_tests_execdir,
+    install_tag : 'tests',
+    follow_symlinks : false,
   )
 endif
 
@@ -400,8 +407,8 @@ test_env = environment()
 test_env.set('G_TEST_SRCDIR', meson.current_source_dir())
 test_env.set('G_TEST_BUILDDIR', meson.current_build_dir())
 
-test_deps = [libm, thread_dep, libglib_dep, app_profile_dep]
-test_deps_static = [libm, thread_dep, libglib_static_dep, app_profile_dep]
+test_deps = [libm, thread_dep, libglib_dep, test_profile_dep]
+test_deps_static = [libm, thread_dep, libglib_static_dep, test_profile_dep]
 test_cargs = ['-DG_LOG_DOMAIN="GLib"', '-UG_DISABLE_ASSERT']
 test_cpp_args = test_cargs
 

@@ -1,5 +1,5 @@
 project('glib', 'c',
-  version : '2.87.2',
+  version : '2.87.3',
   # NOTE: See the policy in docs/meson-version.md before changing the Meson dependency
   meson_version : '>= 1.4.0',
   default_options : [
@@ -19,7 +19,7 @@ cc = meson.get_compiler('c')
 c_standards = {}
 
 foreach std : ['89', '99', '11', '17', '23']
-  arg = (cc.get_id() == 'msvc' ? '/std:' : '-std=') + 'c' + std
+  arg = (cc.get_argument_syntax() == 'msvc' ? '/std:' : '-std=') + 'c' + std
   if cc.has_argument(arg)
     c_standards += { std: arg }
   endif
@@ -42,7 +42,7 @@ if have_cxx
   cxx_standards = {}
 
   foreach std : ['98', '03', '11', '14', '17', '20', '23', '2c', 'latest']
-    arg = (cxx.get_id() == 'msvc' ? '/std:' : '-std=') + 'c++' + std
+    arg = (cxx.get_argument_syntax() == 'msvc' ? '/std:' : '-std=') + 'c++' + std
     if cxx.has_argument(arg)
       cxx_standards += { std: arg }
     endif
@@ -69,16 +69,7 @@ else
 endif
 
 host_system = host_machine.system()
-
-if host_system == 'darwin'
-  ios_test_code = '''#include <TargetConditionals.h>
-  #if ! TARGET_OS_IPHONE
-  #error "Not iOS/tvOS/watchOS/iPhoneSimulator"
-  #endif'''
-  if cc.compiles(ios_test_code, name : 'building for iOS')
-    host_system = 'ios'
-  endif
-endif
+subsystem = ''
 
 linux_libc = ''
 if host_system == 'linux'
@@ -89,6 +80,12 @@ if host_system == 'linux'
   if cc.compiles(musl_test_code, name : 'building for musl libc')
     linux_libc = 'musl'
   endif
+elif host_system == 'darwin'
+  subsystem = host_machine.subsystem()
+elif host_system == 'ios'
+  warning('Setting system = \'ios\' in cross files is deprecated, please use subsystem names')
+  host_system = 'darwin'
+  subsystem = 'ios'
 endif
 
 glib_version = meson.project_version()
@@ -298,6 +295,11 @@ glib_conf.set('ENABLE_NLS', 1)
 # used by the .rc.in files
 glibconfig_conf.set('LT_CURRENT_MINUS_AGE', soversion)
 
+process_spawn_allowed = true
+if subsystem.startswith('tvos') or subsystem.startswith('watchos')
+  process_spawn_allowed = false
+endif
+
 glib_conf.set('_GNU_SOURCE', 1)
 
 if host_system in ['windows', 'darwin']
@@ -460,6 +462,7 @@ headers = [
   'termios.h',
   'unistd.h',
   'values.h',
+  'vcruntime.h',
   'wchar.h',
   'xlocale.h',
 ]
@@ -967,6 +970,10 @@ if cc.has_type('loff_t', prefix: '#include <sys/types.h>')
   glib_conf.set('HAVE_LOFF_T', 1)
 endif
 
+if cc.has_function('unshare', prefix: '#include <sched.h>', args: '-D_GNU_SOURCE')
+  glib_conf.set('HAVE_UNSHARE', 1)
+endif
+
 # Check whether to use statfs or statvfs
 # Some systems have both statfs and statvfs, pick the most "native" for these
 if have_func_statfs and have_func_statvfs
@@ -1000,7 +1007,7 @@ endif
 osx_ldflags = []
 glib_have_carbon = false
 glib_have_cocoa = false
-if host_system == 'darwin'
+if host_system == 'darwin' and subsystem == 'macos'
   add_languages('objc', native: false, required: true)
   objcc = meson.get_compiler('objc')
   if not objcc.compiles('''#include <AvailabilityMacros.h>
@@ -1232,7 +1239,7 @@ if host_system == 'windows' and (cc.get_id() == 'msvc' or cc.get_id() == 'clang-
   glib_conf.set('HAVE_C99_SNPRINTF', false)
   glib_conf.set('HAVE_C99_VSNPRINTF', false)
   glib_conf.set('HAVE_UNIX98_PRINTF', false)
-elif not cc_can_run and host_system in ['ios', 'darwin']
+elif not cc_can_run and host_system == 'darwin'
   # All these are true when compiling natively on macOS, so we should use good
   # defaults when building for iOS and tvOS.
   glib_conf.set('HAVE_C99_SNPRINTF', true)
@@ -1885,7 +1892,7 @@ glibconfig_conf.set('gsizebits', sizet_size * 8)
 glibconfig_conf.set('gssizebits', ssizet_size * 8)
 
 # XXX: https://gitlab.gnome.org/GNOME/glib/issues/1413
-if host_system == 'windows'
+if host_system == 'windows' or host_system == 'cygwin'
   g_module_suffix = 'dll'
 else
   g_module_suffix = 'so'
@@ -2012,7 +2019,7 @@ poll_defines = [
 
 if has_syspoll and has_systypes
   foreach d : poll_defines
-    val = cc.compute_int(d[0], prefix: poll_includes)
+    val = cc.compute_int(d[0], prefix: poll_includes, guess: d[2])
     glibconfig_conf.set(d[1], val)
   endforeach
 elif has_winsock2
@@ -2039,15 +2046,15 @@ else
 endif
 
 inet_defines = [
-  [ 'AF_UNIX', 'g_af_unix' ],
-  [ 'AF_INET', 'g_af_inet' ],
-  [ 'AF_INET6', 'g_af_inet6' ],
-  [ 'MSG_OOB', 'g_msg_oob' ],
-  [ 'MSG_PEEK', 'g_msg_peek' ],
-  [ 'MSG_DONTROUTE', 'g_msg_dontroute' ],
+  [ 'AF_UNIX', 'g_af_unix', 1 ],
+  [ 'AF_INET', 'g_af_inet', 2 ],
+  [ 'AF_INET6', 'g_af_inet6', 30 ],
+  [ 'MSG_OOB', 'g_msg_oob', 1 ],
+  [ 'MSG_PEEK', 'g_msg_peek', 2 ],
+  [ 'MSG_DONTROUTE', 'g_msg_dontroute', 4 ],
 ]
 foreach d : inet_defines
-  val = cc.compute_int(d[0], prefix: inet_includes)
+  val = cc.compute_int(d[0], prefix: inet_includes, guess: d[2])
   glibconfig_conf.set(d[1], val)
 endforeach
 
@@ -2583,7 +2590,7 @@ if host_system == 'windows'
   export_dynamic_ldflags = []
 elif host_system == 'cygwin'
   export_dynamic_ldflags = ['-Wl,--export-all-symbols']
-elif host_system in ['darwin', 'ios']
+elif host_system == 'darwin'
   export_dynamic_ldflags = []
 elif host_system == 'sunos'
   export_dynamic_ldflags = []
