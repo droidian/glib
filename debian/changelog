@@ -1,8 +1,14 @@
 glib2.0 (2.87.3~gitlab0-1) UNRELEASED; urgency=medium
 
-  * New upstream release
+  * New upstream release:
+    Upstream has tagged a new release but not produced tarballs yet, due to CI
+    problems. Let's get this (the tagged contents) early in experimental
+    though, so we can start testing it, but using a pre-version so that we can
+    later import the actual 2.87.3. tarball.
+  * d/p: Refresh and drop applied patches
+  * debian/libglib2.0-0t64.symbols: Update symbols
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 25 Feb 2026 16:18:45 +0100
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 26 Feb 2026 00:43:03 +0100
 
 glib2.0 (2.87.2-3) unstable; urgency=medium
 
