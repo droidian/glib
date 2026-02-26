@@ -1,3 +1,9 @@
+glib2.0 (2.87.3-1) UNRELEASED; urgency=medium
+
+  * Update the source using the upstream-generated-tarball
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 27 Feb 2026 00:18:11 +0100
+
 glib2.0 (2.87.3~gitlab0-1) experimental; urgency=medium
 
   * New upstream release:
