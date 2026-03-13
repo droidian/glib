@@ -1,3 +1,12 @@
+glib2.0 (2.87.3-2) UNRELEASED; urgency=medium
+
+  * d/copyright: Remove comment line.
+    The machine-readable syntax doesn't actually allow these. Use a double
+    blank line as the divider between Files and standalone License paragraphs
+    instead.
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 13 Mar 2026 13:23:19 +0000
+
 glib2.0 (2.87.3-1) experimental; urgency=medium
 
   * Update the source using the upstream-generated-tarball
