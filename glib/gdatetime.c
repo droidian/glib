@@ -65,6 +65,7 @@
 #include <langinfo.h>
 #endif
 
+#include "glib-private.h"
 #include "gatomic.h"
 #include "gcharset.h"
 #include "gcharsetprivate.h"
@@ -2981,14 +2982,14 @@ date_time_lookup_era (GDateTime *datetime,
 {
   static GMutex era_mutex;
   static GPtrArray *static_era_description = NULL;  /* (mutex era_mutex) (element-type GEraDescriptionSegment) */
-  static const char *static_era_description_locale = NULL;  /* (mutex era_mutex) */
+  static char *static_era_description_locale = NULL;  /* (mutex era_mutex) (owned) */
   const char *current_lc_time = setlocale (LC_TIME, NULL);
   GPtrArray *local_era_description;  /* (element-type GEraDescriptionSegment) */
   GEraDate datetime_date;
 
   g_mutex_lock (&era_mutex);
 
-  if (static_era_description_locale != current_lc_time)
+  if (g_strcmp0 (static_era_description_locale, current_lc_time) != 0)
     {
       const char *era_description_str;
       size_t era_description_str_len;
@@ -3006,6 +3007,7 @@ date_time_lookup_era (GDateTime *datetime,
                * of whether it uses nuls or semicolons as separators. */
               int n_entries = ERA_DESCRIPTION_N_SEGMENTS;
               const char *s = era_description_str;
+              char *s2;
 
               for (int i = 1; i < n_entries; i++)
                 {
@@ -3021,19 +3023,20 @@ date_time_lookup_era (GDateTime *datetime,
               era_description_str_len = strlen (s) + (s - era_description_str);
 
               /* Replace all the nuls with semicolons. */
-              era_description_str = tmp = g_memdup2 (era_description_str, era_description_str_len + 1);
-              s = era_description_str;
+              s2 = tmp = g_memdup2 (era_description_str, era_description_str_len + 1);
 
               for (int i = 1; i < n_entries; i++)
                 {
-                  char *next_nul = strchr (s, '\0');
+                  char *next_nul = strchr (s2, '\0');
 
-                  if ((size_t) (next_nul - era_description_str) >= era_description_str_len)
+                  if ((size_t) (next_nul - tmp) >= era_description_str_len)
                     break;
 
                   *next_nul = ';';
-                  s = next_nul + 1;
+                  s2 = next_nul + 1;
                 }
+
+              era_description_str = tmp;
             }
 
           /* Convert from the LC_TIME encoding to UTF-8 if needed. */
@@ -3059,7 +3062,9 @@ date_time_lookup_era (GDateTime *datetime,
 
       g_free (tmp);
 
-      static_era_description_locale = current_lc_time;
+      g_free (static_era_description_locale);
+      static_era_description_locale = g_strdup (current_lc_time);
+      g_ignore_leak (static_era_description_locale);
     }
 
   if (static_era_description == NULL)

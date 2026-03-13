@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include <string.h>
 #include <errno.h>
 #include <sys/types.h>
@@ -1386,7 +1387,7 @@ g_file_set_contents_full (const gchar            *filename,
 #ifndef G_OS_WIN32
           if (fchmod (fd, old_stat.st_mode))
 #else  /* G_OS_WIN32 */
-          if (chmod (tmp_filename, old_stat.st_mode))
+          if (g_chmod (tmp_filename, old_stat.st_mode))
 #endif /* G_OS_WIN32 */
             {
               int saved_errno = errno;
@@ -2576,7 +2577,7 @@ g_path_skip_root (const gchar *file_name)
 const gchar *
 g_basename (const gchar *file_name)
 {
-  gchar *base;
+  const gchar *base;
 
   g_return_val_if_fail (file_name != NULL, NULL);
 
@@ -2584,7 +2585,7 @@ g_basename (const gchar *file_name)
 
 #ifdef G_OS_WIN32
   {
-    gchar *q;
+    const gchar *q;
     q = strrchr (file_name, '/');
     if (base == NULL || (q != NULL && q > base))
       base = q;
@@ -2619,8 +2620,8 @@ g_basename (const gchar *file_name)
 gchar *
 g_path_get_basename (const gchar *file_name)
 {
-  gssize base;
-  gssize last_nonslash;
+  size_t base;
+  size_t last_nonslash;
   gsize len;
   gchar *retval;
 
@@ -2631,10 +2632,10 @@ g_path_get_basename (const gchar *file_name)
 
   last_nonslash = strlen (file_name) - 1;
 
-  while (last_nonslash >= 0 && G_IS_DIR_SEPARATOR (file_name [last_nonslash]))
+  while (last_nonslash > 0 && G_IS_DIR_SEPARATOR (file_name[last_nonslash]))
     last_nonslash--;
 
-  if (last_nonslash == -1)
+  if (last_nonslash == 0 && G_IS_DIR_SEPARATOR (file_name[0]))
     /* string only containing slashes */
     return g_strdup (G_DIR_SEPARATOR_S);
 
@@ -2647,20 +2648,36 @@ g_path_get_basename (const gchar *file_name)
 #endif
   base = last_nonslash;
 
-  while (base >=0 && !G_IS_DIR_SEPARATOR (file_name [base]))
+  while (base > 0 && !G_IS_DIR_SEPARATOR (file_name[base]))
     base--;
 
-#ifdef G_OS_WIN32
-  if (base == -1 &&
-      g_ascii_isalpha (file_name[0]) &&
-      file_name[1] == ':')
-    base = 1;
-#endif /* G_OS_WIN32 */
+  /* Does the file_name start without a directory separator, with the only
+   * directory separators being at the end of the string? e.g. `dir/` */
+  if (base == 0 && !G_IS_DIR_SEPARATOR (file_name[0]))
+    {
+      base = 0;
 
-  len = last_nonslash - base;
+#ifdef G_OS_WIN32
+      /* Does it start with a drive letter? e.g. `C:dir/`
+       * If so, skip that. */
+      if (g_ascii_isalpha (file_name[0]) &&
+          file_name[1] == ':')
+        base = 2;
+#endif /* G_OS_WIN32 */
+    }
+  else
+    {
+      /* Otherwise, `base` now points at the last directory separator character
+       * before the component we want as the basename, so increase the index
+       * again. */
+      base += 1;
+    }
+
+  len = last_nonslash - base + 1;
+  g_assert (len < SIZE_MAX);
   retval = g_malloc (len + 1);
-  memcpy (retval, file_name + (base + 1), len);
-  retval [len] = '\0';
+  memcpy (retval, file_name + base, len);
+  retval[len] = '\0';
 
   return retval;
 }
@@ -2695,7 +2712,8 @@ g_path_get_basename (const gchar *file_name)
 gchar *
 g_path_get_dirname (const gchar *file_name)
 {
-  gchar *base;
+  const gchar *base;
+  gchar *base_p;
   gsize len;
 
   g_return_val_if_fail (file_name != NULL, NULL);
@@ -2704,7 +2722,7 @@ g_path_get_dirname (const gchar *file_name)
 
 #ifdef G_OS_WIN32
   {
-    gchar *q;
+    const gchar *q;
     q = strrchr (file_name, '/');
     if (base == NULL || (q != NULL && q > base))
       base = q;
@@ -2761,11 +2779,11 @@ g_path_get_dirname (const gchar *file_name)
       if (p == base + 1)
         {
           len = (guint) strlen (file_name) + 1;
-          base = g_new (gchar, len + 1);
-          strcpy (base, file_name);
-          base[len-1] = G_DIR_SEPARATOR;
-          base[len] = 0;
-          return base;
+          base_p = g_new (gchar, len + 1);
+          strcpy (base_p, file_name);
+          base_p[len-1] = G_DIR_SEPARATOR;
+          base_p[len] = 0;
+          return base_p;
         }
       if (G_IS_DIR_SEPARATOR (*p))
         {
@@ -2779,11 +2797,11 @@ g_path_get_dirname (const gchar *file_name)
 #endif
 
   len = (guint) 1 + base - file_name;
-  base = g_new (gchar, len + 1);
-  memmove (base, file_name, len);
-  base[len] = 0;
+  base_p = g_new (gchar, len + 1);
+  memmove (base_p, file_name, len);
+  base_p[len] = 0;
 
-  return base;
+  return base_p;
 }
 
 /**

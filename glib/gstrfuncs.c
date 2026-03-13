@@ -2402,7 +2402,7 @@ g_strsplit (const gchar *string,
             const gchar *delimiter,
             gint         max_tokens)
 {
-  char *s;
+  const char *s;
   const gchar *remainder;
   GPtrArray *string_list;
 
@@ -2447,7 +2447,8 @@ g_strsplit (const gchar *string,
 /**
  * g_strsplit_set:
  * @string: a string to split
- * @delimiters: a nul-terminated byte array containing bytes that are used to
+ * @delimiters: (array zero-terminated=1) (element-type guint8): a
+ *   nul-terminated byte array containing bytes that are used to
  *   split the string; can be empty (just a nul byte), which will result in no
  *   string splitting
  * @max_tokens: the maximum number of tokens to split @string into.
@@ -2777,7 +2778,7 @@ g_strstr_len (const gchar *haystack,
   g_return_val_if_fail (needle != NULL, NULL);
 
   if (haystack_len < 0)
-    return strstr (haystack, needle);
+    return (gchar *)strstr (haystack, needle);
   else
     {
       const gchar *p = haystack;

@@ -147,6 +147,7 @@ install_headers(glib_headers, install_dir : glib_includedir)
 
 if host_system != 'windows'
   glib_unix_headers = files('glib-unix.h')
+  glib_unix_sources = files('glib-unix.c')
   install_headers(glib_unix_headers, install_dir : glib_includedir)
 endif
 
@@ -250,6 +251,7 @@ install_headers(glib_sub_headers, install_dir : glib_sub_includedir)
 
 if host_system == 'windows'
   glib_win32_headers = files('gwin32.h')
+  glib_win32_sources = files('gwin32.c')
   install_headers(glib_win32_headers, install_dir : glib_sub_includedir)
 endif
 
@@ -378,7 +380,12 @@ if host_system == 'windows'
     glib_sources += files('dirent/wdirent.c')
   endif
 else
-  glib_sources += files('glib-unix.c', 'gspawn-posix.c', 'giounix.c')
+  glib_sources += files('glib-unix.c', 'giounix.c')
+  if process_spawn_allowed
+    glib_sources += files('gspawn-posix.c')
+  else
+    glib_sources += files('gspawn-unsupported.c')
+  endif
   platform_deps = []
 endif
 

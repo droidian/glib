@@ -101,6 +101,10 @@ gio_tests = {
   'file-enumerator' : {},
   'inet-address' : {},
   'io-stream' : {},
+  'iptosmessage' : {
+    # FIXME: https://gitlab.gnome.org/GNOME/glib/-/issues/3906
+    'can_fail' : host_system in ['freebsd'],
+  },
   'max-version' : {'install' : false},
   'memory-input-stream' : {},
   'memory-monitor' : {},
@@ -208,6 +212,10 @@ python_tests = {
     'can_fail' : host_system == 'freebsd',
     'suite': ['gdbus-codegen', 'slow'],
     'timeout': 90,
+  },
+  'gdbus-tool.py' : {
+    'depends' : gdbus_tool,
+    'env': {'_G_TEST_PROGRAM_RUNNER_PATH': fs.parent(gdbus_tool.full_path())},
   },
   'gio-tool.py' : {
     'depends' : gio_tool,
@@ -633,7 +641,7 @@ if host_machine.system() != 'windows'
   # This test is currently unreliable
   executable('gdbus-overflow', 'gdbus-overflow.c',
       c_args : test_c_args,
-      dependencies : common_gio_tests_deps + [app_profile_dep],
+      dependencies : common_gio_tests_deps + [test_profile_dep],
       install_dir : installed_tests_execdir,
       install_tag : 'tests',
       install : installed_tests_enabled)
@@ -1127,7 +1135,7 @@ foreach program_name, extra_args : test_extra_programs
     program_name : executable(program_name,
       sources: [source, extra_sources],
       c_args : test_c_args,
-      dependencies : common_gio_tests_deps + extra_args.get('dependencies', []) + [app_profile_dep],
+      dependencies : common_gio_tests_deps + extra_args.get('dependencies', []) + [test_profile_dep],
       install_dir : installed_tests_execdir,
       install_tag : 'tests',
       install : install,
@@ -1166,7 +1174,7 @@ foreach test_name, extra_args : gio_tests
   exe = executable(test_name, [source, extra_sources],
     c_args : test_c_args + extra_args.get('c_args', []),
     cpp_args : test_cpp_args + extra_args.get('cpp_args', []),
-    dependencies : common_gio_tests_deps + extra_args.get('dependencies', []) + [app_profile_dep],
+    dependencies : common_gio_tests_deps + extra_args.get('dependencies', []) + [test_profile_dep],
     install_rpath : extra_args.get('install_rpath', ''),
     install_dir: installed_tests_execdir,
     install_tag: 'tests',

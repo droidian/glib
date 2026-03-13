@@ -816,7 +816,7 @@ g_utf8_to_ucs4_fast (const gchar *str,
 		     glong       *items_written)    
 {
   gunichar *result;
-  gint n_chars, i;
+  size_t n_chars, i;
   const gchar *p;
 
   g_return_val_if_fail (str != NULL, NULL);
@@ -915,15 +915,14 @@ try_malloc_n (gsize n_blocks, gsize n_block_bytes, GError **error)
  * @str: a UTF-8 encoded string
  * @len: the maximum length of @str to use, in bytes. If @len is negative,
  *   then the string is nul-terminated.
- * @items_read: (out) (optional): location to store number of
-  *  bytes read, or `NULL`.
- *   If `NULL`, then %G_CONVERT_ERROR_PARTIAL_INPUT will be
- *   returned in case @str contains a trailing partial
- *   character. If an error occurs then the index of the
- *   invalid input is stored here.
+ * @items_read: (out) (optional): location to store number of bytes read, or
+ *   `NULL` to ignore. If `NULL`, then [error@GLib.ConvertError.PARTIAL_INPUT]
+ *   will be returned in case @str contains a trailing partial character. If
+ *   an error occurs then the index of the invalid input is stored here. The
+ *   value stored here will never be negative.
  * @items_written: (out) (optional): location to store number
- *   of characters written or `NULL`. The value here stored does not include
- *   the trailing nul character.
+ *   of characters written, or `NULL` to ignore. The value stored here does not
+ *   include the trailing nul, and will never be negative.
  * @error: location to store the error occurring, or `NULL` to ignore
  *   errors. Any of the errors in [error@GLib.ConvertError] other than
  *   [error@GLib.ConvertError.NO_CONVERSION] may occur.
@@ -944,7 +943,7 @@ g_utf8_to_ucs4 (const gchar *str,
 		GError     **error)
 {
   gunichar *result = NULL;
-  gint n_chars, i;
+  size_t n_chars, i;
   const gchar *in;
   
   in = str;
@@ -1001,11 +1000,12 @@ g_utf8_to_ucs4 (const gchar *str,
  * @str: (array length=len) (element-type gunichar): a UCS-4 encoded string
  * @len: the maximum length (number of characters) of @str to use. 
  *   If @len is negative, then the string is nul-terminated.
- * @items_read: (out) (optional): location to store number of
- *   characters read, or `NULL`.
+ * @items_read: (out) (optional): location to store number of characters read,
+ *   or `NULL` to ignore. If an error occurs then the index of the invalid input
+ *   is stored here. The value stored here will never be negative.
  * @items_written: (out) (optional): location to store number
- *   of bytes written or `NULL`. The value here stored does not include the
- *   trailing nul byte.
+ *   of bytes written, or `NULL` to ignore. The value stored here does not
+ *   include the trailing nul, and will never be negative.
  * @error: location to store the error occurring, or %NULL to ignore
  *   errors. Any of the errors in #GConvertError other than
  *   %G_CONVERT_ERROR_NO_CONVERSION may occur.
@@ -1016,9 +1016,7 @@ g_utf8_to_ucs4 (const gchar *str,
  * The result will be terminated with a nul byte.
  * 
  * Returns: (transfer full): a pointer to a newly allocated UTF-8 string.
- *   This value must be freed with [func@GLib.free]. If an error occurs,
- *   @items_read will be set to the position of the first invalid input
- *   character.
+ *   This value must be freed with [func@GLib.free].
  */
 gchar *
 g_ucs4_to_utf8 (const gunichar *str,
@@ -1027,13 +1025,13 @@ g_ucs4_to_utf8 (const gunichar *str,
 		glong          *items_written,    
 		GError        **error)
 {
-  gint result_length;
+  size_t result_length;
   gchar *result = NULL;
   gchar *p;
-  gint i;
+  size_t i;
 
   result_length = 0;
-  for (i = 0; len < 0 || i < len ; i++)
+  for (i = 0; len < 0 || i < (size_t) len ; i++)
     {
       if (!str[i])
 	break;
@@ -1077,14 +1075,14 @@ g_ucs4_to_utf8 (const gunichar *str,
  * @str: (array length=len) (element-type guint16): a UTF-16 encoded string
  * @len: the maximum length (number of #gunichar2) of @str to use. 
  *   If @len is negative, then the string is nul-terminated.
- * @items_read: (out) (optional): location to store number of words read, or
- *   `NULL`. If `NULL`, then [error@GLib.ConvertError.PARTIAL_INPUT] will
- *   be returned in case @str contains a trailing partial character. If
- *   an error occurs then the index of the invalid input is stored here.
- *   It’s guaranteed to be non-negative.
+ * @items_read: (out) (optional): location to store number of `gunichar2` read,
+ *   or `NULL` to ignore. If `NULL`, then [error@GLib.ConvertError.PARTIAL_INPUT]
+ *   will be returned in case @str contains a trailing partial character. If
+ *   an error occurs then the index of the invalid input is stored here. The
+ *   value stored here will never be negative.
  * @items_written: (out) (optional): location to store number
- *   of bytes written, or `NULL`. The value stored here does not include the
- *   trailing nul byte. It’s guaranteed to be non-negative.
+ *   of bytes written, or `NULL` to ignore. The value stored here does not
+ *   include the trailing nul, and will never be negative.
  * @error: location to store the error occurring, or `NULL` to ignore
  *   errors. Any of the errors in [error@GLib.ConvertError] other than
  *   [error@GLib.ConvertError.NO_CONVERSION] may occur.
@@ -1120,7 +1118,7 @@ g_utf16_to_utf8 (const gunichar2  *str,
   const gunichar2 *in;
   gchar *out;
   gchar *result = NULL;
-  gint n_bytes;
+  size_t n_bytes;
   gunichar high_surrogate;
 
   g_return_val_if_fail (str != NULL, NULL);
@@ -1233,13 +1231,14 @@ g_utf16_to_utf8 (const gunichar2  *str,
  * @str: (array length=len) (element-type guint16): a UTF-16 encoded string
  * @len: the maximum length (number of #gunichar2) of @str to use. 
  *   If @len is negative, then the string is nul-terminated.
- * @items_read: (out) (optional): location to store number of words read, or
- *   `NULL`. If `NULL`, then [error@GLib.ConvertError.PARTIAL_INPUT] will be
- *   returned in case @str contains a trailing partial character. If
- *   an error occurs then the index of the invalid input is stored here.
+ * @items_read: (out) (optional): location to store number of `gunichar2` read,
+ *   or `NULL` to ignore. If `NULL`, then [error@GLib.ConvertError.PARTIAL_INPUT]
+ *   will be returned in case @str contains a trailing partial character. If
+ *   an error occurs then the index of the invalid input is stored here. The
+ *   value stored here will never be negative.
  * @items_written: (out) (optional): location to store number
- *   of characters written, or `NULL`. The value stored here does not include
- *   the trailing nul character.
+ *   of characters written, or `NULL` to ignore. The value stored here does not
+ *   include the trailing nul, and will never be negative.
  * @error: location to store the error occurring, or `NULL` to ignore
  *   errors. Any of the errors in [error@GLib.ConvertError] other than
  *   [error@GLib.ConvertError.NO_CONVERSION] may occur.
@@ -1372,12 +1371,13 @@ g_utf16_to_ucs4 (const gunichar2  *str,
  * @len: the maximum length (number of bytes) of @str to use.
  *   If @len is negative, then the string is nul-terminated.
  * @items_read: (out) (optional): location to store number of bytes read, or
- *   `NULL`. If `NULL`, then [error@GLib.ConvertError.PARTIAL_INPUT] will
- *   be returned in case @str contains a trailing partial character. If
- *   an error occurs then the index of the invalid input is stored here.
+ *   `NULL` to ignore. If `NULL`, then [error@GLib.ConvertError.PARTIAL_INPUT]
+ *   will be returned in case @str contains a trailing partial character. If
+ *   an error occurs then the index of the invalid input is stored here. The
+ *   value stored here will never be negative.
  * @items_written: (out) (optional): location to store number
- *   of `gunichar2` written, or `NULL`. The value stored here does not include
- *   the trailing nul.
+ *   of `gunichar2` written, or `NULL` to ignore. The value stored here does not
+ *   include the trailing nul, and will never be negative.
  * @error: location to store the error occurring, or `NULL` to ignore
  *   errors. Any of the errors in [error@GLib.ConvertError] other than
  *   [error@GLib.ConvertError.NO_CONVERSION] may occur.
@@ -1397,9 +1397,9 @@ g_utf8_to_utf16 (const gchar *str,
 		 GError     **error)
 {
   gunichar2 *result = NULL;
-  gint n16;
+  size_t n16;
   const gchar *in;
-  gint i;
+  size_t i;
 
   g_return_val_if_fail (str != NULL, NULL);
 
@@ -1488,12 +1488,12 @@ g_utf8_to_utf16 (const gchar *str,
  * @str: (array length=len) (element-type gunichar): a UCS-4 encoded string
  * @len: the maximum length (number of characters) of @str to use. 
  *   If @len is negative, then the string is nul-terminated.
- * @items_read: (out) (optional): location to store number of
- *   bytes read, or `NULL`. If an error occurs then the index of the invalid
- *   input is stored here.
+ * @items_read: (out) (optional): location to store number of bytes read, or
+ *   `NULL` to ignore. If an error occurs then the index of the invalid input is
+ *   stored here. The value stored here will never be negative.
  * @items_written: (out) (optional): location to store number
- *   of `gunichar2` written, or `NULL`. The value stored here does not include
- *   the trailing nul.
+ *   of `gunichar2` written, or `NULL` to ignore. The value stored here does not
+ *   include the trailing nul, and will never be negative.
  * @error: location to store the error occurring, or `NULL` to ignore
  *   errors. Any of the errors in [error@GLib.ConvertError] other than
  *   [error@GLib.ConvertError.NO_CONVERSION] may occur.
@@ -1513,12 +1513,12 @@ g_ucs4_to_utf16 (const gunichar  *str,
 		 GError         **error)
 {
   gunichar2 *result = NULL;
-  gint n16;
-  gint i, j;
+  size_t n16;
+  size_t i, j;
 
   n16 = 0;
   i = 0;
-  while ((len < 0 || i < len) && str[i])
+  while ((len < 0 || i < (size_t) len) && str[i])
     {
       gunichar wc = str[i];
 
