@@ -45,7 +45,7 @@ Build-Depends-Arch:
 # B-D-I on cross-exe-wrapper if (cross && !nodoc)
 Build-Depends-Indep:
  cross-exe-wrapper <cross !nodoc>,
- gi-docgen (>= 2024.1) <!nodoc>,
+ gi-docgen (>= 2026.1) <!nodoc>,
  gobject-introspection (>= 1.80.0) <!nodoc>,
 Standards-Version: 4.7.3
 Homepage: https://gitlab.gnome.org/GNOME/glib
