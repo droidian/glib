@@ -1,9 +1,10 @@
-glib2.0 (2.88.0-1) UNRELEASED; urgency=medium
+glib2.0 (2.88.0-1) unstable; urgency=medium
 
   * New upstream release
     - Work around a build regression in NetworkManager with 2.87.x
+  * Release to unstable
 
- -- Simon McVittie <smcv@debian.org>  Mon, 16 Mar 2026 15:24:59 +0000
+ -- Simon McVittie <smcv@debian.org>  Mon, 16 Mar 2026 21:37:12 +0000
 
 glib2.0 (2.87.5-1) experimental; urgency=medium
 
